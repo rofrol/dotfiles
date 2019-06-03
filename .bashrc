@@ -371,3 +371,8 @@ if [[ $- =~ .*i.* ]]; then bind '"\C-xk": "\C-a hstr -k \C-j"'; fi
 
 # https://www.reddit.com/r/vim/comments/5ks3vp/omg_how_come_i_did_not_know_this/
 #set -o vi
+
+# https://github.com/jan-warchol/dotfiles/
+export DOTFILES_HOME=$HOME/.dotfiles.git
+#gives dotfiles, don, dof commands
+source $HOME/.config/bash/dotfiles.sh

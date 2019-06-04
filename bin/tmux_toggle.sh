@@ -17,9 +17,9 @@ both_width=$((highest_width + previous_width))
 
 if [[ $highest_left -gt 0 && $both_width -lt $half_the_width ]] ; then
     tmux move-pane -v -s ${highest} -t $((highest-1))
-    tmux resize-pane -t $((highest-2)) -U 8
+    tmux resize-pane -t $((highest-2)) -U 9
     tmux resize-pane -t ${highest} -y 3
 elif [[ $highest_left -eq 0 && $previous_width -gt $half_the_width ]] ; then
     tmux move-pane -h -s ${highest} -t $((highest-1))
-    tmux resize-pane -t ${highest} -y 6
+    tmux resize-pane -t ${highest} -y 8
 fi

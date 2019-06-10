@@ -1,0 +1,3 @@
+#!/bin/bash
+
+elm-analyse 2>&1 "$@" | tee $HOME/elm-analyse.txt

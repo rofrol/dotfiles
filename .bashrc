@@ -288,7 +288,6 @@ alias webstorm="nvm; webstorm"
 alias m='cd ~/projects/mapdid/monorepo; stmux'
 alias ds='spotdl --song "$@"'
 alias dy='youtube-dl --extract-audio --audio-format mp3 -f bestaudio "$@"'
-alias elm-an="elm-analyse | tee $HOME/elm-analyse.txt"
 
 # https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
 # https://www.quora.com/What-is-the-best-Bash-prompt-for-Git

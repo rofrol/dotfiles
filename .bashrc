@@ -299,6 +299,7 @@ if [ -f /etc/bash_completion.d/git-prompt ]; then
   #PS1='[\u@\h \W$(__git_ps1 " (%s)")]\$ '
   PS1='\w$(__git_ps1 " (%s)")\$ '
 fi
+
 . "/etc/letsencrypt/acme.sh.env"
 
 function killTcpListen () {
@@ -376,3 +377,7 @@ if [[ $- =~ .*i.* ]]; then bind '"\C-xk": "\C-a hstr -k \C-j"'; fi
 export DOTFILES_HOME=$HOME/.dotfiles.git
 #gives dotfiles, don, dof commands
 source $HOME/.config/bash/dotfiles.sh
+
+if [[ $TILIX_ID ]]; then
+  source /etc/profile.d/vte.sh
+fi

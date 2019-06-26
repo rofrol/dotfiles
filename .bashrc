@@ -158,7 +158,9 @@ export PATH=~/installed/popcorntime.sh/:$PATH
 export PATH=$HOME/installed/ctags/bin:$PATH
 export PATH="~/installed/julia/bin:$PATH"
 
-alias nvim='~/installed/nvim.appimage'
+if [ ! -f ~/installed/nvim ]; then
+  alias nvim='~/installed/nvim.appimage'
+fi
 
 
 # [CTRL-R shows me the list of files instead of history · Issue #1594 · junegunn/fzf](https://github.com/junegunn/fzf/issues/1594)
@@ -275,6 +277,10 @@ vgl() {
      vim $file +$line
   fi
 }
+
+# When fuse not available (i.e. on Ubuntu WSL):
+# ./nvim.appimage --appimage-extract
+# ln -s $PWD/squashfs-root/usr/bin/nvim ~/installed/
 alias updnvim="(mkdir -p ~/installed && cd ~/installed && rm -rf nvim.appimage && curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage && chmod +x nvim.appimage)"
 
 

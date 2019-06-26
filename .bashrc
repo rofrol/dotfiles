@@ -275,7 +275,7 @@ vgl() {
      vim $file +$line
   fi
 }
-alias updnvim="(cd ~/bin && rm nvim.appimage && curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage && chmod +x nvim.appimage)"
+alias updnvim="(mkdir -p ~/installed && cd ~/installed && rm -rf nvim.appimage && curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage && chmod +x nvim.appimage)"
 
 
 # do not set TERM manually - let the terminal do it.

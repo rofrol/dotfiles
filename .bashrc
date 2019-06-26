@@ -149,6 +149,7 @@ alias cdk="cd ~/personal_projects/kisswiki"
 #export EDITOR=nvim
 export EDITOR=em
 
+export PATH=~/bin/:$PATH
 export PATH=~/installed/:$PATH
 export PATH=~/installed/remacs/bin/:$PATH
 alias emacs=remacs
@@ -300,7 +301,9 @@ if [ -f /etc/bash_completion.d/git-prompt ]; then
   PS1='\w$(__git_ps1 " (%s)")\$ '
 fi
 
-. "/etc/letsencrypt/acme.sh.env"
+if [ -f /etc/letsencrypt/acme.sh.env ]; then
+  source /etc/letsencrypt/acme.sh.env
+fi
 
 function killTcpListen () {
   kill -9 $(lsof -sTCP:LISTEN -i:$1 -t)

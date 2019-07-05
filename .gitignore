@@ -20,7 +20,6 @@
 !/.ssh/
 /.ssh/*
 !/.ssh/config
-!/.ssh/config_codility
 
 # and the user-wide Vagrantfile
 !/.vagrant.d/
@@ -32,15 +31,24 @@
 !/.global_gitignore
 
 # however, do ignore these:
-.config/git/gitk
-.config/git/config.local
-.config/bash/config.local
-.config/bash/00-paths-override.sh
-.dmrc
-.config/ranger/bookmarks
-.config/ranger/history
-.config/ranger/tagged
+/.config/git/gitk
+/.config/git/config.local
+/.config/bash/config.local
+/.config/bash/00-paths-override.sh
+/.dmrc
+/.config/ranger/bookmarks
+/.config/ranger/history
+/.config/ranger/tagged
 
-.yarnrc
-!/.gitignore
+/.netrc
+/.nvidia-settings-rc
+/.yarnrc
+
+!/.config/mpv
+/.config/mpv/*
+!/.config/mpv/mpv.conf
+!/.config/mpv/input.conf
+
+!/bin
+!/.gitignore                                                               46
 !/README.md

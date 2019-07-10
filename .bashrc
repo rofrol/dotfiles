@@ -190,13 +190,19 @@ history() {
 #https://gist.github.com/mb720/86144b670599c0eab331cd2f48bd23b9
 # https://www.reddit.com/r/linux/comments/5rrpyy/turbo_charge_bash_with_fzf_ripgrep/
 function  edi(){
-  local file=$(fd --exclude node_modules | fzf --reverse)
+  local file="$(fd --exclude node_modules | fzf --reverse)"
   # Open the file if it exists
   if [ -n "$file" ]; then
       # keep it in history
       history -s ${EDITOR:-vim} "$file"
+
+      # for spaces in paths, I need to escape it if I want to have esacped paths in bash history
+      file=$(printf %q "$file")
+      # but then I need to use eval to make it work with escaped paths
+      # https://stackoverflow.com/questions/589149/bash-script-to-cd-to-directory-with-spaces-in-pathname/3032843#3032843
+
       # Use the default editor if it's defined, otherwise Vim
-      ${EDITOR:-vim} "$file"
+      eval ${EDITOR:-vim} "$file"
   fi
 }
 bind -x '"\C-y": edi;'
@@ -390,3 +396,6 @@ source $HOME/.config/bash/dotfiles.sh
 if [[ $TILIX_ID ]]; then
   source /etc/profile.d/vte.sh
 fi
+
+alias gamton='sed -i 's/UA-101774106-4/UA-143241282-1/g' ~/projects/mapdid/monorepo/frontend/src/Mapdid/Service/Analytics/multiple-trackers.js'
+alias gamtoff='sed -i 's/UA-143241282-1/UA-101774106-4/g' ~/projects/mapdid/monorepo/frontend/src/Mapdid/Service/Analytics/multiple-trackers.js'

@@ -399,3 +399,11 @@ fi
 
 alias gamton='sed -i 's/UA-101774106-4/UA-143241282-1/g' ~/projects/mapdid/monorepo/frontend/src/Mapdid/Service/Analytics/multiple-trackers.js'
 alias gamtoff='sed -i 's/UA-143241282-1/UA-101774106-4/g' ~/projects/mapdid/monorepo/frontend/src/Mapdid/Service/Analytics/multiple-trackers.js'
+alias gitka='gitk --all &'
+
+# https://unix.stackexchange.com/questions/43196/how-can-i-tell-grub-i-want-to-reboot-into-windows-before-i-reboot/112284#112284
+function winboot {
+    WINDOWS_TITLE=`grep -i "^menuentry 'Windows" /boot/grub/grub.cfg|head -n 1|cut -d"'" -f2`
+    sudo grub-reboot "$WINDOWS_TITLE"
+    sudo reboot
+}

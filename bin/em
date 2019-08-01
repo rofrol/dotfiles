@@ -8,4 +8,4 @@ else
    TERM=xterm-24bit
 fi
 
-emacs -nw "$@"
+remacs -nw "$@"

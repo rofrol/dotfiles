@@ -127,13 +127,14 @@ nvm() {
     nvm "$@"
 }
 
-node() {
-    unset -f node
-    export NVM_DIR=~/.nvm
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
-    node "$@"
-}
-
+# this errors in git bash
+#node() {
+#    unset -f node
+#    export NVM_DIR=~/.nvm
+#    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+#    node "$@"
+#}
+#
 npm() {
     unset -f npm
     export NVM_DIR=~/.nvm
@@ -149,7 +150,6 @@ alias cdk="cd ~/personal_projects/kisswiki"
 #export EDITOR=nvim
 export EDITOR=em
 
-export PATH=~/bin/:$PATH
 export PATH=~/installed/:$PATH
 export PATH=~/installed/remacs/bin/:$PATH
 alias emacs=remacs
@@ -157,11 +157,7 @@ export PATH=~/installed/subtitleedit/:$PATH
 export PATH=~/installed/popcorntime.sh/:$PATH
 export PATH=$HOME/installed/ctags/bin:$PATH
 export PATH="~/installed/julia/bin:$PATH"
-
-if [ ! -f ~/installed/nvim ]; then
-  alias nvim='~/installed/nvim.appimage'
-fi
-
+export PATH=~/bin/:$PATH
 
 # [CTRL-R shows me the list of files instead of history · Issue #1594 · junegunn/fzf](https://github.com/junegunn/fzf/issues/1594)
 # using https://github.com/dvorka/hstr instead
@@ -365,7 +361,12 @@ export FZF_ALT_C_COMMAND="cd; fd --type d --hidden --follow --exclude '.git' --e
 # https://askubuntu.com/questions/67283/is-it-possible-to-make-writing-to-bash-history-immediate
 # https://stackoverflow.com/questions/9457233/unlimited-bash-history/19533853#19533853
 
-. $HOME/sync-history.sh
+
+# does not work in git bash
+if ! $(echo $(uname -a) | grep -q MINGW64); then
+    echo "sync_history.sh enabled"
+    . $HOME/sync-history.sh
+fi
 
 ## hh is alias to hstr
 # HSTR configuration - add this to ~/.bashrc

@@ -11,11 +11,6 @@
 !/.config/ranger
 !/.config/pulse/presets/*
 
-# and gpg configuration
-!/.gnupg/
-/.gnupg/*
-!/.gnupg/gpg.conf
-
 # and ssh configuration
 !/.ssh/
 /.ssh/*
@@ -28,6 +23,7 @@
 
 # and a selection of hidden configuration files.
 !/.*rc
+/.minttyrc
 !/.global_gitignore
 
 # however, do ignore these:

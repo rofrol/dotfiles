@@ -1,3 +1,18 @@
 Run `don` and `dof` to enable/disable git repo here.
 
 Architecture based on https://github.com/jan-warchol/dotfiles
+
+After cloning repository:
+
+```bash
+# .bashrc sets DOTFILES_HOME and sources don and dof functions
+$ source dotfiles/.bashrc
+$ mv dotfiles/.git ~/.dotfiles.git
+$ rm -rf dotfiles
+$ cd
+$ don
+# .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name
+$ git confing core.excludesFile .dotfiles.gitignore
+$ git checkout
+$ dof
+```

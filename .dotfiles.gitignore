@@ -46,5 +46,5 @@
 !/.config/mpv/input.conf
 
 !/bin
-!/.gitignore                                                               46
+!/.dotfiles.gitignore
 !/README.md

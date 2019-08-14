@@ -24,7 +24,6 @@
 # and a selection of hidden configuration files.
 !/.*rc
 /.minttyrc
-!/.global_gitignore
 
 # however, do ignore these:
 /.config/git/gitk
@@ -46,5 +45,7 @@
 !/.config/mpv/input.conf
 
 !/bin
-!/.dotfiles.gitignore
 !/README.md
+!/.global_gitignore
+!/.dotfiles.gitignore
+!/.gitconfig

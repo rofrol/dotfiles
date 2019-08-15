@@ -25,7 +25,12 @@
 	lg9 = log --graph --date-order --date=iso-local --pretty=format:'%C(auto)%h%d %C(reset)%s (A %C(bold blue)%an%C(reset)) %C(reset)(T %C(green)%ar %C(reset)%ad)' --decorate --all 
 	lg10 = log --graph --date-order --date=iso-local --pretty=format:'%C(auto)%h%d %C(reset)%s (%C(bold blue)%an%C(reset)) %C(reset)(%C(green)%ar %C(reset)%ad)' --decorate --all 
 	lg11 = log --graph --date-order --date=iso-local --pretty=format:'%C(auto)%h%d %C(reset)%s  %C(bold blue)%an%C(reset)%C(reset)  %C(green)%ar %C(reset)%ad' --decorate --all 
-	lg = !"git lg11"
+	# https://stackoverflow.com/questions/1057564/pretty-git-branch-graphs/22875140#22875140
+	lgi = log --graph --decorate --date=iso-local --color --format='%C(auto)%h %d %<|(110,trunc) %s  %<(16,trunc) %an %ad' --all 
+	lgdi = log --graph --decorate --date=iso-local --color --format='%C(auto)%h %d %<|(110,trunc) %s  %<(16,trunc) %an %ad' --all --date-order
+	lgr = log --graph --decorate --date=relative --color --format='%C(auto)%h %d %<|(110,trunc) %s  %<(16,trunc) %an %ad' --all
+	lgdr = log --graph --decorate --date=relative --color --format='%C(auto)%h %d %<|(110,trunc) %s  %<(16,trunc) %an %ad' --all --date-order
+	lg = !"git lgr"
 [user]
 	email = rofrol@gmail.com
 	name = Roman Frołow

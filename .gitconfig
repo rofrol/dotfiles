@@ -7,12 +7,25 @@
         sshow = "!f() { git stash show stash^{/$*} -p; }; f"
         sapply = "!f() { git stash apply stash^{/$*}; }; f"
 	fap = "!git fetch --all --prune && git fetch -f . origin/master:master"
+	fm = fetch -f . origin/master:master
 	rom = rebase origin/master
 	puoh = push -u origin HEAD
-	ffomm = fetch -f . origin/master:master
 	bsa = branch --sort=-authordate
 	brprune = "!git fetch -p --all && LC_ALL=C git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -d"
 	brprunef = "!git fetch -p --all && LC_ALL=C git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -D"
+	# https://stackoverflow.com/questions/1057564/pretty-git-branch-graphs
+	lg1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+	lg3 = log --graph --abbrev-commit --decorate --all
+	lg4 = log --graph --abbrev-commit --decorate --all --oneline
+	lg5 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+	lg6 = log --graph --date-order --date=short --pretty=format:'%C(auto)%h%d %C(reset)%s %C(bold blue)%ce %C(reset)%C(green)%cr (%cd)' --decorate --all
+	lg7 = log --graph --date=short --pretty=format:'%C(auto)%h%d %C(reset)%s %C(bold blue)%ce %C(reset)%C(green)%cr (%cd)' --decorate --all
+	lg8 = log --graph --date=short --pretty=format:'%C(auto)%h%d %C(reset)%s %C(bold blue)%an %C(reset)%C(green)%ar (%ad)' --decorate --all
+	lg9 = log --graph --date-order --date=iso-local --pretty=format:'%C(auto)%h%d %C(reset)%s (A %C(bold blue)%an%C(reset)) %C(reset)(T %C(green)%ar %C(reset)%ad)' --decorate --all 
+	lg10 = log --graph --date-order --date=iso-local --pretty=format:'%C(auto)%h%d %C(reset)%s (%C(bold blue)%an%C(reset)) %C(reset)(%C(green)%ar %C(reset)%ad)' --decorate --all 
+	lg11 = log --graph --date-order --date=iso-local --pretty=format:'%C(auto)%h%d %C(reset)%s  %C(bold blue)%an%C(reset)%C(reset)  %C(green)%ar %C(reset)%ad' --decorate --all 
+	lg = !"git lg11"
 [user]
 	email = rofrol@gmail.com
 	name = Roman Frołow

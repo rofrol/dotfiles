@@ -10,6 +10,8 @@
 !/.config/git
 !/.config/ranger
 !/.config/pulse/presets/*
+!/.config/nvim
+/.config/nvim/autoload
 
 # and ssh configuration
 !/.ssh/

@@ -322,7 +322,7 @@ export PATH="$PATH:$HOME/.skim/bin"
 #alias ls='exa'
 alias dfo='df -x squashfs -x tmpfs -x devtmpfs -BM -H -T'
 alias ncdumc='NCDU_SHELL="mc" ncdu'
-alias ncdumpv='NCDU_SHELL="mpv" ncdu'
+alias ncdumpv='NCDU_SHELL="mpv_playlist.sh" ncdu'
 # https://unix.stackexchange.com/questions/25327/watch-command-alias-expansion
 alias watch='watch '
 

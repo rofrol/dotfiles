@@ -8,11 +8,11 @@ After cloning repository:
 # .bashrc sets DOTFILES_HOME and sources don and dof functions
 $ source dotfiles/.bashrc
 $ mv dotfiles/.git ~/.dotfiles.git
-$ rm -rf dotfiles
 $ cd
 $ don
 # .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name
-$ git confing core.excludesFile .dotfiles.gitignore
+$ git config core.excludesFile .dotfiles.gitignore
 $ git checkout
 $ dof
+$ rm -rf dotfiles
 ```

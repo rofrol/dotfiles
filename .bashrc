@@ -8,6 +8,8 @@ case $- in
       *) return;;
 esac
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
@@ -362,10 +364,12 @@ export FZF_ALT_C_COMMAND="cd; fd --type d --hidden --follow --exclude '.git' --e
 # https://stackoverflow.com/questions/9457233/unlimited-bash-history/19533853#19533853
 
 
+
+
 # does not work in git bash
 if ! $(echo $(uname -a) | grep -q MINGW64); then
     echo "sync_history.sh enabled"
-    . $HOME/sync-history.sh
+    . $SCRIPT_DIR/sync-history.sh
 fi
 
 ## hh is alias to hstr
@@ -392,7 +396,7 @@ if [[ $- =~ .*i.* ]]; then bind '"\C-xk": "\C-a hstr -k \C-j"'; fi
 # https://github.com/jan-warchol/dotfiles/
 export DOTFILES_HOME=$HOME/.dotfiles.git
 #gives dotfiles, don, dof commands
-source $HOME/.config/bash/dotfiles.sh
+source $SCRIPT_DIR/.config/bash/dotfiles.sh
 
 if [[ $TILIX_ID ]]; then
   source /etc/profile.d/vte.sh

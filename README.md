@@ -6,14 +6,14 @@ After cloning repository:
 
 ```bash
 # .bashrc sets DOTFILES_HOME and sources don and dof functions
-$ cp -r dotfiles/.config ~/
-$ source dotfiles/.bashrc
+$ mv -r dotfiles/.config dotfiles/.bashrc ~/
 $ mv dotfiles/.git ~/.dotfiles.git
 $ cd
+$ source dotfiles/.bashrc
 $ don
 # .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name
 $ git config core.excludesFile .dotfiles.gitignore
-$ git checkout
+$ git checkout -f
 $ dof
 $ rm -rf dotfiles
 ```

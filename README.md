@@ -9,7 +9,7 @@ After cloning repository:
 $ mv dotfiles/.config dotfiles/.bashrc ~/
 $ mv dotfiles/.git ~/.dotfiles.git
 $ cd
-$ source dotfiles/.bashrc
+$ source .bashrc
 $ don
 # .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name
 $ git config core.excludesFile .dotfiles.gitignore

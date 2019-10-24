@@ -39,3 +39,10 @@
 	commitGraph = true
 [winUpdater]
 	recentlySeenVersion = 2.19.0.windows.1
+[pager]
+    # cargo install diffr
+    log  = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R
+    show = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R
+    diff = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R
+[interactive]
+    diffFilter = diffr --colors refine-removed:background:200,0,0:foreground:white:bold

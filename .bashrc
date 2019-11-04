@@ -157,6 +157,7 @@ export PATH=~/installed/subtitleedit/:$PATH
 export PATH=~/installed/popcorntime.sh/:$PATH
 export PATH=$HOME/installed/ctags/bin:$PATH
 export PATH="~/installed/julia/bin:$PATH"
+export PATH=$HOME/installed/fix_polish_characters:$PATH
 export PATH=~/bin/:$PATH
 
 # [CTRL-R shows me the list of files instead of history · Issue #1594 · junegunn/fzf](https://github.com/junegunn/fzf/issues/1594)
@@ -384,7 +385,7 @@ export HSTR_CONFIG=hicolor       # get more colors
 #export PROMPT_COMMAND="history -a; history -n; ${PROMPT_COMMAND}"
 
 # if this is interactive shell, then bind hstr to Ctrl-r (for Vi mode check doc)
-if [[ $- =~ .*i.* ]]; then bind '"\C-r": "\C-a hstr -- \C-j"'; fi
+#if [[ $- =~ .*i.* ]]; then bind '"\C-r": "\C-a hstr -- \C-j"'; fi
 # if this is interactive shell, then bind 'kill last command' to Ctrl-x k
 if [[ $- =~ .*i.* ]]; then bind '"\C-xk": "\C-a hstr -k \C-j"'; fi
 

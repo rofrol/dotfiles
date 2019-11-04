@@ -1,6 +1,0 @@
-#!/bin/bash
-# https://discourse.elm-lang.org/t/working-around-not-enough-bytes-problems/3359/3
-(
-  flock -e 200
-  elm $@
-) 200>/tmp/elm.lockfile

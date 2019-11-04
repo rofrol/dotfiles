@@ -411,3 +411,5 @@ function winboot {
     sudo grub-reboot "$WINDOWS_TITLE"
     sudo reboot
 }
+
+alias mpvsub26='mpv --sub-font-size 26'

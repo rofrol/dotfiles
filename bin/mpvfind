@@ -1,0 +1,2 @@
+#!/bin/bash
+find "$1" -type f -exec file -N -i -- {} + | sed -n 's!: video/[^:]*$!!p' | rg -v ".*\.sub$" | awk '{printf "\"%s\"\n", $0}' | xargs mpv

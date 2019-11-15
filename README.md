@@ -23,3 +23,7 @@ On Windows run cmd.exe as Administrator. Then
 ```
 mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 ```
+
+## Depenendcies
+
+`git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`

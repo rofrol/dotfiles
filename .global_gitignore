@@ -1,3 +1,5 @@
 TAGS
 .tmux_session
 .idea
+# https://github.com/rust-lang/rust-mode/issues/320#issuecomment-535033056
+rustfmt.toml

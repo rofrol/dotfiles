@@ -27,7 +27,9 @@ Plug 'gerw/vim-HiLinkTrace'
 Plug 'djoshea/vim-autoread'
 Plug 'tmhedberg/matchit'
 Plug 'tpope/vim-surround'
-Plug 'roman/golden-ratio'
+"Plug 'roman/golden-ratio'
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
 call plug#end()
 
 filetype plugin indent on
@@ -287,3 +289,55 @@ vnoremap <silent> <Leader>K y:<C-U>call Dasht(getreg(0), '!')<Return>
 " Vertical split
 set fillchars+=vert:\
 hi VertSplit guibg=#353C48
+
+" https://superuser.com/questions/404333/how-do-i-only-dp-or-do-just-the-lines-not-the-entire-block-in-vim-diff
+"nnoremap <silent> <leader>dp V:diffput<cr>
+nnoremap <silent> <F4> V:diffput<cr>
+"nnoremap <silent> <leader>dg V:diffget<cr>
+nnoremap <silent> <F5> V:diffget<cr>
+
+" This will allow you to undo a typo or unwanted change on the other file/window, because :undo of just u will only undo a change in the present window.
+nmap <silent> <leader>du :wincmd w<cr>:normal u<cr>:wincmd w<cr>
+
+
+" ============================================================================
+" Terminal
+" =============================================================================
+
+" https://www.reddit.com/r/neovim/comments/7i2k6u/neovim_terminal_one_week_without_tmux/
+
+" https://vi.stackexchange.com/questions/3670/how-to-enter-insert-mode-when-entering-neovim-terminal-pane/3765#3765
+autocmd BufWinEnter,WinEnter term://* startinsert
+
+" https://www.reddit.com/r/vim/comments/8n5bzs/using_neovim_is_there_a_way_to_display_a_terminal/dzt3fix/
+" Terminal Function
+let g:term_buf = 0
+let g:term_win = 0
+function! TermToggle(height)
+    if win_gotoid(g:term_win)
+        hide
+    else
+        botright new
+        exec "resize " . a:height
+        try
+            exec "buffer " . g:term_buf
+        catch
+            call termopen($SHELL, {"detach": 0})
+            let g:term_buf = bufnr("")
+            set nonumber
+            set norelativenumber
+            set signcolumn=no
+        endtry
+        startinsert!
+        let g:term_win = win_getid()
+    endif
+endfunction
+
+" Toggle terminal on/off (neovim)
+nnoremap <A-t> :call TermToggle(12)<CR>
+inoremap <A-t> <Esc>:call TermToggle(12)<CR>
+tnoremap <A-t> <C-\><C-n>:call TermToggle(12)<CR>
+
+" Terminal go back to normal mode
+tnoremap <Esc> <C-\><C-n>
+tnoremap :q! <C-\><C-n>:q!<CR>

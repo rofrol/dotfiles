@@ -30,6 +30,8 @@ Plug 'tpope/vim-surround'
 "Plug 'roman/golden-ratio'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
+"Plug 'ap/vim-buftabline'
+Plug 'zefei/vim-wintabs'
 call plug#end()
 
 filetype plugin indent on
@@ -341,3 +343,40 @@ tnoremap <A-t> <C-\><C-n>:call TermToggle(12)<CR>
 " Terminal go back to normal mode
 tnoremap <Esc> <C-\><C-n>
 tnoremap :q! <C-\><C-n>:q!<CR>
+
+" https://www.reddit.com/r/neovim/comments/6mkvo3/builtin_terminals_or_tmux/dk2db7p/
+tnoremap <C-h> <C-\><C-n><C-w>h
+tnoremap <C-j> <C-\><C-n><C-w>j
+tnoremap <C-k> <C-\><C-n><C-w>k
+tnoremap <C-l> <C-\><C-n><C-w>l
+noremap <C-h> <C-w>h
+noremap <C-j> <C-w>j
+noremap <C-k> <C-w>k
+noremap <C-l> <C-w>l
+inoremap <C-h> <Esc><C-w>h
+inoremap <C-j> <Esc><C-w>j
+inoremap <C-k> <Esc><C-w>k
+inoremap <C-l> <Esc><C-w>l
+
+" Quickly create a new terminal in a new tab
+tnoremap <Leader>c <C-\><C-n>:tab new<CR>:term<CR>
+noremap <Leader>c :tab new<CR>:term<CR>
+inoremap <Leader>c <Esc>:tab new<CR>:term<CR>
+
+" Quickly create a new terminal in a vertical split
+tnoremap <Leader>% <C-\><C-n>:vs<CR><C-w><C-w>:term<CR>
+noremap <Leader>% :vs<CR><C-w><C-w>:term<CR>
+inoremap <Leader>% <Esc>:vs<CR><C-w><C-w>:term<CR>
+
+" Quickly create a new terminal in a horizontal split
+tnoremap <Leader>" <C-\><C-n>:sp<CR><C-w><C-w>:term<CR>
+noremap <Leader>" :sp<CR><C-w><C-w>:term<CR>
+inoremap <Leader>" <Esc>:sp<CR><C-w><C-w>:term<CR>
+
+"nnoremap <C-N> :bnext<CR>
+"nnoremap <C-P> :bprev<CR>
+" https://www.reddit.com/r/neovim/comments/ac1i8w/whats_your_buffermanagement_setup/ed5097b/
+nmap <silent> <Tab> :bn<CR>
+nmap <silent> <S-Tab> :bp<CR> 
+
+highlight TermCursor ctermfg=red guifg=red

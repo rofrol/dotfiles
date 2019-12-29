@@ -413,3 +413,5 @@ function winboot {
 }
 
 alias mpvsub26='mpv --sub-font-size 26'
+
+export PATH="$PATH:$HOME/.npm-packages/bin"

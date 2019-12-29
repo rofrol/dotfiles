@@ -32,6 +32,7 @@ Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 "Plug 'ap/vim-buftabline'
 Plug 'zefei/vim-wintabs'
+Plug 'lambdalisue/suda.vim'
 call plug#end()
 
 filetype plugin indent on
@@ -78,6 +79,7 @@ set nojoinspaces    " WTF, Americans?
 set ts=2            " tabulator width 2
 set sw=2            " indentation width 2
 
+" Does not work in neovim https://github.com/neovim/neovim/issues/8527#issuecomment-406841041
 " read-only files? no problem
 cmap w!! w !sudo tee % >/dev/null
 

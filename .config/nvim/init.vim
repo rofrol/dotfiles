@@ -389,3 +389,8 @@ if has('nvim')
         " more stuff
     augroup end
 endif
+
+" https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
+" C-x to open horizontally, C-v to open vertically, C-t to open in new tab
+nnoremap <silent> <Leader><Space> :GFiles<CR>
+nnoremap <silent> <Leader>f<Space> :Files<CR>

@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Ubuntu WSL2
-if echo `uname -r` | grep -q Microsoft; then
-    # https://github.com/microsoft/WSL/issues/345 
-    TERM=xterm-256color
-else
-   TERM=xterm-24bit
-fi
+#if echo `uname -r` | grep -q Microsoft; then
+#    # https://github.com/microsoft/WSL/issues/345 
+#    TERM=xterm-256color
+#else
+#   TERM=xterm-24bit
+#fi
 
-remacs -nw "$@"
+#remacs -nw "$@"
+nvim "$@"

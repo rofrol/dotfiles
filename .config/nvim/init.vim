@@ -393,4 +393,7 @@ endif
 " https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
 " C-x to open horizontally, C-v to open vertically, C-t to open in new tab
 nnoremap <silent> <Leader><Space> :GFiles<CR>
-nnoremap <silent> <Leader>f<Space> :Files<CR>
+nnoremap <silent> <Leader>ff :Files<CR>
+" open file in the same dir
+nnoremap <silent> <Leader>f. :Files <C-r>=expand("%:h")<CR>/<CR>
+nnoremap <silent> <Leader>fb :Buffers<CR>

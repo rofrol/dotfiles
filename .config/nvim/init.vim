@@ -33,6 +33,17 @@ Plug 'junegunn/fzf.vim'
 "Plug 'ap/vim-buftabline'
 Plug 'zefei/vim-wintabs'
 Plug 'lambdalisue/suda.vim'
+Plug 'qpkorr/vim-bufkill'
+
+" =============================================================================
+" Rust
+" =============================================================================
+" The version of rust.vim bundled with vim is very outdated, and needs updating. (Among other things, formatting no longer works with current rustfmt.) https://github.com/neovim/neovim/issues/11219#issue-506329283
+"Plug 'rust-lang/rust.vim'
+" Install rustfmt https://github.com/rust-lang/rust.vim/issues/89#issuecomment-234314662
+Plug 'rust-lang/rust.vim', { 'for': [ 'rust' ], 'do': 'cargo install rustfmt' }
+let g:rustfmt_autosave = 1
+
 call plug#end()
 
 filetype plugin indent on
@@ -395,7 +406,7 @@ endif
 " https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
 " C-x to open horizontally, C-v to open vertically, C-t to open in new tab
 nnoremap <silent> <Leader><Space> :GFiles<CR>
-nnoremap <silent> <Leader>ff :Files<CR>
+nnoremap <silent> <Leader>f :Files<CR>
 " open file in the same dir
 nnoremap <silent> <Leader>f. :Files <C-r>=expand("%:h")<CR>/<CR>
 nnoremap <silent> <Leader>fb :Buffers<CR>

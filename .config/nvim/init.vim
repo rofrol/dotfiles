@@ -438,6 +438,10 @@ nnoremap <silent> <Leader>fb :Buffers<CR>
 " =============================================================================
 
 " https://medium.com/@garoth/neovim-terminal-usecases-tricks-8961e5ac19b9#.wewpz5kgy
+" look at ~/.config/nvim/.nvim_session.example.vim
+" run with `nvim -S .nvim.session_example.vim'
+" https://stackoverflow.com/questions/23235112/how-to-run-a-series-of-vim-commands-from-command-prompt/23237529#23237529
+" https://stackoverflow.com/questions/12834370/run-vim-command-from-commandline
 function! DefaultWorkspace()
     " Rough num columns to decide between laptop and big monitor screens
     let numcol = 2
@@ -460,24 +464,6 @@ function! DefaultWorkspace()
     wincmd h
 endfunction
 command! -register DefaultWorkspace call DefaultWorkspace()
-
-function! MapdidWorkspace()
-    nnoremap <silent> <Leader><Space> :GFiles frontend<CR>
-    "16sp term://bash
-    16sp | term
-    "vs term://bash
-    vs | term
-    " https://thoughtbot.com/upcase/videos/neovim-sending-commands-to-a-terminal-buffer
-    call jobsend(b:terminal_job_id, "killTcpListen 1234; rm -rf build; make run env=Local name=App port=1234\n")
-    " How to scroll to the bottom?
-    " call feedkeys("G")
-    wincmd k
-    "e frontend/src/Mapdid/App.elm
-    e src/Mapdid/App.elm
-    " https://stackoverflow.com/questions/9445273/how-do-i-emulate-a-keypress-inside-a-vim-function/9445742#9445742
-    call feedkeys("\<Esc>")
-endfunction
-command! -register MapdidWorkspace call MapdidWorkspace()
 
 " https://github.com/rkruk/neovim-dotfiles/blob/8b8594ea05e94e25d627f4f32f8d382afca69fcc/config.vim#L38
 set title          " Set the title of the window in the terminal to the file

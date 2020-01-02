@@ -8,7 +8,7 @@ endif
 call plug#begin('~/.config/nvim/autoload')
 Plug 'tpope/vim-fugitive'
 Plug 'theJian/elm.vim'
-Plug 'chaoren/vim-wordmotion'
+"Plug 'chaoren/vim-wordmotion'
 Plug 'ayu-theme/ayu-vim'
 Plug 'pangloss/vim-javascript'
 Plug 'vim-airline/vim-airline'
@@ -314,6 +314,7 @@ nnoremap <silent> <F5> V:diffget<cr>
 " This will allow you to undo a typo or unwanted change on the other file/window, because :undo of just u will only undo a change in the present window.
 nmap <silent> <leader>du :wincmd w<cr>:normal u<cr>:wincmd w<cr>
 
+set nu
 
 " ============================================================================
 " Terminal
@@ -321,8 +322,24 @@ nmap <silent> <leader>du :wincmd w<cr>:normal u<cr>:wincmd w<cr>
 
 " https://www.reddit.com/r/neovim/comments/7i2k6u/neovim_terminal_one_week_without_tmux/
 
+" :20sp term://bash
+" :80vs term://bash
+" https://stackoverflow.com/questions/1388252/specifying-width-for-vsplit-in-vim/1388268#1388268
+" :split | resize 20 | term
+" https://github.com/neovim/neovim/issues/5073#issuecomment-427493209
+
 " https://vi.stackexchange.com/questions/3670/how-to-enter-insert-mode-when-entering-neovim-terminal-pane/3765#3765
+" https://stackoverflow.com/questions/57899527/neovim-vim-resize-window-based-on-type-of-buffer/57904110#57904110
 autocmd BufWinEnter,WinEnter term://* startinsert
+
+" https://github.com/neovim/neovim/issues/9483#issuecomment-569417862
+" https://vi.stackexchange.com/questions/22307/neovim-go-into-insert-mode-when-clicking-in-a-terminal-in-a-pane/22327#22327
+" https://gist.github.com/jdhao/d592ba03a8862628f31cba5144ea04c2#file-autocommands-vim-L21
+if has('nvim')
+    augroup terminal_setup | au!
+        autocmd TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i | setlocal nonumber
+    augroup end
+endif
 
 " https://www.reddit.com/r/vim/comments/8n5bzs/using_neovim_is_there_a_way_to_display_a_terminal/dzt3fix/
 " Terminal Function
@@ -394,15 +411,6 @@ nmap <silent> <S-Tab> :bp<CR>
 
 highlight TermCursor ctermfg=red guifg=red
 
-" https://github.com/neovim/neovim/issues/9483#issuecomment-569417862
-" https://vi.stackexchange.com/questions/22307/neovim-go-into-insert-mode-when-clicking-in-a-terminal-in-a-pane/22327#22327
-if has('nvim')
-    augroup terminal_setup | au!
-        autocmd TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i
-        " more stuff
-    augroup end
-endif
-
 " https://bluz71.github.io/2018/12/04/fuzzy-finding-in-vim-with-fzf.html
 " C-x to open horizontally, C-v to open vertically, C-t to open in new tab
 nnoremap <silent> <Leader><Space> :GFiles<CR>
@@ -437,16 +445,16 @@ endfunction
 command! -register DefaultWorkspace call DefaultWorkspace()
 
 function! MapdidWorkspace()
-    sp term://bash
+    nnoremap <silent> <Leader><Space> :GFiles frontend<CR>
+    16sp term://bash
     vs term://bash
-    "vs term://bash -c "cd frontend; killTcpListen 1234; rm -rf build; make run env=Local name=App port=1234"
     " https://thoughtbot.com/upcase/videos/neovim-sending-commands-to-a-terminal-buffer
-    call jobsend(b:terminal_job_id, "nvm; cd frontend; killTcpListen 1234; rm -rf build; make run env=Local name=App port=1234\n")
+    call jobsend(b:terminal_job_id, "killTcpListen 1234; rm -rf build; make run env=Local name=App port=1234\n")
     " How to scroll to the bottom?
     " call feedkeys("G")
-    resize 16
     wincmd k
-    e frontend/src/Mapdid/App.elm
+    "e frontend/src/Mapdid/App.elm
+    e src/Mapdid/App.elm
     " https://stackoverflow.com/questions/9445273/how-do-i-emulate-a-keypress-inside-a-vim-function/9445742#9445742
     call feedkeys("\<Esc>")
 endfunction

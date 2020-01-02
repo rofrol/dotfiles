@@ -316,6 +316,15 @@ nmap <silent> <leader>du :wincmd w<cr>:normal u<cr>:wincmd w<cr>
 
 set nu
 
+" use system clipboard
+" https://gist.github.com/jdhao/d592ba03a8862628f31cba5144ea04c2#file-options-vim-L20
+" https://stackoverflow.com/questions/30691466/what-is-difference-between-vims-clipboard-unnamed-and-unnamedplus-settings/30691754#30691754
+set clipboard^=unnamed,unnamedplus
+
+" The way to show the result of substitution in real time for preview
+" https://gist.github.com/jdhao/d592ba03a8862628f31cba5144ea04c2#file-options-vim-L77
+set inccommand=nosplit
+
 " ============================================================================
 " Terminal
 " =============================================================================

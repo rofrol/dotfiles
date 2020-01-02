@@ -481,3 +481,29 @@ command! -register MapdidWorkspace call MapdidWorkspace()
 
 " https://github.com/rkruk/neovim-dotfiles/blob/8b8594ea05e94e25d627f4f32f8d382afca69fcc/config.vim#L38
 set title          " Set the title of the window in the terminal to the file
+
+" https://www.reddit.com/r/neovim/comments/8fu8u9/for_those_using_neovim_as_a_tmux_replacement/dyfhfsw/
+function! VisualMapper(commands, ...)
+  let common_prefix = "" | let key_count = 1
+  if a:0 > 0 | let common_prefix = a:1 | endif
+  if a:0 > 1 | let key_count = a:2 | endif
+  let key_and_cmd = {}
+  for [key_and_name, cmd] in a:commands
+    echo key_and_name
+    let key_and_cmd[split(key_and_name, "\\s\\+>")[0]] = cmd
+  endfor
+  echo "> "
+  let KeyReader = {-> nr2char(getchar())}
+  call feedkeys(common_prefix . key_and_cmd[join(map(range(key_count), KeyReader), '')])
+  call feedkeys("i\<Cr>")
+endfunction
+
+let g:commander = [
+\  ["C > List Connections",        "inmcli -p c show --active"],
+\  ["d > Show current directory",  "ipwd\n"],
+\  ["D > List Disks",              "ifdisk -l"],
+\  ["g > Grep",                    "igrep -r --color --exclude-dir=\".git\" \""],
+\  ["i > Grep Including ",         "igrep -r --color --exclude-dir=\".git\" --include=\"*."],
+\  ["t > Show running processes",  "itop -u $USER"]]
+
+tnoremap <A-s> <C-\><C-n>:call VisualMapper(g:commander)<cr>

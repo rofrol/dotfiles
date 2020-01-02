@@ -334,19 +334,24 @@ set inccommand=nosplit
 " :20sp term://bash
 " :80vs term://bash
 " https://stackoverflow.com/questions/1388252/specifying-width-for-vsplit-in-vim/1388268#1388268
+" :20split | term
 " :split | resize 20 | term
 " https://github.com/neovim/neovim/issues/5073#issuecomment-427493209
 
+" https://stackoverflow.com/questions/57899527/neovim-vim-resize-window-based-on-type-of-buffer/57904110#57904110 
 " https://vi.stackexchange.com/questions/3670/how-to-enter-insert-mode-when-entering-neovim-terminal-pane/3765#3765
 " https://stackoverflow.com/questions/57899527/neovim-vim-resize-window-based-on-type-of-buffer/57904110#57904110
-autocmd BufWinEnter,WinEnter term://* startinsert
-
 " https://github.com/neovim/neovim/issues/9483#issuecomment-569417862
 " https://vi.stackexchange.com/questions/22307/neovim-go-into-insert-mode-when-clicking-in-a-terminal-in-a-pane/22327#22327
 " https://gist.github.com/jdhao/d592ba03a8862628f31cba5144ea04c2#file-autocommands-vim-L21
+
 if has('nvim')
     augroup terminal_setup | au!
-        autocmd TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i | setlocal nonumber
+        au TermOpen * if &buftype ==# 'terminal' | startinsert | setlocal nonumber | endif
+        au TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i
+        " stopinsert first, so when I come from file buffer, it is not in insert file mode when I can click and change cursor on whatever line
+        au BufEnter * if &buftype ==# 'terminal' | stopinsert | startinsert | endif
+        "au BufLeave * if &buftype ==# 'terminal' | stopinsert | endif
     augroup end
 endif
 
@@ -428,6 +433,9 @@ nnoremap <silent> <Leader>f :Files<CR>
 nnoremap <silent> <Leader>f. :Files <C-r>=expand("%:h")<CR>/<CR>
 nnoremap <silent> <Leader>fb :Buffers<CR>
 
+" ============================================================================
+" Workspaces
+" =============================================================================
 
 " https://medium.com/@garoth/neovim-terminal-usecases-tricks-8961e5ac19b9#.wewpz5kgy
 function! DefaultWorkspace()
@@ -455,8 +463,10 @@ command! -register DefaultWorkspace call DefaultWorkspace()
 
 function! MapdidWorkspace()
     nnoremap <silent> <Leader><Space> :GFiles frontend<CR>
-    16sp term://bash
-    vs term://bash
+    "16sp term://bash
+    16sp | term
+    "vs term://bash
+    vs | term
     " https://thoughtbot.com/upcase/videos/neovim-sending-commands-to-a-terminal-buffer
     call jobsend(b:terminal_job_id, "killTcpListen 1234; rm -rf build; make run env=Local name=App port=1234\n")
     " How to scroll to the bottom?
@@ -468,3 +478,6 @@ function! MapdidWorkspace()
     call feedkeys("\<Esc>")
 endfunction
 command! -register MapdidWorkspace call MapdidWorkspace()
+
+" https://github.com/rkruk/neovim-dotfiles/blob/8b8594ea05e94e25d627f4f32f8d382afca69fcc/config.vim#L38
+set title          " Set the title of the window in the terminal to the file

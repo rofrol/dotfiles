@@ -410,3 +410,44 @@ nnoremap <silent> <Leader>f :Files<CR>
 " open file in the same dir
 nnoremap <silent> <Leader>f. :Files <C-r>=expand("%:h")<CR>/<CR>
 nnoremap <silent> <Leader>fb :Buffers<CR>
+
+
+" https://medium.com/@garoth/neovim-terminal-usecases-tricks-8961e5ac19b9#.wewpz5kgy
+function! DefaultWorkspace()
+    " Rough num columns to decide between laptop and big monitor screens
+    let numcol = 2
+    if winwidth(0) >= 220
+        let numcol = 3
+    endif
+
+    if numcol == 3
+        e term://zsh
+        file Shell\ Two
+        vnew
+    endif
+
+    vsp term://~/Programs/golang/context
+    file Context
+    sp term://zsh
+    file Shell\ One
+    wincmd k
+    resize 4
+    wincmd h
+endfunction
+command! -register DefaultWorkspace call DefaultWorkspace()
+
+function! MapdidWorkspace()
+    sp term://bash
+    vs term://bash
+    "vs term://bash -c "cd frontend; killTcpListen 1234; rm -rf build; make run env=Local name=App port=1234"
+    " https://thoughtbot.com/upcase/videos/neovim-sending-commands-to-a-terminal-buffer
+    call jobsend(b:terminal_job_id, "nvm; cd frontend; killTcpListen 1234; rm -rf build; make run env=Local name=App port=1234\n")
+    " How to scroll to the bottom?
+    " call feedkeys("G")
+    resize 16
+    wincmd k
+    e frontend/src/Mapdid/App.elm
+    " https://stackoverflow.com/questions/9445273/how-do-i-emulate-a-keypress-inside-a-vim-function/9445742#9445742
+    call feedkeys("\<Esc>")
+endfunction
+command! -register MapdidWorkspace call MapdidWorkspace()

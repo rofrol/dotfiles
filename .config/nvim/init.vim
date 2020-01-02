@@ -439,9 +439,14 @@ nnoremap <silent> <Leader>fb :Buffers<CR>
 
 " https://medium.com/@garoth/neovim-terminal-usecases-tricks-8961e5ac19b9#.wewpz5kgy
 " look at ~/.config/nvim/.nvim_session.example.vim
-" run with `nvim -S .nvim.session_example.vim'
-" https://stackoverflow.com/questions/23235112/how-to-run-a-series-of-vim-commands-from-command-prompt/23237529#23237529
-" https://stackoverflow.com/questions/12834370/run-vim-command-from-commandline
+
+" reading with `nvim -S .nvim_session.vim` is not good, as cursor position
+" will not be saved etc.
+" https://stackoverflow.com/questions/456792/vim-apply-settings-on-files-in-directory/13192721#13192721
+if filereadable(".nvim_session.vim")
+    source .nvim_session.vim
+endif
+
 function! DefaultWorkspace()
     " Rough num columns to decide between laptop and big monitor screens
     let numcol = 2

@@ -433,43 +433,6 @@ nnoremap <silent> <Leader>f :Files<CR>
 nnoremap <silent> <Leader>f. :Files <C-r>=expand("%:h")<CR>/<CR>
 nnoremap <silent> <Leader>fb :Buffers<CR>
 
-" ============================================================================
-" Workspaces
-" =============================================================================
-
-" https://medium.com/@garoth/neovim-terminal-usecases-tricks-8961e5ac19b9#.wewpz5kgy
-" look at ~/.config/nvim/.nvim_session.example.vim
-
-" reading with `nvim -S .nvim_session.vim` is not good, as cursor position
-" will not be saved etc.
-" https://stackoverflow.com/questions/456792/vim-apply-settings-on-files-in-directory/13192721#13192721
-if filereadable(".nvim_session.vim")
-    source .nvim_session.vim
-endif
-
-function! DefaultWorkspace()
-    " Rough num columns to decide between laptop and big monitor screens
-    let numcol = 2
-    if winwidth(0) >= 220
-        let numcol = 3
-    endif
-
-    if numcol == 3
-        e term://zsh
-        file Shell\ Two
-        vnew
-    endif
-
-    vsp term://~/Programs/golang/context
-    file Context
-    sp term://zsh
-    file Shell\ One
-    wincmd k
-    resize 4
-    wincmd h
-endfunction
-command! -register DefaultWorkspace call DefaultWorkspace()
-
 " https://github.com/rkruk/neovim-dotfiles/blob/8b8594ea05e94e25d627f4f32f8d382afca69fcc/config.vim#L38
 set title          " Set the title of the window in the terminal to the file
 
@@ -498,3 +461,41 @@ let g:commander = [
 \  ["t > Show running processes",  "itop -u $USER"]]
 
 tnoremap <A-s> <C-\><C-n>:call VisualMapper(g:commander)<cr>
+
+" ============================================================================
+" Workspaces
+" =============================================================================
+
+function! DefaultWorkspace()
+    " Rough num columns to decide between laptop and big monitor screens
+    let numcol = 2
+    if winwidth(0) >= 220
+        let numcol = 3
+    endif
+
+    if numcol == 3
+        e term://zsh
+        file Shell\ Two
+        vnew
+    endif
+
+    vsp term://~/Programs/golang/context
+    file Context
+    sp term://zsh
+    file Shell\ One
+    wincmd k
+    resize 4
+    wincmd h
+endfunction
+command! -register DefaultWorkspace call DefaultWorkspace()
+
+" https://medium.com/@garoth/neovim-terminal-usecases-tricks-8961e5ac19b9#.wewpz5kgy
+" look at ~/.config/nvim/.nvim_session.example.vim
+
+" reading with `nvim -S .nvim_session.vim` is not good, as cursor position
+" will not be saved etc.
+" https://stackoverflow.com/questions/456792/vim-apply-settings-on-files-in-directory/13192721#13192721
+if filereadable(".nvim_session.vim")
+    source .nvim_session.vim
+endif
+" Above command should be the last

@@ -199,8 +199,7 @@ function  ef(){
       # https://stackoverflow.com/questions/589149/bash-script-to-cd-to-directory-with-spaces-in-pathname/3032843#3032843
 
       # Use the default editor if it's defined, otherwise Vim
-      #eval ${EDITOR:-vim} "$file"
-      em "$file"
+      eval ${EDITOR:-vim} "$file"
   fi
 }
 # When I open file with this in neovim and then `:sp|term`, I do not see cursor. I need to do to reset.

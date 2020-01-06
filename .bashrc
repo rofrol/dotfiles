@@ -186,7 +186,7 @@ history() {
 
 #https://gist.github.com/mb720/86144b670599c0eab331cd2f48bd23b9
 # https://www.reddit.com/r/linux/comments/5rrpyy/turbo_charge_bash_with_fzf_ripgrep/
-function  edi(){
+function  ef(){
   local file="$(fd --exclude node_modules | fzf --reverse)"
   # Open the file if it exists
   if [ -n "$file" ]; then
@@ -199,10 +199,13 @@ function  edi(){
       # https://stackoverflow.com/questions/589149/bash-script-to-cd-to-directory-with-spaces-in-pathname/3032843#3032843
 
       # Use the default editor if it's defined, otherwise Vim
-      eval ${EDITOR:-vim} "$file"
+      #eval ${EDITOR:-vim} "$file"
+      em "$file"
   fi
 }
-bind -x '"\C-y": edi;'
+# When I open file with this in neovim and then `:sp|term`, I do not see cursor. I need to do to reset.
+# Invoking this function without bind works
+bind -x '"\C-y": ef;'
 
 alias gitc='git branch | fzf | xargs git checkout'
 
@@ -295,7 +298,8 @@ alias update-nvim="(mkdir -p ~/installed && cd ~/installed && rm -rf nvim.appima
 export PATH="~/personal_projects/stmux:$PATH"
 
 alias webstorm="nvm; webstorm"
-alias m='cd ~/projects/mapdid/monorepo; stmux'
+alias m='cd ~/projects/mapdid/monorepo/frontend && nvm && nvim'
+alias day='cd ~/personal_projects/day_schedule; stmux'
 alias ds='spotdl --song "$@"'
 alias dy='youtube-dl --extract-audio --audio-format mp3 -f bestaudio "$@"'
 
@@ -334,7 +338,8 @@ export PATH=${GOPATH//://bin:}/bin:$PATH
 # The default commands fzf uses do not include hidden files. If you want hidden files in the list, you have to define your own $FZF_DEFAULT_COMMAND or $FZF_CTRL_T_COMMAND depending on the context. https://github.com/junegunn/fzf/issues/634#issuecomment-238036404
 # and setting _fzf_compgen_path and _fzf_compgen_path does not show hidden files
 # http://owen.cymru/fzf-ripgrep-navigate-with-bash-faster-than-ever-before/
-export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow -g "!{.git,node_modules}/*" 2> /dev/null'
+#export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow -g "!{.git,node_modules}/*" 2> /dev/null'
+export FZF_DEFAULT_COMMAND='fd --type f'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 #disabling: it interfere with FZF_ALT_C_COMMAND

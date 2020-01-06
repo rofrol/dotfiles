@@ -134,6 +134,9 @@ map <right> <nop>
 
 let mapleader=","
 
+" Does not work
+nmap <Backspace> :noh<CR>
+
 map <Leader>b  :buffers<cr>
 map <silent> <Leader>n :nohl<cr>
 map     <Leader>w  :w!<cr>

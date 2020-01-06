@@ -205,6 +205,8 @@ function  ef(){
 }
 # When I open file with this in neovim and then `:sp|term`, I do not see cursor. I need to do to reset.
 # Invoking this function without bind works
+# bind -X to show user binds https://stackoverflow.com/questions/19755793/list-bash-bind-x-bindings/19761888#19761888
+# type <function> to show function definition https://stackoverflow.com/questions/6916856/can-bash-show-a-functions-definition/6916952#6916952
 bind -x '"\C-y": ef;'
 
 alias gitc='git branch | fzf | xargs git checkout'
@@ -253,6 +255,7 @@ gitg ()
 FZF-EOF" --preview-window=right:60%
 }
 
+# https://stackoverflow.com/questions/41963660/how-to-open-a-file-in-a-specific-application-from-fzf/41982930#41982930
 fe() {
   local files
   IFS=$'\n' files=($(fzf-tmux --query="$1" --multi --select-1 --exit-0))
@@ -339,7 +342,9 @@ export PATH=${GOPATH//://bin:}/bin:$PATH
 # and setting _fzf_compgen_path and _fzf_compgen_path does not show hidden files
 # http://owen.cymru/fzf-ripgrep-navigate-with-bash-faster-than-ever-before/
 #export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow -g "!{.git,node_modules}/*" 2> /dev/null'
-export FZF_DEFAULT_COMMAND='fd --type f'
+#export FZF_DEFAULT_COMMAND='fd --type f'
+export FZF_DEFAULT_COMMAND="fd --type file --color=always"
+export FZF_DEFAULT_OPTS="--ansi"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 #disabling: it interfere with FZF_ALT_C_COMMAND

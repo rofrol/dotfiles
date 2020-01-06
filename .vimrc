@@ -226,3 +226,12 @@ colo default
 " http://vim.wikia.com/wiki/Disable_beeping
 set noerrorbells visualbell t_vb=
 autocmd GUIEnter * set visualbell t_vb=
+
+" https://superuser.com/questions/404333/how-do-i-only-dp-or-do-just-the-lines-not-the-entire-block-in-vim-diff
+"nnoremap <silent> <leader>dp V:diffput<cr>
+nnoremap <silent> <F4> V:diffput<cr>
+"nnoremap <silent> <leader>dg V:diffget<cr>
+nnoremap <silent> <F5> V:diffget<cr>
+
+" This will allow you to undo a typo or unwanted change on the other file/window, because :undo of just u will only undo a change in the present window.
+nmap <silent> <leader>du :wincmd w<cr>:normal u<cr>:wincmd w<cr>

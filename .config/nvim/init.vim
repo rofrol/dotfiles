@@ -40,9 +40,13 @@ Plug 'qpkorr/vim-bufkill'
 " =============================================================================
 " The version of rust.vim bundled with vim is very outdated, and needs updating. (Among other things, formatting no longer works with current rustfmt.) https://github.com/neovim/neovim/issues/11219#issue-506329283
 "Plug 'rust-lang/rust.vim'
-" Install rustfmt https://github.com/rust-lang/rust.vim/issues/89#issuecomment-234314662
-Plug 'rust-lang/rust.vim', { 'for': [ 'rust' ], 'do': 'cargo install rustfmt' }
+" https://github.com/rust-lang/rust.vim/issues/89#issuecomment-571216745
+" interesting https://github.com/rust-lang/rust.vim/pull/369/files#diff-620e97ff3ec1f7b01a2d1f60373196cdR99
+" does this work? https://github.com/whamcloud/integrated-manager-for-lustre/pull/1407
+Plug 'rust-lang/rust.vim', { 'for': [ 'rust' ], 'do': 'rustup component add rustfmt' }
 let g:rustfmt_autosave = 1
+" or do `echo 'edition = "2018"' > rustfmt.toml` for every project https://github.com/rust-lang/rust.vim/issues/368#issue-520085064
+let g:rustfmt_options = '--edition 2018'
 
 call plug#end()
 
@@ -465,6 +469,21 @@ let g:commander = [
 
 tnoremap <A-s> <C-\><C-n>:call VisualMapper(g:commander)<cr>
 
+
+" ============================================================================
+" zefei/vim-wintabs
+" =============================================================================
+
+map <C-H> <Plug>(wintabs_previous)
+map <C-L> <Plug>(wintabs_next)
+map <C-T>c <Plug>(wintabs_close)
+map <C-T>u <Plug>(wintabs_undo)
+map <C-T>o <Plug>(wintabs_only)
+map <C-W>c <Plug>(wintabs_close_window)
+map <C-W>o <Plug>(wintabs_only_window)
+command! Tabc WintabsCloseVimtab
+command! Tabo WintabsOnlyVimtab
+
 " ============================================================================
 " Workspaces
 " =============================================================================
@@ -502,3 +521,7 @@ if filereadable(".nvim_session.vim")
     source .nvim_session.vim
 endif
 " Above command should be the last
+
+" TODO
+" - paste over selection should not replace clipboard with selection
+" - when openning file with fzf, then `:sp|term`, I need to run `reset` to see characters

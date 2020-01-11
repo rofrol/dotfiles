@@ -8,8 +8,14 @@ endif
 call plug#begin('~/.config/nvim/autoload')
 Plug 'tpope/vim-fugitive'
 Plug 'theJian/elm.vim'
+
 "Plug 'chaoren/vim-wordmotion'
-Plug 'ayu-theme/ayu-vim'
+"Plug 'ayu-theme/ayu-vim'
+"Plug 'endel/vim-github-colorscheme'
+"Plug 'sainnhe/edge'
+"Plug 'rakr/vim-one'
+"Plug 'wimstefan/Lightning'
+
 Plug 'pangloss/vim-javascript'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
@@ -53,11 +59,36 @@ call plug#end()
 filetype plugin indent on
 syntax enable
 
+" =============================================================================
+" Color
+" =============================================================================
+
 set termguicolors
 set background=light
-let ayucolor="light"
-"color ayu
-"highlight Normal guifg=white guibg=black
+"let ayucolor="light"
+"colo ayu
+"colo edge
+"colo github
+"colo one
+"highlight Normal ctermfg=black ctermbg=white guifg=black guibg=white
+
+" Black on red is hard to read for diff
+" https://stackoverflow.com/questions/2019281/load-different-colorscheme-when-using-vimdiff/13370967#13370967
+" cterm - sets the style
+" ctermfg - set the text color
+" ctermbg - set the highlighting
+" DiffAdd - line was added
+" DiffDelete - line was removed
+" DiffChange - part of the line was changed (highlights the whole line)
+" DiffText - the exact part of the line that changed
+"highlight! link DiffText MatchParen
+" https://github.com/endel/vim-github-colorscheme/blob/0a660059cae852c7f90951dea7474cfb1485558e/colors/github.vim#L52
+hi DiffAdd ctermfg=233 ctermbg=194 guifg=#003300 guibg=#DDFFDD gui=none cterm=none
+hi DiffChange ctermbg=255 guibg=#ececec gui=none cterm=none
+hi DiffText ctermfg=233 ctermbg=189 guifg=#000033 guibg=#DDDDFF gui=none cterm=none
+hi DiffDelete ctermfg=252 ctermbg=224 guifg=#DDCCCC guibg=#FFDDDD gui=none cterm=none
+
+" =============================================================================
 
 set shell=/bin/bash
 
@@ -350,6 +381,10 @@ vnoremap <silent> <expr> p <sid>Repl()
 " The way to show the result of substitution in real time for preview
 " https://gist.github.com/jdhao/d592ba03a8862628f31cba5144ea04c2#file-options-vim-L77
 set inccommand=nosplit
+
+" https://vim.fandom.com/wiki/Set_working_directory_to_the_current_file
+" https://stackoverflow.com/questions/2288756/how-to-set-working-current-directory-in-vim
+set autochdir
 
 " ============================================================================
 " Terminal

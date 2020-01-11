@@ -301,7 +301,7 @@ export PATH="~/personal_projects/stmux:$PATH"
 
 alias webstorm="nvm; webstorm"
 alias m='cd ~/projects/mapdid/monorepo/frontend && nvm && nvim'
-alias day='cd ~/personal_projects/day_schedule; stmux'
+alias day='cd ~/personal_projects/day_schedule; nvim'
 alias ds='spotdl --song "$@"'
 alias dy='youtube-dl --extract-audio --audio-format mp3 -f bestaudio "$@"'
 

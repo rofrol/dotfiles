@@ -326,7 +326,26 @@ set nu
 " use system clipboard
 " https://gist.github.com/jdhao/d592ba03a8862628f31cba5144ea04c2#file-options-vim-L20
 " https://stackoverflow.com/questions/30691466/what-is-difference-between-vims-clipboard-unnamed-and-unnamedplus-settings/30691754#30691754
-set clipboard^=unnamed,unnamedplus
+"set clipboard^=unnamed,unnamedplus
+set clipboard=unnamedplus
+
+" https://stackoverflow.com/questions/290465/how-to-paste-over-without-overwriting-register/4446608#4446608
+" I haven't found how to hide this function (yet)
+function! RestoreRegister()
+    let @" = s:restore_reg
+    if &clipboard == "unnamedplus"
+        let @+ = s:restore_reg
+    endif
+    return ''
+endfunction
+
+function! s:Repl()
+    let s:restore_reg = @+"
+    return "p@=RestoreRegister()\<cr>"
+endfunction
+
+" NB: this supports "rp that replaces the selection by the contents of @r
+vnoremap <silent> <expr> p <sid>Repl()
 
 " The way to show the result of substitution in real time for preview
 " https://gist.github.com/jdhao/d592ba03a8862628f31cba5144ea04c2#file-options-vim-L77
@@ -483,21 +502,6 @@ map <C-W>c <Plug>(wintabs_close_window)
 map <C-W>o <Plug>(wintabs_only_window)
 command! Tabc WintabsCloseVimtab
 command! Tabo WintabsOnlyVimtab
-
-" https://stackoverflow.com/questions/290465/how-to-paste-over-without-overwriting-register/290723#290723
-" I haven't found how to hide this function (yet)
-function! RestoreRegister()
-  let @" = s:restore_reg
-  return ''
-endfunction
-
-function! s:Repl()
-    let s:restore_reg = @"
-    return "p@=RestoreRegister()\<cr>"
-endfunction
-
-" NB: this supports "rp that replaces the selection by the contents of @r
-vnoremap <silent> <expr> p <sid>Repl()
 
 " ============================================================================
 " Workspaces

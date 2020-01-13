@@ -392,6 +392,9 @@ set autochdir
 
 " https://www.reddit.com/r/neovim/comments/7i2k6u/neovim_terminal_one_week_without_tmux/
 
+" at the bottom
+" :bo16sp|te
+
 " :20sp term://bash
 " :80vs term://bash
 " https://stackoverflow.com/questions/1388252/specifying-width-for-vsplit-in-vim/1388268#1388268

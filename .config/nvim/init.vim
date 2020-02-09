@@ -88,6 +88,59 @@ hi DiffChange ctermbg=255 guibg=#ececec gui=none cterm=none
 hi DiffText ctermfg=233 ctermbg=189 guifg=#000033 guibg=#DDDDFF gui=none cterm=none
 hi DiffDelete ctermfg=252 ctermbg=224 guifg=#DDCCCC guibg=#FFDDDD gui=none cterm=none
 
+"does not work in neovim
+"set t_md=0
+"does not work https://www.reddit.com/r/vim/comments/5iop1e/disable_all_italic_highlights/dba3kqd/
+
+" this works https://www.pixelbeat.org/settings/.gvimrc
+" via https://stackoverflow.com/questions/3971581/how-to-disable-bold-font-in-vim#comment4277318_3971581
+function! Highlight_remove_attr(attr)
+    " save selection registers
+    new
+    silent! put
+
+    " get current highlight configuration
+    redir @x
+    silent! highlight
+    redir END
+    " open temp buffer
+    new
+    " paste in
+    silent! put x
+
+    " convert to vim syntax (from Mkcolorscheme.vim,
+    "   http://vim.sourceforge.net/scripts/script.php?script_id=85)
+    " delete empty,"links" and "cleared" lines
+    silent! g/^$\| links \| cleared/d
+    " join any lines wrapped by the highlight command output
+    silent! %s/\n \+/ /
+    " remove the xxx's
+    silent! %s/ xxx / /
+    " add highlight commands
+    silent! %s/^/highlight /
+    " protect spaces in some font names
+    silent! %s/font=\(.*\)/font='\1'/
+
+    " substitute bold with "NONE"
+    execute 'silent! %s/' . a:attr . '\([\w,]*\)/NONE\1/geI'
+    " yank entire buffer
+    normal ggVG
+    " copy
+    silent! normal "xy
+    " run
+    execute @x
+
+    " remove temp buffer
+    bwipeout!
+
+    " restore selection registers
+    silent! normal ggVGy
+    bwipeout!
+endfunction
+autocmd BufNewFile,BufRead * call Highlight_remove_attr("bold")
+" maybe this when there italics appear
+"autocmd BufNewFile,BufRead * call Highlight_remove_attr("bold") | call Highlight_remove_attr("italic")
+
 " =============================================================================
 
 set shell=/bin/bash

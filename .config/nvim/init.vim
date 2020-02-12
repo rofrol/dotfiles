@@ -622,7 +622,7 @@ endfunction
 command! -register DefaultWorkspace call DefaultWorkspace()
 
 " https://medium.com/@garoth/neovim-terminal-usecases-tricks-8961e5ac19b9#.wewpz5kgy
-" look at ~/.config/nvim/.nvim_session.example.vim
+" look at ~/.config/nvim/.nvim_session.example.vim and ~/.config/nvim/.nvim_session.example2.vim
 
 " reading with `nvim -S .nvim_session.vim` is not good, as cursor position
 " will not be saved etc.

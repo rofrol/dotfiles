@@ -12,6 +12,7 @@
 !/.config/pulse/presets/*
 !/.config/nvim
 /.config/nvim/autoload
+/.config/nvim/.netrwhist
 
 # and ssh configuration
 !/.ssh/

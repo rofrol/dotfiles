@@ -1,0 +1,12 @@
+#!/bin/bash
+
+file="$1"
+
+cp "$file" "$file.bak"
+
+# https://unix.stackexchange.com/questions/10241/how-can-i-make-iconv-replace-the-input-file-with-the-converted-output/10243#10243
+iconv -f cp1250 -t utf8 -o "$file.new" "$file" &&
+mv -f "$file.new" "$file"
+
+# https://stackoverflow.com/questions/82726/convert-dos-line-endings-to-linux-line-endings-in-vim/20872386#20872386
+sed -e 's///g' -i "$file"

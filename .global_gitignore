@@ -4,3 +4,5 @@ TAGS
 # https://github.com/rust-lang/rust-mode/issues/320#issuecomment-535033056
 rustfmt.toml
 .nvim_session.vim
+.vscode
+debug.log

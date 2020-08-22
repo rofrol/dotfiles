@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# https://gist.github.com/justanotherdot/7f9c7eeddd658c680e8c86cbe178e6c8
+# Update nvim for linux on nightly direct from github releases
+
+set -eu
+
+echo "Download latest nvim.appimage into /tmp"
+cd /tmp
+curl -sLO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
+
+echo "Moving nvim.appimage into /usr/bin with the name \`nvim'"
+chmod u+x nvim.appimage
+if [ -f /usr/bin/nvim ]; then
+  echo "Found prior installation of nvim. Making a backup ..."
+  sudo mv /usr/bin/nvim{,.bk}
+fi
+sudo mv ./nvim.appimage /usr/bin/nvim
+
+echo "Finished upgrade of nvim"
+version=$(nvim --version | head -1 | awk '{print $2}')
+echo "Latest version is $version"

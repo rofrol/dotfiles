@@ -4,12 +4,14 @@
 	br = branch
 	st = status -sb
 	cine = commit -a --amend --no-edit
-        sshow = "!f() { git stash show stash^{/$*} -p; }; f"
-        sapply = "!f() { git stash apply stash^{/$*}; }; f"
+  sshow = "!f() { git stash show stash^{/$*} -p; }; f"
+  sapply = "!f() { git stash apply stash^{/$*}; }; f"
 	fap = "!git fetch --all --prune && git fetch -f . origin/master:master"
 	f = "!git fetch --all --prune && git fetch -f . origin/master:master"
 	rom = rebase origin/master
 	puoh = push -u origin HEAD
+	newp = "!git fetch -p --all && git checkout -b new origin/preui-dev-acn"
+	fpa = fetch -p --all
 	bsa = branch --sort=-authordate
 	brprune = "!git fetch -p --all && LC_ALL=C git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -d"
 	brprunef = "!git fetch -p --all && LC_ALL=C git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -D"
@@ -31,18 +33,22 @@
 	lgr = log --graph --decorate --date=relative --color --format='%C(auto)%h %d %<|(110,trunc) %s  %<(16,trunc) %an %ad' --all
 	lgdr = log --graph --decorate --date=relative --color --format='%C(auto)%h %d %<|(110,trunc) %s  %<(16,trunc) %an %ad' --all --date-order
 	lg = !"git lgr"
-[user]
-	email = rofrol@gmail.com
-	name = Roman Frołow
 [core]
 	excludesfile = ~/.global_gitignore
 	commitGraph = true
-[winUpdater]
-	recentlySeenVersion = 2.19.0.windows.1
-[pager]
-    # cargo install diffr
-    log  = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R
-    show = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R
-    diff = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R
-[interactive]
-    diffFilter = diffr --colors refine-removed:background:200,0,0:foreground:white:bold
+#[pager]
+#    # cargo install diffr
+#    log  = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R
+#    show = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R
+#    diff = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R
+#[interactive]
+#    diffFilter = diffr --colors refine-removed:background:200,0,0:foreground:white:bold
+[user]
+	email = rofrol@gmail.com
+	name = Roman Frołow
+; include for all repositories inside $HOME/projects/
+[includeIf "gitdir/i:~/projects/"]
+	path = ~/projects/.gitconfig
+
+[includeIf "gitdir/i:~/projects/uscc/"]
+	path = ~/projects/uscc/.gitconfig

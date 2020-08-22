@@ -17,7 +17,6 @@
 # and ssh configuration
 !/.ssh/
 /.ssh/*
-!/.ssh/config
 
 # and the user-wide Vagrantfile
 !/.vagrant.d/

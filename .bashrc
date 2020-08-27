@@ -426,4 +426,4 @@ alias mpvsub26='mpv --sub-font-size 26'
 export PATH="$PATH:$HOME/.npm-packages/bin"
 
 # https://stackoverflow.com/questions/2596805/how-do-i-make-git-use-the-editor-of-my-choice-for-commits
-export GIT_EDITOR=vim
+export EDITOR=nvim

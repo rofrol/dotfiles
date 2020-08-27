@@ -1,0 +1,3 @@
+# https://stackoverflow.com/questions/13464540/skip-to-next-modified-file-in-git-diff#comment83735846_13466536
+# shift+f to skip to next file, n to previous
+bind stage F :/^\+\+\+

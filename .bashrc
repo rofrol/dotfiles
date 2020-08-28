@@ -427,3 +427,8 @@ export PATH="$PATH:$HOME/.npm-packages/bin"
 
 # https://stackoverflow.com/questions/2596805/how-do-i-make-git-use-the-editor-of-my-choice-for-commits
 export EDITOR=nvim
+
+# https://gist.github.com/matthiassb/9c8162d2564777a70e3ae3cbee7d2e95#gistcomment-2769071
+if service dns-sync.sh status| grep -q 'dns-sync is not running'; then
+     sudo service dns-sync.sh start
+fi

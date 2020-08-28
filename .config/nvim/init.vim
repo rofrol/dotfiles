@@ -549,6 +549,7 @@ nnoremap <silent> <Leader>f :Files<CR>
 " open file in the same dir
 nnoremap <silent> <Leader>f. :Files <C-r>=expand("%:h")<CR>/<CR>
 nnoremap <silent> <Leader>fb :Buffers<CR>
+nnoremap <silent> <F1> :Files <C-r>=expand("%:h")<CR>/<CR>
 
 " https://github.com/rkruk/neovim-dotfiles/blob/8b8594ea05e94e25d627f4f32f8d382afca69fcc/config.vim#L38
 set title          " Set the title of the window in the terminal to the file

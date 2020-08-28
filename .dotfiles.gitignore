@@ -13,6 +13,7 @@
 !/.config/nvim
 /.config/nvim/autoload
 /.config/nvim/.netrwhist
+!/.config/wezterm
 
 # and ssh configuration
 !/.ssh/

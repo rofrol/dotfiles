@@ -474,7 +474,8 @@ endif
 
 " https://www.reddit.com/r/vim/comments/8n5bzs/using_neovim_is_there_a_way_to_display_a_terminal/dzt3fix/
 " Terminal Function
-let g:term_buf = 0
+" Commenting out, because in wezterm cannot see entered characters in terminal
+"let g:term_buf = 0
 let g:term_win = 0
 function! TermToggle(height)
     if win_gotoid(g:term_win)

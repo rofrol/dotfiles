@@ -1,0 +1,14 @@
+# systemctl --user enable setxbkmap
+# systemctl --user start setxbkmap
+# https://wiki.archlinux.org/index.php/Systemd/User#Basic_setup
+# https://www.reddit.com/r/debian/comments/i45o6v/how_to_run_a_command_on_the_startup/g0h339c/
+# Xmodmap is deprecated in favor of setxkbmap https://askubuntu.com/questions/53038/how-do-i-remap-the-caps-lock-key/614664#614664
+[Unit]
+Description=Apply my xkbmap settings
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/setxkbmap -option caps:escape
+
+[Install]
+WantedBy=default.target

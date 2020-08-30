@@ -430,7 +430,8 @@ export EDITOR=nvim
 
 # https://gist.github.com/matthiassb/9c8162d2564777a70e3ae3cbee7d2e95#gistcomment-2769071
 # https://stackoverflow.com/questions/38086185/how-to-check-if-a-program-is-run-in-bash-on-ubuntu-on-windows-and-not-just-plain/43618657#43618657
-if service dns-sync.sh status | grep -q 'dns-sync is not running'; then
+# https://unix.stackexchange.com/questions/247187/bash-if-not-multiple-conditions-without-subshell/247204#247204
+if [ ! grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null ] && service dns-sync.sh status | grep -q 'dns-sync is not running'; then
      sudo service dns-sync.sh start
 fi
 

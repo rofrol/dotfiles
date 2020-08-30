@@ -52,3 +52,5 @@
 
 [includeIf "gitdir/i:~/projects/uscc/"]
 	path = ~/projects/uscc/.gitconfig
+[pull]
+	ff = only

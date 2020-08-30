@@ -432,3 +432,5 @@ export EDITOR=nvim
 if service dns-sync.sh status| grep -q 'dns-sync is not running'; then
      sudo service dns-sync.sh start
 fi
+
+export PATH=$PATH:/usr/lib/postgresql/12/bin/

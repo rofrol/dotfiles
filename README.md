@@ -29,3 +29,7 @@ mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 ## Depenendcies
 
 `git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
+
+## Apt packages
+
+`sudo apt install -y build-essential curl tig`

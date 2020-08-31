@@ -30,6 +30,8 @@ mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 
 `git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
 
-## Apt packages
+## Packages
 
 `sudo apt install -y build-essential curl tig`
+
+`cargo install ripgrep fd-find tokei'

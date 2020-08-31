@@ -6,7 +6,13 @@
 # Default-Start:     S
 # Default-Stop:
 # Short-Description: Synchronizes /etc/resolv.conf in WLS with Windows DNS - Matthias Brooks
+# https://gist.github.com/matthiassb/9c8162d2564777a70e3ae3cbee7d2e95
 ### END INIT INFO
+
+# test:
+# nslookup yahoo.com
+# ssh -T git@github.com
+# ssh -T git@github.yourcompany.com
 
 PATH=/sbin:/bin
 PS=/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe

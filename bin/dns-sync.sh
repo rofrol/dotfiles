@@ -13,6 +13,7 @@
 # nslookup yahoo.com
 # ssh -T git@github.com
 # ssh -T git@github.yourcompany.com
+# `wsl --shutdown` will break connection. Run in powershell as admin to fix: `Restart-Service LxssManager`.
 
 PATH=/sbin:/bin
 PS=/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe

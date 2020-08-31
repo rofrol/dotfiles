@@ -431,8 +431,17 @@ export EDITOR=nvim
 # https://gist.github.com/matthiassb/9c8162d2564777a70e3ae3cbee7d2e95#gistcomment-2769071
 # https://stackoverflow.com/questions/38086185/how-to-check-if-a-program-is-run-in-bash-on-ubuntu-on-windows-and-not-just-plain/43618657#43618657
 # https://unix.stackexchange.com/questions/247187/bash-if-not-multiple-conditions-without-subshell/247204#247204
-if [ ! grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null ] && service dns-sync.sh status | grep -q 'dns-sync is not running'; then
-     sudo service dns-sync.sh start
+grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null
+# I needed to break `if else` into `$?`, otherwise there were errors.
+if [ $? -eq 0 ] ; then
+  echo "dns: wsl."
+  service dns-sync.sh status | grep -q 'dns-sync is not running' &> /dev/null
+  if [ $? -eq 0 ]; then
+    echo "starting dns-sync.sh"
+    sudo service dns-sync.sh start
+  fi
+else
+  echo "dns: not wsl. No need to run dns-sync.sh"
 fi
 
 export PATH=$PATH:/usr/lib/postgresql/12/bin/

@@ -35,3 +35,7 @@ mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 `sudo apt install -y build-essential curl tig`
 
 `cargo install ripgrep fd-find tokei'
+
+## Map capslock to escape
+
+`~/bin/maps_capslock_to_escape.md`

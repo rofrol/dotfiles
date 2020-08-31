@@ -164,7 +164,7 @@ set nolinebreak     " but doesn't wait for the whole word
 " how many lines to the cursor when scrolling
 set so=5
 
-"set number          " number lines
+set nonu " nu or nonu - number lines
 
 set showmode        " shows INSERT or VISUAL mode
 set showcmd         " shows unfinished commands in statusbar
@@ -404,8 +404,6 @@ nnoremap <silent> <F5> V:diffget<cr>
 
 " This will allow you to undo a typo or unwanted change on the other file/window, because :undo of just u will only undo a change in the present window.
 nmap <silent> <leader>du :wincmd w<cr>:normal u<cr>:wincmd w<cr>
-
-set nu
 
 " use system clipboard
 " https://gist.github.com/jdhao/d592ba03a8862628f31cba5144ea04c2#file-options-vim-L20

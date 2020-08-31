@@ -23,6 +23,10 @@ PS=/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
 do_start () {
         while true
         do
+          #TODO: Set metric from here?
+          echo "Remember to run as admin in powershell:"
+          echo "Get-NetAdapter | Where-Object {$_.InterfaceDescription -Match "Cisco AnyConnect"} | Set-NetIPInterface -InterfaceMetric 6000"
+
           #Retrieve nameservers from via Powershell
           TEMPFILE=$(mktemp)
           $PS -Command "Get-DnsClientServerAddress -AddressFamily IPv4 | Select-Object -ExpandProperty ServerAddresses" > $TEMPFILE

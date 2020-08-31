@@ -445,3 +445,5 @@ else
 fi
 
 export PATH=$PATH:/usr/lib/postgresql/12/bin/
+
+source $HOME/.cargo/env

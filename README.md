@@ -39,3 +39,7 @@ mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 ## Map capslock to escape
 
 `~/bin/maps_capslock_to_escape.md`
+
+## Firefox
+
+`ln -s ~/.mozilla/firefox/shared/chrome ~/.mozilla/firefox/your_profile/`

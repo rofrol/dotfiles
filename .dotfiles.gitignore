@@ -25,6 +25,26 @@
 /.vagrant.d/*
 !/.vagrant.d/Vagrantfile
 
+# mpv
+!/.config/mpv
+/.config/mpv/*
+!/.config/mpv/mpv.conf
+!/.config/mpv/input.conf
+
+# firefox
+!/.mozilla/
+/.mozilla/*
+!/.mozilla/firefox/
+/.mozilla/firefox/*
+!/.mozilla/firefox/shared/
+
+#misc
+!/bin
+!/README.md
+!/.global_gitignore
+!/.dotfiles.gitignore
+!/.gitconfig
+
 # and a selection of hidden configuration files.
 !/.*rc
 /.minttyrc
@@ -42,14 +62,3 @@
 /.netrc
 /.nvidia-settings-rc
 /.yarnrc
-
-!/.config/mpv
-/.config/mpv/*
-!/.config/mpv/mpv.conf
-!/.config/mpv/input.conf
-
-!/bin
-!/README.md
-!/.global_gitignore
-!/.dotfiles.gitignore
-!/.gitconfig

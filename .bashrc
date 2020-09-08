@@ -286,12 +286,6 @@ vgl() {
   fi
 }
 
-# When fuse not available (i.e. on Ubuntu WSL):
-# ./nvim.appimage --appimage-extract
-# ln -s $PWD/squashfs-root/usr/bin/nvim ~/installed/
-alias update-nvim="(mkdir -p ~/installed && cd ~/installed && rm -rf nvim.appimage && curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage && chmod +x nvim.appimage)"
-
-
 # do not set TERM manually - let the terminal do it.
 # https://wiki.archlinux.org/index.php/Home_and_End_keys_not_working
 # https://stackoverflow.com/questions/18600188/home-end-keys-do-not-work-in-tmux/27467524#27467524

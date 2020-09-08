@@ -4,6 +4,9 @@
 
 set -eu
 
+version=$(nvim --version | head -1 | awk '{print $2}')
+echo "Current version is $version"
+
 echo "Download latest nvim.appimage into /tmp"
 cd /tmp
 curl -sLO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
@@ -18,4 +21,4 @@ sudo mv ./nvim.appimage /usr/bin/nvim
 
 echo "Finished upgrade of nvim"
 version=$(nvim --version | head -1 | awk '{print $2}')
-echo "Latest version is $version"
+echo "Updated version is $version"

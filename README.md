@@ -32,7 +32,7 @@ mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 
 ## Packages
 
-`sudo apt install -y build-essential curl tig`
+`sudo apt install -y build-essential curl tig fzf`
 
 `cargo install ripgrep fd-find tokei'
 

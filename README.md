@@ -31,8 +31,8 @@ mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 
 ```bash
 sudo apt-add-repository ppa:git-core/ppa
-sudo apt install -y build-essential git curl tig fzf
-cargo install ripgrep fd-find tokei
+sudo apt install -y build-essential git curl tig fzf libssl-dev
+cargo install ripgrep fd-find tokei cargo-watch cargo-edit
 ```
 
 ## Map capslock to escape

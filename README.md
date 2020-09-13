@@ -26,10 +26,6 @@ On Windows run cmd.exe as Administrator. Then
 mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 ```
 
-## Depenendcies
-
-`git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
-
 ## Packages
 
 
@@ -46,3 +42,8 @@ cargo install ripgrep fd-find tokei
 ## Firefox
 
 `ln -s ~/.mozilla/firefox/shared/chrome ~/.mozilla/firefox/your_profile/`
+
+## Depenendcies
+
+`git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
+

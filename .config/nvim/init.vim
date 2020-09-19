@@ -51,8 +51,6 @@ Plug 'qpkorr/vim-bufkill'
 " does this work? https://github.com/whamcloud/integrated-manager-for-lustre/pull/1407
 Plug 'rust-lang/rust.vim', { 'for': [ 'rust' ], 'do': 'rustup component add rustfmt' }
 let g:rustfmt_autosave = 1
-" or do `echo 'edition = "2018"' > rustfmt.toml` for every project https://github.com/rust-lang/rust.vim/issues/368#issue-520085064
-let g:rustfmt_options = '--edition 2018'
 
 call plug#end()
 

@@ -11,6 +11,8 @@ if empty(glob(vim_plug_path))
         " https://github.com/skuridin/dotfiles/blob/85ce62c966edaa45846c674d3330dc77bfc15367/nvim/init.vim#L5
         " https://vi.stackexchange.com/questions/5949/substitute-with-pure-vimscript-without-s/5962#5962
 	"silent exe '!curl -fLo ' . substitute(vim_plug_path, '/', '\', 'g') . ' --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+	
+	" https://github.com/junegunn/vim-plug/wiki/tips#automatic-installation
 	silent exe '!curl -fLo ' . vim_plug_path . ' --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 	autocmd VimEnter * PlugInstall | source $MYVIMRC
 endif

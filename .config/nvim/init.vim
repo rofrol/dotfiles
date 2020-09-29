@@ -1,11 +1,21 @@
-set nocompatible
+" https://github.com/junegunn/vim-plug/issues/539#issuecomment-254515969
+" https://github.com/neomake/neomake/issues/2317
+if has('win32') || has('win64')
+        let &shell='cmd.exe'
+endif
 
-if empty(glob('~/.config/nvim/autoload/plug.vim'))
-	silent execute "!curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+let vim_plug_path = stdpath('data') . '/site/autoload/plug.vim'
+
+if empty(glob(vim_plug_path))
+        " substitute not needed for now
+        " https://github.com/skuridin/dotfiles/blob/85ce62c966edaa45846c674d3330dc77bfc15367/nvim/init.vim#L5
+        " https://vi.stackexchange.com/questions/5949/substitute-with-pure-vimscript-without-s/5962#5962
+	"silent exe '!curl -fLo ' . substitute(vim_plug_path, '/', '\', 'g') . ' --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+	silent exe '!curl -fLo ' . vim_plug_path . ' --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 	autocmd VimEnter * PlugInstall | source $MYVIMRC
 endif
 
-call plug#begin('~/.config/nvim/autoload')
+call plug#begin(stdpath('data') . '/plugged')
 Plug 'tpope/vim-fugitive'
 Plug 'theJian/elm.vim'
 

@@ -233,7 +233,7 @@ map <right> <nop>
 let mapleader=","
 
 " Does not work
-nmap <Backspace> :noh<CR>
+"nmap <Backspace> :noh<CR>
 
 map <Leader>b  :buffers<cr>
 map <silent> <Leader>n :nohl<cr>
@@ -523,7 +523,8 @@ noremap <C-h> <C-w>h
 noremap <C-j> <C-w>j
 noremap <C-k> <C-w>k
 noremap <C-l> <C-w>l
-inoremap <C-h> <Esc><C-w>h
+" With this I cannot delete with Backspace in wezterm on Windows 10.
+"inoremap <C-h> <Esc><C-w>h
 inoremap <C-j> <Esc><C-w>j
 inoremap <C-k> <Esc><C-w>k
 inoremap <C-l> <Esc><C-w>l

@@ -439,3 +439,5 @@ else
 fi
 
 export PATH=$PATH:/usr/lib/postgresql/12/bin/
+
+[ -f ~/.bashrc_local ] && source ~/.bashrc_local

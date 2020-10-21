@@ -36,6 +36,7 @@
 [core]
 	excludesfile = ~/.global_gitignore
 	commitGraph = true
+	autocrlf = false
 #[pager]
 #    # cargo install diffr
 #    log  = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R
@@ -54,3 +55,5 @@
 	path = ~/projects/uscc/.gitconfig
 [pull]
 	ff = only
+[credential]
+	helper = manager

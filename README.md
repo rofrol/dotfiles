@@ -35,9 +35,13 @@ sudo apt install -y build-essential git curl tig fzf libssl-dev
 cargo install ripgrep fd-find tokei cargo-watch cargo-edit
 ```
 
+## fzf
+
+Install using git https://github.com/junegunn/fzf#using-git. Version from deb was to old for nvim integration script (0.20 vs 0.24).
+
 ## Map capslock to escape
 
-`~/bin/maps_capslock_to_escape.md`
+`sudo ~/bin/maps_capslock_to_escape.sh`
 
 ## Firefox
 

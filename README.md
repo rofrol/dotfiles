@@ -31,9 +31,18 @@ mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 
 ```bash
 sudo apt-add-repository ppa:git-core/ppa
-sudo apt install -y build-essential git curl tig fzf libssl-dev
+sudo apt install -y build-essential gitk curl tig fzf libssl-dev
 cargo install ripgrep fd-find tokei cargo-watch cargo-edit
 ```
+
+## git
+
+```bash
+sudo add-apt-repository ppa:git-core/ppa
+apt install git
+```
+
+https://git-scm.com/download/linux
 
 ## fzf
 

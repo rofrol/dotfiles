@@ -26,7 +26,7 @@ On Windows run cmd.exe as Administrator. Then
 mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 ```
 
-## Packages
+## Ubuntu packages
 
 
 ```bash
@@ -35,7 +35,7 @@ sudo apt install -y build-essential gitk curl tig fzf libssl-dev
 cargo install ripgrep fd-find tokei cargo-watch cargo-edit
 ```
 
-## git
+### git
 
 ```bash
 sudo add-apt-repository ppa:git-core/ppa
@@ -44,9 +44,20 @@ apt install git
 
 https://git-scm.com/download/linux
 
-## fzf
+### fzf
 
 Install using git https://github.com/junegunn/fzf#using-git. Version from deb was to old for nvim integration script (0.20 vs 0.24).
+
+## Windows packages
+
+```
+scoop install fzf neovim wezterm
+scoop update \*
+scoop list
+```
+
+- https://github.com/lukesampson/scoop#installation
+- https://github.com/lukesampson/scoop/issues/897#issuecomment-391909564
 
 ## Map capslock to escape
 

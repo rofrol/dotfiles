@@ -1,7 +1,9 @@
 # This is dotfiles repository's gitignore (not a global gitignore).
 
 # Since the worktree is HOME, by default ignore everything...
-/*
+# just /* was not ignoring: 
+#/.idlerc/
+/**
 
 # except some specific subdirectories of .config/
 !/.config/

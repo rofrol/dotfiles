@@ -51,13 +51,23 @@ Install using git https://github.com/junegunn/fzf#using-git. Version from deb wa
 ## Windows packages
 
 ```
-scoop install fzf neovim wezterm
+scoop install fzf neovim wezterm mpv 7zip git jq nodejs
 scoop update \*
 scoop list
 ```
 
 - https://github.com/lukesampson/scoop#installation
 - https://github.com/lukesampson/scoop/issues/897#issuecomment-391909564
+
+Shortcuts in `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Scoop Apps`
+
+mpv from scoop does not read ~/.config/mpv. Portable one reads it.
+
+```
+mklink /D %USERPROFILE%\scoop\apps\mpv\current\portable_config %USERPROFILE%\.config\mpv
+```
+
+For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Othwerwise there will be problems.
 
 ## Map capslock to escape
 

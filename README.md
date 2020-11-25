@@ -20,11 +20,16 @@ dof
 rm -rf dotfiles
 ```
 
+
+## mpv standalone
+
 On Windows run cmd.exe as Administrator. Then
 
 ```
 mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 ```
+
+for mpv from scoop, go to scoop section
 
 ## Ubuntu packages
 
@@ -48,7 +53,9 @@ https://git-scm.com/download/linux
 
 Install using git https://github.com/junegunn/fzf#using-git. Version from deb was to old for nvim integration script (0.20 vs 0.24).
 
-## Windows packages
+## scoop
+
+Scoop is a Windows package manager.
 
 ```
 # wezterm is in extras
@@ -63,10 +70,18 @@ scoop list
 
 Shortcuts in `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Scoop Apps`
 
-mpv from scoop does not read ~/.config/mpv. Portable one reads it.
+mpv from scoop does not read `%APPDATA%\mpv`. Portable one reads it.
 
 ```
 mklink /D %USERPROFILE%\scoop\apps\mpv\current\portable_config %USERPROFILE%\.config\mpv
+mklink /D %USERPROFILE%\.config\mpv\scripts\webui-page %USERPROFILE%\personal_projects\vendor\simple-mpv-webui\webui-page
+mklink %USERPROFILE%\.config\mpv\scripts\webui.lua %USERPROFILE%\personal_projects\vendor\simple-mpv-webui\webui.lua
+```
+
+in bash:
+
+```bash
+curl -so ~/scoop/apps/mpv/current/lua/json.lua https://raw.githubusercontent.com/craigmj/json4lua/master/json/json.lua
 ```
 
 For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Othwerwise there will be problems.

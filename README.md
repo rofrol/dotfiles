@@ -84,6 +84,8 @@ in bash:
 curl -so ~/scoop/apps/mpv/current/lua/json.lua https://raw.githubusercontent.com/craigmj/json4lua/master/json/json.lua
 ```
 
+- https://github.com/57op/simple-mpv-webui-windows-libs/issues/2
+
 For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Othwerwise there will be problems.
 
 ## Map capslock to escape

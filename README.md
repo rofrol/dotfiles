@@ -51,6 +51,8 @@ Install using git https://github.com/junegunn/fzf#using-git. Version from deb wa
 ## Windows packages
 
 ```
+# wezterm is in extras
+scoop bucket add extras
 scoop install fzf neovim wezterm mpv 7zip git jq nodejs
 scoop update \*
 scoop list

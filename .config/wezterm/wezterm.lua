@@ -2,7 +2,8 @@ local wezterm = require 'wezterm';
 
 return {
   --default_prog = {"bash", "-l"},
-  default_prog = {"C:/Users/roman.frolow/AppData/Local/Programs/Git/bin/bash", "-l"},
+  --default_prog = {wezterm.home_dir .. "/AppData/Local/Programs/Git/bin/bash", "-l"},
+  default_prog = {wezterm.home_dir .. "/scoop/apps/git/current/bin/bash", "-l"},
   launch_menu = {
     {
       args = {"top"},

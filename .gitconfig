@@ -2,10 +2,13 @@
 	ci = commit
 	co = checkout
 	br = branch
+	# Provide string with spaces. Replace spaces with underscores. Change branch name to this new string.
+	# https://stackoverflow.com/questions/1706431/the-easiest-way-to-replace-white-spaces-with-underscores-in-bash/1706449#1706449
+	brm = "!f() { name=$(echo $1 | tr -s ' ' | tr ' ' '_'); git branch -m $name; }; f"
 	st = status -sb
 	cine = commit -a --amend --no-edit
-  sshow = "!f() { git stash show stash^{/$*} -p; }; f"
-  sapply = "!f() { git stash apply stash^{/$*}; }; f"
+	sshow = "!f() { git stash show stash^{/$*} -p; }; f"
+	sapply = "!f() { git stash apply stash^{/$*}; }; f"
 	fap = "!git fetch --all --prune && git fetch -f . origin/master:master"
 	f = "!git fetch --all --prune && git fetch -f . origin/master:master"
 	rom = rebase origin/master

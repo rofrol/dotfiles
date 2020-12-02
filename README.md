@@ -58,9 +58,8 @@ Install using git https://github.com/junegunn/fzf#using-git. Version from deb wa
 Scoop is a Windows package manager.
 
 ```
-# wezterm is in extras
 scoop bucket add extras
-scoop install fzf neovim wezterm mpv 7zip git jq nodejs gimp inkscape libreoffice windirstat
+scoop install fzf neovim wezterm mpv 7zip git jq nodejs windirstat xmousebuttoncontrol gimp inkscape libreoffice calibre obs-studio
 # in bash need to escape *. In cmd.exe just *.
 scoop update \*
 scoop list

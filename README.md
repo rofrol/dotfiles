@@ -90,6 +90,10 @@ curl -so ~/scoop/apps/mpv/current/lua/json.lua https://raw.githubusercontent.com
 
 For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Othwerwise there will be problems.
 
+### Calibre
+
+long paths needs to be enabled or it asks where to install. Otherwise scoop cannot create shim.
+
 ## Map capslock to escape
 
 `sudo ~/bin/maps_capslock_to_escape.sh`

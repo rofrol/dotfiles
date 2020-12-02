@@ -59,4 +59,4 @@
 [pull]
 	ff = only
 [credential]
-	helper = manager
+	helper = manager-core

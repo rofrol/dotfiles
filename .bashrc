@@ -404,9 +404,8 @@ if [[ $TILIX_ID ]]; then
   source /etc/profile.d/vte.sh
 fi
 
-alias gamton='sed -i 's/UA-101774106-4/UA-143241282-1/g' ~/projects/mapdid/monorepo/frontend/src/Mapdid/Service/Analytics/multiple-trackers.js'
-alias gamtoff='sed -i 's/UA-143241282-1/UA-101774106-4/g' ~/projects/mapdid/monorepo/frontend/src/Mapdid/Service/Analytics/multiple-trackers.js'
 alias gitka='gitk --all &'
+alias prettypath="echo \"$PATH\" | tr ':' '\n' | sort | uniq"
 
 # https://unix.stackexchange.com/questions/43196/how-can-i-tell-grub-i-want-to-reboot-into-windows-before-i-reboot/112284#112284
 function winboot {

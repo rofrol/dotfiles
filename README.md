@@ -59,7 +59,7 @@ Scoop is a Windows package manager.
 
 ```
 scoop bucket add extras
-scoop install fzf neovim wezterm mpv 7zip git jq nodejs windirstat xmousebuttoncontrol sumatrapdf gimp inkscape libreoffice vcredist2015 calibre-normal obs-studio
+scoop install fzf neovim wezterm mpv 7zip git jq nodejs windirstat xmousebuttoncontrol sumatrapdf ffmpeg gimp inkscape libreoffice vcredist2015 calibre-normal obs-studio
 # in bash need to escape *. In cmd.exe just *.
 scoop update \*
 scoop list

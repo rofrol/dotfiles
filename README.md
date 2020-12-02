@@ -93,6 +93,8 @@ curl -so ~/scoop/apps/mpv/current/lua/json.lua https://raw.githubusercontent.com
 
 - https://github.com/57op/simple-mpv-webui-windows-libs/issues/2
 
+Maybe add thumbnails with icaros https://www.majorgeeks.com/files/details/icaros.html ?
+
 ### wezterm
 
 For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Othwerwise there will be problems.

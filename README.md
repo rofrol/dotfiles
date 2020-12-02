@@ -59,7 +59,7 @@ Scoop is a Windows package manager.
 
 ```
 scoop bucket add extras
-scoop install fzf neovim wezterm mpv 7zip git jq nodejs windirstat xmousebuttoncontrol gimp inkscape libreoffice calibre obs-studio
+scoop install fzf neovim wezterm mpv 7zip git jq nodejs windirstat xmousebuttoncontrol gimp inkscape libreoffice calibre-normal obs-studio
 # in bash need to escape *. In cmd.exe just *.
 scoop update \*
 scoop list
@@ -92,7 +92,12 @@ For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` 
 
 ### Calibre
 
-long paths needs to be enabled or it asks where to install. Otherwise scoop cannot create shim.
+Instal calibre-normal instead of calibre. For calibre (which is portable version) there is problem.
+
+Long paths needs to be enabled or it asks where to install. Otherwise scoop cannot create shim.
+
+- https://github.com/lukesampson/scoop-extras/issues/1765#issuecomment-471170974
+- https://github.com/lukesampson/scoop-extras/issues/2535
 
 ## Map capslock to escape
 

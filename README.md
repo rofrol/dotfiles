@@ -72,13 +72,18 @@ scoop list
 
 Shortcuts in `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Scoop Apps`
 
+### mpv
+
 mpv from scoop does not read `%APPDATA%\mpv`. Portable one reads it.
 
 ```
+rd /S /Q %USERPROFILE%\scoop\apps\mpv\current\portable_config
 mklink /D %USERPROFILE%\scoop\apps\mpv\current\portable_config %USERPROFILE%\.config\mpv
 mklink /D %USERPROFILE%\.config\mpv\scripts\webui-page %USERPROFILE%\personal_projects\vendor\simple-mpv-webui\webui-page
 mklink %USERPROFILE%\.config\mpv\scripts\webui.lua %USERPROFILE%\personal_projects\vendor\simple-mpv-webui\webui.lua
 ```
+
+- https://superuser.com/questions/167076/how-can-i-delete-a-symbolic-link/1373416#1373416
 
 in bash:
 
@@ -87,6 +92,8 @@ curl -so ~/scoop/apps/mpv/current/lua/json.lua https://raw.githubusercontent.com
 ```
 
 - https://github.com/57op/simple-mpv-webui-windows-libs/issues/2
+
+### wezterm
 
 For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Othwerwise there will be problems.
 

@@ -59,7 +59,7 @@ Scoop is a Windows package manager.
 
 ```
 scoop bucket add extras
-scoop install fzf neovim wezterm mpv 7zip git jq nodejs windirstat xmousebuttoncontrol gimp inkscape libreoffice calibre-normal obs-studio
+scoop install fzf neovim wezterm mpv 7zip git jq nodejs windirstat xmousebuttoncontrol sumatrapdf gimp inkscape libreoffice vcredist2015 calibre-normal obs-studio
 # in bash need to escape *. In cmd.exe just *.
 scoop update \*
 scoop list
@@ -98,6 +98,27 @@ Long paths needs to be enabled or it asks where to install. Otherwise scoop cann
 
 - https://github.com/lukesampson/scoop-extras/issues/1765#issuecomment-471170974
 - https://github.com/lukesampson/scoop-extras/issues/2535
+
+### vcredist2015
+
+```
+breoffice-stable' (7.0.1) was installed successfully!
+'libreoffice-stable' suggests installing 'extras/vcredist2015'.
+$ scoop install vcredist2015
+Installing 'vcredist2015' (14.0.24215) [64bit]
+vc_redist.x64.exe (14,6 MB) [=================================================================================================================] 100%
+Checking hash of vc_redist.x64.exe ... ok.
+vc_redist.x86.exe (13,8 MB) [=================================================================================================================] 100%
+Checking hash of vc_redist.x86.exe ... ok.
+Linking ~\scoop\apps\vcredist2015\current => ~\scoop\apps\vcredist2015\14.0.24215
+Running post-install script...
+ERROR Exit code was 1638!
+ERROR Exit code was 1638!
+'vcredist2015' (14.0.24215) was installed successfully!
+Notes
+-----
+You can now remove this installer with 'scoop uninstall vcredist2015'
+```
 
 ## Map capslock to escape
 

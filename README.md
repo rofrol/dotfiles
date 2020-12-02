@@ -60,13 +60,16 @@ Scoop is a Windows package manager.
 ```
 # wezterm is in extras
 scoop bucket add extras
-scoop install fzf neovim wezterm mpv 7zip git jq nodejs
+scoop install fzf neovim wezterm mpv 7zip git jq nodejs gimp inkscape libreoffice windirstat
+# in bash need to escape *. In cmd.exe just *.
 scoop update \*
 scoop list
 ```
 
 - https://github.com/lukesampson/scoop#installation
 - https://github.com/lukesampson/scoop/issues/897#issuecomment-391909564
+- https://github.com/ScoopInstaller/Main/tree/master/bucket
+- https://github.com/lukesampson/scoop-extras/tree/master/bucket
 
 Shortcuts in `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Scoop Apps`
 

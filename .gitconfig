@@ -16,6 +16,10 @@
 	newp = "!git fetch -p --all && git checkout -b new origin/preui-dev-acn"
 	fpa = fetch -p --all
 	bsa = branch --sort=-authordate
+  # https://stackoverflow.com/questions/5113425/how-to-make-git-log-show-all-of-todays-commits/5178739#5178739
+  # https://stackoverflow.com/questions/4479225/how-to-output-git-log-with-the-first-line-only/51997006#51997006
+  # https://stackoverflow.com/questions/4259996/how-can-i-view-a-git-log-of-just-one-users-commits/40743795#40743795
+  standup = "!git log --pretty=format:%s --since=6am --author=$(git config user.email)"
 	brprune = "!git fetch -p --all && LC_ALL=C git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -d"
 	brprunef = "!git fetch -p --all && LC_ALL=C git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -D"
 	# https://stackoverflow.com/questions/1057564/pretty-git-branch-graphs

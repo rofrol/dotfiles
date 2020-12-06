@@ -219,6 +219,11 @@ set nobackup
 set nowb
 set noswapfile
 
+" https://unix.stackexchange.com/questions/44616/why-is-vim-creating-files-with-dos-line-endings/44642#44642
+set fileformat=unix
+set fileformats=unix,dos
+"set nobinary
+
 " start on the line we last ended on
 autocmd BufReadPost *
       \ if line("'\"") > 0 && line("'\"") <= line("$") |

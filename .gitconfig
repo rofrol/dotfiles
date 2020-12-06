@@ -64,3 +64,6 @@
 	ff = only
 [credential]
 	helper = manager-core
+[gui]
+  # https://stackoverflow.com/questions/23151339/set-utf-8-display-for-git-gui-differences-window/24320398#24320398
+	encoding = utf-8

@@ -69,6 +69,7 @@ scoop list
 - https://github.com/lukesampson/scoop/issues/897#issuecomment-391909564
 - https://github.com/ScoopInstaller/Main/tree/master/bucket
 - https://github.com/lukesampson/scoop-extras/tree/master/bucket
+- https://github.com/lukesampson/scoop/wiki/Open-With-Icons
 
 Shortcuts in `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Scoop Apps`
 

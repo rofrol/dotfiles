@@ -1,9 +1,12 @@
 # This is dotfiles repository's gitignore (not a global gitignore).
 
+# https://stackoverflow.com/questions/12144633/explain-which-gitignore-rule-is-ignoring-my-file/12168102#12168102
+# git check-ignore -v path/to/file
+
 # Since the worktree is HOME, by default ignore everything...
-# just /* was not ignoring: 
-#/.idlerc/
-/**
+/*
+# just /* was not ignoring /.idlerc. But when using /**, I could not negate ignoring /bin
+/.**
 
 # except some specific subdirectories of .config/
 !/.config/

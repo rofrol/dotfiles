@@ -57,12 +57,18 @@ Install using git https://github.com/junegunn/fzf#using-git. Version from deb wa
 
 Scoop is a Windows package manager.
 
-```
+
+```cmd.exe
 scoop bucket add extras
-scoop install fzf neovim wezterm mpv 7zip git jq nodejs windirstat xmousebuttoncontrol sumatrapdf ffmpeg gimp inkscape libreoffice vcredist2015 calibre-normal obs-studio
-# in bash need to escape *. In cmd.exe just *.
-scoop update \*
+scoop bucket add games
+bin\scoop-install.bat
+scoop update *
 scoop list
+```
+
+```bash
+# in bash need to escape *
+scoop update \*
 ```
 
 - https://github.com/lukesampson/scoop#installation
@@ -100,7 +106,7 @@ Maybe add thumbnails with icaros https://www.majorgeeks.com/files/details/icaros
 
 For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Othwerwise there will be problems.
 
-### Calibre
+### calibre
 
 Instal calibre-normal instead of calibre. For calibre (which is portable version) there is problem.
 
@@ -129,6 +135,14 @@ Notes
 -----
 You can now remove this installer with 'scoop uninstall vcredist2015'
 ```
+
+### authotkey
+
+There are two versions:
+
+- https://github.com/lukesampson/scoop-extras/blob/master/bucket/autohotkey.json
+- https://github.com/lukesampson/scoop-extras/blob/master/bucket/autohotkey-installer.json
+- 
 
 ## Map capslock to escape
 

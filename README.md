@@ -76,6 +76,7 @@ scoop update \*
 - https://github.com/ScoopInstaller/Main/tree/master/bucket
 - https://github.com/lukesampson/scoop-extras/tree/master/bucket
 - https://github.com/lukesampson/scoop/wiki/Open-With-Icons
+- https://rasa.github.io/scoop-directory/by-stars
 
 Shortcuts in `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Scoop Apps`
 

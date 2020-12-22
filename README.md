@@ -64,6 +64,7 @@ scoop bucket add games
 bin\scoop-install.bat
 scoop update *
 scoop list
+scoop cleanup *
 ```
 
 ```bash

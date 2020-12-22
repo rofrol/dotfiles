@@ -86,18 +86,11 @@ mpv from scoop does not read `%APPDATA%\mpv`. Portable one reads it.
 
 #### simple-mpv-webui
 
-Install this before simple-mpv-webui https://github.com/57op/simple-mpv-webui-windows-libs
-
 ```bash
-cd ~/personal_projects/
-git clone https://github.com/57op/simple-mpv-webui-windows-libs
-source build.sh
-cp -r ~/personal_projects/simple-mpv-webui-windows-libs/mpv ~/scoop/apps/mpv/current/
+bash bin/mpv-lua-setup.sh
 ```
 
 run `bin/mpv-setup.bat` as Administrator.
-
-- https://superuser.com/questions/167076/how-can-i-delete-a-symbolic-link/1373416#1373416
 
 #### Playlist script
 

@@ -149,7 +149,7 @@ There are two versions:
 
 ## Map capslock to escape
 
-`sudo ~/bin/maps_capslock_to_escape.sh`
+`sudo sh ~/bin/maps_capslock_to_escape.sh`
 
 ## Firefox
 

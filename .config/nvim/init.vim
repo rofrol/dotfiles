@@ -475,15 +475,15 @@ set autochdir
 " https://vi.stackexchange.com/questions/22307/neovim-go-into-insert-mode-when-clicking-in-a-terminal-in-a-pane/22327#22327
 " https://gist.github.com/jdhao/d592ba03a8862628f31cba5144ea04c2#file-autocommands-vim-L21
 
-"if has('nvim')
-"    augroup terminal_setup | au!
-"        au TermOpen * if &buftype ==# 'terminal' | startinsert | setlocal nonumber | endif
-"        au TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i
-"        " stopinsert first, so when I come from file buffer, it is not in insert file mode when I can click and change cursor on whatever line
-"        au BufEnter * if &buftype ==# 'terminal' | stopinsert | startinsert | endif
-"        "au BufLeave * if &buftype ==# 'terminal' | stopinsert | endif
-"    augroup end
-"endif
+if has('nvim')
+    augroup terminal_setup | au!
+        au TermOpen * if &buftype ==# 'terminal' | startinsert | setlocal nonumber | endif
+        au TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i
+        " stopinsert first, so when I come from file buffer, it is not in insert file mode when I can click and change cursor on whatever line
+        au BufEnter * if &buftype ==# 'terminal' | stopinsert | startinsert | endif
+        "au BufLeave * if &buftype ==# 'terminal' | stopinsert | endif
+    augroup end
+endif
 
 " https://www.reddit.com/r/vim/comments/8n5bzs/using_neovim_is_there_a_way_to_display_a_terminal/dzt3fix/
 " Terminal Function

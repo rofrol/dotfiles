@@ -5,8 +5,9 @@
 
 # Since the worktree is HOME, by default ignore everything...
 /*
+# disabling, bc could not negate ignoring .elinks on Ubuntu 20.10
 # just /* was not ignoring /.idlerc. But when using /**, I could not negate ignoring /bin
-/.**
+#/.**
 
 # except some specific subdirectories of .config/
 !/.config/
@@ -42,8 +43,13 @@
 !/.mozilla/firefox/
 /.mozilla/firefox/*
 !/.mozilla/firefox/shared/
+#
+# elinks
+!/.elinks
+/.elinks/*
+!/.elinks/elinks.conf
 
-#misc
+# misc
 !/bin
 !/README.md
 !/.global_gitignore

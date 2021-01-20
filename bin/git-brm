@@ -1,0 +1,7 @@
+#!/bin/bash
+
+name=$(echo $1 | sed -e 's/\.\+$//' | tr '.' ' ' | tr -s ' ' | tr ' ' '_' | tr '/' '_')
+
+git branch -m $name
+
+git branch

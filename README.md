@@ -81,6 +81,16 @@ scoop update \*
 
 Shortcuts in `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Scoop Apps`
 
+### scoop does not install newest version
+
+```
+$ cd ~/scoop/buckets/main/
+$ git status
+# it showed that `bucket/proxychains.json` has local modifications but I could not get rid of them with `git checkout -f`
+$ git fetch
+$ git reset --hard origin/master
+```
+
 ### mpv
 
 mpv from scoop does not read `%APPDATA%\mpv`. Portable one reads it.

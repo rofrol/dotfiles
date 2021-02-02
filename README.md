@@ -91,6 +91,10 @@ $ git fetch
 $ git reset --hard origin/master
 ```
 
+- https://gist.github.com/573/e806447bf55a09376cf457a8a403ec44
+  - https://github.com/lukesampson/scoop/issues/3045#issuecomment-493345130
+
+
 ### mpv
 
 mpv from scoop does not read `%APPDATA%\mpv`. Portable one reads it.

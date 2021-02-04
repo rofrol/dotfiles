@@ -439,4 +439,6 @@ fi
 
 export PATH=$PATH:/usr/lib/postgresql/12/bin/
 
+export PATH=$PATH:/home/roman/.local/bin
+
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local

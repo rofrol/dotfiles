@@ -7,8 +7,8 @@ After cloning repository:
 ```bash
 # .bashrc sets DOTFILES_HOME and sources don and dof functions
 cd dotfiles
-cp -r .config/* ~/.config/
-cp .bashrc ~/
+mkdir -p ~/.config/
+cp -r .config .bashrc ~/
 cp -r .git ~/.dotfiles.git
 cd
 source .bashrc
@@ -159,7 +159,12 @@ There are two versions:
 
 - https://github.com/lukesampson/scoop-extras/blob/master/bucket/autohotkey.json
 - https://github.com/lukesampson/scoop-extras/blob/master/bucket/autohotkey-installer.json
-- 
+
+### vscode and git bash
+
+```
+    "terminal.integrated.shell.windows": "${env:USERPROFILE}\\scoop\\apps\\git\\current\\bin\\bash.exe"
+```
 
 ## Map capslock to escape
 

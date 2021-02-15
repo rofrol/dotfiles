@@ -6,4 +6,9 @@ REM
 REM Put shortcut to xmousebuttoncontrol in
 REM %USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
 
+REM wezterm required Ubuntu Mono font https://design.ubuntu.com/font/
+
+REM scoop bucket add extras
+REM scoop bucket add games
+
 scoop install fzf neovim wezterm mpv 7zip git jq nodejs windirstat xmousebuttoncontrol sumatrapdf subtitleedit sharpkeys autohotkey gimp inkscape libreoffice-stable vcredist2015 calibre-normal obs-studio mkvtoolnix games/nbtexplorer vlc windows-terminal qnapi ffmpeg-nightly-shared-vulkan extras/vcredist2019

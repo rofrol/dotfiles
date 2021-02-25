@@ -7,7 +7,6 @@ After cloning repository:
 ```bash
 # .bashrc sets DOTFILES_HOME and sources don and dof functions
 cd dotfiles
-mkdir -p ~/.config/
 cp -r .config .bashrc ~/
 cp -r .git ~/.dotfiles.git
 cd

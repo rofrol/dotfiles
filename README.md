@@ -175,7 +175,24 @@ There are two versions:
 
 `ln -s ~/.mozilla/firefox/shared/chrome ~/.mozilla/firefox/your_profile/`
 
-## Depenendcies
+## tmux
 
 `git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
 
+## rust
+
+Install from https://rustup.rs/
+
+### error: linking with `link.exe` failed: exit code: 3221225781
+#42744
+
+Start PowerShell as Administrator and run:
+
+`npm install --global windows-build-tools`
+
+- https://github.com/rust-lang/rust/issues/42744#issuecomment-309387002
+- https://github.com/felixrieseberg/windows-build-tools
+
+### Packages
+
+`cargo install ripgrep fd-find tokei cargo-edit`

@@ -3,7 +3,7 @@
 # functions that change the environment in the shell (advantage: git
 # integration with the prompt will work).
 
-if [ -z $DOTFILES_HOME ]; then
+if [ -z "$DOTFILES_HOME" ]; then
     echo "ERROR: dotfiles repository isn't configured correctly -"
     echo "       DOTFILES_HOME is undefined. This variable should"
     echo "       contain the path to dotfiles git-dir."
@@ -36,16 +36,16 @@ don() {
         fi
     }
     pushd ~ 1>/dev/null  # remember location
-    export GIT_DIR=$DOTFILES_HOME; export GIT_WORK_TREE=$HOME
+    export GIT_DIR="$DOTFILES_HOME"; export GIT_WORK_TREE="$HOME"
     export GIT_PS1_FMT=" (dotfiles: %s)"
 
     set +u
-    . $HOME/.bashrc  # refresh aliases such as g=git to include the safeguard
+    . "$HOME/.bashrc"  # refresh aliases such as g=git to include the safeguard
 }
 
 dof() {
     unset -f git
-    . $HOME/.bashrc  # refresh aliases such as g=git to remove the safeguard
+    . "$HOME/.bashrc"  # refresh aliases such as g=git to remove the safeguard
     unset GIT_DIR; unset GIT_WORK_TREE
     unset GIT_PS1_FMT
     popd 1>/dev/null  # restore previous location

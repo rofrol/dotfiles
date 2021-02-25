@@ -14,6 +14,8 @@ source .bashrc
 don
 # .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name
 git config core.excludesFile .dotfiles.gitignore
+# double checkout -f
+git checkout -f
 git checkout -f
 dof
 rm -rf dotfiles

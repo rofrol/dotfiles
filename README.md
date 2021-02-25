@@ -124,6 +124,8 @@ Maybe add thumbnails with icaros https://www.majorgeeks.com/files/details/icaros
 
 For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Othwerwise there will be problems.
 
+Install UbuntuMono-R.ttf from https://design.ubuntu.com/font/
+
 ### calibre
 
 Instal calibre-normal instead of calibre. For calibre (which is portable version) there is problem.

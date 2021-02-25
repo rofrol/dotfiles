@@ -177,6 +177,16 @@ There are two versions:
 
 `ln -s ~/.mozilla/firefox/shared/chrome ~/.mozilla/firefox/your_profile/`
 
+on Windows run cmd.exe as Administrator and:
+
+`mklink /d C:\Users\user\AppData\Roaming\Mozilla\Firefox\Profiles\your-profile\chrome C:\Users\user\.mozilla\firefox\shared\chrome`
+
+In Firefox run `about:config` and set
+
+`toolkit.legacyUserProfileCustomizations.stylesheets` to `true`
+
+- https://www.userchrome.org/how-create-userchrome-css.html
+
 ## tmux
 
 `git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`

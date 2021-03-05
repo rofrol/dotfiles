@@ -49,6 +49,12 @@
 /.elinks/*
 !/.elinks/elinks.conf
 
+!/Documents/
+/Documents/*
+!/Documents/WindowsPowerShell/
+/Documents/WindowsPowerShell/*
+!/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
+
 # misc
 !/bin
 !/README.md

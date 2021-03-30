@@ -21,7 +21,6 @@ dof
 rm -rf dotfiles
 ```
 
-
 ## mpv standalone
 
 On Windows run cmd.exe as Administrator. Then
@@ -33,7 +32,6 @@ mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
 for mpv from scoop, go to scoop section
 
 ## Ubuntu packages
-
 
 ```bash
 sudo apt-add-repository ppa:git-core/ppa
@@ -57,7 +55,6 @@ Install using git https://github.com/junegunn/fzf#using-git. Version from deb wa
 ## scoop
 
 Scoop is a Windows package manager.
-
 
 ```cmd.exe
 scoop bucket add extras
@@ -94,7 +91,6 @@ $ git reset --hard origin/master
 
 - https://gist.github.com/573/e806447bf55a09376cf457a8a403ec44
   - https://github.com/lukesampson/scoop/issues/3045#issuecomment-493345130
-
 
 ### mpv
 
@@ -169,6 +165,10 @@ There are two versions:
     "terminal.integrated.shell.windows": "${env:USERPROFILE}\\scoop\\apps\\git\\current\\bin\\bash.exe"
 ```
 
+### Inverse mouse scroll with x mouse button control
+
+Add shortcut to `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`
+
 ## Map capslock to escape
 
 `sudo sh ~/bin/maps_capslock_to_escape.sh`
@@ -196,6 +196,7 @@ In Firefox run `about:config` and set
 Install from https://rustup.rs/
 
 ### error: linking with `link.exe` failed: exit code: 3221225781
+
 #42744
 
 Start PowerShell as Administrator and run:

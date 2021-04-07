@@ -79,3 +79,4 @@
 /.netrc
 /.nvidia-settings-rc
 /.yarnrc
+!/scoop-list.txt

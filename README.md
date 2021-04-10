@@ -36,7 +36,15 @@ for mpv from scoop, go to scoop section
 ```bash
 sudo apt-add-repository ppa:git-core/ppa
 sudo apt install -y build-essential gitk curl tig fzf libssl-dev
-cargo install ripgrep fd-find tokei cargo-watch cargo-edit
+```
+## Rust
+
+Install Rust from rustup.rs/
+
+On Ubuntu you need `sudo apt install -y build-essential`. On Windows `npm i -g windows-build-tools`.
+
+```
+cargo install ripgrep fd-find tokei cargo-watch cargo-edit watchexec
 ```
 
 ### git

@@ -11,8 +11,10 @@
 # scoop bucket add extras
 # scoop bucket add games
 # To generate list of apps
-# (scoop export) | sls '^([\w\._-]+) .* \[(.*)\]$' |% { "$($_.matches.groups[2])/$($_.matches.groups[1])" } > scoop-apps.txt
-# https://github.com/lukesampson/scoop/issues/1543#issuecomment-820429568
+# test:
+# "someapp 2.32 [bucket1]`nsomegood._- 1.23 [bucket2]" -split "`n" | sls '^(.+) .+ \[(.+)\]$' |% { "$($_.matches.groups[2])/$($_.matches.groups[1])" }
+# (scoop export) | sls '^([\w\._-]+) .* \[(.*)\]$' |% sls '^(.+) .+ \[(.+)\]$' |% { "$($_.matches.groups[2])/$($_.matches.groups[1])" } > scoop-apps.txt
+# https://github.com/lukesampson/scoop/issues/1543#issuecomment-821101351
 
 $apps = Get-Content scoop-apps.txt
 scoop install @apps

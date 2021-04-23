@@ -53,12 +53,6 @@
 [user]
 	email = rofrol@gmail.com
 	name = Roman Frołow
-; include for all repositories inside $HOME/projects/
-[includeIf "gitdir/i:~/projects/"]
-	path = ~/projects/.gitconfig
-
-[includeIf "gitdir/i:~/projects/uscc/"]
-	path = ~/projects/uscc/.gitconfig
 [pull]
 	ff = only
 [credential]
@@ -68,3 +62,7 @@
 	encoding = utf-8
 [init]
 	defaultBranch = main
+
+; include for all repositories inside $HOME/projects/
+[includeIf "gitdir/i:~/projects/"]
+	path = ~/projects/.gitconfig

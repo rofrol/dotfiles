@@ -22,3 +22,6 @@ fi
 # https://stackoverflow.com/questions/9597410/list-all-developers-on-a-project-in-git/36325643#36325643
 git log --pretty="%an %ae%n%cn %ce" | sort | uniq
 
+# to remove backup
+# git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d
+# https://gist.github.com/schnell18/c8fbf8fcd268e0d120d2

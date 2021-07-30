@@ -37,6 +37,7 @@ for mpv from scoop, go to scoop section
 sudo apt-add-repository ppa:git-core/ppa
 sudo apt install -y build-essential gitk curl tig fzf libssl-dev
 ```
+
 ## Rust
 
 Install Rust from rustup.rs/
@@ -71,6 +72,7 @@ bin\scoop-install.bat
 scoop update *
 scoop list
 scoop cleanup *
+scoop cache rm *
 ```
 
 ```bash

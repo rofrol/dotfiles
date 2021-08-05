@@ -441,5 +441,7 @@ export PATH=$PATH:/usr/lib/postgresql/12/bin/
 
 export PATH=$PATH:/home/roman/.local/bin
 
+export RIPGREP_CONFIG_PATH=~/.config/ripgrep/ripgreprc
+
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local
 source "$HOME/.cargo/env"

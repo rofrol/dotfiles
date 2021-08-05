@@ -21,6 +21,7 @@
 /.config/nvim/.netrwhist
 !/.config/wezterm
 !/.config/systemd/
+!/.config/ripgrep
 
 # and ssh configuration
 !/.ssh/

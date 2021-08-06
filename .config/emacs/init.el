@@ -27,15 +27,9 @@
 (setq recentf-auto-cleanup 'never)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 
+;; https://github.com/bbatsov/crux/blob/20c07848049716a0e1aa2560e23b5f4149f2a74f/crux.el#L286
 ;; https://stackoverflow.com/questions/1072662/by-emacs-how-to-join-two-lines-into-one/68685485#68685485
-(defun join-lines ()
-  (interactive)
-  (next-line)
-  (join-line)
-  (delete-horizontal-space)
-  (unless (looking-at-p "\n") (insert " ")))
-
-(global-set-key (kbd "M-J") 'join-lines)
+(global-set-key (kbd "M-J") (lambda () (interactive) (delete-indentation 1)))
 
 ;; https://stackoverflow.com/questions/5052088/what-is-custom-set-variables-and-faces-in-my-emacs/5058752#5058752
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))

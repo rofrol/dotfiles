@@ -22,6 +22,7 @@
 !/.config/wezterm
 !/.config/systemd/
 !/.config/ripgrep
+!/.config/emacs
 
 # and ssh configuration
 !/.ssh/

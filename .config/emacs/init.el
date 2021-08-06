@@ -3,11 +3,15 @@
 ;; Disable the splash screen (to enable it again, replace the t with 0)
 (setq inhibit-splash-screen t)
 
-;; Enable transient mark mode
+;; Enable transientk mode
 (transient-mark-mode 1)
 
 ;; https://stackoverflow.com/questions/2627289/how-to-replace-a-region-in-emacs-with-yank-buffer-contents
 (delete-selection-mode 1)
+
+(set-frame-font "Ubuntu Mono-14" nil t)
+;; https://stackoverflow.com/questions/26437034/emacs-line-height/26442029#26442029
+(setq-default line-spacing 14)
 
 (global-set-key (kbd "C-c l") 'org-store-link)
 (global-set-key (kbd "C-c a") 'org-agenda)

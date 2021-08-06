@@ -37,7 +37,7 @@
 ;; https://stackoverflow.com/questions/637351/emacs-how-to-delete-text-without-kill-ring/65100416#65100416
 ;; https://unix.stackexchange.com/questions/26360/emacs-deleting-a-line-without-sending-it-to-the-kill-ring/136581#136581
 ;; https://www.emacswiki.org/emacs/BackwardKillLine
-(defun delete-line-no-kill ()
+(defun delete-line ()
   (interactive)
   (let (kill-ring)
     (kill-line)))
@@ -47,9 +47,9 @@
 ;;   (save-excursion (move-end-of-line 1) (point)))
 ;;  (delete-char 1))
 
-(global-set-key (kbd "C-k") 'delete-line-no-kill)
+(global-set-key (kbd "C-k") 'delete-line)
 
-(defun delete-whole-line-no-kill ()
+(defun delete-whole-line ()
   (interactive)
   (let (kill-ring)
     (kill-whole-line)))
@@ -57,14 +57,32 @@
 ;;  (delete-region (line-beginning-position) (line-end-position))
 ;;  (delete-char 1))
 
-(global-set-key (kbd "C-K") 'delete-whole-line-no-kill)
-;;(global-set-key [(control shift k)] 'delete-whole-line-no-kill)
+;;(global-set-key (kbd "C-K") 'delete-whole-line)
+(global-set-key [(control shift k)] 'delete-whole-line)
 
-(defun backward-kill-line (arg)
-  "Kill ARG lines backward."
-  (interactive "p")
+;; https://github.com/bbatsov/crux/blob/308f17d914e2cd79cbc809de66d02b03ceb82859/crux.el#L224
+(defun delete-line-backwards ()
+  "Delete line backwards and adjust the indentation."
+  (interactive)
   (let (kill-ring)
-    (kill-line (- 1 arg))))
+    (kill-line 0)
+    (indent-according-to-mode)))
 
-(global-set-key (kbd "M-K") 'backward-kill-line)
+(global-set-key (kbd "M-K") 'delete-line-backwards)
 
+(defun mark-whole-line ()
+  (beginning-of-line)
+  (set-mark-command nil)
+  (end-of-line))
+
+(defun kill-ring-save-whole-line-or-region ()
+  (interactive)
+  (if (region-active-p)
+      (call-interactively #'kill-ring-save) ;; then
+    (save-mark-and-excursion ;; else
+      (mark-whole-line)
+      (kill-ring-save (region-beginning) (region-end))
+      (pop-mark)
+      )))
+
+(define-key global-map (kbd "M-w") #'kill-ring-save-whole-line-or-region)

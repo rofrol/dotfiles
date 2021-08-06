@@ -28,21 +28,43 @@
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 
 ;; https://github.com/bbatsov/crux/blob/20c07848049716a0e1aa2560e23b5f4149f2a74f/crux.el#L286
-;; https://stackoverflow.com/questions/1072662/by-emacs-how-to-join-two-lines-into-one/68685485#68685485
 (global-set-key (kbd "M-J") (lambda () (interactive) (delete-indentation 1)))
 
 ;; https://stackoverflow.com/questions/5052088/what-is-custom-set-variables-and-faces-in-my-emacs/5058752#5058752
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 
-;; C-S-<backspace> or M-x kill-whole-line
-;; C-k or M-X kill-line
-
+;; https://stackoverflow.com/questions/637351/emacs-how-to-delete-text-without-kill-ring/65100416#65100416
+;; https://unix.stackexchange.com/questions/26360/emacs-deleting-a-line-without-sending-it-to-the-kill-ring/136581#136581
 ;; https://www.emacswiki.org/emacs/BackwardKillLine
+(defun delete-line-no-kill ()
+  (interactive)
+  (let (kill-ring)
+    (kill-line)))
+;; Same but long version
+;;  (delete-region
+;;   (point)
+;;   (save-excursion (move-end-of-line 1) (point)))
+;;  (delete-char 1))
+
+(global-set-key (kbd "C-k") 'delete-line-no-kill)
+
+(defun delete-whole-line-no-kill ()
+  (interactive)
+  (let (kill-ring)
+    (kill-whole-line)))
+;; Same but long version
+;;  (delete-region (line-beginning-position) (line-end-position))
+;;  (delete-char 1))
+
+(global-set-key (kbd "C-K") 'delete-whole-line-no-kill)
+;;(global-set-key [(control shift k)] 'delete-whole-line-no-kill)
+
 (defun backward-kill-line (arg)
   "Kill ARG lines backward."
   (interactive "p")
-  (kill-line (- 1 arg)))
+  (let (kill-ring)
+    (kill-line (- 1 arg))))
 
 (global-set-key (kbd "M-K") 'backward-kill-line)
-(global-set-key (kbd "C-S-k") 'kill-whole-line)
+

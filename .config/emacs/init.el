@@ -6,6 +6,9 @@
 ;; Enable transient mark mode
 (transient-mark-mode 1)
 
+;; https://stackoverflow.com/questions/2627289/how-to-replace-a-region-in-emacs-with-yank-buffer-contents
+(delete-selection-mode 1)
+
 (global-set-key (kbd "C-c l") 'org-store-link)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c c") 'org-capture)
@@ -50,7 +53,7 @@
 (global-set-key (kbd "C-k") 'delete-line)
 
 ;; Based on https://stackoverflow.com/questions/2423834/move-line-region-up-and-down-in-emacs/12512671#12512671
-(defun delete-whole-line-or-lines-in-region ()
+(defun delete-whole-line-or-in-region-whole-lines ()
   (interactive)
   (let ((beg) (end)))
     (if mark-active
@@ -65,7 +68,7 @@
             end (line-beginning-position 2)))
     (delete-region beg end))
 
-(global-set-key [(control shift k)] 'delete-whole-line-or-lines-in-region)
+(global-set-key [(control shift k)] 'delete-whole-line-or-in-region-whole-lines)
 
 ;; https://github.com/bbatsov/crux/blob/308f17d914e2cd79cbc809de66d02b03ceb82859/crux.el#L224
 (defun delete-line-backwards ()

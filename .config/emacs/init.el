@@ -129,3 +129,22 @@
 
 (global-set-key [(meta up)] 'move-lines-up)
 (global-set-key [(meta down)] 'move-lines-down)
+
+(defun delete-whole-lines ()
+  (interactive)
+  (let ((beg) (end) (keep))
+    (if mark-active 
+        (save-excursion
+          (setq keep t)
+          (setq beg (region-beginning)
+                end (region-end))
+          (goto-char beg)
+          (setq beg (line-beginning-position))
+          (goto-char end)
+          (setq end (line-beginning-position 2)))
+      (setq beg (line-beginning-position)
+            end (line-beginning-position 2)))
+    (delete-region beg end)
+    (if keep
+        (setq mark-active t
+              deactivate-mark nil))))

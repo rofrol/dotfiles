@@ -49,16 +49,23 @@
 
 (global-set-key (kbd "C-k") 'delete-line)
 
-(defun delete-whole-line ()
+;; Based on https://stackoverflow.com/questions/2423834/move-line-region-up-and-down-in-emacs/12512671#12512671
+(defun delete-whole-line-or-lines-in-region ()
   (interactive)
-  (let (kill-ring)
-    (kill-whole-line)))
-;; Same but long version
-;;  (delete-region (line-beginning-position) (line-end-position))
-;;  (delete-char 1))
+  (let ((beg) (end)))
+    (if mark-active
+        (progn
+	 (setq beg (region-beginning)
+                end (region-end))
+          (goto-char beg)
+          (setq beg (line-beginning-position))
+          (goto-char end)
+          (setq end (line-beginning-position 2)))
+      (setq beg (line-beginning-position)
+            end (line-beginning-position 2)))
+    (delete-region beg end))
 
-;;(global-set-key (kbd "C-K") 'delete-whole-line)
-(global-set-key [(control shift k)] 'delete-whole-line)
+(global-set-key [(control shift k)] 'delete-whole-line-or-lines-in-region)
 
 ;; https://github.com/bbatsov/crux/blob/308f17d914e2cd79cbc809de66d02b03ceb82859/crux.el#L224
 (defun delete-line-backwards ()
@@ -69,7 +76,7 @@
     (indent-according-to-mode)))
 
 (global-set-key (kbd "M-K") 'delete-line-backwards)
-		     
+
 (defun mark-whole-line ()
   (beginning-of-line)
   (set-mark-command nil)
@@ -89,7 +96,6 @@
 
 ;; https://stackoverflow.com/questions/2423834/move-line-region-up-and-down-in-emacs/12512671#12512671
 ;; move the line(s) spanned by the active region up/down (line transposing)
-;; {{{
 (defun move-lines (n)
   (let ((beg) (end) (keep))
     (if mark-active 
@@ -129,22 +135,3 @@
 
 (global-set-key [(meta up)] 'move-lines-up)
 (global-set-key [(meta down)] 'move-lines-down)
-
-(defun delete-whole-lines ()
-  (interactive)
-  (let ((beg) (end) (keep))
-    (if mark-active 
-        (save-excursion
-          (setq keep t)
-          (setq beg (region-beginning)
-                end (region-end))
-          (goto-char beg)
-          (setq beg (line-beginning-position))
-          (goto-char end)
-          (setq end (line-beginning-position 2)))
-      (setq beg (line-beginning-position)
-            end (line-beginning-position 2)))
-    (delete-region beg end)
-    (if keep
-        (setq mark-active t
-              deactivate-mark nil))))

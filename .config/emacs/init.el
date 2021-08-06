@@ -34,3 +34,15 @@
 ;; https://stackoverflow.com/questions/5052088/what-is-custom-set-variables-and-faces-in-my-emacs/5058752#5058752
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
+
+;; C-S-<backspace> or M-x kill-whole-line
+;; C-k or M-X kill-line
+
+;; https://www.emacswiki.org/emacs/BackwardKillLine
+(defun backward-kill-line (arg)
+  "Kill ARG lines backward."
+  (interactive "p")
+  (kill-line (- 1 arg)))
+
+(global-set-key (kbd "M-K") 'backward-kill-line)
+(global-set-key (kbd "C-S-k") 'kill-whole-line)

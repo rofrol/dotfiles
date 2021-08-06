@@ -219,3 +219,7 @@ Start PowerShell as Administrator and run:
 ### Packages
 
 `cargo install ripgrep fd-find tokei cargo-edit`
+
+## Emacs
+
+On Windows10 you need to set user env `HOME` pointing `%USERPROFILE%` for emacs to read `~/.config/emacs/init.el`. Otherwise it will read from `~/AppData/Roaming/.emacs.d`.

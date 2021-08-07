@@ -170,3 +170,7 @@
 
 (global-set-key (kbd "C->") 'rofrol/tab-region)
 (global-set-key (kbd "C-<") 'rofrol/untab-region)
+
+;; https://stackoverflow.com/questions/3527142/how-do-you-redo-changes-after-undo-with-emacs/60163018#60163018
+(global-set-key (kbd "C-z") 'undo-only)
+(global-set-key (kbd "C-S-z") 'undo-redo)

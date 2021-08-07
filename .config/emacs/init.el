@@ -174,3 +174,10 @@
 ;; https://stackoverflow.com/questions/3527142/how-do-you-redo-changes-after-undo-with-emacs/60163018#60163018
 (global-set-key (kbd "C-z") 'undo-only)
 (global-set-key (kbd "C-S-z") 'undo-redo)
+
+;; https://www.emacswiki.org/emacs/CuaMode
+;; https://stackoverflow.com/questions/2097890/enabling-control-c-and-control-v-copy-and-paste-in-emacs/2097950#2097950
+(cua-mode t)
+(setq cua-auto-tabify-rectangles nil) ;; Don't tabify after rectangle commands
+(transient-mark-mode 1) ;; No region when it is not highlighted
+(setq cua-keep-region-after-copy t) ;; Standard Windows behaviour

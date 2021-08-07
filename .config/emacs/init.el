@@ -44,7 +44,7 @@
 ;; https://stackoverflow.com/questions/637351/emacs-how-to-delete-text-without-kill-ring/65100416#65100416
 ;; https://unix.stackexchange.com/questions/26360/emacs-deleting-a-line-without-sending-it-to-the-kill-ring/136581#136581
 ;; https://www.emacswiki.org/emacs/BackwardKillLine
-(defun delete-line ()
+(defun rofrol/delete-line ()
   (interactive)
   (let (kill-ring)
     (kill-line)))
@@ -54,10 +54,10 @@
 ;;   (save-excursion (move-end-of-line 1) (point)))
 ;;  (delete-char 1))
 
-(global-set-key (kbd "C-k") 'delete-line)
+(global-set-key (kbd "C-k") 'rofrol/delete-line)
 
 ;; Based on https://stackoverflow.com/questions/2423834/move-line-region-up-and-down-in-emacs/12512671#12512671
-(defun delete-whole-line-or-in-region-whole-lines ()
+(defun rofrol/delete-whole-line-or-in-region-whole-lines ()
   (interactive)
   (let ((beg) (end)))
     (if mark-active
@@ -72,38 +72,21 @@
             end (line-beginning-position 2)))
     (delete-region beg end))
 
-(global-set-key [(control shift k)] 'delete-whole-line-or-in-region-whole-lines)
+(global-set-key [(control shift k)] 'rofrol/delete-whole-line-or-in-region-whole-lines)
 
 ;; https://github.com/bbatsov/crux/blob/308f17d914e2cd79cbc809de66d02b03ceb82859/crux.el#L224
-(defun delete-line-backwards ()
+(defun rofrol/delete-line-backwards ()
   "Delete line backwards and adjust the indentation."
   (interactive)
   (let (kill-ring)
     (kill-line 0)
     (indent-according-to-mode)))
 
-(global-set-key (kbd "M-K") 'delete-line-backwards)
-
-(defun mark-whole-line ()
-  (beginning-of-line)
-  (set-mark-command nil)
-  (end-of-line))
-
-(defun kill-ring-save-whole-line-or-region ()
-  (interactive)
-  (if (region-active-p)
-      (call-interactively #'kill-ring-save) ;; then
-    (save-mark-and-excursion ;; else
-      (mark-whole-line)
-      (kill-ring-save (region-beginning) (region-end))
-      (pop-mark)
-      )))
-
-(define-key global-map (kbd "M-w") #'kill-ring-save-whole-line-or-region)
-
+(global-set-key (kbd "M-K") 'rofrol/delete-line-backwards)
+		     
 ;; https://stackoverflow.com/questions/2423834/move-line-region-up-and-down-in-emacs/12512671#12512671
 ;; move the line(s) spanned by the active region up/down (line transposing)
-(defun move-lines (n)
+(defun rofrol/move-lines (n)
   (let ((beg) (end) (keep))
     (if mark-active 
         (save-excursion
@@ -130,15 +113,60 @@
         (setq mark-active t
               deactivate-mark nil))))
 
-(defun move-lines-up (n)
+(defun rofrol/move-lines-up (n)
   "move the line(s) spanned by the active region up by N lines."
   (interactive "*p")
-  (move-lines (- (or n 1))))
+  (rofrol/move-lines (- (or n 1))))
 
-(defun move-lines-down (n)
+(defun rofrol/move-lines-down (n)
   "move the line(s) spanned by the active region down by N lines."
   (interactive "*p")
-  (move-lines (or n 1)))
+  (rofrol/move-lines (or n 1)))
 
-(global-set-key [(meta up)] 'move-lines-up)
-(global-set-key [(meta down)] 'move-lines-down)
+(global-set-key [(meta up)] 'rofrol/move-lines-up)
+(global-set-key [(meta down)] 'rofrol/move-lines-down)
+
+;; https://stackoverflow.com/questions/2249955/emacs-shift-tab-to-left-shift-the-block/35183657#35183657
+;; https://stackoverflow.com/questions/11623189/how-to-bind-keys-to-indent-unindent-region-in-emacs
+(defun rofrol/indent-region(numSpaces)
+    (progn 
+        ; default to start and end of current line
+        (setq regionStart (line-beginning-position))
+        (setq regionEnd (line-end-position))
+
+        ; if there's a selection, use that instead of the current line
+        (when (use-region-p)
+            (setq regionStart (region-beginning))
+            (setq regionEnd (region-end))
+        )
+
+        (save-excursion ; restore the position afterwards 
+            (goto-char regionStart) ; go to the start of region
+            (setq start (line-beginning-position)) ; save the start of the line
+            (goto-char regionEnd) ; go to the end of region
+            (setq end (line-end-position)) ; save the end of the line
+
+            (indent-rigidly start end numSpaces) ; indent between start and end
+            (setq deactivate-mark nil) ; restore the selected region
+        )
+    )
+)
+
+(defun rofrol/indent-lines(&optional N)
+    (indent-rigidly (line-beginning-position)
+                    (line-end-position)
+                    (* (or N 1) tab-width)))
+
+(defun rofrol/untab-region (&optional N)
+    (interactive "p")
+    (rofrol/indent-region (* (* (or N 1) tab-width)-1)))
+
+(defun  rofrol/tab-region (N)
+    (interactive "p")
+    (if (use-region-p)
+        (rofrol/indent-region (* (or N 1) tab-width)) ; region was selected, call indent-region
+        (rofrol/indent-lines N); else insert spaces as expected
+    ))
+
+(global-set-key (kbd "C->") 'rofrol/tab-region)
+(global-set-key (kbd "C-<") 'rofrol/untab-region)

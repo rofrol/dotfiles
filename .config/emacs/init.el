@@ -190,3 +190,6 @@
 ;; https://emacs.stackexchange.com/questions/68014/touchpad-vertical-scroll-gesture-scrolls-too-much-lines-in-gui-on-windows-10
 (setq mouse-wheel-progressive-speed nil)
 ;;(setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))
+
+(global-set-key [(control f)] 'isearch-forward)
+(global-set-key [(control s)] 'save-buffer)

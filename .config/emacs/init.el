@@ -34,8 +34,30 @@
 (setq recentf-auto-cleanup 'never)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 
-;; https://github.com/bbatsov/crux/blob/20c07848049716a0e1aa2560e23b5f4149f2a74f/crux.el#L286
-(global-set-key (kbd "M-J") (lambda () (interactive) (delete-indentation 1)))
+;; https://stackoverflow.com/questions/1072662/by-emacs-how-to-join-two-lines-into-one/68685485#68685485
+;; ;; https://stackoverflow.com/questions/3695775/get-emacs-to-join-lines-when-killing-lines/3740251#3740251
+(defun rofrol/join-lines ()
+  "Join next line but keep indent on white-space only line."
+  (interactive)
+  (move-end-of-line nil)
+  (delete-char 1)
+  (while  (looking-at "[[:blank:]]")
+    (delete-char 1))
+  (insert " ")
+  (left-char nil))
+ 
+(global-set-key (kbd "M-J") 'rofrol/join-lines)
+
+;; https://stackoverflow.com/questions/3695775/get-emacs-to-join-lines-when-killing-lines/3740251#3740251
+(defun pull-line () "Pull the next line that contains anything up to the end of this one"
+  (interactive)
+  (save-excursion
+    (end-of-line)
+    (while (looking-at "[ \n\r\t]")
+      (delete-char 1))
+    (if (looking-back "^[[:blank:]]*[[:punct:][:alnum:]].*")
+ (fixup-whitespace)
+      (indent-according-to-mode))))
 
 ;; https://stackoverflow.com/questions/5052088/what-is-custom-set-variables-and-faces-in-my-emacs/5058752#5058752
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))

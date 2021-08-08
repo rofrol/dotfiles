@@ -128,7 +128,7 @@
 
 ;; https://stackoverflow.com/questions/2249955/emacs-shift-tab-to-left-shift-the-block/35183657#35183657
 ;; https://stackoverflow.com/questions/11623189/how-to-bind-keys-to-indent-unindent-region-in-emacs
-(defun rofrol/indent-region(numSpaces)
+(defun rofrol/indent-region (numSpaces)
     (progn 
         ; default to start and end of current line
         (setq regionStart (line-beginning-position))
@@ -152,7 +152,7 @@
     )
 )
 
-(defun rofrol/indent-lines(&optional N)
+(defun rofrol/indent-lines (&optional N)
     (indent-rigidly (line-beginning-position)
                     (line-end-position)
                     (* (or N 1) tab-width)))

@@ -181,3 +181,12 @@
 (setq cua-auto-tabify-rectangles nil) ;; Don't tabify after rectangle commands
 (transient-mark-mode 1) ;; No region when it is not highlighted
 (setq cua-keep-region-after-copy t) ;; Standard Windows behaviour
+
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+
+;; scrolling
+;; https://www.reddit.com/r/emacs/comments/p0bfs6/touchpad_vertical_scroll_gesture_scrolls_too_much/
+;; https://emacs.stackexchange.com/questions/68014/touchpad-vertical-scroll-gesture-scrolls-too-much-lines-in-gui-on-windows-10
+(setq mouse-wheel-progressive-speed nil)
+;;(setq mouse-wheel-scroll-amount '(1 ((shift) . 5)))

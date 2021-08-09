@@ -215,3 +215,6 @@
 
 (global-set-key [(control f)] 'isearch-forward)
 (global-set-key [(control s)] 'save-buffer)
+
+;; https://emacs.stackexchange.com/questions/3458/how-to-switch-between-windows-quickly
+(global-set-key [(meta p)] 'ace-window)

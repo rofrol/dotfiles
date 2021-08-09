@@ -46,7 +46,7 @@
   (insert " ")
   (left-char nil))
  
-(global-set-key (kbd "M-J") 'rofrol/join-lines)
+(global-set-key [(meta shift j)] 'rofrol/join-lines)
 
 ;; https://stackoverflow.com/questions/3695775/get-emacs-to-join-lines-when-killing-lines/3740251#3740251
 (defun pull-line () "Pull the next line that contains anything up to the end of this one"
@@ -76,7 +76,7 @@
 ;;   (save-excursion (move-end-of-line 1) (point)))
 ;;  (delete-char 1))
 
-(global-set-key (kbd "C-k") 'rofrol/delete-line)
+(global-set-key [(meta shift k)] 'rofrol/delete-line)
 
 ;; Based on https://stackoverflow.com/questions/2423834/move-line-region-up-and-down-in-emacs/12512671#12512671
 (defun rofrol/delete-whole-line-or-in-region-whole-lines ()
@@ -104,7 +104,7 @@
     (kill-line 0)
     (indent-according-to-mode)))
 
-(global-set-key (kbd "M-K") 'rofrol/delete-line-backwards)
+(global-set-key [(meta shift k)] 'rofrol/delete-line-backwards)
 		     
 ;; https://stackoverflow.com/questions/2423834/move-line-region-up-and-down-in-emacs/12512671#12512671
 ;; move the line(s) spanned by the active region up/down (line transposing)
@@ -190,8 +190,8 @@
         (rofrol/indent-lines N); else insert spaces as expected
     ))
 
-(global-set-key (kbd "C->") 'rofrol/tab-region)
-(global-set-key (kbd "C-<") 'rofrol/untab-region)
+(global-set-key [(control >)] 'rofrol/tab-region)
+(global-set-key [(control <)] 'rofrol/untab-region)
 
 ;; https://stackoverflow.com/questions/3527142/how-do-you-redo-changes-after-undo-with-emacs/60163018#60163018
 (global-set-key (kbd "C-z") 'undo-only)
@@ -218,3 +218,31 @@
 
 ;; https://emacs.stackexchange.com/questions/3458/how-to-switch-between-windows-quickly
 (global-set-key [(meta p)] 'ace-window)
+
+;; https://emacs.stackexchange.com/questions/2999/how-to-maximize-my-emacs-frame-on-start-up/3008#3008
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+(global-unset-key (kbd "C-x s"))
+(global-set-key [(f3)] 'isearch-repeat-forward)
+(global-set-key [(shift f3)] 'isearch-repeat-backward)
+
+(defun rofrol/zen-mode ()
+  (interactive)
+  (tool-bar-mode -1)
+  (toggle-frame-fullscreen))
+
+;; https://www.emacswiki.org/emacs/FullScreen
+;; https://emacs.stackexchange.com/questions/29624/how-do-i-make-sure-a-frame-is-fullscreen#comment45524_29624
+(defun rofrol/zen-mode ()
+  "Toggles full-screen mode and bars."
+  (interactive)
+  (if (memq (frame-parameter nil 'fullscreen) '(fullscreen fullboth))
+    (progn
+      (menu-bar-mode t)
+      (tool-bar-mode t))
+    (progn
+      (menu-bar-mode -1)
+      (tool-bar-mode -1)))
+  (toggle-frame-fullscreen))
+
+(global-set-key [f11] 'rofrol/zen-mode)

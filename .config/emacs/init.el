@@ -284,3 +284,6 @@ there's a region, all lines that region covers will be duplicated."
     (goto-char (+ origin (* (length region) arg) arg))))
 
 (global-set-key [(meta shift down)] 'crux-duplicate-current-line-or-region)
+
+;; https://superuser.com/questions/354849/emacs-kill-buffer-without-prompt/354878#354878
+(global-set-key [(control w)] 'kill-this-buffer)

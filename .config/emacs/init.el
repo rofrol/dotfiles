@@ -250,3 +250,8 @@
 ;; https://www.emacswiki.org/emacs/ShowParenMode
 (show-paren-mode 1)
 (setq show-paren-delay 0)
+
+;; show border around zero width space `​` https://news.ycombinator.com/item?id=16754256
+;; to insert: `C-x 8 RET` then search for ZERO WIDTH SPACE
+;; or `C-q 20013 RET'
+(update-glyphless-char-display 'glyphless-char-display-control '((format-control . empty-box) (no-font . hex-code)))

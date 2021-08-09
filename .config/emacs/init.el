@@ -20,6 +20,12 @@
 (setq org-todo-keywords
   '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
 
+;; https://www.reddit.com/r/emacs/comments/6iqtze/org_mreturn_annoyance/dj9l379/?utm_source=reddit&utm_medium=web2x&context=3
+(setq org-M-RET-may-split-line '((item . nil)))
+
+;; https://www.reddit.com/r/emacs/comments/o33r6z/how_do_i_swap_mreturn_and_return_in_orgmode/h2cejp5/
+(add-hook 'org-mode-hook (lambda () (org-autolist-mode)))
+
 ;; https://emacs.stackexchange.com/questions/3171/function-to-open-my-init-file-for-editing-or-return-its-path
 (global-set-key (kbd "<f8>") (lambda () (interactive) (find-file user-init-file)))
 ;; https://stackoverflow.com/questions/189490/where-can-i-find-my-emacs-file-for-emacs-running-on-windows

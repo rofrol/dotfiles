@@ -293,3 +293,9 @@ there's a region, all lines that region covers will be duplicated."
 
 ;; https://superuser.com/questions/354849/emacs-kill-buffer-without-prompt/354878#354878
 (global-set-key [(control w)] 'kill-this-buffer)
+
+;; https://emacs.stackexchange.com/questions/392/how-to-change-the-cursor-type-and-color
+;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Cursor-Display.html
+;; (setq-default cursor-type 'bar)
+(setq-default cursor-type '(bar . 2))
+;; (setq-default cursor-type 'hollow)

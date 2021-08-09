@@ -246,3 +246,7 @@
   (toggle-frame-fullscreen))
 
 (global-set-key [f11] 'rofrol/zen-mode)
+
+;; https://www.emacswiki.org/emacs/ShowParenMode
+(show-paren-mode 1)
+(setq show-paren-delay 0)

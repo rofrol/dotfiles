@@ -1,5 +1,21 @@
 ;; -*- mode: elisp -*-
 
+(setq load-prefer-newer t)
+
+;; Modularization based on
+;; https://github.com/tonini/emacs.d
+;; https://www.reddit.com/r/emacs/comments/3q50do/best_way_organization_config_files_in_the_emacs/
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+
+;; https://stackoverflow.com/questions/10092322/how-to-automatically-install-emacs-packages-by-specifying-a-list-of-package-name/10102154#10102154
+;; There is also https://github.com/zenspider/package
+;; https://github.com/bbatsov/prelude/blob/f9fb902185e1f7afabe281a25f5787e69ea7b6c9/core/prelude-core.el#L111
+(defvar prelude-dir (file-name-directory load-file-name)
+  "The root dir of the Emacs Prelude distribution.")
+(require 'prelude-packages)
+
+(setq url-http-attempt-keepalives nil)
+
 ;; Disable the splash screen (to enable it again, replace the t with 0)
 (setq inhibit-splash-screen t)
 
@@ -272,33 +288,7 @@
 ;; or `C-q 20013 RET'
 (update-glyphless-char-display 'glyphless-char-display-control '((format-control . empty-box) (no-font . hex-code)))
 
-(defun crux-get-positions-of-line-or-region ()
-  "Return positions (beg . end) of the current line or region."
-  (let (beg end)
-    (if (and mark-active (> (point) (mark)))
-        (exchange-point-and-mark))
-    (setq beg (line-beginning-position))
-    (if mark-active
-        (exchange-point-and-mark))
-    (setq end (line-end-position))
-    (cons beg end)))
-
 ;; https://stackoverflow.com/questions/88399/how-do-i-duplicate-a-whole-line-in-emacs#comment90221710_998472
-(defun crux-duplicate-current-line-or-region (arg)
-  "Duplicates the current line or region ARG times.
-If there's no region, the current line will be duplicated.  However, if
-there's a region, all lines that region covers will be duplicated."
-  (interactive "p")
-  (pcase-let* ((origin (point))
-               (`(,beg . ,end) (crux-get-positions-of-line-or-region))
-               (region (buffer-substring-no-properties beg end)))
-    (dotimes (_i arg)
-      (goto-char end)
-      (newline)
-      (insert region)
-      (setq end (point)))
-    (goto-char (+ origin (* (length region) arg) arg))))
-
 (global-set-key [(meta shift down)] 'crux-duplicate-current-line-or-region)
 
 ;; Based on crux-duplicate-and-comment-current-line-or-region
@@ -310,6 +300,7 @@ there's a region, all lines that region covers will be duplicated."
     (comment-or-uncomment-region beg end)))
 
 (global-set-key [(control /)] 'rofrol/comment-current-line-or-region)
+(global-set-key [(meta control /)] 'crux-duplicate-and-comment-current-line-or-region)
 
 ;; https://superuser.com/questions/354849/emacs-kill-buffer-without-prompt/354878#354878
 (global-set-key [(control w)] 'kill-this-buffer)

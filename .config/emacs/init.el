@@ -59,6 +59,14 @@
 
 (define-key cua-global-keymap [(control return)] 'special-c-return)
 
+;; https://stackoverflow.com/questions/61295861/emacs-how-to-redefine-ctrl-enter-when-cua-mode-is-enabled/61298554#61298554
+(defun vscode-insert-line-below()
+  (interactive)
+  (move-end-of-line 1)
+  (newline-and-indent))
+
+(define-key cua-global-keymap [(control return)] 'vscode-insert-line-below)
+
 ;; https://emacs.stackexchange.com/questions/3171/function-to-open-my-init-file-for-editing-or-return-its-path
 (global-set-key (kbd "<f8>") (lambda () (interactive) (find-file user-init-file)))
 ;; https://stackoverflow.com/questions/189490/where-can-i-find-my-emacs-file-for-emacs-running-on-windows
@@ -330,3 +338,18 @@
 (add-hook 'before-save-hook 'tide-format-before-save)
 
 (add-hook 'typescript-mode-hook #'setup-tide-mode)
+
+;; https://emacs.stackexchange.com/questions/7244/enable-emacs-column-selection-using-mouse/7261#7261
+(defun mouse-start-rectangle (start-event)
+  (interactive "e")
+  (deactivate-mark)
+  (mouse-set-point start-event)
+  (rectangle-mark-mode +1)
+  (let ((drag-event))
+    (track-mouse
+      (while (progn
+               (setq drag-event (read-event))
+               (mouse-movement-p drag-event))
+        (mouse-set-point drag-event)))))
+
+(global-set-key [(meta shift down-mouse-1)] #'mouse-start-rectangle)

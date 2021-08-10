@@ -301,6 +301,16 @@ there's a region, all lines that region covers will be duplicated."
 
 (global-set-key [(meta shift down)] 'crux-duplicate-current-line-or-region)
 
+;; Based on crux-duplicate-and-comment-current-line-or-region
+(defun rofrol/comment-current-line-or-region (arg)
+  "Comments the current line or region"
+  (interactive "p")
+  (pcase-let* ((`(,beg . ,end) (crux-get-positions-of-line-or-region))
+               (region (buffer-substring-no-properties beg end)))
+    (comment-or-uncomment-region beg end)))
+
+(global-set-key [(control /)] 'rofrol/comment-current-line-or-region)
+
 ;; https://superuser.com/questions/354849/emacs-kill-buffer-without-prompt/354878#354878
 (global-set-key [(control w)] 'kill-this-buffer)
 

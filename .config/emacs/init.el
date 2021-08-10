@@ -13,6 +13,13 @@
 ;; https://stackoverflow.com/questions/26437034/emacs-line-height/26442029#26442029
 (setq-default line-spacing 14)
 
+;; https://www.emacswiki.org/emacs/CuaMode
+;; https://stackoverflow.com/questions/2097890/enabling-control-c-and-control-v-copy-and-paste-in-emacs/2097950#2097950
+(cua-mode t)
+(setq cua-auto-tabify-rectangles nil) ;; Don't tabify after rectangle commands
+(transient-mark-mode 1) ;; No region when it is not highlighted
+(setq cua-keep-region-after-copy t) ;; Standard Windows behaviour
+
 (global-set-key (kbd "C-c l") 'org-store-link)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c c") 'org-capture)
@@ -25,6 +32,16 @@
 
 ;; https://www.reddit.com/r/emacs/comments/o33r6z/how_do_i_swap_mreturn_and_return_in_orgmode/h2cejp5/
 (add-hook 'org-mode-hook (lambda () (org-autolist-mode)))
+
+;; https://emacs.stackexchange.com/questions/47097/unbind-cua-c-return-key-only-in-dired-mode/47106#47106
+(defun special-c-return ()
+  (interactive)
+  (if (derived-mode-p 'org-mode)
+      (org-insert-heading-respect-content)
+    (cua-set-rectangle-mark))
+  )
+
+(define-key cua-global-keymap [(control return)] 'special-c-return)
 
 ;; https://emacs.stackexchange.com/questions/3171/function-to-open-my-init-file-for-editing-or-return-its-path
 (global-set-key (kbd "<f8>") (lambda () (interactive) (find-file user-init-file)))
@@ -202,13 +219,6 @@
 ;; https://stackoverflow.com/questions/3527142/how-do-you-redo-changes-after-undo-with-emacs/60163018#60163018
 (global-set-key (kbd "C-z") 'undo-only)
 (global-set-key (kbd "C-S-z") 'undo-redo)
-
-;; https://www.emacswiki.org/emacs/CuaMode
-;; https://stackoverflow.com/questions/2097890/enabling-control-c-and-control-v-copy-and-paste-in-emacs/2097950#2097950
-(cua-mode t)
-(setq cua-auto-tabify-rectangles nil) ;; Don't tabify after rectangle commands
-(transient-mark-mode 1) ;; No region when it is not highlighted
-(setq cua-keep-region-after-copy t) ;; Standard Windows behaviour
 
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))

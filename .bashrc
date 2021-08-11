@@ -151,8 +151,8 @@ alias cdk="cd ~/personal_projects/kisswiki"
 export EDITOR=em
 
 export PATH=~/installed/:$PATH
-export PATH=~/installed/remacs/bin/:$PATH
-alias emacs=remacs
+#export PATH=~/installed/remacs/bin/:$PATH
+#alias emacs=remacs
 export PATH=~/installed/subtitleedit/:$PATH
 export PATH=~/installed/popcorntime.sh/:$PATH
 export PATH=$HOME/installed/ctags/bin:$PATH

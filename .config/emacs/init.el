@@ -59,6 +59,15 @@
 
 (define-key cua-global-keymap [(control return)] 'special-c-return)
 
+;; https://emacs.stackexchange.com/questions/41703/fold-the-immediate-outer-section-in-org-mode/41705#41705
+;; https://stackoverflow.com/questions/12737317/collapsing-the-current-outline-in-emacs-org-mode
+(defun org-fold-outer ()
+  (interactive)
+  (org-beginning-of-line)
+  (if (string-match "^*+" (thing-at-point 'line t))
+      (outline-up-heading 1))
+  (outline-hide-subtree))
+
 ;; https://stackoverflow.com/questions/61295861/emacs-how-to-redefine-ctrl-enter-when-cua-mode-is-enabled/61298554#61298554
 (defun vscode-insert-line-below()
   (interactive)

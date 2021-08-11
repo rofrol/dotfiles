@@ -68,6 +68,14 @@
       (outline-up-heading 1))
   (outline-hide-subtree))
 
+;; https://stackoverflow.com/questions/10969617/hiding-markup-elements-in-org-mode/64067173#64067173
+(defun org-toggle-emphasis ()
+  "Toggle hiding/showing of org emphasize markers."
+  (interactive)
+  (if org-hide-emphasis-markers
+      (set-variable 'org-hide-emphasis-markers nil)
+    (set-variable 'org-hide-emphasis-markers t)))
+
 ;; https://stackoverflow.com/questions/61295861/emacs-how-to-redefine-ctrl-enter-when-cua-mode-is-enabled/61298554#61298554
 (defun vscode-insert-line-below()
   (interactive)

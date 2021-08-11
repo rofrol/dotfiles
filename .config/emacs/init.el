@@ -40,9 +40,6 @@
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c c") 'org-capture)
 
-(setq org-todo-keywords
-  '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
-
 ;; https://www.reddit.com/r/emacs/comments/6iqtze/org_mreturn_annoyance/dj9l379/?utm_source=reddit&utm_medium=web2x&context=3
 (setq org-M-RET-may-split-line '((item . nil)))
 

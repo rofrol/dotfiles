@@ -342,14 +342,24 @@
 ;; https://emacs.stackexchange.com/questions/7244/enable-emacs-column-selection-using-mouse/7261#7261
 (defun mouse-start-rectangle (start-event)
   (interactive "e")
-  (deactivate-mark)
-  (mouse-set-point start-event)
-  (rectangle-mark-mode +1)
-  (let ((drag-event))
-    (track-mouse
-      (while (progn
-               (setq drag-event (read-event))
-               (mouse-movement-p drag-event))
+  (deactivate-mark) (mouse-set-point start-event) (rectangle-mark-mode
+  +1) (let ((drag-event)) (track-mouse (while (progn (setq drag-event
+  (read-event)) (mouse-movement-p drag-event))
         (mouse-set-point drag-event)))))
 
-(global-set-key [(meta shift down-mouse-1)] #'mouse-start-rectangle)
+;;(global-set-key [(meta shift down-mouse-1)] #'mouse-start-rectangle)
+
+(define-key global-map [(shift down-mouse-1)] 'mouse-save-then-kill)
+
+;; https://askubuntu.com/questions/117522/emacs-column-editing-cua-mode-is-it-possible-to-select-rectangular-region-with/117897#117897
+(require 'cua-rect)
+(defun hkb-mouse-mark-cua-rectangle (event)
+  (interactive "e")
+  (if (not cua--rectangle)
+      (cua-mouse-set-rectangle-mark event)
+    (cua-mouse-resize-rectangle event)))
+(global-set-key [(meta shift mouse-1)] 'hkb-mouse-mark-cua-rectangle)
+(define-key cua--rectangle-keymap [(meta shift mouse-1)] 'hkb-mouse-mark-cua-rectangle)
+
+;; https://github.com/PlanLogic/vscode-mode/blob/878f208699200318b1fc2a0331583105976a92ee/vscode-mode.el#L29
+(desktop-save-mode 1)

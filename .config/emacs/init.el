@@ -473,3 +473,32 @@
 
 ;; https://github.com/PlanLogic/vscode-mode/blob/878f208699200318b1fc2a0331583105976a92ee/vscode-mode.el#L29
 (desktop-save-mode 1)
+
+;; Some general settings
+;; https://www.littlehart.net/atthekeyboard/2017/05/26/letting-emacs-into-your-grumpy-heart/
+;; You can disable backups, but that's a bad idea for obvious reasons https://superuser.com/questions/236883/why-does-emacs-create-a-file-that-starts-with
+(setq make-backup-files nil)
+;; http://emacsredux.com/blog/2013/05/09/keep-backup-and-auto-save-files-out-of-the-way/
+(setq auto-save-default nil)
+
+;; https://stackoverflow.com/questions/2627289/how-to-replace-a-region-in-emacs-with-yank-buffer-contents
+(delete-selection-mode t)
+
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;; https://www.reddit.com/r/emacs/comments/29zm3q/how_to_get_rid_of_filename_files_that_emacs_is/
+;; https://emacs.stackexchange.com/questions/22049/git-bash-in-emacs-on-windows
+(setq create-lockfiles nil)
+(prefer-coding-system 'utf-8)
+(define-coding-system-alias 'UTF-8 'utf-8)
+(set-language-environment 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-selection-coding-system 'utf-8)
+(set-locale-environment "en.UTF-8")
+(prefer-coding-system 'utf-8)
+(setq-default buffer-file-coding-system 'utf-8-unix)
+;; https://rufflewind.com/2014-07-20/pasting-unicode-in-emacs-on-windows
+;; https://stackoverflow.com/questions/2901541/which-coding-system-should-i-use-in-emacs
+;; https://emacs.stackexchange.com/questions/22727/pasting-text-from-clipboard-why-m-instead-of-linebreaks
+(when (eq system-type 'windows-nt)
+  (set-selection-coding-system 'utf-16-le)) ;; to paste i.e. ' instead of \222

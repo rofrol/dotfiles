@@ -45,7 +45,11 @@
 (setq org-M-RET-may-split-line '((item . nil)))
 
 ;; https://www.reddit.com/r/emacs/comments/o33r6z/how_do_i_swap_mreturn_and_return_in_orgmode/h2cejp5/
-(add-hook 'org-mode-hook (lambda () (org-autolist-mode)))
+(add-hook 'org-mode-hook (lambda ()
+  (progn
+    ;; https://forsooth.org/posts/orgmode-no-indentation/index.html
+    (setq-local org-adapt-indentation nil)
+    (org-autolist-mode))))
 
 ;; https://emacs.stackexchange.com/questions/47097/unbind-cua-c-return-key-only-in-dired-mode/47106#47106
 (defun special-c-return ()

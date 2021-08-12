@@ -1,4 +1,5 @@
 ;; -*- mode: elisp -*-
+;; -*- lexical-binding: t -*-
 
 (setq load-prefer-newer t)
 
@@ -51,14 +52,13 @@
   (interactive)
   (if (derived-mode-p 'org-mode)
       (org-insert-heading-respect-content)
-    (cua-set-rectangle-mark))
-  )
+    (cua-set-rectangle-mark)))
 
 (define-key cua-global-keymap [(control return)] 'special-c-return)
 
 ;; https://emacs.stackexchange.com/questions/41703/fold-the-immediate-outer-section-in-org-mode/41705#41705
 ;; https://stackoverflow.com/questions/12737317/collapsing-the-current-outline-in-emacs-org-mode
-(defun org-fold-outer ()
+(defun rofrol/org-fold-outer ()
   (interactive)
   (org-beginning-of-line)
   (if (string-match "^*+" (thing-at-point 'line t))
@@ -66,12 +66,108 @@
   (outline-hide-subtree))
 
 ;; https://stackoverflow.com/questions/10969617/hiding-markup-elements-in-org-mode/64067173#64067173
-(defun org-toggle-emphasis ()
+(defun rofrol/org-toggle-emphasis ()
   "Toggle hiding/showing of org emphasize markers."
   (interactive)
   (if org-hide-emphasis-markers
       (set-variable 'org-hide-emphasis-markers nil)
     (set-variable 'org-hide-emphasis-markers t)))
+
+;; https://stackoverflow.com/questions/51260427/is-it-possible-to-collapse-just-one-subtree-without-having-to-cycle-over-tab-fun/58870140#58870140
+(defun rofrol/org-fold-this-heading ()
+  (interactive)
+  (org-back-to-heading)
+  (when (or
+         ;; already folded
+         (outline-invisible-p (point-at-eol))
+         ;; empty subtree
+         (let
+             ((eoh (save-excursion (outline-end-of-heading) (point)))
+              (eos (save-excursion (org-end-of-subtree t t)
+                       (when (bolp) (backward-char)) (point))))
+           (= eos eoh)))
+    ;; move up a level before folding
+    (outline-up-heading 1))
+  (outline-hide-subtree))
+
+;; https://stackoverflow.com/questions/25161792/emacs-org-mode-how-can-i-fold-everything-but-the-current-headline/28031539#28031539
+(defun rofrol/org-show-current-heading-tidily ()
+  (interactive)
+  "Show next entry, keeping other entries closed."
+  (if (save-excursion (end-of-line) (outline-invisible-p))
+      (progn (org-show-entry) (show-children))
+    (outline-back-to-heading)
+    (unless (and (bolp) (org-on-heading-p))
+      (org-up-heading-safe)
+      (hide-subtree)
+      (error "Boundary reached"))
+    (org-overview)
+    (org-reveal t)
+    (org-show-entry)
+    (show-children)))
+
+;; https://emacs.stackexchange.com/questions/27921/org-mode-cycling-inside-subtree-impossible/27924#27924
+(defun rofrol/org-cycle-previous-heading ()
+  (interactive)
+  (outline-previous-heading)
+  (org-cycle))
+
+(defun rofrol/line-by-line ()
+  (interactive)
+  (save-excursion  ;; save our starting position
+  (goto-char (point-min))    ;; go to the beginning of the buffer
+  (while (< (forward-line) 1)    ;; move forward one line
+                                 ;; until forward line returns a non-zero value
+    (end-of-line)    ;; go to the end of the line
+    (insert ";; I made it to here!")))    ;; insert a comment
+  )
+
+(defun rofrol/line-by-line2 ()
+  (interactive)
+  (save-excursion  ;; save our starting position
+  (goto-char (point-min))
+  (while (not (eobp))
+    (when (org-at-item-p) (org-toggle-heading))
+    ;;(insert ";; I made it to here!")    ;; insert a comment
+    (forward-line 1))))
+
+(require 'cl-lib)
+;; https://gist.github.com/mskorzhinskiy/7e7d8c39f7b7e4dc73a3c8eb6b2422e1#file-org-new-navigation-el-L11
+(defun org-user/current-headline-level ()
+  "Get current headline level."
+  (interactive)
+  (let ((element (org-element-at-point)))
+    (when element
+      (cl-getf (cl-getf element 'headline) :level))))
+
+;; does not work, item has no level?
+(defun org-user/current-item-level ()
+  "Get current item level."
+  (interactive)
+  (let ((element (org-element-at-point)))
+    (when element
+      (cl-getf (cl-getf element 'item) :level))))
+
+;; https://christiantietze.de/posts/2019/06/org-fold-heading/
+(defun ct/org-foldup ()
+  "Hide the entire subtree from root headline at point."
+  (interactive)
+  (while (ignore-errors (outline-up-heading 1)))
+  (org-flag-subtree t))
+
+(defun ct/org-shifttab (&optional arg)
+  (interactive "P")
+  (if (or (null (org-current-level))     ; point is before 1st heading, or
+          (and (= 1 (org-current-level)) ; at level-1 heading, or
+               (org-at-heading-p))
+          (org-at-table-p))              ; in a table (to preserve cell movement)
+      ; perform org-shifttab at root level elements and inside tables
+      (org-shifttab arg)
+      ; try to fold up elsewhere
+      (ct/org-foldup)))
+
+(require 'org)
+(org-defkey org-mode-map [(shift tab)] 'ct/org-foldup)
 
 ;; https://stackoverflow.com/questions/61295861/emacs-how-to-redefine-ctrl-enter-when-cua-mode-is-enabled/61298554#61298554
 (defun vscode-insert-line-below()

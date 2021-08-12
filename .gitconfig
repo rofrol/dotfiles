@@ -1,6 +1,10 @@
 [alias]
 	ci = commit
-	co = checkout
+	#co = checkout
+	# https://www.banterly.net/2021/07/31/new-in-git-switch-and-restore/
+	# git checkout -b new_branch == git switch -c new_branch
+	sw = switch
+	re = restore
 	br = branch
 	brc = rev-parse --abbrev-ref HEAD
 	# Provide string with spaces. Replace spaces with underscores. Change branch name to this new string.

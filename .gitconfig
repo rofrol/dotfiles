@@ -62,6 +62,9 @@
 	name = Roman Frołow
 [pull]
 	ff = only
+	# despite the name, this is used for any merge, not just git pull
+	# https://github.blog/2021-08-16-highlights-from-git-2-33/
+	twohead = ort
 [credential]
 	helper = manager-core
 [gui]

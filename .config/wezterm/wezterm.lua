@@ -35,7 +35,7 @@ return {
   --font = wezterm.font("Consolas"),
   --only this font has acceptable smoothing
   font = wezterm.font("Ubuntu Mono"),
-  font_size = 18.0,
+  font_size = 14.5,
   --font_antialias = "None",
   --font_antialias = "Greyscale",
   --font_antialias = "Subpixel",

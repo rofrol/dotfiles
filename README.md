@@ -106,6 +106,14 @@ $ git reset --hard origin/master
 
 mpv from scoop does not read `%APPDATA%\mpv`. Portable one reads it.
 
+Create env MPV_HOME
+
+```
+setx MPV_HOME %USERPROFILE\.confing\mpv
+```
+
+https://github.com/mpv-player/mpv/blob/master/DOCS/man/mpv.rst#files-on-windows
+
 #### simple-mpv-webui
 
 ```bash

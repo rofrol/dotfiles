@@ -26,7 +26,7 @@ rm -rf dotfiles
 On Windows run cmd.exe as Administrator. Then
 
 ```
-mklink /D %APPDATA%\mpv %USERPROFILE\.config\mpv
+mklink /D %APPDATA%\mpv %USERPROFILE%\.config\mpv
 ```
 
 for mpv from scoop, go to scoop section

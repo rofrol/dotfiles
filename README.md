@@ -115,7 +115,7 @@ run `bin/mpv-setup.bat` as Administrator.
 #### Playlist script
 
 ```bash
-curl -so ~/scoop/apps/mpv/current/lua/json.lua https://raw.githubusercontent.com/craigmj/json4lua/master/json/json.lua
+curl --create-dirs -so ~/scoop/apps/mpv/current/lua/json.lua https://raw.githubusercontent.com/craigmj/json4lua/master/json/json.lua
 ```
 
 - https://github.com/57op/simple-mpv-webui-windows-libs/issues/2

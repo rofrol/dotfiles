@@ -26,7 +26,15 @@
 ;; https://stackoverflow.com/questions/2627289/how-to-replace-a-region-in-emacs-with-yank-buffer-contents
 (delete-selection-mode 1)
 
-(set-frame-font "Ubuntu Mono-14" nil t)
+;; (set-frame-font "Ubuntu Mono-14" nil t)
+;; What about this? https://superuser.com/questions/422968/how-to-find-out-current-font-used-in-my-emacs/1333541#1333541
+(set-face-attribute 'default nil
+                    :family "Ubuntu Mono-14"
+                    :height 130
+                    :weight 'normal
+                    :width 'normal)
+(copy-face 'default 'fixed-pitch)
+
 ;; https://stackoverflow.com/questions/26437034/emacs-line-height/26442029#26442029
 (setq-default line-spacing 14)
 

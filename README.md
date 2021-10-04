@@ -5,18 +5,14 @@ Architecture based on https://github.com/jan-warchol/dotfiles
 After cloning repository:
 
 ```bash
-# .bashrc sets DOTFILES_HOME and sources don and dof functions
-cd dotfiles
-cp -r .config .bashrc ~/
-cp -r .git ~/.dotfiles.git
-cd
-source .bashrc
+# git clone <your dotfiles repo>
+cp -r dotfiles/.git ~/.dotfiles.git
+source dotfiles/.config/bash/dotfiles.sh
+export DOTFILES_HOME=$HOME/.dotfiles.git
 don
 # .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name
 git config core.excludesFile .dotfiles.gitignore
-# double checkout -f
-git checkout -f
-git checkout -f
+git restore .
 dof
 rm -rf dotfiles
 ```

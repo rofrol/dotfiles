@@ -13,3 +13,21 @@ version_greater_equal()
 if [ $(version_greater_equal "$(git version)" "git version 2.33") ]; then
    git config --file=$HOME/.gitconfig_local pull.twohead ort
 fi
+
+# https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
+# https://www.quora.com/What-is-the-best-Bash-prompt-for-Git
+if [ -f /etc/bash_completion.d/git-prompt ]; then
+  source /etc/bash_completion.d/git-prompt
+  GIT_PS1_SHOWDIRTYSTATE=true
+  GIT_PS1_SHOWCOLORHINTS=true
+  GIT_PS1_SHOWUNTRACKEDFILES=true
+  #PS1='[\u@\h \W$(__git_ps1 " (%s)")]\$ '
+  PS1='\w$(__git_ps1 " (%s)")\$ '
+fi
+
+alias gitka='gitk --all &'
+
+export EDITOR=nvim
+
+# Should be last
+[ -f ~/.bashrc_local ] && source ~/.bashrc_local

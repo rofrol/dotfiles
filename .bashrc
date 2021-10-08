@@ -29,5 +29,13 @@ alias gitka='gitk --all &'
 
 export EDITOR=nvim
 
+# xargs for trimming https://stackoverflow.com/questions/369758/how-to-trim-whitespace-from-a-bash-variable/12973694#12973694
+# https://unix.stackexchange.com/questions/29981/how-can-i-tell-whether-a-build-is-debian-based/29985#29985
+if [ "$(lsb_release -i | xargs)" = "Distributor ID: Debian" ]; then
+  [ ! -f ~/.git-completion.bash ] && curl -s https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash
+  # https://superuser.com/questions/1310317/why-does-debian-not-autocomplete-all-git-commands/1310326#1310326
+  [ -f ~/.git-completion.bash ] && . ~/.git-completion.bash
+fi
+
 # Should be last
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local

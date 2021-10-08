@@ -37,5 +37,9 @@ if [ "$(lsb_release -i | xargs)" = "Distributor ID: Debian" ]; then
   [ -f ~/.git-completion.bash ] && . ~/.git-completion.bash
 fi
 
+# https://github.com/Schniz/fnm
+export PATH=/home/roman/.fnm:$PATH
+eval "`fnm env`"
+
 # Should be last
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local

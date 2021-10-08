@@ -1,4 +1,4 @@
-[ -f ~/.bashrc_local ] && source ~/.bashrc_local
+[ -f ~/.bashrc_default_from_distribution ] && source ~/.bashrc_default_from_distribution
 export DOTFILES_HOME=$HOME/.dotfiles.git
 source ~/.config/bash/dotfiles.sh
 

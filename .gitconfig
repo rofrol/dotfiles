@@ -61,11 +61,11 @@
 [user]
 	email = rofrol@gmail.com
 	name = Roman Frołow
-[pull]
-	ff = only
+#[pull]
+#	ff = only
 	# despite the name, this is used for any merge, not just git pull
 	# https://github.blog/2021-08-16-highlights-from-git-2-33/
-	twohead = ort
+  #twohead = ort
 [credential]
 	helper = manager-core
 [gui]
@@ -73,6 +73,9 @@
 	encoding = utf-8
 [init]
 	defaultBranch = main
+
+[include]
+	path = .gitconfig_local
 
 ; include for all repositories inside $HOME/projects/
 [includeIf "gitdir/i:~/projects/"]

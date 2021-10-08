@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# https://medium.com/@mrWinston/smarter-git-checkout-using-fzf-to-supercharge-your-commandline-7507db600996
+git branch --all | fzf | xargs git checkout

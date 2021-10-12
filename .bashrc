@@ -41,5 +41,8 @@ fi
 export PATH=/home/roman/.fnm:$PATH
 eval "`fnm env`"
 
+# for pip
+export PATH=$PATH:~/.local/bin
+
 # Should be last
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local

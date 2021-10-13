@@ -4,6 +4,10 @@
 	# https://www.banterly.net/2021/07/31/new-in-git-switch-and-restore/
 	# git checkout -b new_branch == git switch -c new_branch
 	# git checkout -f == git restore .
+  # or maybe
+  # git restore :/
+  # restore file like checkout
+  # git re --source=origin/master --worktree -- path/to/file
 	sw = switch
 	re = restore
 	br = branch
@@ -80,3 +84,5 @@
 ; include for all repositories inside $HOME/projects/
 [includeIf "gitdir/i:~/projects/"]
 	path = ~/projects/.gitconfig
+[pull]
+	ff = only

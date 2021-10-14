@@ -10,4 +10,4 @@ sed -i -- 's/libappindicator3-1/libayatana-appindicator3-1/g' ./"$name"/DEBIAN/c
 new="${name}-debian.deb"
 dpkg -b "$name" "$new" 
 rm -rf "$name"
-#sudo apt install ./"$new"
+sudo apt install ./"$new"

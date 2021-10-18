@@ -1,4 +1,5 @@
 #!/bin/bash
+# Better to use equivs: https://www.reddit.com/r/debian/comments/q7ymc7/convert_deb_to_use_libayatanaappindicator3
 # https://stackoverflow.com/questions/65978703/missing-libappindicator3-1-installing-slack/69087954#69087954
 
 package="$1"

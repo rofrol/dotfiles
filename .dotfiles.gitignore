@@ -82,3 +82,12 @@
 /.nvidia-settings-rc
 /.yarnrc
 !/scoop-list.txt
+
+
+!/.local/
+/.local/*
+!/.local/share/
+/.local/share/*
+!/.local/share/nautilus/
+/.local/share/nautilus/*
+!/.local/share/nautilus/scripts

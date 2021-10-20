@@ -1,10 +1,54 @@
 #!/bin/bash
 
-file="$1"
+# sudo apt install libnotify-bin uchardet recode dos2unix
 
+FILE="$1"
+
+# https://stackoverflow.com/questions/592620/how-can-i-check-if-a-program-exists-from-a-bash-script/677212#677212
+# https://superuser.com/questions/31917/is-there-a-way-to-show-notification-from-bash-script-in-ubuntu/31919#31919
+function check_command() {
+  command -v "$1"
+  if [ ! $? -eq 0 ]; then notify-send --expire-time=0 --urgency=critical "Install ${1}"; exit 1; fi
+}
+
+check_command uchardet
+check_command recode
+check_command dos2unix
+
+# version with recode or vim if there were errors https://stackoverflow.com/questions/9824902/iconv-any-encoding-to-utf-8/52823709#52823709
+# https://stackoverflow.com/questions/64860/best-way-to-convert-text-files-between-character-sets
+# https://superuser.com/questions/27060/batch-convert-encoding-in-files
+# I installed uchardet in Ubuntu and it told me that my file was WINDOWS-1252. I know this was wrong because I saved it as UTF-16 with Kate, to test. However, encguess guess correctly, and it was pre-installed in Ubuntu 19.04
+# https://stackoverflow.com/questions/805418/how-can-i-find-encoding-of-a-file-via-a-script-on-linux/57010566#comment99667079_48913321
+# https://unix.stackexchange.com/questions/11602/how-can-i-test-the-encoding-of-a-text-file-is-it-valid-and-what-is-it
+# https://www.debian.org/doc/manuals/debian-reference/ch11.en.html
+# https://www.npmjs.com/package/detect-file-encoding-and-language https://superuser.com/questions/301552/how-to-auto-detect-text-file-encoding/1635813#1635813
+# https://github.com/gonejack/transcode
+# I often find that the Emacs char-set auto-detection is much more efficient than the other char-set auto-detection tools (such as chardet)
+# https://superuser.com/questions/301552/how-to-auto-detect-text-file-encoding/1373172#1373172
 # https://unix.stackexchange.com/questions/10241/how-can-i-make-iconv-replace-the-input-file-with-the-converted-output/10243#10243
-iconv -f cp1250 -t utf8 -o "$file.new" "$file" &&
-mv -f "$file.new" "$file"
+# set different input and output for iconv
+# https://unix.stackexchange.com/questions/10241/how-can-i-make-iconv-replace-the-input-file-with-the-converted-output/10243#10243
+# https://stackoverflow.com/questions/17872302/why-iconv-command-output-to-the-same-file-is-truncated
+# or not?
+# Actually, iconv worked much better as an in-place converter instead of a filter. Converting a file with more than 2 million lines using iconv -f UTF-32 -t UTF-8 input.csv > output.csv saved only about seven hundred thousand lines, only a third. Using the in-place version iconv -f UTF-32 -t UTF-8 file.csv converted successfully all 2 million plus lines.
+# https://stackoverflow.com/questions/64860/best-way-to-convert-text-files-between-character-sets#comment62188586_64860
 
+CHARSET="$(uchardet "$FILE")"
+REENCSED="$(echo $CHARSET | sed 's/^x-mac-/mac/')"
+recode $REENCSED..UTF-8 "$FILE" STDOUT_OP
+
+if [ ! $? -eq 0 ]; then notify-send --expire-time=0 --urgency=critical "There was problem with recode"; exit 1; fi
+
+mv -f STDOUT_OP "$FILE"
+
+# https://stackoverflow.com/questions/3891076/how-to-convert-windows-end-of-line-in-unix-end-of-line-cr-lf-to-lf/3891101#3891101
 # https://stackoverflow.com/questions/82726/convert-dos-line-endings-to-linux-line-endings-in-vim/20872386#20872386
-sed -e 's///g' -i "$file"
+#sed -e 's/\r//g' -i "$FILE"
+#sed -e 's///g' -i "$FILE"
+dos2unix "$FILE"
+
+if [ ! $? -eq 0 ]; then notify-send --expire-time=0 --urgency=critical "There was problem with dos2unix"; exit 1; fi
+
+ME="$(basename "$0")"
+notify-send "Successfuly converted ${FILE} using ${ME}"

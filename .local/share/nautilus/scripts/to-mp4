@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# https://askubuntu.com/questions/1019464/desktop-shortcut-to-bash-script-crashes-and-burns/1019481#1019481
+function message() {
+  if [ "$TERM" = "dumb" ]; then
+    notify-send "$1"
+  else
+    echo "$1"
+  fi
+}
+
+function message_critical() {
+  if [ "$TERM" = "dumb" ]; then
+    notify-send --expire-time=0 --urgency=critical "$1"
+  else
+    echo "$1"
+  fi
+}
+
 file="$1"
 # https://stackoverflow.com/questions/12152626/how-can-i-remove-the-extension-of-a-filename-in-a-shell-script/32584935#32584935
 ext="$(echo "$file" | rev | cut -f 2- -d '.' | rev)"
@@ -7,6 +24,6 @@ name="$(basename ${package} ${ext})"
 
 ffmpeg -i "$file" "${name}.mp4"
 
-if [ ! $? -eq 0 ]; then notify-send --expire-time=0 --urgency=critical "There was problem with converting video file"; exit 1; fi
+if [ ! $? -eq 0 ]; then message_critical "There was problem with converting video file"; exit 1; fi
 
-notify-send "Successfuly converted ${FILE} using ${ME}"
+message "Successfuly converted ${FILE} using ${ME}"

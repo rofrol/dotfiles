@@ -17,6 +17,15 @@ function message_critical() {
   fi
 }
 
+# https://stackoverflow.com/questions/592620/how-can-i-check-if-a-program-exists-from-a-bash-script/677212#677212
+# https://superuser.com/questions/31917/is-there-a-way-to-show-notification-from-bash-script-in-ubuntu/31919#31919
+function check_command() {
+  command -v "$1"
+  if [ ! $? -eq 0 ]; then message_critical "Install ${1}"; exit 1; fi
+}
+
+check_command ffmpeg
+
 file="$1"
 # https://stackoverflow.com/questions/12152626/how-can-i-remove-the-extension-of-a-filename-in-a-shell-script/32584935#32584935
 ext="$(echo "$file" | rev | cut -f 2- -d '.' | rev)"

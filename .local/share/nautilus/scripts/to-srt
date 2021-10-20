@@ -1,0 +1,13 @@
+#!/bin/bash
+
+file="$1"
+# https://stackoverflow.com/questions/12152626/how-can-i-remove-the-extension-of-a-filename-in-a-shell-script/32584935#32584935
+ext="$(echo "$file" | rev | cut -f 2- -d '.' | rev)"
+name="$(basename ${package} ${ext})"
+
+# https://superuser.com/questions/117929/open-source-command-line-subtitle-converter/1312516#1312516
+ffmpeg -i "$file" -codec:s text "${name}.srt"
+
+if [ ! $? -eq 0 ]; then notify-send --expire-time=0 --urgency=critical "There was problem with converting subtitles file"; exit 1; fi
+
+notify-send "Successfuly converted ${FILE} using ${ME}"

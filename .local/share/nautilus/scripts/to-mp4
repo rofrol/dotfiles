@@ -5,5 +5,8 @@ file="$1"
 ext="$(echo "$file" | rev | cut -f 2- -d '.' | rev)"
 name="$(basename ${package} ${ext})"
 
-
 ffmpeg -i "$file" "${name}.mp4"
+
+if [ ! $? -eq 0 ]; then notify-send --expire-time=0 --urgency=critical "There was problem with converting video file"; exit 1; fi
+
+notify-send "Successfuly converted ${FILE} using ${ME}"

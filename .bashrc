@@ -44,5 +44,11 @@ eval "`fnm env`"
 # for pip
 export PATH=$PATH:~/.local/bin
 
+# https://stackoverflow.com/questions/4075287/node-express-eaddrinuse-address-already-in-use-kill-server/46276685#46276685
+# https://stackoverflow.com/questions/11583562/how-to-kill-a-process-running-on-particular-port-in-linux/19060124#19060124
+function killTcpListen () {
+  kill -9 $(lsof -sTCP:LISTEN -t -i:$1)
+}
+
 # Should be last
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local

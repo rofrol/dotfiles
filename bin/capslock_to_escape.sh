@@ -1,5 +1,5 @@
 # run this:
-# $ sudo -s ./bin/maps_capslock_to_escape.sh
+# $ sudo -s ./bin/capslock_to_escape.sh
 
 # to get scancode for capslock
 

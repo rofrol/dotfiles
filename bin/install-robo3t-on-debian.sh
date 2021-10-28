@@ -2,6 +2,9 @@
  
 set -e
 
+# run it like this:
+# sudo -s ./install-robo3t-on-debian.sh
+
 # sudo apt install jq desktop-file-utils
 
 # clean

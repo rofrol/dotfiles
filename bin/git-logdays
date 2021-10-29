@@ -1,3 +1,9 @@
-AFTER="$2"
-[ -z "$AFTER" ] && AFTER="12 days ago"
+#!/bin/bash
+set -e
+
+AUTHOR="${1:-"<$(git config user.email)>"}" 
+AFTER="${2:-"12 days ago"}"
 git --no-pager log --date=format:'%Y-%m-%d' --format='%ad' --all --author="$1" --after={"$AFTER"} | sort -r | uniq -c | awk '{print $2, $1}' | sort -r
+
+# https://stackoverflow.com/questions/9332802/how-to-write-a-bash-script-that-takes-optional-input-arguments/9333006#9333006
+# https://stackoverflow.com/questions/2013547/assigning-default-values-to-shell-variables-with-a-single-command-in-bash

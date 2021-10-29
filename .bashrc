@@ -56,5 +56,8 @@ alias ncdumpv='NCDU_SHELL="mpv_playlist.sh" ncdu'
 # https://unix.stackexchange.com/questions/25327/watch-command-alias-expansion
 alias watch='watch '
 
+# https://nixos.org/guides/declarative-and-reproducible-developer-environments.html#declarative-reproducible-envs
+eval "$(direnv hook bash)"
+
 # Should be last
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local

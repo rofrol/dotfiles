@@ -50,5 +50,11 @@ function killTcpListen () {
   kill -9 $(lsof -sTCP:LISTEN -t -i:$1)
 }
 
+alias dfo='df -x squashfs -x tmpfs -x devtmpfs -BM -H -T'
+alias ncdumc='NCDU_SHELL="mc" ncdu'
+alias ncdumpv='NCDU_SHELL="mpv_playlist.sh" ncdu'
+# https://unix.stackexchange.com/questions/25327/watch-command-alias-expansion
+alias watch='watch '
+
 # Should be last
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local

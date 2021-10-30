@@ -23,7 +23,7 @@ tar xf "$FILENAME"
 rm -rf "$FILENAME"
 sudo mv "$NAME" /usr/local/bin/robo3t
 cd /usr/local/bin/robo3t/bin
-sudo curl -s "https://dashboard.snapcraft.io/site_media/appmedia/2018/09/logo-256x256.png" -o icon.png
+sudo curl -s "https://raw.githubusercontent.com/Studio3T/robomongo/48f7dfde82b9c4233ca0133044114dca239f5239/install/macosx/robomongo.iconset/icon_128x128.png" -o icon.png
 cat > robo3t.desktop <<EOL
 [Desktop Entry]
 Name=Robo3T

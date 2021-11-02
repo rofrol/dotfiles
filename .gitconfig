@@ -3,6 +3,7 @@
 	#co = checkout
 	# https://www.banterly.net/2021/07/31/new-in-git-switch-and-restore/
 	# git checkout -b new_branch == git switch -c new_branch
+	# git checkout <tag> == git sw --detach <tag>
 	# git checkout -f == git restore .
   # or maybe
   # git restore :/

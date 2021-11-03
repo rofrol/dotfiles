@@ -19,8 +19,6 @@
 	cine = commit -a --amend --no-edit
 	sshow = "!f() { git stash show stash^{/$*} -p; }; f"
 	sapply = "!f() { git stash apply stash^{/$*}; }; f"
-	fap = "!git fetch --all --prune && git fetch -f . origin/master:master"
-	f = "!git fetch --all --prune && git fetch -f . origin/master:master"
 	rom = rebase origin/master
 	puoh = push -u origin HEAD
 	newp = "!git fetch -p --all && git checkout -b new origin/development"

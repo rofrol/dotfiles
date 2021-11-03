@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Update default branch without switching to it
+
+set -e
+
+if [ -z "$1" ]; then
+  RB="$(git branch -rl '*/HEAD' | awk '{print $3}')" # for example origin/master
+  BRANCH="$(echo "$RB" | cut -d'/' -f2)"
+fi
+
+git fetch --all --prune
+
+if [[ $(git rev-parse --abbrev-ref HEAD) == "$BRANCH" ]]; then
+  echo git merge --ff-only "$RB"
+  git merge --ff-only "$RB"
+else
+  echo git fetch -f . "$RB":"$BRANCH"
+  git fetch -f . "$RB":"$BRANCH"
+fi
+
+# https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch/67170894#67170894
+# https://stackoverflow.com/questions/918886/how-do-i-split-a-string-on-a-delimiter-in-bash/29903172#29903172

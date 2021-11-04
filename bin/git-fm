@@ -4,19 +4,19 @@
 
 set -e
 
-if [ -z "$1" ]; then
-  RB="$(git branch -rl '*/HEAD' | awk '{print $3}')" # for example origin/master
-  BRANCH="$(echo "$RB" | cut -d'/' -f2)"
-fi
-
 git fetch --all --prune
 
+if [ -z "$1" ]; then
+  REMOTE_AND_BRANCH="$(git branch -rl '*/HEAD' | awk '{print $3}')" # for example origin/master
+  BRANCH="$(echo "$REMOTE_AND_BRANCH" | cut -d'/' -f2)"
+fi
+
 if [[ $(git rev-parse --abbrev-ref HEAD) == "$BRANCH" ]]; then
-  echo git merge --ff-only "$RB"
-  git merge --ff-only "$RB"
+  echo git merge --ff-only "$REMOTE_AND_BRANCH"
+  git merge --ff-only "$REMOTE_AND_BRANCH"
 else
-  echo git fetch -f . "$RB":"$BRANCH"
-  git fetch -f . "$RB":"$BRANCH"
+  echo git fetch -f . "$REMOTE_AND_BRANCH":"$BRANCH"
+  git fetch -f . "$REMOTE_AND_BRANCH":"$BRANCH"
 fi
 
 # https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch/67170894#67170894

@@ -1,16 +1,30 @@
-#!/bin/bash
+#!/bin/bash -Eu
+# -E: ERR trap is inherited by shell functions.
+# -u: Treat unset variables as an error when substituting.
+#
+# Exit on error. Trap exit.
+# This script is supposed to run in a subshell.
+# See also: http://fvue.nl/wiki/Bash:_Error_handling
 
+# Trap non-normal exit signals: 1/HUP, 2/INT, 3/QUIT, 15/TERM, ERR
+trap onexit 1 2 3 15 ERR
+
+#--- onexit() -----------------------------------------------------
+#  @param $1 integer (optional) Exit status.  If not set, use `$?'
+
+function onexit() {
+  local exit_status=${1:-$?}
+  echo Exiting $0 with $exit_status
+  exit $exit_status
+}
+
+# content
 # Update default branch without switching to it
-
-set -e
 
 git fetch --all --prune
 
-if [ -z "$1" ]; then
-  REMOTE_AND_BRANCH="$(git branch -rl '*/HEAD' | awk '{print $3}')" # for example origin/master
-  BRANCH="$(echo "$REMOTE_AND_BRANCH" | awk -F/ '{print $2})"
-fi
-
+REMOTE_AND_BRANCH="$(git branch -rl '*/HEAD' | awk '{print $3}')" # for example origin/master
+BRANCH="$(echo "$REMOTE_AND_BRANCH" | awk -F/ '{print $2}')"
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 if [[ "$CURRENT_BRANCH" == "$BRANCH" ]]; then
@@ -22,3 +36,7 @@ fi
 # https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch/67170894#67170894
 # https://stackoverflow.com/questions/918886/how-do-i-split-a-string-on-a-delimiter-in-bash/29903172#29903172
 # https://unix.stackexchange.com/questions/312280/split-string-by-delimiter-and-get-n-th-element/312400#312400
+# https://unix.stackexchange.com/questions/463034/bash-throws-error-line-8-1-unbound-variable
+
+# Allways call `onexit' at end of script
+onexit

@@ -12,10 +12,8 @@ if [ -z "$1" ]; then
 fi
 
 if [[ $(git rev-parse --abbrev-ref HEAD) == "$BRANCH" ]]; then
-  echo git merge --ff-only "$REMOTE_AND_BRANCH"
   git merge --ff-only "$REMOTE_AND_BRANCH"
 else
-  echo git fetch -f . "$REMOTE_AND_BRANCH":"$BRANCH"
   git fetch -f . "$REMOTE_AND_BRANCH":"$BRANCH"
 fi
 

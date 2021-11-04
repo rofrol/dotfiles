@@ -8,7 +8,7 @@ git fetch --all --prune
 
 if [ -z "$1" ]; then
   REMOTE_AND_BRANCH="$(git branch -rl '*/HEAD' | awk '{print $3}')" # for example origin/master
-  BRANCH="$(echo "$REMOTE_AND_BRANCH" | cut -d'/' -f2)"
+  BRANCH="$(echo "$REMOTE_AND_BRANCH" | awk -F/ '{print $2})"
 fi
 
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
@@ -21,3 +21,4 @@ fi
 
 # https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch/67170894#67170894
 # https://stackoverflow.com/questions/918886/how-do-i-split-a-string-on-a-delimiter-in-bash/29903172#29903172
+# https://unix.stackexchange.com/questions/312280/split-string-by-delimiter-and-get-n-th-element/312400#312400

@@ -11,7 +11,9 @@ if [ -z "$1" ]; then
   BRANCH="$(echo "$REMOTE_AND_BRANCH" | cut -d'/' -f2)"
 fi
 
-if [[ $(git rev-parse --abbrev-ref HEAD) == "$BRANCH" ]]; then
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+if [[ "$CURRENT_BRANCH" == "$BRANCH" ]]; then
   git merge --ff-only "$REMOTE_AND_BRANCH"
 else
   git fetch -f . "$REMOTE_AND_BRANCH":"$BRANCH"

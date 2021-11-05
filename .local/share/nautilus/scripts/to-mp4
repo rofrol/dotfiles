@@ -29,7 +29,7 @@ check_command ffmpeg
 file="$1"
 # https://stackoverflow.com/questions/12152626/how-can-i-remove-the-extension-of-a-filename-in-a-shell-script/32584935#32584935
 ext="$(echo "$file" | rev | cut -f 2- -d '.' | rev)"
-name="$(basename ${package} ${ext})"
+name="$(basename "$file" "$ext")"
 
 ffmpeg -i "$file" "${name}.mp4"
 

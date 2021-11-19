@@ -83,8 +83,9 @@
 [include]
 	path = .gitconfig_local
 
+[pull]
+	ff = only
+
 ; include for all repositories inside $HOME/projects/
 [includeIf "gitdir/i:~/projects/"]
 	path = ~/projects/.gitconfig
-[pull]
-	ff = only

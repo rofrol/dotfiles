@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # https://askubuntu.com/questions/1019464/desktop-shortcut-to-bash-script-crashes-and-burns/1019481#1019481
 function message() {

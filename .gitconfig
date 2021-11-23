@@ -27,7 +27,7 @@
 	bs = bisect
 	# https://stackoverflow.com/questions/43489971/how-to-suppress-the-editor-for-git-rebase-continue
 	grc = "!GIT_EDITOR=true git rebase --continue"
-	garc = "!git add -A && GIT_EDITOR=true git rebase --continue"
+	garc = "!git add -u && GIT_EDITOR=true git rebase --continue"
 	# https://stackoverflow.com/questions/5113425/how-to-make-git-log-show-all-of-todays-commits/5178739#5178739
 	# https://stackoverflow.com/questions/4479225/how-to-output-git-log-with-the-first-line-only/51997006#51997006
 	# https://stackoverflow.com/questions/4259996/how-can-i-view-a-git-log-of-just-one-users-commits/40743795#40743795

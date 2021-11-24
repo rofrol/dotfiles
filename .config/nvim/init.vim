@@ -424,6 +424,9 @@ nmap <silent> <leader>du :wincmd w<cr>:normal u<cr>:wincmd w<cr>
 " https://gist.github.com/jdhao/d592ba03a8862628f31cba5144ea04c2#file-options-vim-L20
 " https://stackoverflow.com/questions/30691466/what-is-difference-between-vims-clipboard-unnamed-and-unnamedplus-settings/30691754#30691754
 "set clipboard^=unnamed,unnamedplus
+" If you are using Linux, you need to install xclip if using X11 or wl-copy and wl-paste if using Wayland
+" https://discourse.nixos.org/t/how-to-support-clipboard-for-neovim/9534/3
+" or xsel https://github.com/neovim/neovim/issues/7945#issuecomment-361970165
 set clipboard=unnamedplus
 
 " https://stackoverflow.com/questions/290465/how-to-paste-over-without-overwriting-register/4446608#4446608

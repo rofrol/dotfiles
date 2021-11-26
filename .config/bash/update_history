@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows/48114#48114
-savePS1=$PS1
-PS1=$savePS1$(history -a; history -r)
+SAVE_PS1=$PS1
+PS1=$SAVE_PS1$(history -a; history -r)
 
 # https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows/309087#309087
 # https://askubuntu.com/questions/80371/bash-history-handling-with-multiple-terminals/80882#80882

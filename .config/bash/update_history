@@ -8,4 +8,12 @@ PS1=$savePS1$(history -a; history -r)
 # https://askubuntu.com/questions/80371/bash-history-handling-with-multiple-terminals/80882#80882
 # https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows/430128#430128
 shopt -s histappend
-PROMPT_COMMAND="history -a; history -c; history -r"
+_bash_history_append() {
+    builtin history -a
+    builtin history -c
+    builtin history -r
+}
+
+# It is good to prepend _bash_history_append to default PROMPT_COMMAND, because in default we can have something like __vte_prompt_command, which will keep current directory when opening new tabs in gnome-terminal etc.
+# So we remove prefix _bash_history_append from PROMPT_COMMAND and so there are no repetitions.
+PROMPT_COMMAND="_bash_history_append;${PROMPT_COMMAND#"_bash_history_append;"}"

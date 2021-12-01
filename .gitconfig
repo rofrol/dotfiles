@@ -86,6 +86,9 @@
 [pull]
 	ff = only
 
+[fetch]
+	prune = true
+
 ; include for all repositories inside $HOME/projects/
 [includeIf "gitdir/i:~/projects/"]
 	path = ~/projects/.gitconfig

@@ -38,8 +38,8 @@ if [ "$(lsb_release -i | xargs)" = "Distributor ID: Debian" ]; then
 fi
 
 # https://github.com/Schniz/fnm
-export PATH=/home/roman/.fnm:$PATH
-eval "`fnm env`"
+#export PATH=/home/roman/.fnm:$PATH
+#eval "`fnm env`"
 
 # for pip
 export PATH=$PATH:~/.local/bin
@@ -58,7 +58,7 @@ alias ncdumpv='NCDU_SHELL="mpv_playlist.sh" ncdu'
 alias watch='watch '
 
 # https://nixos.org/guides/declarative-and-reproducible-developer-environments.html#declarative-reproducible-envs
-eval "$(direnv hook bash)"
+#eval "$(direnv hook bash)"
 
 source ~/.config/bash/update_history
 

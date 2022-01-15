@@ -1,0 +1,18 @@
+--windows-filenames
+--write-subs
+--write-auto-subs
+#--embed-subs
+--sub-format srt
+--convert-subs srt
+--sub-langs en
+--embed-metadata
+--embed-thumbnail
+--embed-chapters
+--merge-output-format mkv
+--sponsorblock-remove sponsor,selfpromo,interaction
+--no-mtime
+--no-abort-on-error
+#--skip-playlist-after-errors 20
+--playlist-reverse
+-P "~/storage/shared/Download/"
+-o "%(extractor)s/%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s [%(id)s].%(ext)s"

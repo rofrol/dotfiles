@@ -27,7 +27,7 @@ function check_command() {
 check_command ffmpeg
 
 file="$1"
-# https://stackoverflow.com/questions/12152626/how-can-i-remove-the-extension-of-a-filename-in-a-shell-script/32584935#32584935
+# https://stackoverflow.com/questions/965053/extract-filename-and-extension-in-bash/965069#965069
 ext="${file##*.}"
 name="$(basename "$file" ."$ext")"
 

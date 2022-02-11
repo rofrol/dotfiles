@@ -7,7 +7,7 @@ After cloning repository:
 ```bash
 # git clone <your dotfiles repo>
 cp -r dotfiles/.git ~/.dotfiles.git
-source dotfiles/.config/bash/dotfiles.sh
+source dotfiles/dotfiles.sh
 export DOTFILES_HOME=$HOME/.dotfiles.git
 don
 # .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name

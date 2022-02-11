@@ -62,6 +62,9 @@
 !/README.md
 !/.global_gitignore
 !/.dotfiles.gitignore
+!/dotfiles.sh
+!/dotfiles.zsh
+!/.zprofile
 !/.gitconfig
 
 # and a selection of hidden configuration files.

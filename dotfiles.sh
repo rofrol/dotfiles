@@ -40,12 +40,26 @@ don() {
     export GIT_PS1_FMT=" (dotfiles: %s)"
 
     set +u
-    . "$HOME/.bashrc"  # refresh aliases such as g=git to include the safeguard
+
+    if [ -n "$ZSH_VERSION" ]; then
+      # assume Zsh
+    elif [ -n "$BASH_VERSION" ]; then
+      . "$HOME/.bashrc"  # refresh aliases such as g=git to include the safeguard
+    else
+      # assume something else
+    fi
 }
 
 dof() {
     unset -f git
-    . "$HOME/.bashrc"  # refresh aliases such as g=git to remove the safeguard
+    if [ -n "$ZSH_VERSION" ]; then
+      # assume Zsh
+    elif [ -n "$BASH_VERSION" ]; then
+      . "$HOME/.bashrc"  # refresh aliases such as g=git to include the safeguard
+    else
+      # assume something else
+    fi
+
     unset GIT_DIR; unset GIT_WORK_TREE
     unset GIT_PS1_FMT
     popd 1>/dev/null  # restore previous location

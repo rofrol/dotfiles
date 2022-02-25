@@ -8,3 +8,13 @@ export NVM_DIR="$HOME/.nvm"
 
 export DOTFILES_HOME=$HOME/.dotfiles.git
 source $HOME/dotfiles.sh
+
+export PATH=$PATH:~/bin
+
+export PATH=$PATH:$HOME/.local/zig/current
+
+alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
+
+alias gitka='gitk --all &'
+
+alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'

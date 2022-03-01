@@ -94,3 +94,7 @@
 !/.local/share/nautilus/
 /.local/share/nautilus/*
 !/.local/share/nautilus/scripts
+
+!/.config/karabiner/
+/.config/karabiner/*
+!/.config/karabiner/karabiner.json

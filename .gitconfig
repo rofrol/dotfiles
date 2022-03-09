@@ -57,6 +57,7 @@
 	excludesfile = ~/.global_gitignore
 	commitGraph = true
 	autocrlf = false
+	editor = nvim
 #[pager]
 #    # cargo install diffr
 #    log  = diffr --colors refine-removed:background:200,0,0:foreground:white:bold | less -R

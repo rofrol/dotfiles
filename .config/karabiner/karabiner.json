@@ -179,6 +179,16 @@
                                     "key_code": "left_command"
                                 }
                             ]
+                        },
+                        {
+                            "from": {
+                                "key_code": "right_command"
+                            },
+                            "to": [
+                                {
+                                    "key_code": "right_option"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -402,7 +412,7 @@
                     },
                     "to": [
                         {
-                            "key_code": "f1"
+                            "consumer_key_code": "display_brightness_decrement"
                         }
                     ]
                 },
@@ -412,7 +422,7 @@
                     },
                     "to": [
                         {
-                            "key_code": "f2"
+                            "consumer_key_code": "display_brightness_increment"
                         }
                     ]
                 },
@@ -442,7 +452,7 @@
                     },
                     "to": [
                         {
-                            "key_code": "f5"
+                            "consumer_key_code": "dictation"
                         }
                     ]
                 },

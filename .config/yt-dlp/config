@@ -14,5 +14,6 @@
 --no-abort-on-error
 #--skip-playlist-after-errors 20
 --playlist-reverse
--P "~/storage/shared/Download/"
--o "%(extractor)s/%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s [%(id)s].%(ext)s"
+#-P "~/storage/shared/Download/"
+#-o "%(extractor)s/%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s [%(id)s].%(ext)s"
+-o "%(title)s.%(ext)s"

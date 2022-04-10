@@ -18,3 +18,9 @@ alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
 alias gitka='gitk --all &'
 
 alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
+
+export PATH=/opt/homebrew/opt/python@3.9/libexec/bin:$PATH
+
+export PATH=/opt/homebrew/opt/keydb/bin/:$PATH
+
+alias update-brew='brew update && brew upgrade --cask --greedy && brew cleanup'

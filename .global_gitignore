@@ -6,3 +6,5 @@ rustfmt.toml
 .nvim_session.vim
 .vscode
 debug.log
+.DS_Store
+.vsconfig

@@ -24,3 +24,14 @@ export PATH=/opt/homebrew/opt/python@3.9/libexec/bin:$PATH
 export PATH=/opt/homebrew/opt/keydb/bin/:$PATH
 
 alias update-brew='brew update && brew upgrade --cask --greedy && brew cleanup'
+
+export EDITOR=nvim
+
+# https://apple.stackexchange.com/questions/88515/how-do-i-edit-current-shell-command-in-vi/443515#443515
+# https://nuclearsquid.com/writings/edit-long-commands/
+# Enable Ctrl-x-e to edit command line
+autoload -U edit-command-line
+# Emacs style
+zle -N edit-command-line
+bindkey '^xe' edit-command-line
+bindkey '^x^e' edit-command-line

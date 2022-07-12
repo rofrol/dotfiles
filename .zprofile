@@ -23,7 +23,7 @@ export PATH=/opt/homebrew/opt/python@3.9/libexec/bin:$PATH
 
 export PATH=/opt/homebrew/opt/keydb/bin/:$PATH
 
-alias update-brew='brew update && brew upgrade --cask --greedy && brew cleanup'
+alias update-brew='brew update && brew upgrade && brew upgrade --cask --greedy && brew cleanup'
 
 export EDITOR=nvim
 
@@ -35,3 +35,7 @@ autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '^xe' edit-command-line
 bindkey '^x^e' edit-command-line
+
+export PATH=~/.bun/bin:$PATH
+
+export PATH=~/.bun/bin:$PATH

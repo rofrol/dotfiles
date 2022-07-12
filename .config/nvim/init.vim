@@ -653,6 +653,12 @@ function! DefaultWorkspace()
 endfunction
 command! -register DefaultWorkspace call DefaultWorkspace()
 
+" https://gpanders.com/blog/whats-new-in-neovim-0-7
+let g:do_filetype_lua = 1
+let g:did_load_filetypes = 0
+set laststatus=3
+
+
 " https://medium.com/@garoth/neovim-terminal-usecases-tricks-8961e5ac19b9#.wewpz5kgy
 " look at ~/.config/nvim/.nvim_session.example.vim and ~/.config/nvim/.nvim_session.example2.vim
 

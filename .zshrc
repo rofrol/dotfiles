@@ -17,11 +17,9 @@ alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
 
 alias gitka='gitk --all &'
 
-alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
+export PATH="$(brew --prefix python)/libexec/bin":$PATH
 
-export PATH=/opt/homebrew/opt/python@3.9/libexec/bin:$PATH
-
-export PATH=/opt/homebrew/opt/keydb/bin/:$PATH
+export PATH="$(brew --prefix keydb)/bin":$PATH
 
 alias update-brew='brew update && brew upgrade && brew upgrade --cask --greedy && brew cleanup'
 
@@ -38,4 +36,8 @@ bindkey '^x^e' edit-command-line
 
 export PATH=~/.bun/bin:$PATH
 
-export PATH=~/.bun/bin:$PATH
+eval "$(direnv hook zsh)"
+
+function zigtestfile() {
+  watchexec -w "$1" 'echo -e "\n\n------ test run"; zig test $1"
+}

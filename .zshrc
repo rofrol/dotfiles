@@ -39,5 +39,6 @@ export PATH=~/.bun/bin:$PATH
 eval "$(direnv hook zsh)"
 
 function zigtestfile() {
-  watchexec -w "$1" 'echo -e "\n\n------ test run"; zig test $1"
+    d=$(date -u +%FT%TZ)
+    watchexec -w "$1" "echo -e \"\n\n${d}: zig test run\"; zig test $1"
 }

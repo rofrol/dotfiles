@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo -e "\n\n$(date +%FT%TZ): zig test run ---------"
+zig test $1

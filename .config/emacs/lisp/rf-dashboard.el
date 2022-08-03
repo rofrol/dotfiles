@@ -1,7 +1,7 @@
 ;;; -*- lexical-binding: t; -*-
 
 ;; https://www.reddit.com/r/emacs/comments/8jaflq/tip_how_to_use_your_dashboard_properly/
-(rc/require 'dashboard)
+(rf/require 'dashboard)
 (dashboard-setup-startup-hook)
 (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
 

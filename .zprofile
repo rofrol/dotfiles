@@ -36,9 +36,10 @@ bindkey '^x^e' edit-command-line
 
 export PATH=~/.bun/bin:$PATH
 
-eval "$(direnv hook zsh)"
+#eval "$(direnv hook zsh)"
 
-function zigtestfile() {
-    d=$(date -u +%FT%TZ)
-    watchexec -w "$1" "echo -e \"\n\n${d}: zig test run\"; zig test $1"
-}
+export PATH=~/zls:$PATH
+
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)

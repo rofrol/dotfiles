@@ -7,3 +7,4 @@
 (require 'rf-custom)
 (require 'rf-current-time)
 (require 'rf-dashboard)
+(require 'rf-misc)

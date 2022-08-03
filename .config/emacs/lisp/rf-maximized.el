@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 (when (eq system-type 'darwin)
   (when window-system
     ;; does not work when in early-init.el

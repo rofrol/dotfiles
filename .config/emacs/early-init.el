@@ -1,4 +1,4 @@
-;;; early-init.el -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t; -*-
 
 ;; Log startup stats
 ;; https://andrewjamesjohnson.com/modernizing-my-emacs-configuration/

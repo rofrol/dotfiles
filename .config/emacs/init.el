@@ -49,7 +49,7 @@
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c c") 'org-capture)
 
-;; https://www.reddit.com/r/emacs/comments/6iqtze/org_mreturn_annoyance/dj9l379/?utm_source=reddit&utm_medium=web2x&context=3
+;; https://www.reddit.com/r/emacs/comments/6iqtze/org_mreturn_annoyance/dj9l379/
 (setq org-M-RET-may-split-line '((item . nil)))
 
 ;; https://www.reddit.com/r/emacs/comments/o33r6z/how_do_i_swap_mreturn_and_return_in_orgmode/h2cejp5/

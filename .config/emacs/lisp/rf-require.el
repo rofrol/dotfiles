@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 ;; https://github.com/rexim/dotfiles/blob/a529f79ffe3bac19fe1ce842c3296ad792757df7/.emacs.rc/rc.el#L1
 
 ;; without below error: Symbol's value as variable is void: "package-archives"

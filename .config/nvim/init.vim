@@ -52,6 +52,7 @@ Plug 'junegunn/fzf.vim'
 Plug 'zefei/vim-wintabs'
 Plug 'lambdalisue/suda.vim'
 Plug 'qpkorr/vim-bufkill'
+Plug 'ziglang/zig.vim'
 
 " =============================================================================
 " Rust

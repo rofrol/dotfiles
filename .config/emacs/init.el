@@ -12,3 +12,5 @@
 (require 'rf-multiple-cursors)
 (require 'rf-mwim)
 (require 'rf-dired)
+(require 'rf-zig)
+(require 'rf-compile)

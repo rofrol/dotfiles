@@ -15,3 +15,4 @@
 (require 'rf-zig)
 (require 'rf-compile)
 (require 'rf-expand-region)
+(require 'rf-which-func)

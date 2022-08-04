@@ -8,4 +8,5 @@
 (require 'rf-current-time)
 (require 'rf-dashboard)
 (require 'rf-misc)
-(require 'rf-tide)
+(require 'rf-tree-sitter)
+(require 'rf-multiple-cursors)

@@ -27,4 +27,7 @@
   (dolist (package packages)
     (rf/require-one-package package)))
 
+;; install from local or github etc.
+(rf/require 'quelpa)
+
 (provide 'rf-require)

@@ -10,3 +10,4 @@
 (require 'rf-misc)
 (require 'rf-tree-sitter)
 (require 'rf-multiple-cursors)
+(require 'rf-mwim)

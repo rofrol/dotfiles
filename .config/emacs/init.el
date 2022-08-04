@@ -11,3 +11,4 @@
 (require 'rf-tree-sitter)
 (require 'rf-multiple-cursors)
 (require 'rf-mwim)
+(require 'rf-dired)

@@ -21,4 +21,10 @@
 (setq recentf-auto-cleanup 'never)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)
 
+;; https://www.littlehart.net/atthekeyboard/2017/05/26/letting-emacs-into-your-grumpy-heart/
+;; You can disable backups, but that's a bad idea for obvious reasons https://superuser.com/questions/236883/why-does-emacs-create-a-file-that-starts-with
+(setq make-backup-files nil)
+;; http://emacsredux.com/blog/2013/05/09/keep-backup-and-auto-save-files-out-of-the-way/
+(setq auto-save-default nil)
+
 (provide 'rf-misc)

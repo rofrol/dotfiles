@@ -7,6 +7,8 @@
 
 (pixel-scroll-precision-mode t)
 
+;; prevent jumping when showing relative line number
+;; https://emacs.stackexchange.com/questions/55165/uneven-line-numbers-with-display-line-numbers/55166#55166
 (defun roforl/display-line-numbers-equalize ()
   "prevent jumping when showing relative line number"
   (setq display-line-numbers-width (length (number-to-string (line-number-at-pos (point-max))))))

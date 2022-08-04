@@ -14,3 +14,4 @@
 (require 'rf-dired)
 (require 'rf-zig)
 (require 'rf-compile)
+(require 'rf-expand-region)

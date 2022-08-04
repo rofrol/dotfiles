@@ -27,4 +27,7 @@
 ;; http://emacsredux.com/blog/2013/05/09/keep-backup-and-auto-save-files-out-of-the-way/
 (setq auto-save-default nil)
 
+;; https://emacs.stackexchange.com/questions/392/how-to-change-the-cursor-type-and-color/393#393
+(setq-default cursor-type 'bar)
+
 (provide 'rf-misc)

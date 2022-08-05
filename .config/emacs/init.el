@@ -9,6 +9,7 @@
 (require 'rf-dashboard)
 (require 'rf-misc)
 (require 'rf-tree-sitter)
+(require 'rf-prettier)
 (require 'rf-multiple-cursors)
 (require 'rf-mwim)
 (require 'rf-dired)
@@ -17,3 +18,4 @@
 (require 'rf-expand-region)
 (require 'rf-which-func)
 (require 'rf-ibuffer)
+(require 'rf-json)

@@ -39,11 +39,4 @@
 (rf/require 'prettier)
 (add-hook 'after-init-hook #'global-prettier-mode)
 
-;; indent as you code
-(quelpa '(tsi :repo "orzechowskid/tsi.el" :fetcher github))
-(with-eval-after-load 'tsi
-  (tsi-typescript-mode)
-  (tsi-json-mode)
-  (tsi-css-mode))
-
 (provide 'rf-tree-sitter)

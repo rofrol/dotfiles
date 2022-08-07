@@ -8,12 +8,16 @@
 (require 'rf-current-time)
 (require 'rf-dashboard)
 (require 'rf-misc)
+
 (require 'rf-tree-sitter)
+;; (require 'rf-tsi)
 (require 'rf-prettier)
 (require 'rf-multiple-cursors)
+
 (require 'rf-mwim)
 (require 'rf-dired)
 (require 'rf-zig)
+
 (require 'rf-compile)
 (require 'rf-expand-region)
 (require 'rf-which-func)

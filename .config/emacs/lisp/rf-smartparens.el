@@ -98,4 +98,10 @@ respectively."
     (define-key smartparens-mode-map (kbd "C-c _" 'wrap-with-underscores))
     (define-key smartparens-mode-map (kbd "C-c `" 'wrap-with-back-quotes)))
 
+;; does not work inside `(with-eval-after-load`
+;; https://github.com/oshima/dotfiles/blob/d933fad1d49758e75baf3c60ce127047cc3ef71d/.emacs.d/inits/20_smartparens.el#L8
+(setq sp-highlight-pair-overlay nil)
+(setq sp-highlight-wrap-overlay nil)
+(setq sp-highlight-wrap-tag-overlay nil)
+
 (provide 'rf-smartparens)

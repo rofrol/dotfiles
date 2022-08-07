@@ -104,4 +104,21 @@ respectively."
 (setq sp-highlight-wrap-overlay nil)
 (setq sp-highlight-wrap-tag-overlay nil)
 
+;; https://github.com/jaguirresza/.emacs.d/blob/a5f21a38bb69a61f7aa7485dc9d7c4cc85132158/settings/smart-parens.el#L22
+(when (fboundp 'sp-local-pair)
+  (sp-local-pair '(js-mode typescript-mode) "{" nil
+                 :when '(("RET"))
+                 :post-handlers '(:add rf/curly-braces-newline-handle)
+                 :actions '(insert)))
+
+(defun rf/curly-braces-newline-handle (id action context)
+  (when (eq action 'insert)
+    (save-excursion (newline-and-indent))
+    (indent-according-to-mode)))
+
+;; should I enable it?
+;; (setq sp-show-pair-delay 0)
+;; (setq sp-show-pair-from-inside t)
+;; (setq sp-cancel-autoskip-on-backward-movement nil)
+
 (provide 'rf-smartparens)

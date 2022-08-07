@@ -23,3 +23,4 @@
 (require 'rf-which-func)
 (require 'rf-ibuffer)
 (require 'rf-json)
+(require 'rf-smartparens)

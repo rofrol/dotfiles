@@ -104,12 +104,18 @@ respectively."
 (setq sp-highlight-wrap-overlay nil)
 (setq sp-highlight-wrap-tag-overlay nil)
 
+;; after RET indent and add }
 ;; https://github.com/jaguirresza/.emacs.d/blob/a5f21a38bb69a61f7aa7485dc9d7c4cc85132158/settings/smart-parens.el#L22
-(when (fboundp 'sp-local-pair)
-  (sp-local-pair '(js-mode typescript-mode) "{" nil
-                 :when '(("RET"))
-                 :post-handlers '(:add rf/curly-braces-newline-handle)
-                 :actions '(insert)))
+;; (when (fboundp 'sp-local-pair)
+;;   (sp-local-pair '(js-mode typescript-mode) "{" nil
+;;                  :when '(("RET"))
+;;                  :post-handlers '(:add rf/curly-braces-newline-handle)
+;;                  :actions '(insert)))
+
+;; insert {} and after RET indent
+;; https://github.com/ogdenwebb/snug-emacs/blob/5cfa136d5ba67d8dd20f4e963ef1be9757366ae1/use/use-sp.el#L14
+(sp-with-modes '(js-mode typescript-mode)
+  (sp-local-pair "{" nil :post-handlers '(:add ("||\n[i]" "RET"))))
 
 (defun rf/curly-braces-newline-handle (id action context)
   (when (eq action 'insert)

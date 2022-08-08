@@ -1,5 +1,6 @@
 ;;; -*- lexical-binding: t; -*-
 
+;; https://github.com/ogdenwebb/snug-emacs/blob/5cfa136d5ba67d8dd20f4e963ef1be9757366ae1/use/use-dired.el
 
 ;;; q will kill dired buffer, not just hide it
 ;; https://emacs.stackexchange.com/questions/54578/rebind-q-key-in-emacs-dired-to-the-command-kill-this-buffer#comment85263_54579
@@ -43,7 +44,17 @@
 
 (with-eval-after-load 'dired-x
   (setq dired-omit-files
-    (concat dired-omit-files "\\|^\\..+$\\|\\.pdf$\\|\\.tex$|\\.DS_Store"))
+    (concat dired-omit-files "\\|^\\..+$\\|\\.pdf$\\|\\.tex$|\\.DS_Store")
+        dired-hide-details-hide-symlink-targets nil
+        dired-omit-verbose nil
+        ;; The macOS system default ’ls’ command does not support option --quoting-style=literal
+        ;; https://github.com/yqrashawn/fd-dired
+        ;; https://stackoverflow.com/questions/57972341/how-to-install-and-use-gnu-ls-on-macos
+        dired-listing-switches "-AFhlv --group-directories-first"
+        dired-dwim-target t
+        dired-recursive-copies 'always
+        ;; dired-recursive-deletes 'always
+        )
   (add-hook 'dired-mode-hook (lambda () (dired-omit-mode 1))))
 
 (provide 'rf-dired)

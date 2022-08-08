@@ -43,3 +43,7 @@ export PATH=~/zls:$PATH
 
 # Load Angular CLI autocompletion.
 source <(ng completion script)
+
+
+# https://stackoverflow.com/questions/57972341/how-to-install-and-use-gnu-ls-on-macos
+alias ls="/opt/homebrew/opt/coreutils/libexec/gnubin/ls"

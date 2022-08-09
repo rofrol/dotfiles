@@ -119,8 +119,8 @@ respectively."
 
 ;; insert {} and after RET indent
 ;; https://github.com/ogdenwebb/snug-emacs/blob/5cfa136d5ba67d8dd20f4e963ef1be9757366ae1/use/use-sp.el#L14
-;; (sp-with-modes '(js-mode typescript-mode)
-;;   (sp-local-pair "{" nil :post-handlers '(:add ("||\n[i]" "RET"))))
+(sp-with-modes '(js-mode typescript-mode)
+  (sp-local-pair "{" nil :post-handlers '(:add ("||\n[i]" "RET"))))
 
 ;; should I enable it?
 ;; (setq sp-show-pair-delay 0)

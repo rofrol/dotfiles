@@ -112,15 +112,15 @@ respectively."
 ;;                  :post-handlers '(:add rf/curly-braces-newline-handle)
 ;;                  :actions '(insert)))
 
-;; insert {} and after RET indent
-;; https://github.com/ogdenwebb/snug-emacs/blob/5cfa136d5ba67d8dd20f4e963ef1be9757366ae1/use/use-sp.el#L14
-(sp-with-modes '(js-mode typescript-mode)
-  (sp-local-pair "{" nil :post-handlers '(:add ("||\n[i]" "RET"))))
-
 (defun rf/curly-braces-newline-handle (id action context)
   (when (eq action 'insert)
     (save-excursion (newline-and-indent))
     (indent-according-to-mode)))
+
+;; insert {} and after RET indent
+;; https://github.com/ogdenwebb/snug-emacs/blob/5cfa136d5ba67d8dd20f4e963ef1be9757366ae1/use/use-sp.el#L14
+;; (sp-with-modes '(js-mode typescript-mode)
+;;   (sp-local-pair "{" nil :post-handlers '(:add ("||\n[i]" "RET"))))
 
 ;; should I enable it?
 ;; (setq sp-show-pair-delay 0)

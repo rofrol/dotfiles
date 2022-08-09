@@ -34,4 +34,6 @@
 ;; M-: (prettier-enabled-parsers) RET
 ;; https://github.com/jscheid/prettier.el/issues/101#issuecomment-1134475617
 
+;; needed to install prettier with `npm i -g prettier` and `M-x prettier-restart`.
+
 (provide 'rf-prettier)

@@ -7,7 +7,6 @@
 (require 'rf-custom)
 (require 'rf-current-time)
 (require 'rf-dashboard)
-(require 'rf-misc)
 (require 'rf-tree-sitter)
 (require 'rf-tsi)
 (require 'rf-prettier)
@@ -21,3 +20,4 @@
 (require 'rf-ibuffer)
 (require 'rf-json)
 (require 'rf-smartparens)
+(require 'rf-misc)

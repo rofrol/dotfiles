@@ -10,4 +10,4 @@
   (tsi-json-mode)
   (tsi-css-mode))
 
-(provide 'rf-tree-sitter)
+(provide 'rf-tsi)

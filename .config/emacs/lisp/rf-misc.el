@@ -46,4 +46,8 @@
 
 (global-set-key [(control shift k)] 'rofrol/delete-whole-line)
 
+;; https://emacs.stackexchange.com/questions/41230/wraparound-search-with-isearch-mode/41233#41233
+(define-key isearch-mode-map (kbd "C-s") 'isearch-repeat-forward)
+(define-key isearch-mode-map (kbd "C-r") 'isearch-repeat-forward)
+
 (provide 'rf-misc)

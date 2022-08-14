@@ -45,21 +45,25 @@
 ;; https://unix.stackexchange.com/questions/26360/emacs-deleting-a-line-without-sending-it-to-the-kill-ring/136581#136581
 ;; https://www.emacswiki.org/emacs/BackwardKillLine
 ;; https://emacs.stackexchange.com/questions/12701/kill-a-line-deletes-the-line-but-leaves-a-blank-newline-character/12702#12702
-(defun sto/kill-whole-line ()
+(defun rf/kill-whole-line ()
   "Kill whole line but retain cursor position instead of moving to start of next line."
   (interactive)
   (let ((n (current-column)))
     (kill-whole-line)
-    (move-to-column n t)))
+    ;; do not move-to-column if that will add whitespaces at the end of line
+    ;; https://emacs.stackexchange.com/questions/13068/is-there-a-function-that-returns-the-position-of-the-first-and-last-non-whitespa
+    (if (< n (- (line-end-position) (line-beginning-position)))
+      (move-to-column n t)
+      (end-of-line))))
 
-(defun sto/kill-line-or-region ()
+(defun rf/kill-line-or-region ()
   "If no region is selected kill the current line otherwise kill region."
   (interactive)
   (if (use-region-p)
       (kill-region (region-beginning) (region-end) t)
-    (sto/kill-whole-line)))
+    (rf/kill-whole-line)))
 
-(global-set-key (kbd "C-S-k") 'sto/kill-line-or-region)
+(global-set-key (kbd "C-S-k") 'rf/kill-line-or-region)
 
 ;; https://emacs.stackexchange.com/questions/20896/change-the-behaviour-of-ret-with-electric-indent-to-only-indent-the-new-line/20899#20899
 ;; https://www.emacswiki.org/emacs/IndentationBasics

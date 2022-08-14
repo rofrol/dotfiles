@@ -46,10 +46,6 @@
 
 (global-set-key [(control shift k)] 'rofrol/delete-whole-line)
 
-;; https://emacs.stackexchange.com/questions/41230/wraparound-search-with-isearch-mode/41233#41233
-(define-key isearch-mode-map (kbd "C-s") 'isearch-repeat-forward)
-(define-key isearch-mode-map (kbd "C-r") 'isearch-repeat-forward)
-
 ;; https://emacs.stackexchange.com/questions/20896/change-the-behaviour-of-ret-with-electric-indent-to-only-indent-the-new-line/20899#20899
 ;; https://www.emacswiki.org/emacs/IndentationBasics
 ;; Emacs does enable the global electric-indent-mode by default
@@ -61,5 +57,23 @@
 (add-hook 'js-mode-hook
   (lambda ()
     (setq js-switch-indent-offset js-indent-level)))
+
+;; Prevents issue where you have to press backspace twice when
+;; trying to remove the first character that fails a search
+;; https://stackoverflow.com/questions/285660/automatically-wrapping-i-search/36707038#36707038
+(define-key isearch-mode-map [remap isearch-delete-char] 'isearch-del-char)
+
+;; when I do an incremental search, the cursor jumps to the first match
+;; whether the first match is above or below the cursor
+;; https://stackoverflow.com/questions/285660/automatically-wrapping-i-search
+;; (setq isearch-wrap-pause 'no-ding) not for incremental search, only for repeated
+;; https://stackoverflow.com/questions/72957940/setting-isearch-wrap-pause-in-emacs-28/73071338#73071338
+(defadvice isearch-search (after isearch-no-fail activate)
+  (unless isearch-success
+    (ad-disable-advice 'isearch-search 'after 'isearch-no-fail)
+    (ad-activate 'isearch-search)
+    (isearch-repeat (if isearch-forward 'forward))
+    (ad-enable-advice 'isearch-search 'after 'isearch-no-fail)
+    (ad-activate 'isearch-search)))
 
 (provide 'rf-misc)

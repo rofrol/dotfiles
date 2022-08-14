@@ -30,21 +30,26 @@
 ;; https://emacs.stackexchange.com/questions/392/how-to-change-the-cursor-type-and-color/393#393
 (setq-default cursor-type 'bar)
 
+;; https://emacs.stackexchange.com/questions/24678/kill-the-current-line-and-preserving-cursor-position/49060#49060
 ;; https://stackoverflow.com/questions/637351/emacs-how-to-delete-text-without-kill-ring/65100416#65100416
 ;; https://unix.stackexchange.com/questions/26360/emacs-deleting-a-line-without-sending-it-to-the-kill-ring/136581#136581
 ;; https://www.emacswiki.org/emacs/BackwardKillLine
 ;; https://emacs.stackexchange.com/questions/12701/kill-a-line-deletes-the-line-but-leaves-a-blank-newline-character/12702#12702
-(defun rofrol/delete-whole-line ()
+(defun sto/kill-whole-line ()
+  "Kill whole line but retain cursor position instead of moving to start of next line."
   (interactive)
-  (let (kill-ring)
-    (kill-whole-line)))
-;; Same but long version
-;;  (delete-region
-;;   (point)
-;;   (save-excursion (move-end-of-line 1) (point)))
-;;  (delete-char 1))
+  (let ((n (current-column)))
+    (kill-whole-line)
+    (move-to-column n t)))
 
-(global-set-key [(control shift k)] 'rofrol/delete-whole-line)
+(defun sto/kill-line-or-region ()
+  "If no region is selected kill the current line otherwise kill region."
+  (interactive)
+  (if (use-region-p)
+      (kill-region (region-beginning) (region-end) t)
+    (sto/kill-whole-line)))
+
+(global-set-key (kbd "C-S-k") 'sto/kill-line-or-region)
 
 ;; https://emacs.stackexchange.com/questions/20896/change-the-behaviour-of-ret-with-electric-indent-to-only-indent-the-new-line/20899#20899
 ;; https://www.emacswiki.org/emacs/IndentationBasics

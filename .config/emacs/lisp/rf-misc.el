@@ -61,11 +61,15 @@
 ;; https://emacs.stackexchange.com/questions/29973/stop-javascript-mode-from-lining-up-function-parameters-after-newline/34534#34534
 (add-hook 'js-mode-hook
   (lambda ()
-    (setq js-switch-indent-offset js-indent-level
-          ;; when pressing RET in `console.log('Example',` indent only once
-          ;; https://emacs.stackexchange.com/questions/29780/changing-how-argument-lists-are-indented-in-javascript/34030#34030
-          ;; https://emacs.stackexchange.com/questions/29973/stop-javascript-mode-from-lining-up-function-parameters-after-newline/34534#34534
-          js-indent-align-list-continuation nil)))
+    (setq
+      ;; https://emacs.stackexchange.com/questions/72678/switch-casess-code-block-doesnt-get-indented-in-javascript-mode/73072#73072
+      ;; https://emacs.stackexchange.com/questions/54255/customize-js2-mode-switch-indentation
+      ;; https://stackoverflow.com/questions/4177929/how-to-change-the-indentation-width-in-emacs-javascript-mode/4178127#4178127
+      js-switch-indent-offset js-indent-level
+      ;; when pressing RET in `console.log('Example',` indent only once
+      ;; https://emacs.stackexchange.com/questions/29780changing-how-argument-lists-are-indented-in-javascript/34030#34030
+      ;; https://emacs.stackexchange.com/questions/29973stop-javascript-mode-from-lining-up-function-parameters-after-newline/34534#34534
+      js-indent-align-list-continuation nil)))
 
 ;; Prevents issue where you have to press backspace twice when
 ;; trying to remove the first character that fails a search

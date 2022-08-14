@@ -50,4 +50,16 @@
 (define-key isearch-mode-map (kbd "C-s") 'isearch-repeat-forward)
 (define-key isearch-mode-map (kbd "C-r") 'isearch-repeat-forward)
 
+;; https://emacs.stackexchange.com/questions/20896/change-the-behaviour-of-ret-with-electric-indent-to-only-indent-the-new-line/20899#20899
+;; https://www.emacswiki.org/emacs/IndentationBasics
+;; Emacs does enable the global electric-indent-mode by default
+;; https://www.reddit.com/r/emacs/comments/g0v57a/comment/fnd5lg4/
+(setq-default electric-indent-inhibit t)
+
+
+;; https://emacs.stackexchange.com/questions/29973/stop-javascript-mode-from-lining-up-function-parameters-after-newline/34534#34534
+(add-hook 'js-mode-hook
+  (lambda ()
+    (setq js-switch-indent-offset js-indent-level)))
+
 (provide 'rf-misc)

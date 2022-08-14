@@ -56,7 +56,11 @@
 ;; https://emacs.stackexchange.com/questions/29973/stop-javascript-mode-from-lining-up-function-parameters-after-newline/34534#34534
 (add-hook 'js-mode-hook
   (lambda ()
-    (setq js-switch-indent-offset js-indent-level)))
+    (setq js-switch-indent-offset js-indent-level
+          ;; when pressing RET in `console.log('Example',` indent only once
+          ;; https://emacs.stackexchange.com/questions/29780/changing-how-argument-lists-are-indented-in-javascript/34030#34030
+          ;; https://emacs.stackexchange.com/questions/29973/stop-javascript-mode-from-lining-up-function-parameters-after-newline/34534#34534
+          js-indent-align-list-continuation nil)))
 
 ;; Prevents issue where you have to press backspace twice when
 ;; trying to remove the first character that fails a search

@@ -24,8 +24,18 @@
 ;; https://www.littlehart.net/atthekeyboard/2017/05/26/letting-emacs-into-your-grumpy-heart/
 ;; You can disable backups, but that's a bad idea for obvious reasons https://superuser.com/questions/236883/why-does-emacs-create-a-file-that-starts-with
 (setq make-backup-files nil)
+;; https://www.emacswiki.org/emacs/AutoSave
 ;; http://emacsredux.com/blog/2013/05/09/keep-backup-and-auto-save-files-out-of-the-way/
 (setq auto-save-default nil)
+
+;; https://www.reddit.com/r/emacs/comments/29zm3q/comment/ciq24je/
+;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Interlocking.html#Interlocking
+;; https://stackoverflow.com/questions/1629217/emacs-why-do-i-have-hashes-at-the-ends-of-my-file-names-i-e-test-c/72027075#72027075
+;; https://stackoverflow.com/questions/5738170/why-does-emacs-create-temporary-symbolic-links-for-modified-files
+;; https://emacs.stackexchange.com/questions/8193/untracked-file-in-a-git-repository
+;; https://emacs.stackexchange.com/questions/55089/emacs-leaving-behind-files-preceded-with-despite-lock-files-being-disabled
+;; https://www.emacswiki.org/emacs/LockFiles
+(setq create-lockfiles nil)
 
 ;; https://emacs.stackexchange.com/questions/392/how-to-change-the-cursor-type-and-color/393#393
 (setq-default cursor-type 'bar)

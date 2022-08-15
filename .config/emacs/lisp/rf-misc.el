@@ -103,4 +103,15 @@
     (ad-enable-advice 'isearch-search 'after 'isearch-no-fail)
     (ad-activate 'isearch-search)))
 
+;; https://emacs.stackexchange.com/questions/42104/create-a-new-file-in-a-new-folder/42111#42111
+;; https://www.iqbalansari.me/blog/2014/12/07/automatically-create-parent-directories-on-visiting-a-new-file-in-emacs/
+(defun rofrol/create-non-existent-directory ()
+  (let ((parent-directory (file-name-directory buffer-file-name)))
+    (when (and (not (file-exists-p parent-directory))
+               (y-or-n-p (format "Directory `%s' does not exist! Create it?" parent-directory)))
+      (make-directory parent-directory t))))
+
+(add-to-list 'find-file-not-found-functions #'rofrol/create-non-existent-directory)
+
+
 (provide 'rf-misc)

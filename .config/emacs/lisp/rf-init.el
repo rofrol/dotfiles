@@ -7,12 +7,25 @@
 
 (pixel-scroll-precision-mode t)
 
+;; (global-display-line-numbers-mode)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+
+;; these two does not work to prevent jumping/shifting in absolute line number
+;; (setq display-line-numbers-width-start t)
+;; (setq display-line-numbers-width-start 5)
+
+;; with this there is only one jump when grows in absolute line number
+;; https://www.reddit.com/r/emacs/comments/8pfdlb/comment/e0bh22k/
+(setq display-line-numbers-grow-only t)
+
+(setq display-line-numbers-type 'relative)
+
 ;; prevent jumping when showing relative line number
 ;; https://emacs.stackexchange.com/questions/55165/uneven-line-numbers-with-display-line-numbers/55166#55166
-(defun roforl/display-line-numbers-equalize ()
+(defun rf/display-line-numbers-equalize ()
   "prevent jumping when showing relative line number"
   (setq display-line-numbers-width (length (number-to-string (line-number-at-pos (point-max))))))
-(add-hook 'find-file-hook 'roforl/display-line-numbers-equalize)
+(add-hook 'find-file-hook 'rf/display-line-numbers-equalize)
 
 (tool-bar-mode 0)
 (menu-bar-mode 0)

@@ -155,4 +155,8 @@
 (global-set-key (kbd "M-<up>") 'rofrol/move-lines-up)
 (global-set-key (kbd "M-<down>") 'rofrol/move-lines-down)
 
+;; disable text resize with ctrl+mouse wheel/touchpad scroll
+(global-unset-key (kbd "C-<wheel-up>"))
+(global-unset-key (kbd "C-<wheel-down>"))
+
 (provide 'rf-misc)

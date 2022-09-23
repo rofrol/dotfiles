@@ -36,14 +36,42 @@ bindkey '^x^e' edit-command-line
 
 export PATH=~/.bun/bin:$PATH
 
-#eval "$(direnv hook zsh)"
-
-export PATH=~/zls:$PATH
-
-
 # Load Angular CLI autocompletion.
 source <(ng completion script)
 
+
+#eval "$(direnv hook zsh)"
+
+# somehow ng needs to be before load-nvmrc
+# also errors with pushd
+
+# https://github.com/nvm-sh/nvm#zsh
+# https://stackoverflow.com/questions/23556330/run-nvm-use-automatically-every-time-theres-a-nvmrc-file-on-the-directory/39519460#39519460
+# https://github.com/daliusd/cfg/blob/69828995023cd0d1ccac0e42b13419428dca7766/.bash_private#L53
+# https://blog.ffff.lt/posts/fnm-on-cd/
+# place this after nvm initialization!
+autoload -U add-zsh-hook
+load-nvmrc() {
+  local node_version="$(nvm version)"
+  local nvmrc_path="$(nvm_find_nvmrc)"
+
+  if [ -n "$nvmrc_path" ]; then
+    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+
+    if [ "$nvmrc_node_version" = "N/A" ]; then
+      nvm install
+    elif [ "$nvmrc_node_version" != "$node_version" ]; then
+      nvm use
+    fi
+  elif [ "$node_version" != "$(nvm version default)" ]; then
+    echo "Reverting to nvm default version"
+    nvm use default
+  fi
+}
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
+
+export PATH=~/zls:$PATH
 
 # https://stackoverflow.com/questions/57972341/how-to-install-and-use-gnu-ls-on-macos
 alias ls="/opt/homebrew/opt/coreutils/libexec/gnubin/ls"

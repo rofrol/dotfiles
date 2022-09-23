@@ -24,7 +24,11 @@ dotfiles() {
 
 # Alternative #2: environment modification
 don() {
-    set -u
+    # commenting out `set -u` and `set +u` because of this error
+    # nvm: parameter not set
+    # after setting https://github.com/nvm-sh/nvm#zsh
+
+    #set -u
     GIT_BIN=`which git`
     # add safeguard against git clean
     git() {
@@ -39,7 +43,7 @@ don() {
     export GIT_DIR="$DOTFILES_HOME"; export GIT_WORK_TREE="$HOME"
     export GIT_PS1_FMT=" (dotfiles: %s)"
 
-    set +u
+    #set +u
 
     if [ -n "$ZSH_VERSION" ]; then
       # assume Zsh

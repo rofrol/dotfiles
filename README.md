@@ -6,9 +6,9 @@ After cloning repository:
 
 ```bash
 # git clone <your dotfiles repo>
-cp -r dotfiles/.git ~/.dotfiles.git
-source dotfiles/dotfiles.sh
+mv dotfiles/.git ~/.dotfiles.git
 export DOTFILES_HOME=$HOME/.dotfiles.git
+source dotfiles/dotfiles.sh
 don
 # .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name
 git config core.excludesFile .dotfiles.gitignore

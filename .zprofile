@@ -21,7 +21,8 @@ export PATH="$(brew --prefix python)/libexec/bin":$PATH
 
 export PATH="$(brew --prefix keydb)/bin":$PATH
 
-alias update-brew='brew update && brew upgrade && brew upgrade --cask --greedy && brew cleanup'
+alias brew-update='brew update && brew upgrade && brew upgrade --cask --greedy && brew cleanup'
+alias brew-packages='{brew leaves --installed-on-request & brew list --cask -1;} | sort | uniq'
 
 export EDITOR=nvim
 

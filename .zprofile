@@ -38,7 +38,7 @@ bindkey '^x^e' edit-command-line
 export PATH=~/.bun/bin:$PATH
 
 # Load Angular CLI autocompletion.
-source <(ng completion script)
+#source <(ng completion script)
 
 
 #eval "$(direnv hook zsh)"
@@ -95,3 +95,6 @@ unset __conda_setup
 export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
+
+export PATH=$PATH:$HOME/.local/zig/current
+export PATH=$PATH:$HOME/zls

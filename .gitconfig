@@ -12,7 +12,7 @@
 	sw = switch
 	re = restore
 	br = branch
-	brc = rev-parse --abbrev-ref HEAD
+	brc = branch --show-current
 	# Provide string with spaces. Replace spaces with underscores. Change branch name to this new string.
 	# https://stackoverflow.com/questions/1706431/the-easiest-way-to-replace-white-spaces-with-underscores-in-bash/1706449#1706449
 	st = status -sb

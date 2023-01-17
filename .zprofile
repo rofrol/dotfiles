@@ -11,7 +11,10 @@ source $HOME/dotfiles.sh
 
 export PATH=$PATH:~/bin
 
-export PATH=$PATH:$HOME/.local/zig/current
+#export PATH=$PATH:~/.zvm/bin
+#export PATH=$PATH:$HOME/.local/zig/current
+export PATH=$PATH:$HOME/personal_projects/zig/vendor/zig/stage3/bin/
+
 
 alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
 
@@ -98,3 +101,13 @@ eval "$(pyenv init -)"
 
 export PATH=$PATH:$HOME/.local/zig/current
 export PATH=$PATH:$HOME/zls
+export PATH=$PATH:~/.pyenv/shims/yt-dlp
+export PATH=$PATH:/opt/homebrew/bin/
+export PATH=$PATH:~/personal_projects/zig/vendor/sm2/zig-out/bin/
+
+# https://blog.remibergsma.com/2012/07/10/setting-locales-correctly-on-mac-osx-terminal-application/
+export LC_MESSAGES=en_US.UTF-8
+
+export PATH=$PATH:~/bin/roc
+
+source "$HOME/.cargo/env"

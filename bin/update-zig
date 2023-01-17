@@ -1,0 +1,17 @@
+#!/bin/bash
+
+zig version
+
+ZIG_BOOTSTRAP="$HOME/personal_projects/zig/vendor/zig-bootstrap"
+ZIG_PREFIX=$ZIG_BOOTSTRAP/out/zig-aarch64-macos-none-native
+LLVM_PREFIX=$ZIG_BOOTSTRAP/out/aarch64-macos-none-native
+
+cd $HOME/personal_projects/zig/vendor/zig
+git pull --ff-only
+time "$ZIG_PREFIX/bin/zig" build \
+  -p stage3 \
+  --search-prefix "$LLVM_PREFIX" \
+  --zig-lib-dir lib \
+  -Dstatic-llvm
+
+zig version

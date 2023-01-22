@@ -111,3 +111,5 @@ export LC_MESSAGES=en_US.UTF-8
 export PATH=$PATH:~/bin/roc
 
 source "$HOME/.cargo/env"
+
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh

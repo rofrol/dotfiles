@@ -1,0 +1,15 @@
+#!/bin/sh
+while true;
+do
+  read command arg1;
+  case $command in
+    s) sm2 "$1" show;;
+    g) sm2 "$1" grade $arg1;;
+    *) sm2 "$1" $command;;
+  esac;
+  case $command in
+    g*) sm2 "$1" ;;
+    *) ;;
+  esac;
+done
+

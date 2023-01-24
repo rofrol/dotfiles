@@ -9,7 +9,8 @@ fi
 
 EXT="${FILE##*.}"
 NAME="${FILE%.*}"
-OUT="${NAME}.whatsapp.${EXT}"
+#OUT="${NAME}.whatsapp.${EXT}"
+OUT="${NAME}.whatsapp.mp4"
 echo "OUT=${OUT}"
 
 ffmpeg -i "$FILE" -c:v libx264 -profile:v baseline -level 3.0 -pix_fmt yuv420p "$OUT"

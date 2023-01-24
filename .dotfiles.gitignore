@@ -9,6 +9,9 @@
 # just /* was not ignoring /.idlerc. But when using /**, I could not negate ignoring /bin
 #/.**
 
+*.DS_Store
+
+
 # except some specific subdirectories of .config/
 !/.config/
 /.config/*

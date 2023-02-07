@@ -1,10 +1,15 @@
 eval "$(/opt/homebrew/bin/brew shellenv)"
+export HOMEBREW_CASK_OPTS=--no-quarantine
+# brew cleanup doesn't clean ~/Library/Caches/Homebrew https://github.com/Homebrew/brew/issues/3784
+alias brew-update='brew update && brew upgrade && brew upgrade --cask --greedy && brew cleanup -s && rm -rf $(brew --cache)'
+alias brew-packages='{brew leaves --installed-on-request & brew list --cask -1;} | sort | uniq'
+
 
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
 export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+[ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)//nvm.sh"  # This loads nvm
+[ -s "$(brew --prefix nvm)/etc/bash_completion.d/nvm" ] && \. "$(brew --prefix nvm)//etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
 export DOTFILES_HOME=$HOME/.dotfiles.git
 source $HOME/dotfiles.sh
@@ -13,8 +18,8 @@ export PATH=$PATH:~/bin
 
 #export PATH=$PATH:~/.zvm/bin
 #export PATH=$PATH:$HOME/.local/zig/current
-export PATH=$PATH:$HOME/personal_projects/zig/vendor/zig/stage3/bin/
-
+#export PATH=$PATH:$HOME/personal_projects/zig/vendor/zig/stage3/bin/
+export PATH=$PATH:~/bin/zig
 
 alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
 
@@ -23,9 +28,6 @@ alias gitka='gitk --all &'
 export PATH="$(brew --prefix python)/libexec/bin":$PATH
 
 export PATH="$(brew --prefix keydb)/bin":$PATH
-
-alias brew-update='brew update && brew upgrade && brew upgrade --cask --greedy && brew cleanup'
-alias brew-packages='{brew leaves --installed-on-request & brew list --cask -1;} | sort | uniq'
 
 export EDITOR=nvim
 
@@ -113,3 +115,5 @@ export PATH=$PATH:~/bin/roc
 source "$HOME/.cargo/env"
 
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /Users/rfrolow/.config/broot/launcher/bash/br
+

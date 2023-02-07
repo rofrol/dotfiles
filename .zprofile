@@ -1,5 +1,8 @@
 eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# https://apple.stackexchange.com/questions/337320/how-to-get-rid-of-application-downloaded-from-the-internet-message-when-instal/376476#376476
 export HOMEBREW_CASK_OPTS=--no-quarantine
+
 # brew cleanup doesn't clean ~/Library/Caches/Homebrew https://github.com/Homebrew/brew/issues/3784
 alias brew-update='brew update && brew upgrade && brew upgrade --cask --greedy && brew cleanup -s && rm -rf $(brew --cache)'
 alias brew-packages='{brew leaves --installed-on-request & brew list --cask -1;} | sort | uniq'

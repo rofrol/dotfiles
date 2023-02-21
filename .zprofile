@@ -7,6 +7,20 @@ export HOMEBREW_CASK_OPTS=--no-quarantine
 alias brew-update='brew update && brew upgrade && brew upgrade --cask --greedy && brew cleanup -s && rm -rf $(brew --cache)'
 alias brew-packages='{brew leaves --installed-on-request & brew list --cask -1;} | sort | uniq'
 
+# https://stackoverflow.com/questions/19915683/how-to-find-package-for-installed-file-in-brew/36622898#36622898
+function brew_find_pkg {
+    file_to_search="$@"
+
+    for package in $(brew-packages); do
+        brew ls $package | grep -E -q "/${file_to_search}$"
+        if [ $? -eq 0 ]; then
+            echo $package
+            break
+        fi
+    done
+}
+
+
 
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
@@ -20,9 +34,13 @@ source $HOME/dotfiles.sh
 export PATH=$PATH:~/bin
 
 #export PATH=$PATH:~/.zvm/bin
-#export PATH=$PATH:$HOME/.local/zig/current
 #export PATH=$PATH:$HOME/personal_projects/zig/vendor/zig/stage3/bin/
-export PATH=$PATH:~/bin/zig
+#export PATH=$PATH:~/bin/zig
+alias zupd='zig version && $HOME/personal_projects/zig/zig-utils/scripts/zupd aarch64-macos'
+
+export PATH=$PATH:$HOME/.local/zig/current
+
+export PATH=$PATH:$HOME/zls
 
 alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
 
@@ -104,8 +122,6 @@ export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
-export PATH=$PATH:$HOME/.local/zig/current
-export PATH=$PATH:$HOME/zls
 export PATH=$PATH:~/.pyenv/shims/yt-dlp
 export PATH=$PATH:/opt/homebrew/bin/
 export PATH=$PATH:~/personal_projects/zig/vendor/sm2/zig-out/bin/
@@ -120,3 +136,8 @@ source "$HOME/.cargo/env"
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /Users/rfrolow/.config/broot/launcher/bash/br
 
+alias gh-repo-private='gh repo create --private'
+# https://stackoverflow.com/questions/73778273/how-to-add-a-remote-repo-using-gh-cli/74764582#74764582
+alias gh-remote='git remote add origin $(gh repo view $repo --json sshUrl --jq .sshUrl)'
+
+alias ghc='gh repo create --add-readme -c -l Apache-2.0 --public'

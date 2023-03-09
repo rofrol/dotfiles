@@ -1,6 +1,6 @@
 [ -f ~/.bashrc_default_from_distribution ] && source ~/.bashrc_default_from_distribution
 export DOTFILES_HOME=$HOME/.dotfiles.git
-source ~/.config/bash/dotfiles.sh
+source ~/dotfiles.sh
 
 # https://unix.stackexchange.com/questions/285924/how-to-compare-a-programs-version-in-a-shell-script/567537#567537
 version_greater_equal()

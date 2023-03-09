@@ -21,6 +21,15 @@ dotfiles() {
     set +u
 }
 
+source_config() {
+    if [ ! -z ${ZSH_VERSION+x} ]; then
+      . "$HOME/.zprofile"
+    elif [ ! -z ${BASH_VERSION+x} ]; then
+      . "$HOME/.bashrc"  # refresh aliases such as g=git to include the safeguard
+    else
+      echo "not recognized"
+    fi
+}
 
 # Alternative #2: environment modification
 don() {
@@ -45,24 +54,12 @@ don() {
 
     #set +u
 
-    if [ -n "$ZSH_VERSION" ]; then
-      # assume Zsh
-    elif [ -n "$BASH_VERSION" ]; then
-      . "$HOME/.bashrc"  # refresh aliases such as g=git to include the safeguard
-    else
-      # assume something else
-    fi
+    source_config
 }
 
 dof() {
     unset -f git
-    if [ -n "$ZSH_VERSION" ]; then
-      # assume Zsh
-    elif [ -n "$BASH_VERSION" ]; then
-      . "$HOME/.bashrc"  # refresh aliases such as g=git to include the safeguard
-    else
-      # assume something else
-    fi
+    source_config
 
     unset GIT_DIR; unset GIT_WORK_TREE
     unset GIT_PS1_FMT

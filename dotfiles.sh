@@ -21,6 +21,7 @@ dotfiles() {
     set +u
 }
 
+# https://stackoverflow.com/questions/9910966/how-to-get-shell-to-self-detect-using-zsh-or-bash/64036008#64036008
 source_config() {
     if [ ! -z ${ZSH_VERSION+x} ]; then
       . "$HOME/.zprofile"

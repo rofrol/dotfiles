@@ -60,7 +60,7 @@ alias watch='watch '
 # https://nixos.org/guides/declarative-and-reproducible-developer-environments.html#declarative-reproducible-envs
 #eval "$(direnv hook bash)"
 
-source ~/.config/bash/update_history
+#source ~/.config/bash/update_history
 
 # Should be last
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local

@@ -24,10 +24,6 @@ function brew_find_pkg {
 
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)//nvm.sh"  # This loads nvm
-[ -s "$(brew --prefix nvm)/etc/bash_completion.d/nvm" ] && \. "$(brew --prefix nvm)//etc/bash_completion.d/nvm"  # This loads nvm bash_completion
-
 export DOTFILES_HOME=$HOME/.dotfiles.git
 source $HOME/dotfiles.sh
 
@@ -69,35 +65,6 @@ export PATH=~/.bun/bin:$PATH
 
 #eval "$(direnv hook zsh)"
 
-# somehow ng needs to be before load-nvmrc
-# also errors with pushd
-
-# https://github.com/nvm-sh/nvm#zsh
-# https://stackoverflow.com/questions/23556330/run-nvm-use-automatically-every-time-theres-a-nvmrc-file-on-the-directory/39519460#39519460
-# https://github.com/daliusd/cfg/blob/69828995023cd0d1ccac0e42b13419428dca7766/.bash_private#L53
-# https://blog.ffff.lt/posts/fnm-on-cd/
-# place this after nvm initialization!
-autoload -U add-zsh-hook
-load-nvmrc() {
-  local node_version="$(nvm version)"
-  local nvmrc_path="$(nvm_find_nvmrc)"
-
-  if [ -n "$nvmrc_path" ]; then
-    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
-
-    if [ "$nvmrc_node_version" = "N/A" ]; then
-      nvm install
-    elif [ "$nvmrc_node_version" != "$node_version" ]; then
-      nvm use
-    fi
-  elif [ "$node_version" != "$(nvm version default)" ]; then
-    echo "Reverting to nvm default version"
-    nvm use default
-  fi
-}
-add-zsh-hook chpwd load-nvmrc
-load-nvmrc
-
 export PATH=~/zls:$PATH
 
 # https://stackoverflow.com/questions/57972341/how-to-install-and-use-gnu-ls-on-macos
@@ -118,10 +85,6 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
 export PATH=$PATH:~/.pyenv/shims/yt-dlp
 export PATH=$PATH:/opt/homebrew/bin/
 export PATH=$PATH:~/personal_projects/zig/vendor/sm2/zig-out/bin/
@@ -131,13 +94,17 @@ export LC_MESSAGES=en_US.UTF-8
 
 export PATH=$PATH:~/bin/roc
 
-source "$HOME/.cargo/env"
-
+# git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /Users/rfrolow/.config/broot/launcher/bash/br
 
 alias gh-repo-private='gh repo create --private'
 # https://stackoverflow.com/questions/73778273/how-to-add-a-remote-repo-using-gh-cli/74764582#74764582
 alias gh-remote='git remote add origin $(gh repo view $repo --json sshUrl --jq .sshUrl)'
 
 alias ghc='gh repo create --add-readme -c -l Apache-2.0 --public'
+
+# add in .zprofile_local:
+# source .zprofile_nvm
+
+# Should be last
+[ -f ~/.zprofile_local ] && source ~/.zprofile_local

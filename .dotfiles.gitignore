@@ -68,6 +68,7 @@
 !/dotfiles.sh
 !/dotfiles.zsh
 !/.zprofile
+!/.zprofile_nvm
 !/.gitconfig
 
 # and a selection of hidden configuration files.

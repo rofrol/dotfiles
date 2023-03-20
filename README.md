@@ -17,6 +17,10 @@ dof
 rm -rf dotfiles
 ```
 
+## Neovim config
+
+`cd ~/.config && git clone git@github.com:rofrol/kickstart.nvim.git nvim`
+
 ## Ubuntu packages
 
 ```bash

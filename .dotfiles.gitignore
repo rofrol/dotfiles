@@ -19,9 +19,9 @@
 !/.config/git
 !/.config/ranger
 !/.config/pulse/presets/*
-!/.config/nvim
-/.config/nvim/autoload
-/.config/nvim/.netrwhist
+#!/.config/nvim
+#/.config/nvim/autoload
+#/.config/nvim/.netrwhist
 !/.config/wezterm
 !/.config/systemd/
 !/.config/ripgrep

@@ -20,3 +20,5 @@ PROMPT='$SHOW_DIRS$(git_super_status) %# '
 # Since there is .zshrc, setting this in .zprofile was causing that,
 # alt+. was not working correctly for bringing back last used last parameter
 export EDITOR=nvim
+
+source ~/.zshrc_nvm

@@ -109,8 +109,5 @@ alias gh-remote='git remote add origin $(gh repo view $repo --json sshUrl --jq .
 
 alias ghc='gh repo create --add-readme -c -l Apache-2.0 --public'
 
-# add in .zprofile_local:
-# source .zprofile_nvm
-
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local

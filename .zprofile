@@ -54,8 +54,6 @@ export PATH="$(brew --prefix python)/libexec/bin":$PATH
 
 export PATH="$(brew --prefix keydb)/bin":$PATH
 
-export EDITOR=nvim
-
 # https://apple.stackexchange.com/questions/88515/how-do-i-edit-current-shell-command-in-vi/443515#443515
 # https://nuclearsquid.com/writings/edit-long-commands/
 # Enable Ctrl-x-e to edit command line

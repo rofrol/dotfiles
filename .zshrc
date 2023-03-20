@@ -16,3 +16,7 @@ ZSH_THEME_GIT_PROMPT_PREFIX=" ["
 # https://unix.stackexchange.com/questions/273529/shorten-path-in-zsh-prompt/273567#273567
 SHOW_DIRS=%(4~|%-1~/…/%2~|%3~)
 PROMPT='$SHOW_DIRS$(git_super_status) %# '
+
+# Since there is .zshrc, setting this in .zprofile was causing that,
+# alt+. was not working correctly for bringing back last used last parameter
+export EDITOR=nvim

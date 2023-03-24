@@ -1,0 +1,6 @@
+#prefix=C:\Users\rofro\.npm-packages
+msvs_version=2017
+
+prefix=${XDG_DATA_HOME}/npm
+cache=${XDG_CACHE_HOME}/npm
+init-module=${XDG_CONFIG_HOME}/npm/config/npm-init.js

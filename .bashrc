@@ -1,3 +1,5 @@
+source $HOME/.xdg.sh
+
 [ -f ~/.bashrc_default_from_distribution ] && source ~/.bashrc_default_from_distribution
 export DOTFILES_HOME=$HOME/.dotfiles.git
 source ~/dotfiles.sh

@@ -11,6 +11,7 @@
 
 *.DS_Store
 
+!/.xdg.sh
 
 # except some specific subdirectories of .config/
 !/.config/
@@ -26,6 +27,9 @@
 !/.config/systemd/
 !/.config/ripgrep
 !/.config/emacs
+!/.config/elinks
+!/.config/npm
+!/.config/readline
 
 # and ssh configuration
 !/.ssh/
@@ -48,11 +52,6 @@
 !/.mozilla/firefox/
 /.mozilla/firefox/*
 !/.mozilla/firefox/shared/
-#
-# elinks
-!/.elinks
-/.elinks/*
-!/.elinks/elinks.conf
 
 !/Documents/
 /Documents/*
@@ -69,7 +68,6 @@
 !/dotfiles.zsh
 !/.zprofile
 !/.zprofile_nvm
-!/.gitconfig
 
 # and a selection of hidden configuration files.
 !/.*rc

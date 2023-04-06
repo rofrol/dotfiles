@@ -155,5 +155,8 @@ atuin-setup() {
 }
 atuin-setup
 
+# https://stackoverflow.com/questions/122327/how-do-i-find-the-location-of-my-python-site-packages-directory/52638888#52638888
+export PATH=$(python -c "import sysconfig; print(sysconfig.get_path('purelib'))"):$PATH
+
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local

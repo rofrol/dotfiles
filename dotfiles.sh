@@ -12,12 +12,7 @@ fi
 # Alternative #1: `dotfiles` command
 dotfiles() {
     set -u
-    if [[ "$@" == *clean* ]]; then
-        echo "NEVER USE 'git clean' on the dotfiles repository!"
-        echo "It would delete data from your HOME directory."
-    else
-        git --work-tree="$HOME" --git-dir="$DOTFILES_HOME" "$@"
-    fi
+    git --work-tree="$HOME" --git-dir="$DOTFILES_HOME" "$@"
     set +u
 }
 
@@ -42,16 +37,15 @@ don() {
     GIT_BIN=`which git`
     # add safeguard against git clean
     git() {
-        if [[ "$@" == *clean* ]]; then
-            echo "NEVER USE 'git clean' on the dotfiles repository!"
-            echo "It would delete data from your HOME directory."
-        else
-            $GIT_BIN "$@"
-        fi
+        $GIT_BIN "$@"
     }
     pushd ~ 1>/dev/null  # remember location
     export GIT_DIR="$DOTFILES_HOME"; export GIT_WORK_TREE="$HOME"
     export GIT_PS1_FMT=" (dotfiles: %s)"
+
+    # ripgrep does not read core.excludesFile from git repo
+    # https://github.com/BurntSushi/ripgrep/issues/1014#issuecomment-625776121
+    alias rg='rg --ignore-file .dotfiles.gitignore'
 
     #set +u
 
@@ -65,4 +59,5 @@ dof() {
     unset GIT_DIR; unset GIT_WORK_TREE
     unset GIT_PS1_FMT
     popd 1>/dev/null  # restore previous location
+    unalias rg
 }

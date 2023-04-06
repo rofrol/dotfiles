@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+
+brew update && brew upgrade && brew upgrade --cask --greedy && \
+# brew cleanup doesn't clean ~/Library/Caches/Homebrew https://github.com/Homebrew/brew/issues/3784
+brew cleanup -s && rm -rf $(brew --cache) && \
+# https://apple.stackexchange.com/questions/359456/brew-cleanup-doesnt-scrub-the-caskroom#comment654930_424947
+find "$(brew --prefix)/Caskroom" -type f '(' -name '*.dmg' -or -name '*.pkg' ')' -delete && \
+brew doctor

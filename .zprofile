@@ -116,7 +116,8 @@ alias ghc='gh repo create --add-readme -c -l Apache-2.0 --public'
 CUR_SHELL=zsh
 atuin-setup() {
     if ! which atuin &> /dev/null; then return 1; fi
-    bindkey '^E' _atuin_search_widget
+    # commenting out as I cannot go to end of line with ctrl+e when this is binded
+    #bindkey '^E' _atuin_search_widget
 
     export ATUIN_NOBIND="true"
     eval "$(atuin init "$CUR_SHELL")"

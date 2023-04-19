@@ -98,9 +98,6 @@ export LC_MESSAGES=en_US.UTF-8
 
 export PATH=$PATH:~/bin/roc
 
-# git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
-source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-
 alias gh-repo-private='gh repo create --private'
 # https://stackoverflow.com/questions/73778273/how-to-add-a-remote-repo-using-gh-cli/74764582#74764582
 alias gh-remote='git remote add origin $(gh repo view $repo --json sshUrl --jq .sshUrl)'
@@ -109,7 +106,7 @@ alias ghc='gh repo create --add-readme -c -l Apache-2.0 --public'
 
 # ported fzf's own ctrl-r zsh widget to read from atuin instead of the shell's history to solve this.
 # fzf's fuzzy search experience and speed with atuin's shell history management and syncing functionality.
-# ctrl-r will search your shell history with fzf+atuin and ctrl-e will bring up atuin's own fuzzy finder in case you still want it.
+# ctrl-r will search your shell history with fzf+atuin and ctrl-t will bring up atuin's own fuzzy finder in case you still want it.
 # It only searches the last 5000 entries of your atuin history for speed,
 # but you can tweak ATUIN_LIMIT to your desired value if that's not optimal.
 # https://news.ycombinator.com/item?id=35256206
@@ -117,7 +114,7 @@ CUR_SHELL=zsh
 atuin-setup() {
     if ! which atuin &> /dev/null; then return 1; fi
     # commenting out as I cannot go to end of line with ctrl+e when this is binded
-    #bindkey '^E' _atuin_search_widget
+    bindkey '^Y' _atuin_search_widget
 
     export ATUIN_NOBIND="true"
     eval "$(atuin init "$CUR_SHELL")"
@@ -152,12 +149,41 @@ atuin-setup() {
     zle -N fzf-atuin-history-widget
     bindkey '^R' fzf-atuin-history-widget
 }
-atuin-setup
+# atuin-setup
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+#https://www.reddit.com/r/linux4noobs/comments/egb644/fzf_newcomer_fd_or_ripgrep/
+export FZF_DEFAULT_COMMAND='fd --hidden --no-ignore --exclude node_modules'
+
+# https://www.reddit.com/r/fzf/comments/zazcrt/comment/jfo5z8k/
+cdfzf() { file="$(fd --type file --hidden --no-ignore --exclude node_modules | fzf)"; [ -n "$file" ] && cd "$(dirname "$file")"; }
+
+# echo 'eval "$(atuin init zsh)"' >> ~/.zprofile_atuin
+source ~/.zprofile_atuin
+
+# git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# https://unix.stackexchange.com/questions/534942/auto-trigger-history-search-in-terminal-using-fzf-fuzzy-finder/676369#676369
+# source ~/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+#zstyle ':autocomplete:*' default-context fzf-atuin-history-widget
+#bindkey -M menuselect '\r' .accept-line
 
 # https://stackoverflow.com/questions/122327/how-do-i-find-the-location-of-my-python-site-packages-directory/52638888#52638888
 export PATH=$(python -c "import sysconfig; print(sysconfig.get_path('purelib'))"):$PATH
 
 alias dfr="df -H | rg --color never '(^Filesystem | /$)'"
+
+# up-line-or-search-prefix () {
+#   local CURSOR_before_search=$CURSOR
+#   zle up-line-or-search "$LBUFFER"
+#   CURSOR=$CURSOR_before_search
+# }
+# zle -N up-line-or-search-prefix
+# bindkey '^T' up-line-or-search-prefix
+
+alias exercismwatch="watchexec -i zig-cache -e zig -r 'printf \"\n\n\n-----------\n\"; zig test test*;'"
 
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local

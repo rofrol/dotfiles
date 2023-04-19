@@ -66,3 +66,5 @@ alias watch='watch '
 
 # Should be last
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

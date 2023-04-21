@@ -185,5 +185,7 @@ alias dfr="df -H | rg --color never '(^Filesystem | /$)'"
 
 alias exercismwatch="watchexec -i zig-cache -e zig -r 'printf \"\n\n\n-----------\n\"; zig test test*;'"
 
+export PATH=$PATH:~/.local/share/npm/bin
+
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local

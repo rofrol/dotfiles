@@ -223,26 +223,6 @@
                     "simple_modifications": [
                         {
                             "from": {
-                                "key_code": "right_command"
-                            },
-                            "to": [
-                                {
-                                    "key_code": "right_option"
-                                }
-                            ]
-                        },
-                        {
-                            "from": {
-                                "key_code": "right_option"
-                            },
-                            "to": [
-                                {
-                                    "key_code": "right_command"
-                                }
-                            ]
-                        },
-                        {
-                            "from": {
                                 "key_code": "grave_accent_and_tilde"
                             },
                             "to": [
@@ -258,6 +238,26 @@
                             "to": [
                                 {
                                     "key_code": "grave_accent_and_tilde"
+                                }
+                            ]
+                        },
+                        {
+                            "from": {
+                                "key_code": "right_command"
+                            },
+                            "to": [
+                                {
+                                    "key_code": "right_option"
+                                }
+                            ]
+                        },
+                        {
+                            "from": {
+                                "key_code": "right_option"
+                            },
+                            "to": [
+                                {
+                                    "key_code": "right_command"
                                 }
                             ]
                         }
@@ -505,6 +505,83 @@
                         "is_pointing_device": true,
                         "product_id": 12314,
                         "vendor_id": 16700
+                    },
+                    "ignore": true,
+                    "manipulate_caps_lock_led": false,
+                    "simple_modifications": [],
+                    "treat_as_built_in_keyboard": false
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": true,
+                        "product_id": 2096,
+                        "vendor_id": 1118
+                    },
+                    "ignore": true,
+                    "manipulate_caps_lock_led": true,
+                    "simple_modifications": [],
+                    "treat_as_built_in_keyboard": false
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": true,
+                        "product_id": 2095,
+                        "vendor_id": 1118
+                    },
+                    "ignore": true,
+                    "manipulate_caps_lock_led": true,
+                    "simple_modifications": [],
+                    "treat_as_built_in_keyboard": false
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": false,
+                        "product_id": 521,
+                        "vendor_id": 5426
+                    },
+                    "ignore": false,
+                    "manipulate_caps_lock_led": true,
+                    "simple_modifications": [
+                        {
+                            "from": {
+                                "key_code": "left_command"
+                            },
+                            "to": [
+                                {
+                                    "key_code": "left_option"
+                                }
+                            ]
+                        },
+                        {
+                            "from": {
+                                "key_code": "left_option"
+                            },
+                            "to": [
+                                {
+                                    "key_code": "left_command"
+                                }
+                            ]
+                        }
+                    ],
+                    "treat_as_built_in_keyboard": false
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": false,
+                        "is_pointing_device": true,
+                        "product_id": 521,
+                        "vendor_id": 5426
                     },
                     "ignore": true,
                     "manipulate_caps_lock_led": false,
@@ -838,21 +915,11 @@
                 },
                 {
                     "from": {
-                        "key_code": "right_command"
+                        "key_code": "left_command"
                     },
                     "to": [
                         {
-                            "key_code": "right_option"
-                        }
-                    ]
-                },
-                {
-                    "from": {
-                        "key_code": "right_option"
-                    },
-                    "to": [
-                        {
-                            "key_code": "right_command"
+                            "key_code": "left_option"
                         }
                     ]
                 },
@@ -868,11 +935,21 @@
                 },
                 {
                     "from": {
-                        "key_code": "left_command"
+                        "key_code": "right_command"
                     },
                     "to": [
                         {
-                            "key_code": "left_option"
+                            "key_code": "right_option"
+                        }
+                    ]
+                },
+                {
+                    "from": {
+                        "key_code": "right_option"
+                    },
+                    "to": [
+                        {
+                            "key_code": "right_command"
                         }
                     ]
                 }

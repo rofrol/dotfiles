@@ -421,6 +421,17 @@
 ;; https://stackoverflow.com/questions/88399/how-do-i-duplicate-a-whole-line-in-emacs#comment90221710_998472
 (global-set-key [(meta shift down)] 'crux-duplicate-current-line-or-region)
 
+(defun crux-get-positions-of-line-or-region ()
+  "Return positions (beg . end) of the current line or region."
+  (let (beg end)
+    (if (and mark-active (> (point) (mark)))
+        (exchange-point-and-mark))
+    (setq beg (line-beginning-position))
+    (if mark-active
+        (exchange-point-and-mark))
+    (setq end (line-end-position))
+    (cons beg end)))
+
 ;; Based on crux-duplicate-and-comment-current-line-or-region
 (defun rofrol/comment-current-line-or-region (arg)
   "Comments the current line or region"

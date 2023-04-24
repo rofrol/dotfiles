@@ -159,4 +159,14 @@
 (global-unset-key (kbd "C-<wheel-up>"))
 (global-unset-key (kbd "C-<wheel-down>"))
 
+;; Based on crux-duplicate-and-comment-current-line-or-region
+(defun rofrol/comment-current-line-or-region (arg)
+  "Comments the current line or region"
+  (interactive "p")
+  (pcase-let* ((`(,beg . ,end) (crux-get-positions-of-line-or-region))
+               (region (buffer-substring-no-properties beg end)))
+    (comment-or-uncomment-region beg end)))
+
+(global-set-key [(control /)] 'rofrol/comment-current-line-or-region)
+
 (provide 'rf-misc)

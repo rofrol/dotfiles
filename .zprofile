@@ -183,7 +183,7 @@ alias dfr="df -H | rg --color never '(^Filesystem | /$)'"
 # zle -N up-line-or-search-prefix
 # bindkey '^T' up-line-or-search-prefix
 
-alias exercismwatch="watchexec -i zig-cache -e zig -r 'printf \"\n\n\n-----------\n\"; zig test test*;'"
+alias exercismwatch="watchexec -i zig-cache -e zig -r -c reset 'zig test test* 2>&1| less'"
 
 export PATH=$PATH:~/.local/share/npm/bin
 

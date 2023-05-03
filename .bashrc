@@ -68,3 +68,4 @@ alias watch='watch '
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+. "$HOME/.cargo/env"

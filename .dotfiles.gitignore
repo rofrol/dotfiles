@@ -100,3 +100,7 @@
 !/.config/karabiner/
 /.config/karabiner/*
 !/.config/karabiner/karabiner.json
+
+!/.config/lazygit/
+/.config/lazygit/*
+!/.config/lazygit/config.yml

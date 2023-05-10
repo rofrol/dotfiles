@@ -45,3 +45,5 @@ function nvims() {
   fi
   NVIM_APPNAME=$config nvim $@
 }
+
+alias nf='nvim $(fd | zf)'

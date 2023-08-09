@@ -1,0 +1,2 @@
+# https://github.com/atuinsh/atuin/blob/main/docs/docs/key-binding.md
+eval "$(atuin init zsh --disable-up-arrow)"

@@ -113,7 +113,6 @@ alias ghc='gh repo create --add-readme -c -l Apache-2.0 --public'
 CUR_SHELL=zsh
 atuin-setup() {
     if ! which atuin &> /dev/null; then return 1; fi
-    # commenting out as I cannot go to end of line with ctrl+e when this is binded
     bindkey '^Y' _atuin_search_widget
 
     export ATUIN_NOBIND="true"
@@ -149,6 +148,8 @@ atuin-setup() {
     zle -N fzf-atuin-history-widget
     bindkey '^R' fzf-atuin-history-widget
 }
+# why is it commented out?
+# because of that?: commenting out as I cannot go to end of line with ctrl+e when this is binded
 # atuin-setup
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -159,7 +160,6 @@ export FZF_DEFAULT_COMMAND='fd --hidden --no-ignore --exclude node_modules'
 # https://www.reddit.com/r/fzf/comments/zazcrt/comment/jfo5z8k/
 cdfzf() { file="$(fd --type file --hidden --no-ignore --exclude node_modules | fzf)"; [ -n "$file" ] && cd "$(dirname "$file")"; }
 
-# echo 'eval "$(atuin init zsh)"' >> ~/.zprofile_atuin
 source ~/.zprofile_atuin
 
 # git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions

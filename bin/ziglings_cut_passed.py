@@ -10,7 +10,7 @@ def clear_terminal():
     elif os.name == "nt":  # Windows
         os.system("cls")
 
-pattern = r'(Compiling .*\nerror: .*)'
+pattern = r'(Compiling .*\n((Checking .*\n)?error: .*))'
 input_text = sys.stdin.read()
 
 clear_terminal()

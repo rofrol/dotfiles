@@ -16,4 +16,6 @@
 --playlist-reverse
 #-P "~/storage/shared/Download/"
 #-o "%(extractor)s/%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s [%(id)s].%(ext)s"
--o "%(title)s.%(ext)s"
+#-o "%(title)s.%(ext)s"
+-P "~/Downloads/"
+-o "%(extractor)s/uploader--%(uploader)s__playlist--%(playlist)s__plstid%(playlist_index)s__title--%(title)s__id--%(id)s__date--%(upload_date)s.%(ext)s"

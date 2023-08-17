@@ -38,7 +38,7 @@ alias nvim-LazyVim="NVIM_APPNAME=LazyVim nvim"
 alias nvim-dpetka2001="NVIM_APPNAME=LazyVim nvim"
 
 function nvims() {
-  items=("default" "kickstart" "LazyVim" "NvChad" "AstroNvim" "LandonSchropp" "LazyVim" "dpetka2001")
+  items=("default" "kickstart" "NvChad" "AstroNvim" "LandonSchropp" "LazyVim" "dpetka2001")
   config=$(printf "%s\n" "${items[@]}" | fzf --prompt=" Neovim Config  " --height=~50% --layout=reverse --border --exit-0)
   if [[ -z $config ]]; then
     echo "Nothing selected"

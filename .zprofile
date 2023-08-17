@@ -173,8 +173,6 @@ source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 # https://stackoverflow.com/questions/122327/how-do-i-find-the-location-of-my-python-site-packages-directory/52638888#52638888
 export PATH=$(python -c "import sysconfig; print(sysconfig.get_path('purelib'))"):$PATH
 
-alias dfr="df -H | rg --color never '(^Filesystem | /$)'"
-
 # up-line-or-search-prefix () {
 #   local CURSOR_before_search=$CURSOR
 #   zle up-line-or-search "$LBUFFER"

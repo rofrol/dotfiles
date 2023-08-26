@@ -14,9 +14,9 @@ trap onexit 1 2 3 15 ERR
 #  @param $1 integer (optional) Exit status.  If not set, use `$?'
 
 function onexit() {
-  local exit_status=${1:-$?}
-  echo Exiting $0 with $exit_status
-  exit $exit_status
+	local exit_status=${1:-$?}
+	echo Exiting $0 with $exit_status
+	exit $exit_status
 }
 
 # content
@@ -25,13 +25,19 @@ function onexit() {
 git fetch --all --prune
 
 REMOTE_AND_BRANCH="$(git branch -rl '*/HEAD' | awk '{print $3}')" # for example origin/master
+echo REMOTE_AND_BRANCH: $REMOTE_AND_BRANCH
+if [ -z "${REMOTE_AND_BRANCH}" ]; then
+	echo Set HEAD with: git remote set-head origin -a
+	exit 1
+fi
+
 BRANCH="$(echo "$REMOTE_AND_BRANCH" | awk -F/ '{print $2}')"
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 if [[ "$CURRENT_BRANCH" == "$BRANCH" ]]; then
-  git merge --ff-only "$REMOTE_AND_BRANCH"
+	git merge --ff-only "$REMOTE_AND_BRANCH"
 else
-  git fetch -f . "$REMOTE_AND_BRANCH":"$BRANCH"
+	git fetch -f . "$REMOTE_AND_BRANCH":"$BRANCH"
 fi
 
 # https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch/67170894#67170894

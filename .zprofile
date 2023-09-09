@@ -185,5 +185,12 @@ alias exercismwatch="watchexec -i zig-cache -e zig -r -c reset 'zig test test* 2
 
 export PATH=$PATH:~/.local/share/npm/bin
 
+export PYENV_ROOT="$HOME/.pyenv"
+# command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+export PATH=$PATH:~/go/bin/
+
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local

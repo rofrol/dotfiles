@@ -53,3 +53,5 @@ alias nf='nvim $(fd | zf)'
 # https://unix.stackexchange.com/questions/522035/expand-alias-in-zsh-history/522040#522040
 # https://github.com/ellie/atuin/issues/969
 # alias nf='f=$(fd | zf); print -rs nvim $f; nvim $f'
+
+alias n='nvim --headless "+Lazy! sync" "+TSUpdateSync" +qa && nvim'

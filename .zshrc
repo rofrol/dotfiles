@@ -62,3 +62,5 @@ function killTcpListen () {
   kill -QUIT $(sudo lsof -sTCP:LISTEN -t -i tcp:$1)
 }
 
+# termporary until https://github.com/jqlang/jq/pull/2904 is released
+export JQ_COLORS="0;90:0;39:0;39:0;39:0;32:1;39:1;39:1;34"

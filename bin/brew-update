@@ -1,9 +1,79 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
-#brew update && brew upgrade && brew upgrade --cask --greedy && \
-brew update && brew upgrade $({brew leaves --installed-on-request & brew list --cask -1;} | sort | uniq | grep -v zscaler) && \
-# brew cleanup doesn't clean ~/Library/Caches/Homebrew https://github.com/Homebrew/brew/issues/3784
-brew cleanup -s && rm -rf $(brew --cache) && \
-# https://apple.stackexchange.com/questions/359456/brew-cleanup-doesnt-scrub-the-caskroom#comment654930_424947
-find "$(brew --prefix)/Caskroom" -type f '(' -name '*.dmg' -or -name '*.pkg' ')' -delete && \
-brew doctor
+# https://github.com/reitermarkus/dotfiles/blob/3219808b4e8379057dcb3dde984d655c6d094ac8/.sh#L59C1-L59C1
+# https://github.com/Homebrew/homebrew-cask/issues/77258#issuecomment-588557462
+# https://unix.stackexchange.com/questions/64736/combine-the-output-of-two-commands-in-bash/588220#588220
+# https://stackoverflow.com/questions/37115269/bash-printing-color-codes-literally-and-not-in-actual-color/37118992#37118992
+
+{
+
+  # Abort on errors.
+  set -e
+  set -o pipefail
+
+  # Abort on unbound variables.
+  set -u
+
+  # Disable Ctrl-Z.
+  trap '' TSTP
+
+  # Trap Ctrl-C.
+  trap 'trap "" INT; printf "\n\e[0;31mAborting …\e[0m\n" 1>&2; exit 1' INT
+
+  # Prevent system sleep.
+  /usr/bin/caffeinate -dimu -w $$ &
+
+  # Add exit handlers.
+  at_exit() {
+    AT_EXIT+="${AT_EXIT:+$'\n'}"
+    AT_EXIT+="${*?}"
+    # shellcheck disable=SC2064
+    trap "${AT_EXIT}" EXIT
+  }
+
+  # Ask for superuser password, and temporarily add it to the Keychain.
+  (
+    builtin read -r -s -p "Password: "
+    builtin echo "add-generic-password -U -s 'dotfiles' -a '${USER}' -w '${REPLY}'"
+  ) | /usr/bin/security -i
+  printf "\n"
+  
+  SUDO_ASKPASS="$(/usr/bin/mktemp)"
+  printf "SUDO_ASKPASS: $SUDO_ASKPASS\n"
+  
+  at_exit "
+    printf '\e[0;31mDeleting SUDO_ASKPASS script …\e[0m\n'
+    /bin/rm -f '${SUDO_ASKPASS}'
+  "
+  
+  {
+    echo "#!/bin/sh"
+    echo "/usr/bin/security find-generic-password -s 'dotfiles' -a '${USER}' -w"
+  } > "${SUDO_ASKPASS}"
+  
+  /bin/chmod +x "${SUDO_ASKPASS}"
+  
+  export SUDO_ASKPASS
+  
+  if ! /usr/bin/sudo -A -kv 2>/dev/null; then
+    printf '\e[0;31mIncorrect password.\e[0m\n' 1>&2
+    exit 1
+  fi
+  
+  # Test SUDO_ASKPASS with:
+  # brew reinstall --cask microsoft-edge
+
+  #brew update && brew upgrade && brew upgrade --cask --greedy && \
+  brew update && \
+  cat \
+  <(brew leaves --installed-on-request) \
+  <(brew list --cask -1) \
+  | sort | uniq | grep -v zscaler | brew upgrade
+
+  # brew cleanup doesn't clean ~/Library/Caches/Homebrew https://github.com/Homebrew/brew/issues/3784
+  brew cleanup -s && rm -rf $(brew --cache) && \
+  # https://apple.stackexchange.com/questions/359456/brew-cleanup-doesnt-scrub-the-caskroom#comment654930_424947
+  find "$(brew --prefix)/Caskroom" -type f '(' -name '*.dmg' -or -name '*.pkg' ')' -delete && \
+  brew doctor
+
+}

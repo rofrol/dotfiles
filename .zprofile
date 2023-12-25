@@ -11,8 +11,6 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # https://apple.stackexchange.com/questions/337320/how-to-get-rid-of-application-downloaded-from-the-internet-message-when-instal/376476#376476
 export HOMEBREW_CASK_OPTS=--no-quarantine
 
-alias brew-packages='{brew leaves --installed-on-request & brew list --cask -1;} | sort | uniq'
-
 # https://stackoverflow.com/questions/19915683/how-to-find-package-for-installed-file-in-brew/36622898#36622898
 function brew_find_pkg {
     file_to_search="$@"
@@ -194,3 +192,6 @@ export PATH=$PATH:~/go/bin/
 
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local
+
+# Added by OrbStack: command-line tools and integration
+source ~/.orbstack/shell/init.zsh 2>/dev/null || :

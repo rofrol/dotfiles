@@ -1,0 +1,5 @@
+#!/bin/bash
+cat \
+	<(brew leaves --installed-on-request) \
+	<(brew list --cask -1) | 
+sort | uniq

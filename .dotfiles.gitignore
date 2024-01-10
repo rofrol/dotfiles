@@ -107,3 +107,4 @@
 !/.config/lazygit/config.yml
 
 .tldrc
+!/.ignore

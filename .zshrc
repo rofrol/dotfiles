@@ -54,10 +54,35 @@ function nvims() {
   NVIM_APPNAME=$config nvim $@
 }
 
-alias nf='nvim $(fd | zf)'
+# alias nf='nvim $(fd | zf)'
+
+export ATUIN_SESSION=$(atuin uuid)
+ATUIN_HISTORY_ID=""
+
+_atuin_preexec() {
+    local id
+    id=$(atuin history start -- "$1")
+    export ATUIN_HISTORY_ID="$id"
+    __atuin_preexec_time=${EPOCHREALTIME-}
+}
+
+_atuin_precmd() {
+    local EXIT="$?" __atuin_precmd_time=${EPOCHREALTIME-}
+
+    [[ -z "${ATUIN_HISTORY_ID:-}" ]] && return
+
+    local duration=""
+    if [[ -n $__atuin_preexec_time && -n $__atuin_precmd_time ]]; then
+        printf -v duration %.0f $(((__atuin_precmd_time - __atuin_preexec_time) * 1000000000))
+    fi
+
+    (ATUIN_LOG=error atuin history end --exit $EXIT ${=duration:+--duration $duration} -- $ATUIN_HISTORY_ID &) >/dev/null 2>&1
+    export ATUIN_HISTORY_ID=""
+}
+
 # https://unix.stackexchange.com/questions/522035/expand-alias-in-zsh-history/522040#522040
 # https://github.com/ellie/atuin/issues/969
-# alias nf='f=$(fd | zf); print -rs nvim $f; nvim $f'
+alias nf='f=$(fd | zf); print -rs nvim $f; _atuin_preexec "nvim $f"; nvim $f; _atuin_precmd $ATUIN_HISTORY_ID'
 
 alias n='nvim --headless "+Lazy! sync" "+TSUpdateSync" +qa && nvim'
 

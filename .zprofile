@@ -36,7 +36,7 @@ export PATH=$PATH:~/bin
 #export PATH=$PATH:~/.zvm/bin
 #export PATH=$PATH:$HOME/personal_projects/zig/vendor/zig/stage3/bin/
 #export PATH=$PATH:~/bin/zig
-alias zupd='zig version && $HOME/personal_projects/zig/zig-utils/scripts/zupd aarch64-macos'
+alias zig-update='zig version && $HOME/personal_projects/zig/zig-utils/scripts/zupd aarch64-macos'
 
 export PATH=$PATH:$HOME/.local/zig/current
 

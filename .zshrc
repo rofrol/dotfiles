@@ -36,9 +36,14 @@ alias nvim-astro="NVIM_APPNAME=AstroNvim nvim"
 alias nvim-LandonSchropp="NVIM_APPNAME=LandonSchropp nvim"
 alias nvim-LazyVim="NVIM_APPNAME=LazyVim nvim"
 alias nvim-dpetka2001="NVIM_APPNAME=LazyVim nvim"
+alias nvim-pasteTest="NVIM_APPNAME=LazyVim pasteTest"
+alias nvim-olical="NVIM_APPNAME=nvim-olical nvim"
+alias nvim-cajuse="NVIM_APPNAME=nvim-cajuse nvim"
+alias nvim-vimstudio="NVIM_APPNAME=nvim-vimstudio nvim"
+
 
 function nvims() {
-  items=("default" "kickstart" "NvChad" "AstroNvim" "LandonSchropp" "LazyVim" "dpetka2001")
+  items=("default" "kickstart" "NvChad" "AstroNvim" "LandonSchropp" "LazyVim" "dpetka2001", "pasteTest", "nvim-olical", "nvim-cajuse", "nvim-vimstudio")
   config=$(printf "%s\n" "${items[@]}" | fzf --prompt=" Neovim Config  " --height=~50% --layout=reverse --border --exit-0)
   if [[ -z $config ]]; then
     echo "Nothing selected"

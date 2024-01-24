@@ -24,9 +24,11 @@ $scala\
 $docker_context\
 [](fg:#06969A bg:#33658A)\
 $time\
-[ ](fg:#33658A)\
 $line_break$character
 """
+
+[character]
+success_symbol = "[❯](black)"
 
 # Disable the blank line at the start of the prompt
 # add_newline = false
@@ -142,4 +144,4 @@ format = '[ $symbol ($version) ]($style)'
 disabled = false
 time_format = "%R" # Hour:Minute Format
 style = "bg:#33658A"
-format = '[ ♥ $time ]($style)'
+format = '[ $time ]($style)'

@@ -221,3 +221,19 @@ Start PowerShell as Administrator and run:
 ## Emacs
 
 On Windows10 you need to set user env `HOME` pointing `%USERPROFILE%` for emacs to read `~/.config/emacs/init.el`. Otherwise it will read from `~/AppData/Roaming/.emacs.d`.
+
+## macos and nushell
+
+`ln -s ~/.config/nushell ~/Library/Application\ Support/`
+
+- https://github.com/nushell/nushell/issues/10746
+- https://github.com/nushell/nushell/issues/893
+
+in iterm2 set `Preferences > Profiles > General > Command > Command` to `/opt/homebrew/bin/nu`
+
+`brew install nushell starship vivid`
+
+```shell
+mkdir ~/.cache/starship
+starship init nu | save -f ~/.cache/starship/init.nu
+```

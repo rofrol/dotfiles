@@ -108,3 +108,8 @@
 
 .tldrc
 !/.ignore
+
+!/.config/nushell/
+/.config/nushell/*
+!/.config/nushell/config.nu
+!/.config/nushell/env.nu

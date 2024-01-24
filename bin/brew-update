@@ -66,7 +66,7 @@
 
 	#brew update && brew upgrade && brew upgrade --cask --greedy && \
 	brew update && brew upgrade &&
-		brew list --cask -1 | sort | uniq | grep -v zscaler | xargs brew upgrade --cask
+		brew list --cask -1 | sort | uniq | grep -v zscaler | grep -v microsoft-office | xargs brew upgrade --cask
 
 	# brew cleanup doesn't clean ~/Library/Caches/Homebrew https://github.com/Homebrew/brew/issues/3784
 	brew cleanup -s && rm -rf $(brew --cache) &&

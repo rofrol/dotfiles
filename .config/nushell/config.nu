@@ -774,3 +774,4 @@ source ~/.local/share/atuin/init.nu
 
 #alias n = nvim --headless "+Lazy! sync" "+TSUpdateSync" +qa and nvim
 alias n = nvim
+alias gitka = gitk --all

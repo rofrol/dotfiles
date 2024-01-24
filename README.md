@@ -231,7 +231,7 @@ On Windows10 you need to set user env `HOME` pointing `%USERPROFILE%` for emacs 
 
 in iterm2 set `Preferences > Profiles > General > Command > Command` to `/opt/homebrew/bin/nu`
 
-`brew install nushell starship vivid`
+`brew install nushell starship`
 
 ```shell
 mkdir ~/.cache/starship

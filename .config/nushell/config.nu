@@ -764,7 +764,9 @@ $env.config = {
 def nuopen [arg, --raw (-r)] { if $raw { open -r $arg } else { open $arg } }
 alias open = ^open
 
-$env.LS_COLORS = (vivid generate gruvbox-hard-light | str trim)
+#$env.LS_COLORS = (vivid generate modus-operandi | str trim)
+# use default ls colors
+$env.LS_COLORS = ''
 
 use ~/.cache/starship/init.nu
 

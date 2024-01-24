@@ -81,14 +81,14 @@
 [init]
 	defaultBranch = main
 
-[include]
-	path = .gitconfig_local
-
 [pull]
 	ff = only
 
 [fetch]
 	prune = true
+
+[include]
+	path = .gitconfig_local
 
 ; include for all repositories inside $HOME/projects/
 [includeIf "gitdir/i:~/projects/"]

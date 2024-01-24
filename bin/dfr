@@ -1,3 +1,3 @@
 #!/bin/bash
 
-df -H | rg --color never '(^Filesystem | /$)'
+df -h | rg --color never '(^Filesystem | /$)'

@@ -238,3 +238,7 @@ in iterm2 set `Preferences > Profiles > General > Command > Command` to `/opt/ho
 mkdir ~/.cache/starship
 starship init nu | save -f ~/.cache/starship/init.nu
 ```
+
+## lazygit and macos
+
+`ln -s ~/.config/lazygit ~/Library/Application\ Support/`

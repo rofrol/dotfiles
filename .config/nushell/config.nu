@@ -105,7 +105,7 @@ let light_theme = {
     shape_custom: green
     shape_datetime: cyan_bold
     shape_directory: cyan
-    shape_external: cyan
+    shape_external: black
     shape_externalarg: green_bold
     shape_external_resolved: light_purple_bold
     shape_filepath: cyan
@@ -115,7 +115,7 @@ let light_theme = {
     shape_garbage: { fg: white bg: red attr: b}
     shape_globpattern: cyan_bold
     shape_int: purple_bold
-    shape_internalcall: cyan_bold
+    shape_internalcall: black
     shape_keyword: cyan_bold
     shape_list: cyan_bold
     shape_literal: blue

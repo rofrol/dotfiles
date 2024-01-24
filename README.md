@@ -228,6 +228,7 @@ On Windows10 you need to set user env `HOME` pointing `%USERPROFILE%` for emacs 
 
 - https://github.com/nushell/nushell/issues/10746
 - https://github.com/nushell/nushell/issues/893
+- my answer https://superuser.com/questions/1804643/how-do-i-change-the-default-location-for-nushell-configration-files/1827175#1827175
 
 in iterm2 set `Preferences > Profiles > General > Command > Command` to `/opt/homebrew/bin/nu`
 

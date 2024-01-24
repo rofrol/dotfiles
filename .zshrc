@@ -84,7 +84,8 @@ _atuin_precmd() {
 # https://github.com/ellie/atuin/issues/969
 alias nf='f=$(fd | zf); print -rs nvim $f; _atuin_preexec "nvim $f"; nvim $f; _atuin_precmd $ATUIN_HISTORY_ID'
 
-alias n='nvim --headless "+Lazy! sync" "+TSUpdateSync" +qa && nvim'
+# alias n='nvim --headless "+Lazy! sync" "+TSUpdateSync" +qa && nvim'
+alias n=nvim
 
 # https://stackoverflow.com/questions/3855127/find-and-kill-process-locking-port-3000-on-mac/49587641#49587641
 # https://stackoverflow.com/questions/3855127/find-and-kill-process-locking-port-3000-on-mac/37998980#37998980

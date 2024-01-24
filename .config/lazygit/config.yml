@@ -5,7 +5,6 @@ git:
   paging:
     colorArg: always
     pager: diff-so-fancy
-    # pager: delta --light --paging=never
 gui:
   showIcons: true
   sidePanelWidth: 0.25

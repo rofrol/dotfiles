@@ -28,9 +28,6 @@ function brew_find_pkg {
 
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
-export DOTFILES_HOME=$HOME/.dotfiles.git
-source $HOME/dotfiles.sh
-
 export PATH=$PATH:~/bin
 
 #export PATH=$PATH:~/.zvm/bin

@@ -771,3 +771,6 @@ $env.LS_COLORS = ''
 use ~/.cache/starship/init.nu
 
 source ~/.local/share/atuin/init.nu
+
+#alias n = nvim --headless "+Lazy! sync" "+TSUpdateSync" +qa and nvim
+alias n = nvim

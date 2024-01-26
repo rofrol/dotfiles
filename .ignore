@@ -11,3 +11,4 @@ projects/
 Library/
 Music/
 Movies/
+!.config/

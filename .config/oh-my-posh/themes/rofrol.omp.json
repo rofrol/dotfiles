@@ -41,7 +41,7 @@
           "style": "diamond",
           "foreground": "p:white",
           "background": "p:yellow",
-          "template": "  {{ .CurrentDate | date .Format }} ",
+          "template": "  {{ .CurrentDate | date .Format }} ",
           "properties": {
             "time_format": "15:04"
           }

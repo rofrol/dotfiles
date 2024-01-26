@@ -115,3 +115,7 @@
 !/.config/nushell/env.nu
 
 !/.config/starship.toml
+
+!/.config/oh-my-posh/
+/.config/oh-my-posh/*
+!/.config/oh-my-posh/themes

@@ -1,0 +1,135 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 2,
+  "blocks": [
+    {
+      "type": "rprompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "text",
+          "style": "diamond",
+          "foreground": "p:white",
+          "background": "p:tan",
+          "leading_diamond": "\ue0b6",
+          "template": "{{ if .Env.PNPPSHOST }} \uf8c5 {{ .Env.PNPPSHOST }} {{ end }}"
+        },
+        {
+          "type": "text",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
+          "foreground": "p:white",
+          "background": "p:teal",
+          "template": "{{ if .Env.PNPPSSITE }} \uf2dd {{ .Env.PNPPSSITE }}{{ end }}"
+        },
+        {
+          "type": "text",
+          "style": "diamond",
+          "foreground": "p:white",
+          "background": "p:teal",
+          "trailing_diamond": "\ue0b4",
+          "template": "{{ if .Env.PNPPSSITE }} {{ end }}"
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "session",
+          "style": "powerline",
+          "foreground": "p:white",
+          "background": "p:plum",
+          "leading_diamond": "\ue0b6",
+          "template": " {{ .UserName }} "
+        },
+        {
+          "type": "path",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
+          "foreground": "p:white",
+          "background": "p:blush",
+          "template": " {{ .Path }} ",
+          "properties": {
+            "style": "folder"
+          }
+        },
+        {
+          "type": "git",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
+          "foreground": "p:white",
+          "background": "p:salmon",
+          "template": " ➜ ({{ .UpstreamIcon }}{{ .HEAD }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }}) ",
+          "properties": {
+            "branch_icon": "",
+            "fetch_stash_count": true,
+            "fetch_status": false,
+            "fetch_upstream_icon": true
+          }
+        },
+        {
+          "type": "node",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
+          "foreground": "p:white",
+          "background": "p:sky",
+          "template": " \ue718 {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} "
+        },
+        {
+          "type": "time",
+          "style": "diamond",
+          "foreground": "p:white",
+          "background": "p:teal_blue",
+          "trailing_diamond": "\ue0b0",
+          "template": "  {{ .CurrentDate | date .Format }} ",
+          "properties": {
+            "time_format": "15:04"
+          }
+        }
+      ]
+    },
+    {
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "foreground": "#cd5e42",
+          "style": "plain",
+          "template": "\ue3bf ",
+          "type": "root"
+        },
+        {
+          "foreground": "#000000",
+          "style": "plain",
+          "template": "❯ ",
+          "type": "text"
+        }
+      ],
+      "type": "prompt"
+    }
+  ],
+  "palette": {
+    "blush": "#DA627D",
+    "plum": "#9A348E",
+    "salmon": "#FCA17D",
+    "sky": "#86BBD8",
+    "tan": "#CC3802",
+    "teal": "#047E84",
+    "teal_blue": "#33658A",
+    "white": "#FFFFFF",
+    "blue": "#5555ff"
+  },
+  "transient_prompt": {
+    "foreground": "#000000",
+    //❯ 🚀   ༼ つ ◕_◕ ༽つ ⚡   ♥
+    // {{ .PWD }}
+    // {{ .User }}
+    // {{ .Shell }}
+    // https://github.com/deriamis/dotfiles/blob/352eda338740c3006d96b4783f602942b3f476b4/.poshthemes/powerlevel10k_poweruser.omp.json#L190
+    //"template": "<#303030,transparent>\u2591\u2592\u2593</><#fdf6e3,#303030> \uea82</> {{ .Segments.Time.CurrentDate | date .Segments.Time.Format }} \ue0b1 $SHLVL:{{ .PromptCount }} \ue0b1 {{ if .Root }}<#dc322f>{{ .UserName }}</>{{ else }}{{ .UserName }}{{ end }}<#657b83>@{{ .HostName }}</>:<#b58900,#303030>{{ .PWD }} </><#303030,transparent>\ue0b0</><#7e8082,transparent> {{ if .Root }}#{{ else if eq .Shell \"zsh\" }}%%{{ else }}${{ end }} </>"
+    //"template": "<#5555ff>{{ .Folder }}</> ❯ "
+    "template": " <p:blue>{{ .Segments.Path.Path }}</> ❯  {{ .Segments.Time.CurrentDate | date .Segments.Time.Format }} ❯ "
+  }
+}

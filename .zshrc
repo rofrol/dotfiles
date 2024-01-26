@@ -17,7 +17,10 @@ ZSH_THEME_GIT_PROMPT_PREFIX=" ["
 SHOW_DIRS=%(4~|%-1~/…/%2~|%3~)
 PROMPT='$SHOW_DIRS$(git_super_status) %# '
 
-eval "$(starship init zsh)"
+# eval "$(starship init zsh)"
+# eval "$(oh-my-posh init zsh)"
+# eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/M365Princess.omp.json)"
+eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/themes/rofrol.omp.json)"
 
 # Since there is .zshrc, setting this in .zprofile was causing that,
 # alt+. was not working correctly for bringing back last used last parameter

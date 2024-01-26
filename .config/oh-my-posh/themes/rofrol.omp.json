@@ -46,7 +46,7 @@
         },
         {
           "foreground": "p:white",
-          "background": "p:blush",
+          "background": "p:blue",
           "style": "powerline",
           "powerline_symbol": "\ue0b0",
           "properties": {
@@ -59,6 +59,7 @@
           "type": "path"
         },
         {
+          "foreground": "p:white",
           "background": "p:salmon",
           "background_templates": [
             "{{ if or (.Working.Changed) (.Staging.Changed) }}p:salmon{{ end }}",
@@ -66,7 +67,6 @@
             "{{ if gt .Ahead 0 }}#f17c37{{ end }}",
             "{{ if gt .Behind 0 }}#89d1dc{{ end }}"
           ],
-          "foreground": "p:white",
           "powerline_symbol": "\ue0b0",
           "properties": {
             "branch_icon": "\ue725 ",
@@ -94,6 +94,14 @@
           "foreground": "p:white",
           "background": "p:sky",
           "template": "  {{ .Full }} "
+        },
+        {
+          "type": "angular",
+          "style": "powerline",
+          "powerline_symbol": "",
+          "foreground": "p:white",
+          "background": "p:blush",
+          "template": "  {{ .Full }} "
         },
         {
           "type": "time",
@@ -131,13 +139,13 @@
   "palette": {
     "blush": "#DA627D",
     "plum": "#9A348E",
-    "salmon": "#FCA17D",
+    "salmon": "#ff966d",
     "sky": "#86BBD8",
     "tan": "#CC3802",
     "teal": "#047E84",
     "teal_blue": "#33658A",
     "white": "#FFFFFF",
-    "blue": "#5555ff"
+    "blue": "#6c98f6"
   },
   "transient_prompt": {
     "foreground": "#000000",

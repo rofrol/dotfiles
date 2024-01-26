@@ -169,4 +169,6 @@
 
 (global-set-key [(control /)] 'rofrol/comment-current-line-or-region)
 
+(setq mac-command-modifier 'control)
+
 (provide 'rf-misc)

@@ -7,7 +7,7 @@ $directory\
 [](fg:#DA627D bg:#FCA17D)\
 $git_branch\
 $git_status\
-[](fg:#FCA17D bg:#86BBD8)\
+[ ](fg:#FCA17D bg:#86BBD8)\
 $c\
 $elixir\
 $elm\
@@ -53,7 +53,7 @@ disabled = true # Disabled by default
 style = "bg:#DA627D"
 format = "[ $path ]($style)"
 truncation_length = 3
-truncation_symbol = "…/"
+truncation_symbol = "../"
 
 # Here is how you can shorten some long paths by text replacement
 # similar to mapped_locations in Oh My Posh:

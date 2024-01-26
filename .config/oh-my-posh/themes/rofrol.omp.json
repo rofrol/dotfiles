@@ -40,7 +40,7 @@
           "type": "time",
           "style": "diamond",
           "foreground": "p:white",
-          "background": "p:sky",
+          "background": "p:yellow",
           "template": "  {{ .CurrentDate | date .Format }} ",
           "properties": {
             "time_format": "15:04"
@@ -148,7 +148,8 @@
     "teal_blue": "#33658A",
     "white": "#FFFFFF",
     "blue": "#6c98f6",
-    "green": "#338a80"
+    "green": "#338a80",
+    "yellow": "#f1d354"
   },
   "transient_prompt": {
     "foreground": "#000000",

@@ -17,6 +17,8 @@ ZSH_THEME_GIT_PROMPT_PREFIX=" ["
 SHOW_DIRS=%(4~|%-1~/…/%2~|%3~)
 PROMPT='$SHOW_DIRS$(git_super_status) %# '
 
+eval "$(starship init zsh)"
+
 # Since there is .zshrc, setting this in .zprofile was causing that,
 # alt+. was not working correctly for bringing back last used last parameter
 export EDITOR=nvim

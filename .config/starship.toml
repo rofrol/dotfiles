@@ -20,6 +20,7 @@ $nodejs\
 $nim\
 $rust\
 $scala\
+$python\
 [](fg:#86BBD8 bg:#06969A)\
 $docker_context\
 [](fg:#06969A bg:#33658A)\
@@ -145,3 +146,8 @@ disabled = false
 time_format = "%R" # Hour:Minute Format
 style = "bg:#33658A"
 format = '[ $time ]($style)'
+
+[python]
+symbol = ""
+style = "bg:#86BBD8"
+format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'

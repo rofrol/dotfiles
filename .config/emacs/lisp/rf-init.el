@@ -28,7 +28,7 @@
 (add-hook 'find-file-hook 'rf/display-line-numbers-equalize)
 
 (tool-bar-mode 0)
-(menu-bar-mode 0)
+(menu-bar-mode 1)
 ;; (scroll-bar-mode 0)
 (column-number-mode 1)
 (setq ring-bell-function 'ignore)

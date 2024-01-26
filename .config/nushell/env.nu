@@ -102,5 +102,6 @@ $env.NU_PLUGIN_DIRS = [
 
 $env.PATH = ($env.PATH | split row (char esep) | prepend '/opt/homebrew/bin')
 $env.PATH = ($env.PATH | split row (char esep) | prepend '~/bin')
+$env.PATH = ($env.PATH | split row (char esep) | prepend '~/.local/share/npm/bin')
 
 $env.EDITOR = nvim

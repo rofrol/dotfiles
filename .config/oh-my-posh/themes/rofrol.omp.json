@@ -37,13 +37,26 @@
       "alignment": "left",
       "segments": [
         {
+          "type": "time",
+          "style": "diamond",
+          "foreground": "p:white",
+          "background": "p:sky",
+          "template": "  {{ .CurrentDate | date .Format }} ",
+          "properties": {
+            "time_format": "15:04"
+          }
+        },
+        /*
+        {
           "type": "session",
           "style": "powerline",
+          "powerline_symbol": "\ue0b0",
           "foreground": "p:white",
           "background": "p:plum",
           "leading_diamond": "\ue0b6",
           "template": " {{ .UserName }} "
         },
+*/
         {
           "foreground": "p:white",
           "background": "p:blue",
@@ -84,7 +97,7 @@
           "style": "powerline",
           "powerline_symbol": "\ue0b0",
           "foreground": "p:white",
-          "background": "p:sky",
+          "background": "p:green",
           "template": " \ue718 {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} "
         },
         {
@@ -102,17 +115,6 @@
           "foreground": "p:white",
           "background": "p:blush",
           "template": "  {{ .Full }} "
-        },
-        {
-          "type": "time",
-          "style": "diamond",
-          "foreground": "p:white",
-          "background": "p:teal_blue",
-          "trailing_diamond": "\ue0b0",
-          "template": "  {{ .CurrentDate | date .Format }} ",
-          "properties": {
-            "time_format": "15:04"
-          }
         }
       ]
     },
@@ -145,7 +147,8 @@
     "teal": "#047E84",
     "teal_blue": "#33658A",
     "white": "#FFFFFF",
-    "blue": "#6c98f6"
+    "blue": "#6c98f6",
+    "green": "#338a80"
   },
   "transient_prompt": {
     "foreground": "#000000",
@@ -156,6 +159,6 @@
     // https://github.com/deriamis/dotfiles/blob/352eda338740c3006d96b4783f602942b3f476b4/.poshthemes/powerlevel10k_poweruser.omp.json#L190
     //"template": "<#303030,transparent>\u2591\u2592\u2593</><#fdf6e3,#303030> \uea82</> {{ .Segments.Time.CurrentDate | date .Segments.Time.Format }} \ue0b1 $SHLVL:{{ .PromptCount }} \ue0b1 {{ if .Root }}<#dc322f>{{ .UserName }}</>{{ else }}{{ .UserName }}{{ end }}<#657b83>@{{ .HostName }}</>:<#b58900,#303030>{{ .PWD }} </><#303030,transparent>\ue0b0</><#7e8082,transparent> {{ if .Root }}#{{ else if eq .Shell \"zsh\" }}%%{{ else }}${{ end }} </>"
     //"template": "<#5555ff>{{ .Folder }}</> ❯ "
-    "template": "{{ .Segments.Path.Path }} ❯  {{ .Segments.Time.CurrentDate | date .Segments.Time.Format }} $ "
+    "template": " {{ .Segments.Time.CurrentDate | date .Segments.Time.Format }} ❯ {{ .Segments.Path.Path }} ❯ $ "
   }
 }

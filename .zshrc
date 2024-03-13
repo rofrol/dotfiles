@@ -105,6 +105,7 @@ export SDKMAN_DIR=$(brew --prefix sdkman-cli)/libexec
 [[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" ]] && source "${SDKMAN_DIR}/bin/sdkman-init.sh"
 
 export PATH="$HOME/personal_projects/docker/vendor/regclient/bin/:$PATH"
+export PATH="$(brew --prefix sdkman-cli)/bin/:$PATH"
 
 export DOTFILES_HOME=$HOME/.dotfiles.git
 source $HOME/dotfiles.sh

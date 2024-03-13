@@ -12,6 +12,7 @@
 --sponsorblock-remove sponsor,selfpromo,interaction
 --no-mtime
 --no-abort-on-error
+--trim-filenames 50
 #--skip-playlist-after-errors 20
 --playlist-reverse
 #-P "~/storage/shared/Download/"

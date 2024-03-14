@@ -124,3 +124,4 @@
 /iosevka/*
 !/iosevka/private-build-plans.toml
 !/iosevka/IosevkaCustom-Regular.ttf
+!/iosevka/README.md

@@ -7,7 +7,12 @@ exportGlyphNames = false
 
 [buildPlans.IosevkaCustom.variants.design]
 capital-b = "more-asymmetric-serifless"
+capital-j = "serifless"
+capital-w = "straight-serifless"
 f = "flat-hook-serifless"
+i = "flat-tailed"
+j = "flat-hook-serifless"
+l = "flat-tailed"
 m = "short-leg-serifless"
 two = "straight-neck-serifless"
 three = "two-arcs"

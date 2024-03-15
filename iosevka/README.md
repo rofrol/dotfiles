@@ -23,3 +23,5 @@ fontforge -script font-patcher --complete ~/personal_projects/vendor/Iosevka/dis
 cp IosevkaCustomNerdFont-Regular.ttf ~/iosevka/
 open ~/iosevka/IosevkaCustomNerdFont-Regular.ttf
 ```
+
+`./reinstall.sh`

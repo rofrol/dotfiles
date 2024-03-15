@@ -8,14 +8,15 @@ exportGlyphNames = false
 [buildPlans.IosevkaCustom.variants.design]
 capital-b = "more-asymmetric-serifless"
 capital-j = "serifless"
-capital-w = "straight-vertical-sides-serifless"
+capital-w = "straight-serifless"
 f = "flat-hook-serifless-crossbar-at-x-height"
-i = "semi-tailed"
-j = "flat-hook-serifless"
-l = "flat-tailed"
+i = "serifed"
+j = "flat-hook-serifed"
+l = "zshaped"
 m = "short-leg-serifless"
 t = "flat-hook"
-one = "no-base"
+w = "straight-serifless"
+one = "base"
 two = "straight-neck-serifless"
 three = "two-arcs"
 four = "closed-serifless"
@@ -27,6 +28,16 @@ at = "threefold"
 dollar = "open"
 percent = "rings-continuous-slash"
 question = "smooth"
+
+[buildPlans.IosevkaCustom.weights.Regular]
+shape = 400
+menu = 400
+css = 400
+
+[buildPlans.IosevkaCustom.widths.Normal]
+shape = 500
+menu = 5
+css = "normal"
 
 [buildPlans.IosevkaCustom.slopes.Upright]
 angle = 0

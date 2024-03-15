@@ -63,8 +63,8 @@
           "style": "powerline",
           "powerline_symbol": "\ue0b0",
           "properties": {
-            "folder_icon": "\uf115",
-            "folder_separator_icon": " /",
+            "folder_icon": "\uf115 ",
+            "folder_separator_icon": "/",
             "home_icon": "~",
             "style": "agnoster"
           },

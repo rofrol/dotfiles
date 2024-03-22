@@ -126,3 +126,7 @@
 !/iosevka/IosevkaCustomNerdFont-Regular.ttf
 !/iosevka/README.md
 !/iosevka/reinstall.sh
+
+!/.config/zed
+/.config/zed/*
+!/.config/zed/*.json

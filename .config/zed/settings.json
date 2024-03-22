@@ -1,0 +1,251 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run the `open default settings` command
+// from the command palette or from `Zed` application menu.
+{
+  "theme": "One Light",
+  "vim_mode": true,
+  "ui_font_size": 16,
+  "buffer_font_size": 18,
+  "buffer_font_family": "Zed Mono",
+  // "buffer_font_size": 19,
+  // "buffer_font_family": "IosevkaCustom Nerd Font",
+  "ui_font_family": "Zed Sans",
+  "hour_format": "hour24",
+  "telemetry": {
+    "metrics": false
+  },
+  "project_panel": {
+    // Default width of the project panel.
+    "default_width": 240,
+    // Where to dock project panel. Can be 'left' or 'right'.
+    "dock": "right"
+  },
+  // https://proderror.eu/blog/overriding-themes-in-zed-editor-2024-02-02.md
+  "experimental.theme_overrides": {
+    "editor.foreground": "#000000",
+    "editor.background": "#ffffff",
+    "syntax": {
+      // "attribute": {
+      //   "color": "#5c78e2ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "boolean": {
+      //   "color": "#ad6e25ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      "comment": {
+        "color": "#3d8060ff",
+        "font_style": null,
+
+        "font_weight": null
+      },
+      // "comment.doc": {
+      //   "color": "#6a737dff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      "constant": {
+        "color": "#21509fff",
+        "font_style": null,
+        "font_weight": null
+      },
+      // "constructor": {
+      //   "color": "#005cc5ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "embedded": {
+      //   "color": "#032f62ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "emphasis": {
+      //   "color": "#5c78e2ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "emphasis.strong": {
+      //   "color": "#ad6e25ff",
+      //   "font_style": null,
+      //   "font_weight": 700
+      // },
+      // "enum": {
+      //   "color": "#005cc5ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      "function": {
+        "color": "#755f30ff",
+        "font_style": null,
+        "font_weight": null
+      },
+      // "hint": {
+      //   "color": "#9294beff",
+      //   "font_style": null,
+      //   "font_weight": 700
+      // },
+      "keyword": {
+        "color": "#a020d4ff",
+        "font_style": null,
+        "font_weight": null
+      },
+      "label": {
+        "color": "#5c78e2ff",
+        "font_style": null,
+        "font_weight": null
+      },
+      // not checked
+      // "link_text": {
+      //   "color": "#5b79e3ff",
+      //   "font_style": "italic",
+      //   "font_weight": null
+      // },
+      // "link_uri": {
+      //   "color": "#3882b7ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      "number": {
+        "color": "#3b845cff",
+        "font_style": null,
+        "font_weight": null
+      },
+      // "operator": {
+      //   "color": "#24292eff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "predictive": {
+      //   "color": "#9b9ec6ff",
+      //   "font_style": "italic",
+      //   "font_weight": null
+      // },
+      // "preproc": {
+      //   "color": "#383a41ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "primary": {
+      //   "color": "#383a41ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      "property": {
+        "color": "#21509fff",
+        "font_style": null,
+        "font_weight": null
+      },
+      // "punctuation": {
+      //   "color": "#383a41ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      "punctuation.bracket": {
+        "color": "#bc362aff",
+        "font_style": null,
+        "font_weight": null
+      },
+      // "punctuation.delimiter": {
+      //   "color": "#4d4f52ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "punctuation.list_marker": {
+      //   "color": "#d3604fff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "punctuation.special": {
+      //   "color": "#b92b46ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "string": {
+      //   "color": "#032f62ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "string.escape": {
+      //   "color": "#7c7e86ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "string.regex": {
+      //   "color": "#ad6e26ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "string.special": {
+      //   "color": "#ad6e26ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "string.special.symbol": {
+      //   "color": "#ad6e26ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "tag": {
+      //   "color": "#24292eff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "text.literal": {
+      //   "color": "#649f57ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // },
+      // "title": {
+      //   "color": "#d3604fff",
+      //   "font_style": null,
+      //   "font_weight": 400
+      // },
+      "type": {
+        "color": "#3d8060ff",
+        "font_style": null,
+        "font_weight": null
+      },
+      "variable": {
+        "color": "#22509fff",
+        "font_style": null,
+        "font_weight": null
+      },
+      "variable.special": {
+        "color": "#21509fff",
+        "font_style": null,
+        "font_weight": null
+      }
+      // "variant": {
+      //   "color": "#5b79e3ff",
+      //   "font_style": null,
+      //   "font_weight": null
+      // }
+      // https://github.com/Mofiqul/vscode.nvim/blob/ea9ff6da3756ab229bcb59aad1ea7749eb15b065/lua/vscode/colors.lua#L59
+      // https://github.com/Mofiqul/vscode.nvim/blob/ea9ff6da3756ab229bcb59aad1ea7749eb15b065/lua/vscode/theme.lua#L281
+      // vscGray = '#808080',
+      // vscViolet = '#646695',
+      // vscBlue = '#569CD6',
+      // vscAccentBlue = '#4FC1FE',
+      // vscDarkBlue = '#223E55',
+      // vscMediumBlue = '#18a2fe',
+      // vscLightBlue = '#9CDCFE',
+      // vscGreen = '#6A9955',
+      // vscBlueGreen = '#4EC9B0',
+      // vscLightGreen = '#B5CEA8',
+      // vscRed = '#F44747',
+      // vscOrange = '#CE9178',
+      // vscLightRed = '#D16969',
+      // vscYellowOrange = '#D7BA7D',
+      // vscYellow = '#DCDCAA',
+      // vscDarkYellow = '#FFD602',
+      // vscPink = '#C586C0',
+    }
+  }
+}

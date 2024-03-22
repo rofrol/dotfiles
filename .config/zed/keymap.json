@@ -1,0 +1,22 @@
+[
+  // Standard macOS bindings
+  {
+    "context": "Pane",
+    "bindings": {
+      "ctrl-alt-1": ["pane::ActivateItem", 0], // "ctrl-1 does not work, so need to map it to ctrl+option+1" in karabiner
+      "ctrl-2": ["pane::ActivateItem", 1],
+      "ctrl-3": ["pane::ActivateItem", 2],
+      "ctrl-4": ["pane::ActivateItem", 3],
+      "ctrl-5": ["pane::ActivateItem", 4],
+      "ctrl-6": ["pane::ActivateItem", 5],
+      "ctrl-7": ["pane::ActivateItem", 6],
+      "ctrl-8": ["pane::ActivateItem", 7],
+      "ctrl-9": ["pane::ActivateItem", 8],
+      "ctrl-0": "pane::ActivateLastItem",
+      "ctrl--": "pane::GoBack",
+      "ctrl-_": "pane::GoForward",
+      "cmd-shift-t": "pane::ReopenClosedItem",
+      "cmd-shift-f": "project_search::ToggleFocus"
+    }
+  }
+]

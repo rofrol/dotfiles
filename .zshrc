@@ -109,3 +109,5 @@ export PATH="$(brew --prefix sdkman-cli)/bin/:$PATH"
 
 export DOTFILES_HOME=$HOME/.dotfiles.git
 source $HOME/dotfiles.sh
+
+alias etr='eza --icons -lt modified --sort modified --time-style full-iso'

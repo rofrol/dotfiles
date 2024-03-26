@@ -127,6 +127,11 @@
 !/iosevka/README.md
 !/iosevka/reinstall.sh
 
-!/.config/zed
+!/.config/zed/
 /.config/zed/*
 !/.config/zed/*.json
+
+!/.config/yt-dlp/
+/.config/yt-dlp/*
+!/.config/yt-dlp/config
+

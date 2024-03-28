@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#pass input as arguments
 
 FILE="$1"
 

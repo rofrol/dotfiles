@@ -63,7 +63,7 @@
           "style": "powerline",
           "powerline_symbol": "\ue0b0",
           "properties": {
-            "folder_icon": "\uf115 ",
+            "folder_icon": " ",
             "folder_separator_icon": "/",
             "home_icon": "~",
             "style": "agnoster"
@@ -153,7 +153,7 @@
   },
   "transient_prompt": {
     "foreground": "#000000",
-    //❯ 🚀   ༼ つ ◕_◕ ༽つ ⚡      ♥
+    //❯ 🚀   ༼ つ ◕_◕ ༽つ ⚡      ♥ 
     // {{ .PWD }}
     // {{ .User }}
     // {{ .Shell }}

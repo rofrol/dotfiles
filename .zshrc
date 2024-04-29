@@ -95,6 +95,7 @@ alias n=nvim
 # https://stackoverflow.com/questions/3855127/find-and-kill-process-locking-port-3000-on-mac/49587641#49587641
 # https://stackoverflow.com/questions/3855127/find-and-kill-process-locking-port-3000-on-mac/37998980#37998980
 function killTcpListen () {
+  sudo lsof -sTCP:LISTEN -t -i tcp:$1
   kill -QUIT $(sudo lsof -sTCP:LISTEN -t -i tcp:$1)
 }
 

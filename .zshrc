@@ -112,3 +112,5 @@ export DOTFILES_HOME=$HOME/.dotfiles.git
 source $HOME/dotfiles.sh
 
 alias etr='eza --icons -lt modified --sort modified --time-style full-iso'
+
+export PATH="$(brew --prefix git)/bin/:$PATH"

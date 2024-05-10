@@ -114,3 +114,9 @@ source $HOME/dotfiles.sh
 alias etr='eza --icons -lt modified --sort modified --time-style full-iso'
 
 export PATH="$(brew --prefix git)/bin/:$PATH"
+
+# https://github.com/kovidgoyal/kitty/issues/268#issuecomment-419342337
+# https://www.reddit.com/r/KittyTerminal/comments/197iook/comment/ki0y0bs/
+function clearScrollback() {
+  printf '\033[2J\033[3J\033[1;1H'
+}

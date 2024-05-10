@@ -120,3 +120,13 @@ export PATH="$(brew --prefix git)/bin/:$PATH"
 function clearScrollback() {
   printf '\033[2J\033[3J\033[1;1H'
 }
+
+# https://twitter.com/nektro/status/1396376520512339973
+# usage: cat /etc/group | yargs cut -d':' -f1
+function yargs() {
+  cat /dev/stdin |
+  while IFS= read -r line
+  do
+    echo $line | $@
+  done
+}

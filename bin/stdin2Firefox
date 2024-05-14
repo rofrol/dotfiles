@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# https://unix.stackexchange.com/questions/24931/how-to-make-firefox-read-stdin/24939#24939
+# read from stdin, write to a temp file, open the temp file in a browser, then delete it
+tmpfile=$(mktemp).html
+cat >$tmpfile
+open -a Firefox $tmpfile
+# trap "rm $tmpfile" EXIT

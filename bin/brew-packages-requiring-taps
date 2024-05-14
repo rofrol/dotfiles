@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# List all installed packages
+installed_packages=$(brew list)
+
+# Loop through the installed packages
+for package in $installed_packages; do
+  # Check if the package is from the homebrew/core repository
+  info=$(brew info --json=v2 $package)
+  tap=$(echo "$info" | jq -r '.casks[0].tap')
+
+  if [ "$tap" == "homebrew/core" ]; then
+    echo "Package $package can be installed with 'brew install $package'"
+  else
+    echo "Package $package requires a tap: $tap"
+  fi
+done

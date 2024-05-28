@@ -1,6 +1,6 @@
 Run `don` and `dof` to enable/disable git repo here.
 
-Architecture based on https://github.com/jan-warchol/dotfiles
+Architecture based on <https://github.com/jan-warchol/dotfiles>
 
 After cloning repository:
 
@@ -16,6 +16,14 @@ git restore .
 dof
 rm -rf dotfiles
 ```
+
+## .ignore
+
+I have added some directories like `/projects/` to `.ignore`, so that ripgrep or telescope in neovim do not search them.
+
+if you start a glob pattern with a `/`, then it will only match that specific path relative to where ripgrep is running
+
+<https://stackoverflow.com/questions/64373137/ripgrep-to-only-exclude-a-file-in-the-root-of-the-folder/64389725#64389725>
 
 ## Neovim config
 
@@ -45,11 +53,11 @@ sudo add-apt-repository ppa:git-core/ppa
 apt install git
 ```
 
-https://git-scm.com/download/linux
+<https://git-scm.com/download/linux>
 
 ### fzf
 
-Install using git https://github.com/junegunn/fzf#using-git. Version from deb was to old for nvim integration script (0.20 vs 0.24).
+Install using git <https://github.com/junegunn/fzf#using-git>. Version from deb was to old for nvim integration script (0.20 vs 0.24).
 
 ## scoop
 
@@ -70,12 +78,12 @@ scoop cache rm *
 scoop update \*
 ```
 
-- https://github.com/lukesampson/scoop#installation
-- https://github.com/lukesampson/scoop/issues/897#issuecomment-391909564
-- https://github.com/ScoopInstaller/Main/tree/master/bucket
-- https://github.com/lukesampson/scoop-extras/tree/master/bucket
-- https://github.com/lukesampson/scoop/wiki/Open-With-Icons
-- https://rasa.github.io/scoop-directory/by-stars
+- <https://github.com/lukesampson/scoop#installation>
+- <https://github.com/lukesampson/scoop/issues/897#issuecomment-391909564>
+- <https://github.com/ScoopInstaller/Main/tree/master/bucket>
+- <https://github.com/lukesampson/scoop-extras/tree/master/bucket>
+- <https://github.com/lukesampson/scoop/wiki/Open-With-Icons>
+- <https://rasa.github.io/scoop-directory/by-stars>
 
 Shortcuts in `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Scoop Apps`
 
@@ -89,8 +97,8 @@ $ git fetch
 $ git reset --hard origin/master
 ```
 
-- https://gist.github.com/573/e806447bf55a09376cf457a8a403ec44
-  - https://github.com/lukesampson/scoop/issues/3045#issuecomment-493345130
+- <https://gist.github.com/573/e806447bf55a09376cf457a8a403ec44>
+  - <https://github.com/lukesampson/scoop/issues/3045#issuecomment-493345130>
 
 ### mpv
 
@@ -102,7 +110,7 @@ Create env MPV_HOME
 setx MPV_HOME %USERPROFILE\.confing\mpv
 ```
 
-https://github.com/mpv-player/mpv/blob/master/DOCS/man/mpv.rst#files-on-windows
+<https://github.com/mpv-player/mpv/blob/master/DOCS/man/mpv.rst#files-on-windows>
 
 #### simple-mpv-webui
 
@@ -118,17 +126,17 @@ run `bin/mpv-setup.bat` as Administrator.
 curl --create-dirs -so ~/scoop/apps/mpv/current/lua/json.lua https://raw.githubusercontent.com/craigmj/json4lua/master/json/json.lua
 ```
 
-- https://github.com/57op/simple-mpv-webui-windows-libs/issues/2
+- <https://github.com/57op/simple-mpv-webui-windows-libs/issues/2>
 
 #### Thumbnails
 
-Maybe add thumbnails with icaros https://www.majorgeeks.com/files/details/icaros.html ?
+Maybe add thumbnails with icaros <https://www.majorgeeks.com/files/details/icaros.html> ?
 
 ### wezterm
 
 For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Othwerwise there will be problems.
 
-Install UbuntuMono-R.ttf from https://design.ubuntu.com/font/
+Install UbuntuMono-R.ttf from <https://design.ubuntu.com/font/>
 
 ### calibre
 
@@ -136,8 +144,8 @@ Instal calibre-normal instead of calibre. For calibre (which is portable version
 
 Long paths needs to be enabled or it asks where to install. Otherwise scoop cannot create shim.
 
-- https://github.com/lukesampson/scoop-extras/issues/1765#issuecomment-471170974
-- https://github.com/lukesampson/scoop-extras/issues/2535
+- <https://github.com/lukesampson/scoop-extras/issues/1765#issuecomment-471170974>
+- <https://github.com/lukesampson/scoop-extras/issues/2535>
 
 ### vcredist2015
 
@@ -164,8 +172,8 @@ You can now remove this installer with 'scoop uninstall vcredist2015'
 
 There are two versions:
 
-- https://github.com/lukesampson/scoop-extras/blob/master/bucket/autohotkey.json
-- https://github.com/lukesampson/scoop-extras/blob/master/bucket/autohotkey-installer.json
+- <https://github.com/lukesampson/scoop-extras/blob/master/bucket/autohotkey.json>
+- <https://github.com/lukesampson/scoop-extras/blob/master/bucket/autohotkey-installer.json>
 
 ### vscode and git bash
 
@@ -193,7 +201,7 @@ In Firefox run `about:config` and set
 
 `toolkit.legacyUserProfileCustomizations.stylesheets` to `true`
 
-- https://www.userchrome.org/how-create-userchrome-css.html
+- <https://www.userchrome.org/how-create-userchrome-css.html>
 
 ## tmux
 
@@ -201,18 +209,18 @@ In Firefox run `about:config` and set
 
 ## rust
 
-Install from https://rustup.rs/
+Install from <https://rustup.rs/>
 
 ### error: linking with `link.exe` failed: exit code: 3221225781
 
-#42744
+# 42744
 
 Start PowerShell as Administrator and run:
 
 `npm install --global windows-build-tools`
 
-- https://github.com/rust-lang/rust/issues/42744#issuecomment-309387002
-- https://github.com/felixrieseberg/windows-build-tools
+- <https://github.com/rust-lang/rust/issues/42744#issuecomment-309387002>
+- <https://github.com/felixrieseberg/windows-build-tools>
 
 ### Packages
 
@@ -226,9 +234,9 @@ On Windows10 you need to set user env `HOME` pointing `%USERPROFILE%` for emacs 
 
 `ln -s ~/.config/nushell ~/Library/Application\ Support/`
 
-- https://github.com/nushell/nushell/issues/10746
-- https://github.com/nushell/nushell/issues/893
-- my answer https://superuser.com/questions/1804643/how-do-i-change-the-default-location-for-nushell-configration-files/1827175#1827175
+- <https://github.com/nushell/nushell/issues/10746>
+- <https://github.com/nushell/nushell/issues/893>
+- my answer <https://superuser.com/questions/1804643/how-do-i-change-the-default-location-for-nushell-configration-files/1827175#1827175>
 
 in iterm2 set `Preferences > Profiles > General > Command > Command` to `/opt/homebrew/bin/nu`
 

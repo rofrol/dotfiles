@@ -79,3 +79,5 @@ PERL_MB_OPT="--install_base \"/home/roman/perl5\""
 export PERL_MB_OPT
 PERL_MM_OPT="INSTALL_BASE=/home/roman/perl5"
 export PERL_MM_OPT
+
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"

@@ -81,3 +81,5 @@ PERL_MM_OPT="INSTALL_BASE=/home/roman/perl5"
 export PERL_MM_OPT
 
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+alias n=nvim

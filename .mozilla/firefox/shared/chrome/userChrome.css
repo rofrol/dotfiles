@@ -223,7 +223,8 @@ Window controls will be all wrong without it
     #sidebar:hover {
     width: var(--sidebar-visible-width) !important;
   }
-  #sidebar-box[sidebarcommand="_ccc8cbaa-3c36-46d1-b0ae-d5e122755901_-sidebar-action"]:not(
+  #main-window:not([inFullscreen])
+    #sidebar-box[sidebarcommand="_ccc8cbaa-3c36-46d1-b0ae-d5e122755901_-sidebar-action"]:not(
       [hidden]
     )
     ~ #appcontent {

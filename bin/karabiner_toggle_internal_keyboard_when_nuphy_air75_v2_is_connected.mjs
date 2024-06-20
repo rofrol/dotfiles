@@ -20,12 +20,10 @@ import { exec } from "child_process";
 
 const debug = false;
 // https://stackoverflow.com/questions/21077670/expanding-resolving-in-node-js/54183941#54183941
-const fileName = "~/.config/karabiner/karabiner.json".replace(
-  /^~/,
-  require("os").homedir,
-);
+import { homedir } from "os";
+const fileName = "~/.config/karabiner/karabiner.json".replace(/^~/, homedir);
 if (debug) console.log(fileName);
-const file = require(fileName);
+import file from "/Users/roman.frolow/.config/karabiner/karabiner.json" with { type: "json" };
 
 const profileIndex = file.profiles.findIndex((profile) => profile.selected);
 if (debug) console.log("profileIndex", profileIndex);

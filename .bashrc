@@ -87,3 +87,8 @@ alias n=nvim
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH=$BUN_INSTALL/bin:$PATH
+
+export PATH=$PATH:$HOME/.atuin/bin
+# https://github.com/atuinsh/atuin/blob/main/docs/docs/key-binding.md
+[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+eval "$(atuin init bash --disable-up-arrow)"

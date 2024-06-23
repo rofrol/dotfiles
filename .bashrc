@@ -83,3 +83,7 @@ export PERL_MM_OPT
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 alias n=nvim
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH=$BUN_INSTALL/bin:$PATH

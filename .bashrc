@@ -92,3 +92,5 @@ export PATH=$PATH:$HOME/.atuin/bin
 # https://github.com/atuinsh/atuin/blob/main/docs/docs/key-binding.md
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
 eval "$(atuin init bash --disable-up-arrow)"
+
+eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/rofrol.omp.json)"

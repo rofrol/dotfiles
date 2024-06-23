@@ -141,7 +141,7 @@ atuin-setup() {
 # because of that?: commenting out as I cannot go to end of line with ctrl+e when this is binded
 # atuin-setup
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source <(fzf --zsh)
 
 #https://www.reddit.com/r/linux4noobs/comments/egb644/fzf_newcomer_fd_or_ripgrep/
 export FZF_DEFAULT_COMMAND='fd --hidden --no-ignore --exclude node_modules'

@@ -28,9 +28,7 @@ export PATH=$PATH:~/bin
 #export PATH=$PATH:$HOME/personal_projects/zig/vendor/zig/stage3/bin/
 #export PATH=$PATH:~/bin/zig
 alias zig-update='zig version && $HOME/personal_projects/zig/zig-utils/scripts/zupd aarch64-macos'
-
 export PATH=$PATH:$HOME/.local/zig/current
-
 export PATH=$PATH:$HOME/zls
 
 alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'

@@ -44,7 +44,7 @@ fi
 
 # for pip
 export PATH=$PATH:~/.local/bin
-export PATH=$PATH:~/bin
+export PATH=~/bin:$PATH
 
 # https://stackoverflow.com/questions/4075287/node-express-eaddrinuse-address-already-in-use-kill-server/46276685#46276685
 # https://stackoverflow.com/questions/11583562/how-to-kill-a-process-running-on-particular-port-in-linux/19060124#19060124
@@ -94,3 +94,7 @@ export PATH=$PATH:$HOME/.atuin/bin
 eval "$(atuin init bash --disable-up-arrow)"
 
 eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/rofrol.omp.json)"
+
+alias zig-update='zig version; $HOME/personal_projects/zig/zig-utils/scripts/zupd x86_64-linux'
+export PATH=$HOME/.local/zig/current:$PATH
+export PATH=$HOME/zls:$PATH

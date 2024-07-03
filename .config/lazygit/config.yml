@@ -1,49 +1,50 @@
+# https://github.com/folke/dot/blob/5df77fa64728a333f4d58e35d3ca5d8590c4f928/config/lazygit/config.yml
 disableStartupPopups: true
 # https://github.com/nabekou29/dotfiles/blob/c0e463aceaa755f70ac002b51028d93ae8f31598/config/lazygit.yml#L6
 git:
-    branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium --oneline {{branchName}} --"
-    paging:
-        colorArg: always
-        pager: diff-so-fancy
+  branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium --oneline {{branchName}} --"
+  paging:
+    colorArg: always
+    pager: diff-so-fancy
 gui:
-    showIcons: true
-    sidePanelWidth: 0.25
-    language: "en"
-    timeFormat: "2006-01-02T15:04:05Z07:00" # '02 Jan 06 15:04 MST' # https://pkg.go.dev/time#Time.Format
+  showIcons: true
+  sidePanelWidth: 0.25
+  language: "en"
+  timeFormat: "2006-01-02T15:04:05Z07:00" # '02 Jan 06 15:04 MST' # https://pkg.go.dev/time#Time.Format
 # https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Command_Keybindings.md
 customCommands:
-    - key: null
-      command: "gh repo view -w"
-      context: "global"
-      loadingText: "view repo on GitHub"
-    - key: "O"
-      command: "{{if .SelectedFile }} code {{ .SelectedFile.Name }} {{end}} "
-      context: "global"
-      description: "open vscode"
-    - key: "<c-r>"
-      command: "gh pr view {{.SelectedLocalBranch.Name}}"
-      context: "localBranches"
-      description: "view pull request"
-      subprocess: true
-    - key: null
-      command: "gh pr merge {{.SelectedLocalBranch.Name}} -d {{index .PromptResponses 0}}"
-      context: "localBranches"
-      description: "merge pull request"
-      prompts:
-        - type: "menu"
-          title: "Select merge option"
-          options:
-            - value: "--merge"
-              name: "Create a merge commit"
-              description: "gh pr merge {{.SelectedLocalBranch.Name}} -d --merge -b ''"
-            - value: "--squash"
-              name: "Squash and merge"
-              description: "gh pr merge {{.SelectedLocalBranch.Name}} -d --squash -b ''"
-            - value: "--rebase"
-              name: "Rebase and merge"
-              description: "gh pr merge {{.SelectedLocalBranch.Name}} -d --rebase -b ''"
+  - key: null
+    command: "gh repo view -w"
+    context: "global"
+    loadingText: "view repo on GitHub"
+  - key: "O"
+    command: "{{if .SelectedFile }} code {{ .SelectedFile.Name }} {{end}} "
+    context: "global"
+    description: "open vscode"
+  - key: "<c-r>"
+    command: "gh pr view {{.SelectedLocalBranch.Name}}"
+    context: "localBranches"
+    description: "view pull request"
+    subprocess: true
+  - key: null
+    command: "gh pr merge {{.SelectedLocalBranch.Name}} -d {{index .PromptResponses 0}}"
+    context: "localBranches"
+    description: "merge pull request"
+    prompts:
+      - type: "menu"
+        title: "Select merge option"
+        options:
+          - value: "--merge"
+            name: "Create a merge commit"
+            description: "gh pr merge {{.SelectedLocalBranch.Name}} -d --merge -b ''"
+          - value: "--squash"
+            name: "Squash and merge"
+            description: "gh pr merge {{.SelectedLocalBranch.Name}} -d --squash -b ''"
+          - value: "--rebase"
+            name: "Rebase and merge"
+            description: "gh pr merge {{.SelectedLocalBranch.Name}} -d --rebase -b ''"
 keybinding:
-    universal:
-        openRecentRepos: <disabled> # '<c-r>'
+  universal:
+    openRecentRepos: <disabled> # '<c-r>'
 os:
-    editPreset: "nvim"
+  editPreset: "nvim"

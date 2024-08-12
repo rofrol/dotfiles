@@ -1,5 +1,6 @@
 @-moz-document url(chrome://browser/content/browser.xhtml)
 {
+  /* https://superuser.com/questions/1608096/how-to-inspect-firefoxs-ui */
   /* https://twitter.com/myfonj/status/1387584962354982912 */
   /* https://www.reddit.com/r/firefox/comments/j9agb3/disable_the_fullscreen_animation_in_firefox_80/ga9xbet/?utm_source=reddit&utm_medium=web2x&context=3 */
 
@@ -233,5 +234,10 @@ Window controls will be all wrong without it
   #sidebar-box[sidebarcommand="_ccc8cbaa-3c36-46d1-b0ae-d5e122755901_-sidebar-action"]
     #sidebar-header {
     display: none !important;
+  }
+
+  #tabbrowser-arrowscrollbox {
+    /* https://stackoverflow.com/questions/16670931/hide-scroll-bar-but-while-still-being-able-to-scroll/38994837#38994837 */
+    scrollbar-width: none;
   }
 }

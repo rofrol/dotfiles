@@ -240,4 +240,20 @@ Window controls will be all wrong without it
     /* https://stackoverflow.com/questions/16670931/hide-scroll-bar-but-while-still-being-able-to-scroll/38994837#38994837 */
     scrollbar-width: none;
   }
+
+  #tabbrowser-tabs[haspinnedtabs]:not([positionpinnedtabs])
+    > #tabbrowser-arrowscrollbox
+    > .tabbrowser-tab:nth-child(1 of :not([pinned], [hidden])) {
+    margin-inline-start: 0 !important;
+  }
+
+  #tabbrowser-tabs[haspinnedtabs]:not([positionpinnedtabs])
+    > #tabbrowser-arrowscrollbox
+    > .tabbrowser-tab:nth-last-child(1 of [pinned]) {
+    border-bottom: 1px solid #999 !important;
+  }
+
+  .wrapper {
+    padding-inline-start: 0 !important;
+  }
 }

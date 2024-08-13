@@ -139,3 +139,5 @@
 /.config/kitty/*
 !/.config/kitty/current-theme.conf
 !/.config/kitty/kitty.conf
+
+!/.procs.toml

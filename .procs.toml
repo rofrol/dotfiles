@@ -1,3 +1,4 @@
+# https://stackoverflow.com/questions/4421633/who-is-listening-on-a-given-tcp-port-on-mac-os-x/68976772#68976772
 # https://github.com/yiskw713/dotfiles/blob/f5678479153a2bb9a3a99918faa068e4e305803a/procs.toml#L69
 [[columns]]
 kind = "Pid"

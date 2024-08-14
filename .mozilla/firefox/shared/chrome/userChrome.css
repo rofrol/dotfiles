@@ -236,6 +236,10 @@ Window controls will be all wrong without it
     display: none !important;
   }
 
+  /*
+   * native vertical tabs
+   */
+
   #tabbrowser-arrowscrollbox {
     /* https://stackoverflow.com/questions/16670931/hide-scroll-bar-but-while-still-being-able-to-scroll/38994837#38994837 */
     scrollbar-width: none;
@@ -255,5 +259,21 @@ Window controls will be all wrong without it
 
   .wrapper {
     padding-inline-start: 0 !important;
+  }
+
+  /* https://support.mozilla.org/en-US/questions/1341555 */
+  /* Hide the mute/unmute button */
+  .tab-icon-overlay:not([pinned], [sharing], [crashed]):is(
+      [soundplaying],
+      [muted]
+    ) {
+    display: none !important;
+  }
+
+  /* make tab play icon unclickable */
+  /* https://www.reddit.com/r/firefox/comments/3v4hrl/comment/cxk8smy/ */
+  .tabbrowser-tab :is(.tab-icon-sound, .tab-icon-overlay) {
+    pointer-events: none !important;
+    opacity: 0.5 !important;
   }
 }

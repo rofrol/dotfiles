@@ -247,5 +247,6 @@
       // vscDarkYellow = '#FFD602',
       // vscPink = '#C586C0',
     }
-  }
+  },
+  "auto_update": false
 }

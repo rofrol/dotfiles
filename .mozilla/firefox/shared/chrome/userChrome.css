@@ -276,4 +276,10 @@ Window controls will be all wrong without it
     pointer-events: none !important;
     opacity: 0.5 !important;
   }
+
+  /* make selected tab in vertical tabs more visible */
+  #TabsToolbar #firefox-view-button[open] > .toolbarbutton-icon,
+  .tab-background:is([selected], [multiselected]) {
+    box-shadow: 0 0 6px rgb(0, 0, 255) !important;
+  }
 }

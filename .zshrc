@@ -157,6 +157,9 @@ source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 #zstyle ':autocomplete:*' default-context fzf-atuin-history-widget
 #bindkey -M menuselect '\r' .accept-line
 
+# https://stackoverflow.com/questions/71591971/how-can-i-fix-the-zsh-command-not-found-python-error-macos-monterey-12-3/71657414#71657414
+eval "$(pyenv init --path)"
+
 # https://stackoverflow.com/questions/122327/how-do-i-find-the-location-of-my-python-site-packages-directory/52638888#52638888
 export PATH=$(python -c "import sysconfig; print(sysconfig.get_path('purelib'))"):$PATH
 

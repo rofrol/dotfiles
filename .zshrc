@@ -220,7 +220,7 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/themes/rofrol.omp.json
 # alt+. was not working correctly for bringing back last used last parameter
 export EDITOR=nvim
 
-source ~/.zshrc_nvm
+#source ~/.zshrc_nvm
 
 
 # Load Angular CLI autocompletion.

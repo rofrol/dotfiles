@@ -141,3 +141,7 @@
 !/.config/kitty/kitty.conf
 
 !/.procs.toml
+
+!/.config/ghostty/
+/.config/ghostty/*
+!/.config/ghostty/config

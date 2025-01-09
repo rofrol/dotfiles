@@ -1,0 +1,58 @@
+# https://ghostty.org/docs/config/reference
+# ghostty +show-config --default --docs
+# https://github.com/search?q=path%3Aghostty%2Fconfig&type=code
+
+theme = Terminal Basic
+
+# ghostty +list-keybinds
+
+# Shift+⌘+\ open the tab overview https://gpanders.com/blog/ghostty-is-native-so-what/
+
+# https://github.com/ghostty-org/ghostty/discussions/4680
+keybind = command+one=unbind
+keybind = command+two=unbind
+keybind = command+three=unbind
+keybind = command+four=unbind
+keybind = command+five=unbind
+keybind = command+six=unbind
+keybind = command+seven=unbind
+keybind = command+eight=unbind
+keybind = command+nine=unbind
+
+# https://github.com/ghostty-org/ghostty/discussions/2946
+#keybind = global:alt+grave_accent=toggle_quick_terminal
+keybind = global:f3=toggle_quick_terminal
+
+#background-opacity = 0.9
+#background-blur-radius = 5
+macos-option-as-alt = true
+
+# https://www.jonashietala.se/blog/2025/01/06/first_impressions_of_ghostty/
+
+# below setting prevents to go fullscreen with cmd+enter or whth command from menu
+# unless you set mouse-hide-while-typing = true, but then tabs are disabled
+#window-decoration = false
+#macos-non-native-fullscreen = true
+fullscreen = true
+
+# https://github.com/fredrikaverpil/dotfiles/blob/main/ghostty.conf
+# more space is taken in fullscreen
+#macos-titlebar-style = tabs
+
+#macos-titlebar-proxy-icon = hidden
+
+mouse-hide-while-typing = true
+
+# set to high value to maximize
+window-height = 10000
+window-width = 10000
+
+# ghostty +list-fonts
+font-family = Iosevka Rofrol
+# font-size started working after setting font-family
+font-size = 18
+
+unfocused-split-opacity = 1
+
+#adjust-cell-height=9
+#adjust-cursor-height=9

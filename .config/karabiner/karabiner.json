@@ -375,6 +375,12 @@
                     ]
                 }
             ],
+            "fn_function_keys": [
+                {
+                    "from": { "key_code": "f3" },
+                    "to": [{ "key_code": "f3" }]
+                }
+            ],
             "name": "US",
             "selected": true,
             "simple_modifications": [

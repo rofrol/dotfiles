@@ -239,10 +239,11 @@ alias nvim-pasteTest="NVIM_APPNAME=LazyVim pasteTest"
 alias nvim-olical="NVIM_APPNAME=nvim-olical nvim"
 alias nvim-cajuse="NVIM_APPNAME=nvim-cajuse nvim"
 alias nvim-vimstudio="NVIM_APPNAME=nvim-vimstudio nvim"
+alias nvim-lazy4="NVIM_APPNAME=LazyVim--starter4 nvim"
 
 
 function nvims() {
-  items=("default" "kickstart" "NvChad" "AstroNvim" "LandonSchropp" "LazyVim" "dpetka2001", "pasteTest", "nvim-olical", "nvim-cajuse", "nvim-vimstudio")
+  items=("default" "kickstart" "NvChad" "AstroNvim" "LandonSchropp" "LazyVim" "dpetka2001", "pasteTest", "nvim-olical", "nvim-cajuse", "nvim-vimstudio", "LazyVim--starter4")
   config=$(printf "%s\n" "${items[@]}" | fzf --prompt=" Neovim Config  " --height=~50% --layout=reverse --border --exit-0)
   if [[ -z $config ]]; then
     echo "Nothing selected"
@@ -308,6 +309,9 @@ source $HOME/dotfiles.sh
 alias etr='eza --icons -lt modified --sort modified --time-style full-iso'
 
 export PATH="$(brew --prefix git)/bin/:$PATH"
+export PATH="$HOME/.zvm/self:$PATH"
+export PATH="$HOME/.zvm/bin:$PATH"
+export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
 
 # https://github.com/kovidgoyal/kitty/issues/268#issuecomment-419342337
 # https://www.reddit.com/r/KittyTerminal/comments/197iook/comment/ki0y0bs/
@@ -324,3 +328,5 @@ function yargs() {
     echo $line | $@
   done
 }
+
+alias chrome='open -na Google\ Chrome'

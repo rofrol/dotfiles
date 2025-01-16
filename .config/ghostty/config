@@ -51,6 +51,7 @@ window-width = 10000
 font-family = Iosevka Rofrol
 # font-size started working after setting font-family
 font-size = 18
+font-synthetic-style = no-bold,no-italic,no-bold-italic
 
 unfocused-split-opacity = 1
 

@@ -145,3 +145,7 @@
 !/.config/ghostty/
 /.config/ghostty/*
 !/.config/ghostty/config
+
+!/.config/helix/
+/.config/helix/*
+!/.config/helix/config.toml

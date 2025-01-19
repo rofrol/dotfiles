@@ -13,3 +13,13 @@ select = "underline"
 
 [editor.indent-guides]
 render = true
+
+[keys.normal]
+C-s = ":w" # Ctrl and 's' to write
+Cmd-s = ":w" # Cmd or Win or Meta and 's' to write
+
+[keys.insert]
+# just ":w" is enought in insert mode https://github.com/helix-editor/helix/issues/3377#issuecomment-1210017485
+# after saving I want to be in normal mode
+C-s =  ["normal_mode", ":w"] # Ctrl and 's' to write
+Cmd-s = ["normal_mode", ":w"] # Cmd or Win or Meta

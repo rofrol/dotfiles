@@ -1,1 +1,15 @@
-theme = "onelight_white"
+# theme = "onelight_white"
+theme = "catppuccin_latte_white"
+
+[editor]
+# line-number = "relative"
+# cursorline = true
+color-modes = true
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.indent-guides]
+render = true

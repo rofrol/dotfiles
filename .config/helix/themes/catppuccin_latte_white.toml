@@ -1,0 +1,30 @@
+inherits = "catppuccin_latte"
+
+# fake value bg_transparent to unset background https://github.com/helix-editor/helix/discussions/4092#discussioncomment-3807475
+"ui.background" = {bg = "bg_transparent"}
+
+"comment" = { fg = "#444444" }
+# "type" = "pink"
+
+
+[palette]
+text = "#000000"
+# https://github.com/catppuccin/nvim/discussions/323#discussioncomment-8105066
+# rosewater = "#cc7983"
+# flamingo = "#bb5d60"
+# pink = "#d54597"
+# mauve = "#a65fd5"
+# red = "#b7242f"
+# maroon = "#db3e68"
+maroon = "#db3eff"
+# peach = "#e46f2a"
+yellow = "#bc8705"
+# green = "#1a8e32"
+green = "#00ad00"
+# teal = "#00a390"
+# teal = "#179299"
+# sky = "#089ec0"
+sapphire = "#0ea0a0"
+# blue = "#017bca"
+blue = "#1c5ee1"
+# lavender = "#8584f7"

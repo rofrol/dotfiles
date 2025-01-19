@@ -3,7 +3,7 @@ inherits = "catppuccin_latte"
 # fake value bg_transparent to unset background https://github.com/helix-editor/helix/discussions/4092#discussioncomment-3807475
 "ui.background" = {bg = "bg_transparent"}
 
-"comment" = { fg = "#444444" }
+"comment" = { fg = "#333333" }
 # "type" = "pink"
 
 

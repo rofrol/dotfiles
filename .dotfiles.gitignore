@@ -149,3 +149,4 @@
 !/.config/helix/
 /.config/helix/*
 !/.config/helix/config.toml
+!/.config/helix/themes

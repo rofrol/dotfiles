@@ -3,8 +3,9 @@ inherits = "catppuccin_latte"
 # fake value bg_transparent to unset background https://github.com/helix-editor/helix/discussions/4092#discussioncomment-3807475
 "ui.background" = {bg = "bg_transparent"}
 
-"comment" = { fg = "#333333" }
-# "type" = "pink"
+"comment" = { fg = "darky1" }
+
+"ui.cursor.primary.normal" = { fg = "base", bg = "darky2" }
 
 
 [palette]
@@ -29,3 +30,5 @@ sapphire = "#0ea0a0"
 # blue = "#017bca"
 blue = "#1c5ee1"
 # lavender = "#8584f7"
+darky1 = "#333333"
+darky2 = "#7f7f7f"

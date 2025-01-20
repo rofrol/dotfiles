@@ -167,7 +167,8 @@
                (region (buffer-substring-no-properties beg end)))
     (comment-or-uncomment-region beg end)))
 
-(global-set-key [(control /)] 'rofrol/comment-current-line-or-region)
+; meow uses ctrl+/ for meow-undo, 
+;(global-set-key [(control /)] 'rofrol/comment-current-line-or-region)
 
 (setq mac-command-modifier 'control)
 

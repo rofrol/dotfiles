@@ -21,5 +21,5 @@
 (require 'rf-json)
 (require 'rf-smartparens)
 (require 'rf-misc)
-(require 'rf-evil)
-(require 'rf-clojure)
+;(require 'rf-evil)
+(require 'rf-meow)

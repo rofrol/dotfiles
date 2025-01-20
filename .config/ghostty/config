@@ -26,8 +26,9 @@ keybind = global:f3=toggle_quick_terminal
 #background-opacity = 0.9
 #background-blur-radius = 5
 
-# disable so that I can enter polish characters like ł
-#macos-option-as-alt = true
+# enter polish characters with right alt like alt+l gives ł
+# https://github.com/ghostty-org/ghostty/discussions/3483#discussioncomment-11716750
+macos-option-as-alt = left
 
 # https://www.jonashietala.se/blog/2025/01/06/first_impressions_of_ghostty/
 

@@ -26,7 +26,6 @@
 !/.config/wezterm
 !/.config/systemd/
 !/.config/ripgrep
-!/.config/emacs
 !/.config/elinks
 !/.config/npm
 !/.config/readline
@@ -150,3 +149,10 @@
 /.config/helix/*
 !/.config/helix/config.toml
 !/.config/helix/themes
+
+!/.config/emacs/
+/.config/emacs/*
+!/.config/emacs/*.el
+!/.config/emacs/lisp/
+!/.config/emacs/lisp/*.el
+/.config/emacs/custom.el

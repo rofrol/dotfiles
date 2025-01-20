@@ -5,6 +5,7 @@ theme = "catppuccin_latte_white"
 # line-number = "relative"
 # cursorline = true
 color-modes = true
+bufferline = "always"
 
 [editor.cursor-shape]
 insert = "bar"

@@ -18,7 +18,7 @@
 ;; https://www.reddit.com/r/emacs/comments/8pfdlb/comment/e0bh22k/
 (setq display-line-numbers-grow-only t)
 
-(setq display-line-numbers-type 'relative)
+;(setq display-line-numbers-type 'relative)
 
 ;; prevent jumping when showing relative line number
 ;; https://emacs.stackexchange.com/questions/55165/uneven-line-numbers-with-display-line-numbers/55166#55166

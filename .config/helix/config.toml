@@ -16,11 +16,21 @@ select = "underline"
 render = true
 
 [keys.normal]
-C-s = ":w" # Ctrl and 's' to write
+# C-s save_selection Save the current selection to the jumplist
+# C-s = ":w" # Ctrl and 's' to write
 Cmd-s = ":w" # Cmd or Win or Meta and 's' to write
+
+# https://www.reddit.com/r/HelixEditor/comments/17tjcb2/comment/k8y2434/
+# make sure there is only one selection, select word under cursor, set search to selection, then switch to select mode
+"C-d" = ["keep_primary_selection", "move_prev_word_start", "move_next_word_end", "search_selection", "select_mode"]
 
 [keys.insert]
 # just ":w" is enought in insert mode https://github.com/helix-editor/helix/issues/3377#issuecomment-1210017485
 # after saving I want to be in normal mode
 C-s =  ["normal_mode", ":w"] # Ctrl and 's' to write
 Cmd-s = ["normal_mode", ":w"] # Cmd or Win or Meta
+
+[keys.select]
+# https://www.reddit.com/r/HelixEditor/comments/17tjcb2/comment/k8y2434/
+# if already in select mode, just add new selection at next occurrence
+"C-d" = ["search_selection", "extend_search_next"]

@@ -1,0 +1,45 @@
+# /opt/homebrew/opt/helix/libexec/runtime/themes/emacs.toml
+inherits = "emacs"
+
+"comment" = { fg = "gray20" }
+
+"ui.help" = { fg = "black", bg = "surface0" }
+"ui.menu" = { fg = "black", bg = "surface0" }
+"ui.menu.selected" = { fg = "black", bg = "light_blue" }
+
+"ui.statusline" = { fg = "subtext1", bg = "mantle" }
+"ui.statusline.inactive" = { fg = "surface2", bg = "mantle" }
+"ui.statusline.normal" = { fg = "base", bg = "skyblue1", modifiers = ["bold"] }
+"ui.statusline.insert" = { fg = "base", bg = "seagreen3", modifiers = ["bold"]  }
+"ui.statusline.select" = { fg = "base", bg = "orchid2", modifiers = ["bold"]  }
+
+"ui.selection" = { bg = "gray88", modifiers = ["dim"] }
+"ui.selection.primary" = { bg = "gray88" }
+
+"ui.cursorline.primary" = { fg = "white", bg = "grey95" }
+"ui.cursorline.secondary" = { fg = "white", bg = "grey92" }
+
+"ui.cursorcolumn.primary" = { fg = "white", bg = "grey95" }
+"ui.cursorcolumn.secondary" = { fg = "white", bg = "grey92" }
+
+"ui.highlight" = { bg = "gray88" }
+
+"ui.cursor" = { fg = "base", bg = "secondary_cursor" }
+"ui.cursor.primary" = { fg = "base", bg = "misty_rose" }
+"ui.cursor.match" = { fg = "peach", modifiers = ["bold"] }
+
+"ui.cursor.primary.normal" = { fg = "base", bg = "gold1" }
+"ui.cursor.primary.insert" = { fg = "base", bg = "forest_green" }
+"ui.cursor.primary.select" = { fg = "base", bg = "medium_orchid" }
+
+"ui.cursor.normal" = { fg = "base", bg = "secondary_cursor_normal" }
+"ui.cursor.insert" = { fg = "base", bg = "secondary_cursor_insert" }
+"ui.cursor.select" = { fg = "base", bg = "secondary_cursor" }
+
+[palette]
+text = "#000000"
+
+# muted_salmon
+secondary_cursor = "#e1a99d"
+secondary_cursor_normal = "#97a7fb"
+secondary_cursor_insert = "#74b867"

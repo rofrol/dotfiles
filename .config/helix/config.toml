@@ -1,5 +1,6 @@
 # theme = "onelight_white"
-theme = "catppuccin_latte_white"
+# theme = "catppuccin_latte_white"
+theme = "emacs_my"
 
 [editor]
 # line-number = "relative"

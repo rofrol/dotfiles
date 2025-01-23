@@ -51,6 +51,9 @@ X = "select_line_above"
 # https://www.reddit.com/r/HelixEditor/comments/14vqm19/comment/jrgr4f9/
 esc = ["collapse_selection", "keep_primary_selection", "normal_mode" ]
 
+# https://github.com/helix-editor/helix/discussions/10430
+C-d = ":bc"
+
 [keys.normal.space]
 # https://github.com/helix-editor/helix/pull/12527#issuecomment-2607790981
 D = ":insert-output date -u '+## %Y-%m-%d'"
@@ -59,14 +62,17 @@ D = ":insert-output date -u '+## %Y-%m-%d'"
 S = ":pipe gecho -n $(date +%Y-%m-%d)"
 # https://github.com/David-Else/developer-workstation-setup-script-debian/blob/9a9a36bfd2733ecbe81eff78ba2cb7d5d84d55f8/dotfiles/helix/.config/helix/config.toml#L19C8-L19C47
 "." = "file_picker_in_current_buffer_directory"
+"space" = "file_picker"
 
 l = ":toggle lsp.display-inlay-hints"
+r = ":config-reload"
 
 [keys.insert]
 # just ":w" is enought in insert mode https://github.com/helix-editor/helix/issues/3377#issuecomment-1210017485
 # after saving I want to be in normal mode
 C-s =  ["normal_mode", ":w"] # Ctrl and 's' to write
 Cmd-s = ["normal_mode", ":w"] # Cmd or Win or Meta
+C-d = ":bc"
 
 [keys.select]
 # select a word, yank it to the search-register with * go into visual mode and select the following occurrences with n

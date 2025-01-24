@@ -93,3 +93,5 @@
 ; include for all repositories inside $HOME/projects/
 [includeIf "gitdir/i:~/projects/"]
 	path = ~/projects/.gitconfig
+[http]
+	postBuffer = 5242880000

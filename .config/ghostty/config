@@ -23,8 +23,13 @@ keybind = command+nine=unbind
 #keybind = global:alt+grave_accent=toggle_quick_terminal
 keybind = global:f3=toggle_quick_terminal
 
-keybind = cmd+right=next_tab
-keybind = cmd+left=previous_tab
+keybind = cmd+opt+right=next_tab
+keybind = cmd+opt+left=previous_tab
+
+keybind = cmd+left=goto_split:left
+keybind = cmd+right=goto_split:right
+keybind = cmd+up=goto_split:top
+keybind = cmd+down=goto_split:bottom
 
 #background-opacity = 0.9
 #background-blur-radius = 5

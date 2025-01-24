@@ -23,6 +23,9 @@ keybind = command+nine=unbind
 #keybind = global:alt+grave_accent=toggle_quick_terminal
 keybind = global:f3=toggle_quick_terminal
 
+keybind = cmd+opt+right=next_tab
+keybind = cmd+opt+left=previous_tab
+
 #background-opacity = 0.9
 #background-blur-radius = 5
 

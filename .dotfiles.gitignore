@@ -156,3 +156,8 @@
 !/.config/emacs/lisp/
 !/.config/emacs/lisp/*.el
 /.config/emacs/custom.el
+
+!/.config/zellij/
+/.config/zellij/*
+!/.config/zellij/*.kdl
+!/.config/zellij/layouts

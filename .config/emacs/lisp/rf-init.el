@@ -33,6 +33,7 @@
 (column-number-mode 1)
 (setq ring-bell-function 'ignore)
 
-(set-face-attribute 'default nil :font "NotoMono Nerd Font Mono 20")
+;(set-face-attribute 'default nil :font "NotoMono Nerd Font Mono 20")
+(set-face-attribute 'default nil :font "Iosevka Rofrol 18")
 
 (provide 'rf-init)

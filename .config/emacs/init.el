@@ -7,7 +7,7 @@
 (require 'rf-custom)
 (require 'rf-current-time)
 (require 'rf-dashboard)
-(require 'rf-tree-sitter)
+;(require 'rf-tree-sitter)
 (require 'rf-tsi)
 (require 'rf-prettier)
 (require 'rf-multiple-cursors)

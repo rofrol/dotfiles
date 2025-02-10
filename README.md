@@ -17,6 +17,11 @@ dof
 rm -rf dotfiles
 ```
 
+`atuin login`
+
+`ln -s ~/.config/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml`
+
+
 ## .ignore
 
 I have added some directories like `/projects/` to `.ignore`, so that ripgrep or telescope in neovim do not search them.

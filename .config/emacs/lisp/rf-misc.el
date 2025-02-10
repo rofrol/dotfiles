@@ -17,6 +17,7 @@
 ;; https://stackoverflow.com/questions/50417/how-do-i-get-list-of-recent-files-in-gnu-emacs/50422#50422
 ;; https://stackoverflow.com/questions/3527150/open-recent-in-emacs/3527488
 (recentf-mode 1)
+(add-hook 'buffer-list-update-hook #'recentf-track-opened-file)
 (setq recentf-max-menu-items 25)
 (setq recentf-auto-cleanup 'never)
 (global-set-key (kbd "C-x C-r") 'recentf-open-files)

@@ -8,6 +8,12 @@
   (when (eq major-mode 'zig-mode)
     (zig-test-buffer)))
 
-(add-hook 'after-save-hook #'zig-test-buffer-hook)
+;(add-hook 'after-save-hook #'zig-test-buffer-hook)
+
+(defun rf/watchexech-zig-build ()
+  "Run watchexec -r zig build"
+  (interactive)
+  (when (eq major-mode 'zig-mode)
+    (compile )))
 
 (provide 'rf-zig)

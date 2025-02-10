@@ -106,17 +106,17 @@
 
 ;; https://emacs.stackexchange.com/questions/42104/create-a-new-file-in-a-new-folder/42111#42111
 ;; https://www.iqbalansari.me/blog/2014/12/07/automatically-create-parent-directories-on-visiting-a-new-file-in-emacs/
-(defun rofrol/create-non-existent-directory ()
+(defun rf/create-non-existent-directory ()
   (let ((parent-directory (file-name-directory buffer-file-name)))
     (when (and (not (file-exists-p parent-directory))
                (y-or-n-p (format "Directory `%s' does not exist! Create it?" parent-directory)))
       (make-directory parent-directory t))))
 
-(add-to-list 'find-file-not-found-functions #'rofrol/create-non-existent-directory)
+(add-to-list 'find-file-not-found-functions #'rf/create-non-existent-directory)
 
 ;; https://stackoverflow.com/questions/2423834/move-line-region-up-and-down-in-emacs/12512671#12512671
 ;; move the line(s) spanned by the active region up/down (line transposing)
-(defun rofrol/move-lines (n)
+(defun rf/move-lines (n)
   (let ((beg) (end) (keep))
     (if mark-active
         (save-excursion
@@ -143,25 +143,25 @@
         (setq mark-active t
               deactivate-mark nil))))
 
-(defun rofrol/move-lines-up (n)
+(defun rf/move-lines-up (n)
   "move the line(s) spanned by the active region up by N lines."
   (interactive "*p")
-  (rofrol/move-lines (- (or n 1))))
+  (rf/move-lines (- (or n 1))))
 
-(defun rofrol/move-lines-down (n)
+(defun rf/move-lines-down (n)
   "move the line(s) spanned by the active region down by N lines."
   (interactive "*p")
-  (rofrol/move-lines (or n 1)))
+  (rf/move-lines (or n 1)))
 
-(global-set-key (kbd "M-<up>") 'rofrol/move-lines-up)
-(global-set-key (kbd "M-<down>") 'rofrol/move-lines-down)
+(global-set-key (kbd "M-<up>") 'rf/move-lines-up)
+(global-set-key (kbd "M-<down>") 'rf/move-lines-down)
 
 ;; disable text resize with ctrl+mouse wheel/touchpad scroll
 (global-unset-key (kbd "C-<wheel-up>"))
 (global-unset-key (kbd "C-<wheel-down>"))
 
 ;; Based on crux-duplicate-and-comment-current-line-or-region
-(defun rofrol/comment-current-line-or-region (arg)
+(defun rf/comment-current-line-or-region (arg)
   "Comments the current line or region"
   (interactive "p")
   (pcase-let* ((`(,beg . ,end) (crux-get-positions-of-line-or-region))
@@ -169,7 +169,7 @@
     (comment-or-uncomment-region beg end)))
 
 ; meow uses ctrl+/ for meow-undo, 
-;(global-set-key [(control /)] 'rofrol/comment-current-line-or-region)
+;(global-set-key [(control /)] 'rf/comment-current-line-or-region)
 
 (setq mac-command-modifier 'control)
 

@@ -19,7 +19,12 @@ rm -rf dotfiles
 
 `atuin login`
 
-`ln -s ~/.config/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml`
+## lazygit
+
+```shell
+$ ln -s ~/.config/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml
+$ brew install diff-so-fancy
+```
 
 
 ## .ignore

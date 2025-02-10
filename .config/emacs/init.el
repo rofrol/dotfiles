@@ -21,5 +21,6 @@
 (require 'rf-json)
 (require 'rf-smartparens)
 (require 'rf-misc)
+(require 'rf-help)
 ;(require 'rf-evil)
 (require 'rf-meow)

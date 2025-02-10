@@ -19,13 +19,14 @@ rm -rf dotfiles
 
 `atuin login`
 
+for mason neovim: `brew install node`
+
 ## lazygit
 
 ```shell
-$ ln -s ~/.config/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml
-$ brew install diff-so-fancy
+ln -s ~/.config/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml
+brew install diff-so-fancy
 ```
-
 
 ## .ignore
 

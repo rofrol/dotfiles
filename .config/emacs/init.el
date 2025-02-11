@@ -24,3 +24,4 @@
 (require 'rf-help)
 ;(require 'rf-evil)
 ;(require 'rf-meow)
+(require 'rf-font)

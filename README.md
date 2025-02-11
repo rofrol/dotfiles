@@ -17,9 +17,15 @@ dof
 rm -rf dotfiles
 ```
 
+## misc
+
 `atuin login`
 
 for mason neovim: `brew install node`
+
+`mkdir -p ~/personal_projects/vendor/ && cd ~/personal_projects/vendor/ && git clone https://github.com/zsh-git-prompt/zsh-git-prompt`
+
+`mkdir -p ~/.zsh && cd ~/.zsh && git clone https://github.com/zsh-users/zsh-autosuggestions`
 
 ## lazygit
 

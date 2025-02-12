@@ -22,7 +22,8 @@
 (setq compilation-scroll-output 'first-error)
 
 ; https://stackoverflow.com/questions/9725015/how-do-i-make-the-compilation-window-in-emacs-to-always-be-a-certain-size/9726633#9726633
-(setq compilation-window-height 18)
+(setq compilation-window-height 12)
+(add-hook 'compilation-mode-hook (lambda () (text-scale-decrease 2)))
 
 ; https://www.masteringemacs.org/article/compiling-running-scripts-emacs
 ; communicate with the background process, same with C-u M-x compile

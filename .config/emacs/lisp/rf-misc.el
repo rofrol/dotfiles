@@ -1,8 +1,13 @@
 ;;; -*- lexical-binding: t; -*-
 
-;; https://manueluberti.eu/emacs/2021/08/06/fido/
 ;; http://xahlee.info/emacs/emacs/emacs_icomplete_mode.html
+;; https://web.archive.org/web/20221006140810/https://manueluberti.eu/emacs/2021/08/06/fido/
 (fido-vertical-mode 1)
+
+(with-eval-after-load 'icomplete
+  ;; Quit minibuffer with a single ESC
+  (define-key icomplete-minibuffer-map [escape] 'keyboard-escape-quit))
+
 
 ;; https://stackoverflow.com/questions/2627289/how-to-replace-a-region-in-emacs-with-yank-buffer-contents
 ;; When Delete Selection mode is enabled, typed text replaces the selection

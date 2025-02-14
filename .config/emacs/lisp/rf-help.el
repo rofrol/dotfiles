@@ -16,10 +16,4 @@
     (quit-restore-window help-window)
       (print "No Help window"))))
 
-(add-to-list 'display-buffer-alist
-             '("^\\*Help\\*$"
-               (display-buffer-reuse-window display-buffer-pop-up-window)
-               (window-height . 18)))
-
-
 (provide 'rf-help)

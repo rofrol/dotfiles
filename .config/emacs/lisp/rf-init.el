@@ -1,5 +1,5 @@
-;(setq mac-command-modifier 'control)
-;(setq mac-control-modifier 'super)
+(setq mac-command-modifier 'control)
+(setq mac-control-modifier 'super)
 
 (global-set-key (kbd "C-z") 'undo-only)
 (global-set-key (kbd "C-S-z") 'undo-redo)

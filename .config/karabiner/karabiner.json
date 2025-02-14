@@ -340,8 +340,7 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "^org.gnu.Emacs$",
-                                            "^org.gnu.Aquamacs$"
+                                            "^org.gnu.Emacs$"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -356,45 +355,6 @@
                                         "modifiers": ["left_command"]
                                     }
                                 ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Swap Command ⌘ and Control ⌃ only in Emacs",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "^org.gnu.Emacs$",
-                                            "^org.gnu.Aquamacs$"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_command",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "left_control" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "^org.gnu.Emacs$",
-                                            "^org.gnu.Aquamacs$"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_control",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "left_command" }],
                                 "type": "basic"
                             }
                         ]
@@ -448,12 +408,12 @@
                     "identifiers": { "is_keyboard": true },
                     "simple_modifications": [
                         {
-                            "from": { "key_code": "right_option" },
-                            "to": [{ "key_code": "right_command" }]
-                        },
-                        {
                             "from": { "key_code": "right_command" },
                             "to": [{ "key_code": "right_option" }]
+                        },
+                        {
+                            "from": { "key_code": "right_option" },
+                            "to": [{ "key_code": "right_command" }]
                         }
                     ]
                 }

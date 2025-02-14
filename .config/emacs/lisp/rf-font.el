@@ -73,7 +73,7 @@
 (setq-default right-margin-width 0)
 
 
-(defvar my-buffer-font-size 250
+(defvar my-buffer-font-size 200
   "Default font size for text-mode, prog-mode, and dashboard-mode buffers.")
 
 (defun my-update-buffer-font-size ()

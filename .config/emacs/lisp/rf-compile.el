@@ -43,4 +43,11 @@
 
 (add-hook 'compilation-finish-functions 'rf/finish-focus-comp)
 
+(defun compile-view-error (&optional event)
+  "Like `compile-goto-error', but visit the file in view mode."
+  (interactive (list last-input-event))
+  (compile-goto-error event)
+  (with-current-buffer (window-buffer)
+    (view-mode t)))
+
 (provide 'rf-compile)

@@ -23,7 +23,7 @@
 (setq split-width-threshold nil)
 
 ; https://stackoverflow.com/questions/9725015/how-do-i-make-the-compilation-window-in-emacs-to-always-be-a-certain-size/9726633#9726633
-;(setq compilation-window-height 12)
+(setq compilation-window-height 12)
 ;(add-hook 'compilation-mode-hook (lambda () (text-scale-decrease 2)))
 
 ;(when (eq system-type 'darwin)

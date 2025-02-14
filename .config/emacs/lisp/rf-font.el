@@ -18,14 +18,9 @@
 ;(set-face-attribute 'mode-line nil  :height 100)
 ;(set-face-attribute 'header-line nil  :height 200)
 
-;; somehow this sets height of buffer
-(setq display-buffer-alist
-      '(("\\*\\(Compilation\\|Help\\|Messages\\|Backtrace\\|Warnings\\)\\*" ;; Match multiple buffer names
-         (display-buffer-reuse-window display-buffer-in-side-window)
-         (side . bottom)
-         ;(window-height . 0.4)
-         )))
-
+; https://stackoverflow.com/questions/2813273/emacs-23-2-opens-a-new-window-for-each-compile-error-warning-navigated-to/3921613#3921613
+; this is needed, so that compilation buffer does not open error file with split
+(setq split-width-threshold nil)
 
 ; https://stackoverflow.com/questions/9725015/how-do-i-make-the-compilation-window-in-emacs-to-always-be-a-certain-size/9726633#9726633
 ;(setq compilation-window-height 12)

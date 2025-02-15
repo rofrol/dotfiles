@@ -36,35 +36,33 @@
   (interactive)
   (progn
     (message "Entered rf/zig-insert-braces")
-    (when (and (derived-mode-p 'zig-ts-mode)
-               (eq last-command-event ?{))
-      (message "Entered when")
+    (when (derived-mode-p 'zig-ts-mode)
       (let* ((node (treesit-node-at (point)))
              (parent (treesit-node-parent node))
              (builtin-type-node (treesit-node-child parent 4)))
-        (message "Node: %s" node)
-        (message "Node type: %s" (if node (treesit-node-type node) "nil"))
-        (message "Parent: %s" parent)
-        (message "Parent type: %s" (if parent (treesit-node-type parent) "nil"))
-        (message "Builtin type: %s" builtin-type-node)
-        (when (and parent
-                   (string= (treesit-node-type parent) "function_declaration")
-                   builtin-type-node
-                   (string= (treesit-node-type builtin-type-node) "builtin_type"))
-          (message "Entered when 2")
-          ;; Delete the auto-inserted opening brace
-          (delete-char -1)
-          ;; Insert formatted braces with a space before
-          (insert " {\n\n}")
-          ;; Position cursor on empty line between braces
-          (forward-line -1)
-          (indent-according-to-mode)
-          ;; Indent the closing brace
-          (forward-line 1)
-          (indent-according-to-mode)
-          ;; Move back to the empty line and indent cursor position
-          (forward-line -1)
-          (indent-for-tab-command))))))
+        (if (and parent
+                 (string= (treesit-node-type parent) "function_declaration")
+                 builtin-type-node
+                 (string= (treesit-node-type builtin-type-node) "builtin_type"))
+            ;; Function declaration case
+            (progn
+              (message "Before end-of-line, point: %d" (point))
+              (end-of-line)
+              (message "After end-of-line, point: %d" (point))
+              (insert " ")
+              (message "After space, point: %d" (point))
+              ;; Try inserting newlines before the braces
+              (sp-insert-pair "{")
+              (message "After sp-insert-pair, point: %d" (point))
+              (newline)
+              (newline)
+              (indent-according-to-mode)
+              (forward-line -1)
+              (message "After forward-line -1, point: %d" (point))
+              (indent-according-to-mode)
+              (message "After indent, point: %d" (point)))
+          ;; Normal case - let smartparens handle it
+          (sp-insert-pair "{"))))))
 
 (define-key zig-ts-mode-map "{" 'rf/zig-insert-braces)
 

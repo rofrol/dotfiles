@@ -334,6 +334,32 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "Make left_command+spacebar behave like left_control+spacebar only in Emacs",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "^org.gnu.Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": { "mandatory": ["command"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "2",
+                                        "modifiers": ["command", "shift"]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "Make Ctrl+Tab behave like Cmd+Tab only in Emacs",
                         "manipulators": [
                             {

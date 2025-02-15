@@ -3,6 +3,19 @@
 
 (global-set-key (kbd "C-z") 'undo-only)
 (global-set-key (kbd "C-S-z") 'undo-redo)
+
+; https://emacs.stackexchange.com/questions/53196/how-to-quickly-revert-the-buffer
+(defun rf/reload-file-preserve-point ()
+  (interactive)
+  (when (or (buffer-modified-p)
+            (y-or-n-p "Reverting will discard changes. Proceed?"))
+    (save-excursion
+      (revert-buffer t t t))
+    (setq buffer-undo-list nil)
+    (message "Buffer reverted")))
+
+(global-set-key (kbd "C-x x h") 'rf/reload-file-preserve-point)
+
 (global-set-key (kbd "<f9>") (lambda () (interactive) (load user-init-file)))
 
 (pixel-scroll-precision-mode t)

@@ -103,33 +103,6 @@
 ;(setq sp-highlight-pair-overlay nil)
 ;(setq sp-highlight-wrap-overlay nil)
 ;(setq sp-highlight-wrap-tag-overlay nil)
-;
-;(defun rf/curly-braces-newline-handle (id action context)
-;  (when (eq action 'insert)
-;    (save-excursion (newline-and-indent))
-;    (indent-according-to-mode)))
-;(sp-local-pair '(prog-mode) "{" nil :post-handlers '((rf/curly-braces-newline-handle "RET")))
-;
-;(defun rf/sp-insert-curly-braces (id action _offset)
-;  "Insert '{}' and place point between them."
-;  (when (eq action :insert)
-;    (save-excursion
-;      (backward-char 1)  ; Move back one character, placing point before '}'
-;      (sp-insert-pair "{" "}"))))
-;
-;(sp-local-pair '(prog-mode) "{" nil :post-handlers '((rf/sp-insert-curly-braces "RET")))
-
-(defun rf/sp-insert-curly-braces-newlines ()
-  "Insert `{`, followed by a newline, an indented line for content, and then another closing brace on its own line."
-  (interactive)
-  (insert "{\n")
-  (indent-according-to-mode)
-  (insert "\n}")
-  (indent-according-to-mode)
-  (forward-line -1)
-  (indent-according-to-mode))
-
-(define-key prog-mode-map "{" 'rf/sp-insert-curly-braces-newlines)
 
 ;; should I enable it?
 ;; (setq sp-show-pair-delay 0)

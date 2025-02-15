@@ -28,6 +28,21 @@
     (rf/require-one-package package)))
 
 ;; install from local or github etc.
-(rf/require 'quelpa)
+
+;; https://emacs.stackexchange.com/questions/62036/installing-quelpa-use-package-from-use-package/79563#79563
+(setq use-package-always-ensure t)
+
+(require 'use-package-ensure)
+
+(use-package quelpa
+  :ensure t)
+
+;(setq use-package-ensure-function 'quelpa)
+(setq use-package-always-ensure t)
+
+(use-package quelpa-use-package
+  :demand
+  :config
+  (quelpa-use-package-activate-advice))
 
 (provide 'rf-require)

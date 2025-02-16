@@ -4,6 +4,7 @@
 ;(rf/require 'zig-ts-mode)
 (setq major-mode-remap-alist
  '((zig-mode . zig-ts-mode)))
+(add-hook 'zig-ts-mode-hook (lambda () (smartparens-mode -1)))
 
 (defun my/enable-treesit-explorer-mode ()
   "Enable `treesit-explore-mode` and automatically confirm language prompt."
@@ -110,18 +111,17 @@
             (message "After end-of-line, point: %d" (point))
             (insert " ")
             (message "After space, point: %d" (point))
-            ;; Try inserting newlines before the braces
-            (sp-insert-pair "{")
+            (insert "{")
             (message "After sp-insert-pair, point: %d" (point))
             (newline)
             (newline)
+            (insert "}")
             (indent-according-to-mode)
             (forward-line -1)
             (message "After forward-line -1, point: %d" (point))
             (indent-according-to-mode)
             (message "After indent, point: %d" (point)))
-        ;; Normal case - let smartparens handle it
-        (sp-insert-pair "{")))))
+        (insert "{")))))
 
 (define-key zig-ts-mode-map "{" 'rf/zig-insert-braces)
 

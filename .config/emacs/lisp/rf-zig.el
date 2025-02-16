@@ -5,6 +5,16 @@
 (setq major-mode-remap-alist
  '((zig-mode . zig-ts-mode)))
 
+(defun my/enable-treesit-explorer-mode ()
+  "Enable `treesit-explorer-mode` and automatically confirm language prompt."
+  (interactive)
+  (let ((read-answer-short t))
+    (cl-letf (((symbol-function 'completing-read) 
+               (lambda (&rest _) "zig")))
+      (treesit-explore-mode))))
+
+(add-hook 'zig-ts-mode-hook #'my/enable-treesit-explorer-mode)
+
 ;; https://emacs.stackexchange.com/questions/4108/execute-external-script-upon-save-when-in-a-certain-mode/4115#4115
 (defun zig-test-buffer-hook ()
   "Run zig test on save"

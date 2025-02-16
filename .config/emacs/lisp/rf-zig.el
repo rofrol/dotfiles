@@ -84,8 +84,17 @@
                                                 (string= (treesit-node-type sibling) "ERROR"))
                                          (throw 'found sibling)
                                          (setq sibling (treesit-node-next-sibling sibling))))))))
+             (ancestor-is-func-decl (when node
+                      (let ((ancestor (treesit-node-parent node)))
+                      (catch 'found
+                        (dotimes (i 10)  ; Check first 10 ancestors
+                          (message "ancestor %s" (treesit-node-type ancestor))
+                          (if (and ancestor
+                                   (string= (treesit-node-type ancestor) "function_declaration"))
+                            (throw 'found ancestor)
+                            (setq ancestor (treesit-node-parent ancestor))))))))
              (should-insert-brace (and parent
-                 ;(string= (treesit-node-type parent) "function_declaration")
+                 ancestor-is-func-decl
                  (or (not (string= (treesit-node-type node) "block"))
                      (and 
                       (string= (treesit-node-type node) "identifier") 

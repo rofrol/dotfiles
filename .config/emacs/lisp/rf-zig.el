@@ -96,8 +96,20 @@
                                  (string= (treesit-node-type ancestor) "function_declaration"))
                           (throw 'found ancestor)
                           (setq ancestor (treesit-node-parent ancestor))))))))
+           (ancestor-is-expression_statement-or-variable_declaration(when node
+                    (let ((prev node)
+                          (ancestor (treesit-node-parent node)))
+                    (catch 'found
+                      (dotimes (i 10)  ; Check first 10 ancestors
+                        (message "ancestor %s" (treesit-node-type ancestor))
+                        (if (and ancestor
+                                 (or (string= (treesit-node-type ancestor) "expression_statement")
+                                     (string= (treesit-node-type ancestor) "variable_declaration")))
+                          (throw 'found ancestor)
+                          (setq ancestor (treesit-node-parent ancestor))))))))
            (should-insert-brace (and parent
                ancestor-is-func-decl
+               (not ancestor-is-expression_statement-or-variable_declaration)
                (or (not (string= (treesit-node-type node) "block"))
                    (and
                     (string= (treesit-node-type node) "identifier")

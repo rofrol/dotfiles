@@ -41,6 +41,32 @@
   :hook (zig-ts-mode . (lambda ()
                          (setq treesit-font-lock-level 4))))
 
+;for cases:
+;const Elephant = struct {
+;    letter: u8,
+;    tail: ?*Elephant = null,
+;    visited: bool = false,
+;
+;    // New Elephant methods!
+;    fn visit4(self: *Elephant) void 
+;    pub fn getTail(self: *Elephant) *Elephant {
+;        return self.tail.?; // Remember, this means "orelse unreachable"
+;    }
+;    fn visit3(self: *Elephant) 
+;    pub fn hasTail(self: *Elephant) bool {
+;        return (self.tail != null);
+;    }
+;
+;    fn visit2(self: *Elephant) void 
+;// std.debug.log
+;
+;    pub fn print(self: *Elephant) void {
+;        // Prints elephant letter and [v]isited
+;        const v: u8 = if (self.visited) 'v' else ' ';
+;        std.debug.print("{u}{u} ", .{ self.letter, v });
+;    }
+;};
+
 (defun rf/zig-insert-braces ()
   "Insert braces for Zig function declarations with proper formatting."
   (interactive)
@@ -49,17 +75,24 @@
     (when (derived-mode-p 'zig-ts-mode)
       (let* ((node (treesit-node-at (point)))
              (parent (treesit-node-parent node))
-             (builtin-type-node (when parent
-                                 (catch 'found
-                                   (dotimes (i 10)  ; Check first 10 children
-                                     (let ((child (treesit-node-child parent i)))
-                                       (when (and child
-                                                 (string= (treesit-node-type child) "builtin_type"))
-                                         (throw 'found child))))))))
-        (if (and parent
-                 (string= (treesit-node-type parent) "function_declaration")
-                 builtin-type-node
-                 (string= (treesit-node-type builtin-type-node) "builtin_type"))
+             (sibling-error-node (when node
+                                   (let ((sibling (treesit-node-next-sibling node)))
+                                   (catch 'found
+                                     (dotimes (i 10)  ; Check first 10 siblings
+                                       (message "sibling: %s" (treesit-node-type sibling))
+                                       (if (and sibling
+                                                (string= (treesit-node-type sibling) "ERROR"))
+                                         (throw 'found sibling)
+                                         (setq sibling (treesit-node-next-sibling sibling))))))))
+             (should-insert-brace (and parent
+                 ;(string= (treesit-node-type parent) "function_declaration")
+                 (or (not (string= (treesit-node-type node) "block"))
+                     (and 
+                      (string= (treesit-node-type node) "identifier") 
+                      (string= (treesit-node-type parent) "ERROR"))
+                      sibling-error-node))))
+                                         
+        (if should-insert-brace
             ;; Function declaration case
             (progn
               (message "Before end-of-line, point: %d" (point))

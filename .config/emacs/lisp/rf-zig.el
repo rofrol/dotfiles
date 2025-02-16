@@ -30,6 +30,7 @@
     (compile )))
 
 (use-package zig-ts-mode
+  :ensure t
   ;:quelpa (zig-mode :host github :repo "nanzhong/zig-mode" :branch "tree-sitter")
   :quelpa (zig-ts-mode :fetcher codeberg :repo "meow_king/zig-ts-mode")
   :demand t
@@ -70,64 +71,62 @@
 (defun rf/zig-insert-braces ()
   "Insert braces for Zig function declarations with proper formatting."
   (interactive)
-  (progn
-    (message "Entered rf/zig-insert-braces")
-    (when (derived-mode-p 'zig-ts-mode)
-      (let* ((node (treesit-node-at (point)))
-             (parent (treesit-node-parent node))
-             (sibling-error-node (when node
-                                   (let ((sibling (treesit-node-next-sibling node)))
-                                   (catch 'found
-                                     (dotimes (i 10)  ; Check first 10 siblings
-                                       (message "sibling: %s" (treesit-node-type sibling))
-                                       (if (and sibling
-                                                (string= (treesit-node-type sibling) "ERROR"))
-                                         (throw 'found sibling)
-                                         (setq sibling (treesit-node-next-sibling sibling))))))))
-             (ancestor-is-func-decl (when node
-                      (let ((ancestor (treesit-node-parent node)))
-                      (catch 'found
-                        (dotimes (i 10)  ; Check first 10 ancestors
-                          (message "ancestor %s" (treesit-node-type ancestor))
-                          (if (and ancestor
-                                   (string= (treesit-node-type ancestor) "function_declaration"))
-                            (throw 'found ancestor)
-                            (setq ancestor (treesit-node-parent ancestor))))))))
-             (should-insert-brace (and parent
-                 ancestor-is-func-decl
-                 (or (not (string= (treesit-node-type node) "block"))
-                     (and 
-                      (string= (treesit-node-type node) "identifier") 
-                      (string= (treesit-node-type parent) "ERROR"))
-                      sibling-error-node))))
-                                         
-        (if should-insert-brace
-            ;; Function declaration case
-            (progn
-              (message "Before end-of-line, point: %d" (point))
-              (end-of-line)
-              (message "After end-of-line, point: %d" (point))
-              (insert " ")
-              (message "After space, point: %d" (point))
-              ;; Try inserting newlines before the braces
-              (sp-insert-pair "{")
-              (message "After sp-insert-pair, point: %d" (point))
-              (newline)
-              (newline)
-              (indent-according-to-mode)
-              (forward-line -1)
-              (message "After forward-line -1, point: %d" (point))
-              (indent-according-to-mode)
-              (message "After indent, point: %d" (point)))
-          ;; Normal case - let smartparens handle it
-          (sp-insert-pair "{"))))))
+  (when (derived-mode-p 'zig-ts-mode)
+    (let* ((node (treesit-node-at (point)))
+           (parent (treesit-node-parent node))
+           (sibling-error-node (when node
+                                 (let ((sibling (treesit-node-next-sibling node)))
+                                 (catch 'found
+                                   (dotimes (i 10)  ; Check first 10 siblings
+                                     (message "sibling: %s" (treesit-node-type sibling))
+                                     (if (and sibling
+                                              (string= (treesit-node-type sibling) "ERROR"))
+                                       (throw 'found sibling)
+                                       (setq sibling (treesit-node-next-sibling sibling))))))))
+           (ancestor-is-func-decl (when node
+                    (let ((prev node)
+                          (ancestor (treesit-node-parent node)))
+                    (catch 'found
+                      (dotimes (i 10)  ; Check first 10 ancestors
+                        (message "ancestor %s" (treesit-node-type ancestor))
+                        (if (and ancestor
+                                 (string= (treesit-node-type ancestor) "function_declaration"))
+                          (throw 'found ancestor)
+                          (setq ancestor (treesit-node-parent ancestor))))))))
+           (should-insert-brace (and parent
+               ancestor-is-func-decl
+               (or (not (string= (treesit-node-type node) "block"))
+                   (and
+                    (string= (treesit-node-type node) "identifier")
+                    (string= (treesit-node-type parent) "ERROR"))
+                    sibling-error-node))))
+      (if should-insert-brace
+          ;; Function declaration case
+          (progn
+            (message "Before end-of-line, point: %d" (point))
+            (end-of-line)
+            (message "After end-of-line, point: %d" (point))
+            (insert " ")
+            (message "After space, point: %d" (point))
+            ;; Try inserting newlines before the braces
+            (sp-insert-pair "{")
+            (message "After sp-insert-pair, point: %d" (point))
+            (newline)
+            (newline)
+            (indent-according-to-mode)
+            (forward-line -1)
+            (message "After forward-line -1, point: %d" (point))
+            (indent-according-to-mode)
+            (message "After indent, point: %d" (point)))
+        ;; Normal case - let smartparens handle it
+        (sp-insert-pair "{")))))
 
 (define-key zig-ts-mode-map "{" 'rf/zig-insert-braces)
 
-(defun insert-newline-and-close-brace ()
-  "Inserts a newline followed by a closing brace."
-  (interactive)
-  (insert "{\n}"))
+;(defun insert-newline-and-close-brace ()
+;  "Inserts a newline followed by a closing brace."
+;  (interactive)
+;  (insert "{\n}"))
 
 ;(define-key prog-mode-map "{" 'insert-newline-and-close-brace)
 

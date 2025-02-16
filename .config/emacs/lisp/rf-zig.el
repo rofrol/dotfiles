@@ -49,7 +49,13 @@
     (when (derived-mode-p 'zig-ts-mode)
       (let* ((node (treesit-node-at (point)))
              (parent (treesit-node-parent node))
-             (builtin-type-node (treesit-node-child parent 4)))
+             (builtin-type-node (when parent
+                                 (catch 'found
+                                   (dotimes (i 10)  ; Check first 10 children
+                                     (let ((child (treesit-node-child parent i)))
+                                       (when (and child
+                                                 (string= (treesit-node-type child) "builtin_type"))
+                                         (throw 'found child))))))))
         (if (and parent
                  (string= (treesit-node-type parent) "function_declaration")
                  builtin-type-node

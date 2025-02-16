@@ -27,15 +27,47 @@
   (dolist (package packages)
     (rf/require-one-package package)))
 
-;; install from local or github etc.
+;; put packages configuration ~/.config/emacs/etc.
+(use-package no-littering
+  :ensure t
+  :demand t)
+
+;; Bootstrap `quelpa'.
+;; https://github.com/condy0919/.emacs.d/blob/ba3c48f6064e4756dec32c0976eab00e81facb80/init.el#L46
+;; https://github.com/forrestchang/doom-emacs/blob/66ddbf981e56c4503a31e463b93f09b1b91c3be9/core/core-packages.el#L74
+;; :comands
+;;   It does not load quelpa at startup.
+;;   It registers the command quelpa for autoloading.
+;;   The package will only be loaded when quelpa is actually invoked.
+;; https://github.com/quelpa/quelpa
+;; disable auto-upgrade for startup performance
+;; call y/upgrade-quelpa manually if necessary
+;; :pin
+;; - It ensures that quelpa is sourced from the specified repository (melpa in this case), even if the package is available from multiple sources (e.g., GNU ELPA, MELPA, MELPA Stable, or a custom repository).
+;; - This is useful if you want to override the default repository priority or prevent installation from an unwanted source.
+;; :ensure
+;;   Ensures that the package is installed automatically if it is not already installed.
+;; :demand
+;;   Purpose: Forces the package to be loaded immediately when Emacs starts, instead of deferring it until it is actually needed.
+(use-package quelpa
+  :ensure t
+  :pin melpa
+  :commands quelpa)
+  ;:custom
+  ;;; Don't track MELPA, we'll use package.el for that
+  ;(quelpa-git-clone-depth 1)
+  ;(quelpa-self-upgrade-p nil)
+  ;(quelpa-update-melpa-p nil)
+  ;(quelpa-checkout-melpa-p nil)
+  ;(quelpa-melpa-recipe-stores nil))
+
+;; --debug-init implies `debug-on-error'.
+(setq debug-on-error init-file-debug)
 
 ;; https://emacs.stackexchange.com/questions/62036/installing-quelpa-use-package-from-use-package/79563#79563
 (setq use-package-always-ensure t)
 
 (require 'use-package-ensure)
-
-(use-package quelpa
-  :ensure t)
 
 ;(setq use-package-ensure-function 'quelpa)
 (setq use-package-always-ensure t)

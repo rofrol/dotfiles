@@ -6,10 +6,12 @@
  '((zig-mode . zig-ts-mode)))
 
 (defun my/enable-treesit-explorer-mode ()
-  "Enable `treesit-explorer-mode` and automatically confirm language prompt."
+  "Enable `treesit-explore-mode` and automatically confirm language prompt."
   (interactive)
+  ;; when running treesit-explore-mode, it shows zig option to choose in Minibffer
+  ;; this chooses this option
   (let ((read-answer-short t))
-    (cl-letf (((symbol-function 'completing-read) 
+    (cl-letf (((symbol-function 'completing-read)
                (lambda (&rest _) "zig")))
       (treesit-explore-mode))))
 

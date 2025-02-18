@@ -17,8 +17,7 @@
 
 (defun rf/toggle-between-fullscreen-and-maximized ()
   (interactive)
-  (set-frame-parameter nil 'fullscreen
-    (if (eq 'fullboth (frame-parameter (selected-frame) 'fullscreen)) 'maximized 'fullboth)))
+  (toggle-frame-fullscreen))
 (global-set-key (kbd "<f7>") 'rf/toggle-between-fullscreen-and-maximized)
 
 ; Make new frame, not initial, also maximized

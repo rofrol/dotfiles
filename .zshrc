@@ -149,8 +149,11 @@ cdfzf() { file="$(fd --type file --hidden --no-ignore --exclude node_modules | f
 
 source ~/.zprofile_atuin
 
-# git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
-source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+# brew install zsh-autosuggestions
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# i.e. copied _cursor to completions from cursor installation files
+fpath=(~/.zsh/completions $fpath)
 
 # https://unix.stackexchange.com/questions/534942/auto-trigger-history-search-in-terminal-using-fzf-fuzzy-finder/676369#676369
 # source ~/.zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh
@@ -330,3 +333,14 @@ function yargs() {
 }
 
 alias chrome='open -na Google\ Chrome'
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/roman.frolow/.lmstudio/bin"
+
+# bun completions
+[ -s "/Users/roman.frolow/.bun/_bun" ] && source "/Users/roman.frolow/.bun/_bun"
+
+# ZVM
+export ZVM_INSTALL="$HOME/.zvm/self"
+export PATH="$PATH:$HOME/.zvm/bin"
+export PATH="$PATH:$ZVM_INSTALL/"

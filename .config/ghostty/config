@@ -64,6 +64,9 @@ font-family = Mioosevka Nerd Font
 font-size = 18
 font-synthetic-style = no-bold,no-italic,no-bold-italic
 
+# -calt disables font ligatures
+font-feature = -calt
+
 unfocused-split-opacity = 1
 
 #adjust-cell-height=9

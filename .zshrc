@@ -348,3 +348,10 @@ export PATH="$PATH:$ZVM_INSTALL/"
 # no need to add quotes around pasted url or escape \?
 # https://www.reddit.com/r/zsh/comments/15bxxyv/comment/jtur10r/
 alias yt-dlp='noglob yt-dlp'
+
+# ? is a wildcard in Bash, too. The difference you are seeing occurs because in Zsh,
+# a failed match leads to an error, whereas in Bash, it is silently ignored.
+# I would actually recommend not turning it off. Silently ignoring errors is not a good thing and can even be dangerous when performing destructive operations.
+# https://superuser.com/questions/1605802/completely-disable-and-globbing-in-zsh/1606090#1606090
+# https://unix.stackexchange.com/questions/310540/how-to-get-rid-of-no-match-found-when-running-rm/313187#313187
+#unsetopt nomatch

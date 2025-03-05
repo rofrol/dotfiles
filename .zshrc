@@ -344,3 +344,7 @@ export PATH="$PATH:/Users/roman.frolow/.lmstudio/bin"
 export ZVM_INSTALL="$HOME/.zvm/self"
 export PATH="$PATH:$HOME/.zvm/bin"
 export PATH="$PATH:$ZVM_INSTALL/"
+
+# no need to add quotes around pasted url or escape \?
+# https://www.reddit.com/r/zsh/comments/15bxxyv/comment/jtur10r/
+alias yt-dlp='noglob yt-dlp'

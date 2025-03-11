@@ -347,7 +347,7 @@ export PATH="$PATH:$ZVM_INSTALL/"
 
 # no need to add quotes around pasted url or escape \?
 # https://www.reddit.com/r/zsh/comments/15bxxyv/comment/jtur10r/
-alias yt-dlp='noglob yt-dlp'
+alias y='noglob yt-dlp'
 
 # ? is a wildcard in Bash, too. The difference you are seeing occurs because in Zsh,
 # a failed match leads to an error, whereas in Bash, it is silently ignored.

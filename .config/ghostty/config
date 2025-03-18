@@ -59,10 +59,11 @@ window-height = 10000
 window-width = 10000
 
 # ghostty +list-fonts
-font-family = Mioosevka Nerd Font
+font-family = IosevkaMayukaiSerif Nerd Font
 # font-size started working after setting font-family
 font-size = 18
 font-synthetic-style = no-bold,no-italic,no-bold-italic
+font-style = normal
 
 # -calt disables font ligatures
 font-feature = -calt

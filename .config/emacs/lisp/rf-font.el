@@ -45,7 +45,7 @@
 ;      ad-do-it)))
 
 ;(set-face-attribute 'default nil :font "Iosevka Rofrol 20")
-(set-face-attribute 'default nil :font "Miosevka Nerd Font 14")
+(set-face-attribute 'default nil :font "IosevkaMayukaiSerif Nerd Font 14")
 (defvar face-attribute-height 180
   "Default font face height when Emacs starts.")
 (set-face-attribute 'default nil :height face-attribute-height)

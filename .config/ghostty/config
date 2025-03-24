@@ -48,7 +48,7 @@ fullscreen = true
 
 # https://github.com/fredrikaverpil/dotfiles/blob/main/ghostty.conf
 # more space is taken in fullscreen
-#macos-titlebar-style = tabs
+macos-titlebar-style = tabs
 
 #macos-titlebar-proxy-icon = hidden
 
@@ -66,7 +66,7 @@ font-synthetic-style = no-bold,no-italic,no-bold-italic
 font-style = normal
 
 # -calt disables font ligatures
-font-feature = -calt
+font-feature = -calt, -liga, -dlig
 
 unfocused-split-opacity = 1
 

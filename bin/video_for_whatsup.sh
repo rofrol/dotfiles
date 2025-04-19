@@ -36,3 +36,18 @@ rm \
   "${FILE%/*}/ffmpeg2pass-0.log.mbtree.temp" &>/dev/null
 
 # https://stackoverflow.com/questions/39887869/ffmpeg-whatsapp-video-format-not-supported/45882902#45882902
+
+# - `Automator > Quick Action`
+#   - `Workflow receives current: files or folders`
+#   - `in: Finder.app`
+#   - on the left search for `Run Shell Script` and drag-and-drop it to the right.
+#   - `Pass input: as arguments`
+#
+# The conent will be:
+#
+# ```bash
+# . $HOME/.zprofile
+# file_name.sh "$@"
+# ```
+#
+# chmod +x file_name.sh

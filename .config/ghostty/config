@@ -44,7 +44,7 @@ macos-option-as-alt = left
 # unless you set mouse-hide-while-typing = true, but then tabs are disabled
 #window-decoration = false
 #macos-non-native-fullscreen = true
-fullscreen = true
+fullscreen = false
 
 # https://github.com/fredrikaverpil/dotfiles/blob/main/ghostty.conf
 # more space is taken in fullscreen

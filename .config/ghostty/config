@@ -60,11 +60,14 @@ window-width = 10000
 
 # ghostty +list-fonts
 # font-family = IosevkaMayukaiSerif Nerd Font
-font-family = SauceCodePro Nerd Font
+# font-family = SauceCodePro Nerd Font
+# font-family = TrulleMono Nerd Font
+font-family = IosevkaSourceCodePro Nerd Font
 # font-size started working after setting font-family
 font-size = 18
 font-synthetic-style = no-bold,no-italic,no-bold-italic
 font-style = normal
+# font-style = bold
 
 # -calt disables font ligatures
 font-feature = -calt, -liga, -dlig

@@ -66,8 +66,10 @@
 !/dotfiles.sh
 !/dotfiles.zsh
 !/.zprofile
-!/.zprofile_nvm
-!/.zprofile_atuin
+!/.zshrc_nvm
+!/.zshrc_pyenv
+!/.zshrc_sdkman
+!/.zshrc_atuin
 
 # and a selection of hidden configuration files.
 !/.*rc

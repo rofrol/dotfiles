@@ -7,6 +7,15 @@ Another interesting approach <https://mitxela.com/projects/dotfiles_management>
 After cloning repository:
 
 ```bash
+# install git on macos
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install git
+export PATH="$(brew --prefix git)/bin/:$PATH"
+
+ssh-keygen -t ed25519 -C "your_email@example.com"
+# add ~/.ssh/id_ed25519.pub to github.com > Settings > SSH and GPG keys > New SSH key
+
+# general instructions for all windows, macos, linux
 # git clone <your dotfiles repo>
 mv dotfiles/.git ~/.dotfiles.git
 export DOTFILES_HOME=$HOME/.dotfiles.git
@@ -21,11 +30,23 @@ rm -rf dotfiles
 
 ## misc
 
+brew install --cask karabiner-elements alt-tab rectangle
+
+# coreutils for ls alias
+
+brew install neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt coreutils
+
+git clone <git@github.com>:rofrol/LazyVim--starter ~/.config/nvim
+
 `atuin login`
 
-for mason neovim: `brew install node`
+mason in neovim needs npm:
 
-`mkdir -p ~/personal_projects/vendor/ && cd ~/personal_projects/vendor/ && git clone https://github.com/zsh-git-prompt/zsh-git-prompt`
+```shell
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+nvm install node
+nvm alias default node
+```
 
 `mkdir -p ~/.zsh && cd ~/.zsh && git clone https://github.com/zsh-users/zsh-autosuggestions`
 

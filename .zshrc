@@ -18,8 +18,6 @@ function brew_find_pkg {
     done
 }
 
-
-
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
 export PATH=$PATH:~/bin
@@ -76,7 +74,6 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-export PATH=$PATH:~/.pyenv/shims/yt-dlp
 export PATH=$PATH:/opt/homebrew/bin/
 export PATH=$PATH:~/personal_projects/zig/vendor/sm2/zig-out/bin/
 
@@ -160,12 +157,6 @@ fpath=(~/.zsh/completions $fpath)
 #zstyle ':autocomplete:*' default-context fzf-atuin-history-widget
 #bindkey -M menuselect '\r' .accept-line
 
-# https://stackoverflow.com/questions/71591971/how-can-i-fix-the-zsh-command-not-found-python-error-macos-monterey-12-3/71657414#71657414
-eval "$(pyenv init --path)"
-
-# https://stackoverflow.com/questions/122327/how-do-i-find-the-location-of-my-python-site-packages-directory/52638888#52638888
-export PATH=$(python -c "import sysconfig; print(sysconfig.get_path('purelib'))"):$PATH
-
 # up-line-or-search-prefix () {
 #   local CURSOR_before_search=$CURSOR
 #   zle up-line-or-search "$LBUFFER"
@@ -178,15 +169,7 @@ alias exercismwatch="watchexec -i zig-cache -e zig -r -c reset 'zig test test* 2
 
 export PATH=$PATH:~/.local/share/npm/bin
 
-export PYENV_ROOT="$HOME/.pyenv"
-# command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
 export PATH=$PATH:~/go/bin/
-
-# Should be last
-[ -f ~/.zprofile_local ] && source ~/.zprofile_local
 
 # Added by OrbStack: command-line tools and integration
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
@@ -197,7 +180,7 @@ source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 
 # https://github.com/zsh-git-prompt/zsh-git-prompt
 # https://stackoverflow.com/questions/1128496/to-get-a-prompt-which-indicates-git-branch-in-zsh/2902338#2902338
-source $HOME/personal_projects/vendor/zsh-git-prompt/zshrc.sh
+source "$HOMEBREW_PREFIX/opt/zsh-git-prompt/zshrc.sh"
 # an example prompt
 # default macos:
 #PROMPT=%n@%m %1~ %#
@@ -222,9 +205,6 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/themes/rofrol.omp.json
 # Since there is .zshrc, setting this in .zprofile was causing that,
 # alt+. was not working correctly for bringing back last used last parameter
 export EDITOR=nvim
-
-#source ~/.zshrc_nvm
-
 
 # Load Angular CLI autocompletion.
 #source <(ng completion script)
@@ -300,11 +280,7 @@ function killTcpListen () {
 # termporary until https://github.com/jqlang/jq/pull/2904 is released
 export JQ_COLORS="0;90:0;39:0;39:0;39:0;32:1;39:1;39:1;34"
 
-export SDKMAN_DIR=$(brew --prefix sdkman-cli)/libexec
-[[ -s "${SDKMAN_DIR}/bin/sdkman-init.sh" ]] && source "${SDKMAN_DIR}/bin/sdkman-init.sh"
-
 export PATH="$HOME/personal_projects/docker/vendor/regclient/bin/:$PATH"
-export PATH="$(brew --prefix sdkman-cli)/bin/:$PATH"
 
 export DOTFILES_HOME=$HOME/.dotfiles.git
 source $HOME/dotfiles.sh
@@ -355,3 +331,12 @@ alias y='noglob yt-dlp'
 # https://superuser.com/questions/1605802/completely-disable-and-globbing-in-zsh/1606090#1606090
 # https://unix.stackexchange.com/questions/310540/how-to-get-rid-of-no-match-found-when-running-rm/313187#313187
 #unsetopt nomatch
+
+source ~/.zshrc_nvm
+
+
+
+
+
+# Should be last
+[ -f ~/.zprofile_local ] && source ~/.zprofile_local

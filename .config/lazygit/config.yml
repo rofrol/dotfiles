@@ -25,7 +25,7 @@ customCommands:
     command: "gh pr view {{.SelectedLocalBranch.Name}}"
     context: "localBranches"
     description: "view pull request"
-    subprocess: true
+    output: terminal
   - key: null
     command: "gh pr merge {{.SelectedLocalBranch.Name}} -d {{index .PromptResponses 0}}"
     context: "localBranches"

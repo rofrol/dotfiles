@@ -6,6 +6,7 @@
                 "rules": [
                     {
                         "description": "ctrl-1 does not work, so need to map it to ctrl+option+1 https://stackoverflow.com/questions/69582660/how-to-remap-key-combinations-in-karabiner-elements/69597847#69597847",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
@@ -21,318 +22,23 @@
                                 "type": "basic"
                             }
                         ]
-                    }
-                ]
-            },
-            "devices": [
-                {
-                    "fn_function_keys": [
-                        {
-                            "from": { "key_code": "f1" },
-                            "to": [{ "key_code": "f1" }]
-                        },
-                        {
-                            "from": { "key_code": "f2" },
-                            "to": [{ "key_code": "f2" }]
-                        },
-                        {
-                            "from": { "key_code": "f3" },
-                            "to": [{ "key_code": "f3" }]
-                        },
-                        {
-                            "from": { "key_code": "f4" },
-                            "to": [{ "key_code": "f4" }]
-                        },
-                        {
-                            "from": { "key_code": "f5" },
-                            "to": [{ "key_code": "f5" }]
-                        },
-                        {
-                            "from": { "key_code": "f6" },
-                            "to": [{ "key_code": "f6" }]
-                        },
-                        {
-                            "from": { "key_code": "f7" },
-                            "to": [{ "key_code": "f7" }]
-                        },
-                        {
-                            "from": { "key_code": "f8" },
-                            "to": [{ "key_code": "f8" }]
-                        },
-                        {
-                            "from": { "key_code": "f9" },
-                            "to": [{ "key_code": "f9" }]
-                        },
-                        {
-                            "from": { "key_code": "f10" },
-                            "to": [{ "key_code": "f10" }]
-                        },
-                        {
-                            "from": { "key_code": "f11" },
-                            "to": [{ "key_code": "f11" }]
-                        },
-                        {
-                            "from": { "key_code": "f12" },
-                            "to": [{ "key_code": "f12" }]
-                        }
-                    ],
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 50501,
-                        "vendor_id": 1133
                     },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "application" },
-                            "to": [{ "key_code": "right_command" }]
-                        },
-                        {
-                            "from": { "key_code": "left_command" },
-                            "to": [{ "key_code": "left_option" }]
-                        },
-                        {
-                            "from": { "key_code": "left_option" },
-                            "to": [{ "key_code": "left_command" }]
-                        },
-                        {
-                            "from": { "key_code": "right_command" },
-                            "to": [{ "key_code": "right_option" }]
-                        }
-                    ]
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 835,
-                        "vendor_id": 1452
+                    {
+                        "description": "Swap grave_accent_and_tilde and non_us_backslash",
+                        "enabled": false,
+                        "manipulators": [
+                            {
+                                "from": { "key_code": "grave_accent_and_tilde" },
+                                "to": [{ "key_code": "non_us_backslash" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": { "key_code": "non_us_backslash" },
+                                "to": [{ "key_code": "grave_accent_and_tilde" }],
+                                "type": "basic"
+                            }
+                        ]
                     },
-                    "ignore": true,
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "grave_accent_and_tilde" },
-                            "to": [{ "key_code": "non_us_backslash" }]
-                        },
-                        {
-                            "from": { "key_code": "non_us_backslash" },
-                            "to": [{ "key_code": "grave_accent_and_tilde" }]
-                        },
-                        {
-                            "from": { "key_code": "right_command" },
-                            "to": [{ "key_code": "right_option" }]
-                        },
-                        {
-                            "from": { "key_code": "right_option" },
-                            "to": [{ "key_code": "right_command" }]
-                        }
-                    ]
-                },
-                {
-                    "fn_function_keys": [
-                        {
-                            "from": { "key_code": "f1" },
-                            "to": [{ "key_code": "f1" }]
-                        },
-                        {
-                            "from": { "key_code": "f2" },
-                            "to": [{ "key_code": "f2" }]
-                        },
-                        {
-                            "from": { "key_code": "f3" },
-                            "to": [{ "key_code": "f3" }]
-                        },
-                        {
-                            "from": { "key_code": "f4" },
-                            "to": [{ "key_code": "f4" }]
-                        },
-                        {
-                            "from": { "key_code": "f5" },
-                            "to": [{ "key_code": "f5" }]
-                        },
-                        {
-                            "from": { "key_code": "f6" },
-                            "to": [{ "key_code": "f6" }]
-                        },
-                        {
-                            "from": { "key_code": "f7" },
-                            "to": [{ "key_code": "f7" }]
-                        },
-                        {
-                            "from": { "key_code": "f8" },
-                            "to": [{ "key_code": "f8" }]
-                        },
-                        {
-                            "from": { "key_code": "f9" },
-                            "to": [{ "key_code": "f9" }]
-                        },
-                        {
-                            "from": { "key_code": "f10" },
-                            "to": [{ "key_code": "f10" }]
-                        },
-                        {
-                            "from": { "key_code": "f11" },
-                            "to": [{ "key_code": "f11" }]
-                        },
-                        {
-                            "from": { "key_code": "f12" },
-                            "to": [{ "key_code": "f12" }]
-                        }
-                    ],
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 49987,
-                        "vendor_id": 1133
-                    },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "application" },
-                            "to": [{ "key_code": "right_command" }]
-                        },
-                        {
-                            "from": { "key_code": "left_command" },
-                            "to": [{ "key_code": "left_option" }]
-                        },
-                        {
-                            "from": { "key_code": "left_option" },
-                            "to": [{ "key_code": "left_command" }]
-                        }
-                    ]
-                },
-                {
-                    "fn_function_keys": [
-                        {
-                            "from": { "key_code": "f11" },
-                            "to": [{ "key_code": "f11" }]
-                        }
-                    ],
-                    "identifiers": {
-                        "is_pointing_device": true,
-                        "product_id": 49987,
-                        "vendor_id": 1133
-                    }
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "is_pointing_device": true,
-                        "product_id": 2096,
-                        "vendor_id": 1118
-                    },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "right_option" },
-                            "to": [{ "key_code": "right_command" }]
-                        }
-                    ]
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 521,
-                        "vendor_id": 5426
-                    },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "left_command" },
-                            "to": [{ "key_code": "left_option" }]
-                        },
-                        {
-                            "from": { "key_code": "left_option" },
-                            "to": [{ "key_code": "left_command" }]
-                        }
-                    ]
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 50503,
-                        "vendor_id": 1133
-                    },
-                    "ignore": true
-                },
-                {
-                    "disable_built_in_keyboard_if_exists": true,
-                    "identifiers": {
-                        "device_address": "d7-91-93-56-e5-a9",
-                        "is_keyboard": true,
-                        "is_pointing_device": true
-                    },
-                    "ignore": false
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 12869,
-                        "vendor_id": 6645
-                    },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "right_command" },
-                            "to": [{ "key_code": "right_option" }]
-                        },
-                        {
-                            "from": { "key_code": "right_control" },
-                            "to": [{ "key_code": "right_command" }]
-                        }
-                    ]
-                }
-            ],
-            "fn_function_keys": [
-                {
-                    "from": { "key_code": "f1" },
-                    "to": [{ "key_code": "f1" }]
-                },
-                {
-                    "from": { "key_code": "f2" },
-                    "to": [{ "key_code": "f2" }]
-                },
-                {
-                    "from": { "key_code": "f3" },
-                    "to": [{ "key_code": "f3" }]
-                },
-                {
-                    "from": { "key_code": "f4" },
-                    "to": [{ "key_code": "f4" }]
-                },
-                {
-                    "from": { "key_code": "f5" },
-                    "to": [{ "key_code": "f5" }]
-                },
-                {
-                    "from": { "key_code": "f7" },
-                    "to": [{ "key_code": "f7" }]
-                },
-                {
-                    "from": { "key_code": "f8" },
-                    "to": [{ "key_code": "f8" }]
-                },
-                {
-                    "from": { "key_code": "f9" },
-                    "to": [{ "key_code": "f9" }]
-                },
-                {
-                    "from": { "key_code": "f10" },
-                    "to": [{ "key_code": "f10" }]
-                },
-                {
-                    "from": { "key_code": "f11" },
-                    "to": [{ "key_code": "f11" }]
-                },
-                {
-                    "from": { "key_code": "f12" },
-                    "to": [{ "key_code": "f12" }]
-                }
-            ],
-            "name": "ISO",
-            "simple_modifications": [
-                {
-                    "from": { "key_code": "caps_lock" },
-                    "to": [{ "key_code": "escape" }]
-                }
-            ]
-        },
-        {
-            "complex_modifications": {
-                "rules": [
                     {
                         "description": "Disable escape in Emacs bc it exits fullscreen",
                         "manipulators": [
@@ -421,14 +127,6 @@
                             "to": [{ "key_code": "escape" }]
                         },
                         {
-                            "from": { "key_code": "grave_accent_and_tilde" },
-                            "to": [{ "key_code": "non_us_backslash" }]
-                        },
-                        {
-                            "from": { "key_code": "non_us_backslash" },
-                            "to": [{ "key_code": "grave_accent_and_tilde" }]
-                        },
-                        {
                             "from": { "key_code": "right_command" },
                             "to": [{ "key_code": "right_option" }]
                         },
@@ -471,7 +169,7 @@
                     "to": [{ "key_code": "f3" }]
                 }
             ],
-            "name": "US",
+            "name": "ISO",
             "selected": true,
             "simple_modifications": [
                 {
@@ -479,16 +177,11 @@
                     "to": [{ "key_code": "escape" }]
                 },
                 {
-                    "from": { "key_code": "grave_accent_and_tilde" },
-                    "to": [{ "key_code": "non_us_backslash" }]
-                },
-                {
                     "from": { "key_code": "insert" },
                     "to": [{ "key_code": "fn" }]
                 }
             ],
             "virtual_hid_keyboard": { "keyboard_type_v2": "iso" }
-        },
-        { "name": "New profile" }
+        }
     ]
 }

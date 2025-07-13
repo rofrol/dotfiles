@@ -30,13 +30,15 @@ rm -rf dotfiles
 
 ## misc
 
+```shell
 brew install --cask karabiner-elements alt-tab rectangle
-
 # coreutils for ls alias
-
 brew install neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt coreutils
+```
 
-git clone <git@github.com>:rofrol/LazyVim--starter ~/.config/nvim
+`git clone <git@github.com>:rofrol/LazyVim--starter ~/.config/nvim`
+
+```
 
 `atuin login`
 

@@ -33,6 +33,13 @@ alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
 
 alias gitka='gitk --all &'
 
+# https://unix.stackexchange.com/questions/275728/set-ls-l-time-format/693168#693168
+export TIME_STYLE=long-iso
+alias l='ls -lA'
+alias ll='ls -lA --color=auto --group-directories-first'
+
+alias et='eza --icons -lt modified --time-style "+%Y-%m-%d %H:%M"'
+alias etr='eza --icons -lt modified --sort modified --time-style "+%Y-%m-%d %H:%M"'
 export PATH="$(brew --prefix python)/libexec/bin":$PATH
 
 export PATH="$(brew --prefix keydb)/bin":$PATH
@@ -284,8 +291,6 @@ export PATH="$HOME/personal_projects/docker/vendor/regclient/bin/:$PATH"
 
 export DOTFILES_HOME=$HOME/.dotfiles.git
 source $HOME/dotfiles.sh
-
-alias etr='eza --icons -lt modified --sort modified --time-style full-iso'
 
 export PATH="$(brew --prefix git)/bin/:$PATH"
 export PATH="$HOME/.zvm/self:$PATH"

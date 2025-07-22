@@ -59,15 +59,29 @@ window-height = 10000
 window-width = 10000
 
 # ghostty +list-fonts
+# font-family = SourceCodevka
+font-family = Monaco
+# font-family = CommitMonoRofrol
 # font-family = IosevkaMayukaiSerif Nerd Font
+# font-family = Codevka Nerd Font # width 400
 # font-family = SauceCodePro Nerd Font
 # font-family = TrulleMono Nerd Font
-font-family = IosevkaSourceCodePro Nerd Font
+# font-family = IosevkaSourceCodePro Nerd Font
+# font-family = SauceCodevka Nerd Font Extended # width 400
+# font-family = SauceCodevkaNF-Extended # does not work
+# font-family = SourceCodevka Nerd Font # width 400
+# font-family = SourceCodevka Light Extended # width 300
+# font-family = SourceCodevka SemiLight Extended # does not work, width 350
+# font-family = SourceCodevka Extended # width 400
+# font-family = SourceCodevka Book Extended # does not work, width 450
+# font-family = SourceCodevka Medium Extended # width 500
+# font-family = Udon mono
 # font-size started working after setting font-family
 font-size = 18
 font-synthetic-style = no-bold,no-italic,no-bold-italic
-font-style = normal
 # font-style = bold
+font-thicken = false
+# font-thicken-strength = 10
 
 # -calt disables font ligatures
 font-feature = -calt, -liga, -dlig
@@ -76,3 +90,7 @@ unfocused-split-opacity = 1
 
 #adjust-cell-height=9
 #adjust-cursor-height=9
+
+## 2025-06-09 19:53
+
+

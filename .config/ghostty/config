@@ -60,6 +60,10 @@ window-width = 10000
 
 # ghostty +list-fonts
 font-family = SourceCodevka
+
+# font-family = CaskaydiaMono Nerd Font Mono
+# font-style = semilight
+
 # font-family = Monaco
 # font-family = Hack
 # font-family = CommitMonoRofrol
@@ -78,9 +82,8 @@ font-family = SourceCodevka
 # font-family = SourceCodevka Medium Extended # width 500
 # font-family = Udon mono
 # font-size started working after setting font-family
-font-size = 16
+font-size = 17
 font-synthetic-style = no-bold,no-italic,no-bold-italic
-# font-style = bold
 font-thicken = false
 # font-thicken-strength = 10
 

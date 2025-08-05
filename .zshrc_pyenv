@@ -7,6 +7,5 @@ eval "$(pyenv init --path)"
 export PATH=$(python -c "import sysconfig; print(sysconfig.get_path('purelib'))"):$PATH
 
 export PYENV_ROOT="$HOME/.pyenv"
-# command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"

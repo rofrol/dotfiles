@@ -27,4 +27,4 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 export HOMEBREW_CASK_OPTS=--no-quarantine
 
 export DOTFILES_HOME=$HOME/.dotfiles.git
-source dotfiles.sh
+source ~/dotfiles.sh

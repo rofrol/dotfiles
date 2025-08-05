@@ -282,7 +282,6 @@ export PATH="$HOME/.codeium/windsurf/bin:$PATH"
 eval "$(uv generate-shell-completion zsh)"
 export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
-export PATH="$(brew --prefix curl)/bin/":$PATH
 export PATH=$HOME/.cargo/bin:$PATH
 export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
 

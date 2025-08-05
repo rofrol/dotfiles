@@ -19,7 +19,7 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 # git clone <your dotfiles repo>
 mv dotfiles/.git ~/.dotfiles.git
 export DOTFILES_HOME=$HOME/.dotfiles.git
-source dotfiles/dotfiles.sh
+source dotfiles.sh
 don
 # .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name
 git config core.excludesFile .dotfiles.gitignore
@@ -33,7 +33,7 @@ rm -rf dotfiles
 ```shell
 brew install --cask karabiner-elements alt-tab rectangle
 # coreutils for ls alias
-brew install neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt coreutils
+brew install neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt curl coreutils gnused
 ```
 
 `git clone <git@github.com>:rofrol/LazyVim--starter ~/.config/nvim`

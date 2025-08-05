@@ -19,6 +19,8 @@ echo '~/.zprofile sourced.'
 # export PATH="$(brew --prefix curl)/bin/":$PATH
 # to find keg-only packages:
 # for i in $(brew leaves --installed-on-request); do brew info $i 2>/dev/null | head -1 | grep "keg-only"; done
+# unless it is installed as dependency, like `brew uses --installed curl` shows php
+# in that case do `brew uninstall --ignore-dependencies curl && brew install curl`
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # https://apple.stackexchange.com/questions/337320/how-to-get-rid-of-application-downloaded-from-the-internet-message-when-instal/376476#376476

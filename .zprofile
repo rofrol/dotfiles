@@ -1,5 +1,3 @@
-echo '~/.zprofile sourced.'
-
 # What Goes to ~/.zprofile and What Goes to ~/.zshrc?
 # Since ~/.zprofile is loaded only once at login time, it’s best to put things that are loaded only once and can be inherited by subshells. An excellent example of this is environment variables.
 
@@ -28,3 +26,5 @@ export HOMEBREW_CASK_OPTS=--no-quarantine
 
 export DOTFILES_HOME=$HOME/.dotfiles.git
 source ~/dotfiles.sh
+
+echo '~/.zprofile sourced.'

@@ -1,4 +1,5 @@
-echo '~/.zshrc sourced.'
+# https://ellie.wtf/notes/profiling-zsh
+# zmodload zsh/zprof
 
 #  ~/.zshrc is typically reserved for things that are not inheritable by subshells, such as aliases and functions, custom prompts, history customizations, and so on.
 
@@ -276,7 +277,29 @@ export PATH="$PATH:$ZVM_INSTALL/"
 # https://unix.stackexchange.com/questions/310540/how-to-get-rid-of-no-match-found-when-running-rm/313187#313187
 #unsetopt nomatch
 
-source ~/.zshrc_nvm
+## zplug
+
+export ZPLUG_HOME=/opt/homebrew/opt/zplug
+source $ZPLUG_HOME/init.zsh
+zplug "qoomon/zsh-lazyload"
+
+# Install plugins if there are plugins that have not been installed
+if ! zplug check --verbose; then
+    printf "Install? [y/N]: "
+    if read -q; then
+        echo; zplug install
+    fi
+fi
+
+# Then, source plugins and add commands to $PATH
+zplug load --verbose
+
+# source ~/.zshrc_nvm
+# https://ellie.wtf/notes/profiling-zsh
+# https://registerspill.thorstenball.com/p/how-fast-is-your-shell
+# eager: $SHELL -i -c exit  0.43s user 0.59s system 88% cpu 1.151 total
+# lazyload: $SHELL -i -c exit  0.30s user 0.42s system 87% cpu 0.830 total
+lazyload nvm -- 'source ~/.zshrc_nvm'
 
 export PATH="$HOME/.codeium/windsurf/bin:$PATH"
 eval "$(uv generate-shell-completion zsh)"
@@ -298,3 +321,6 @@ export NVM_DIR="$HOME/.nvm"
 
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local
+
+echo '~/.zshrc sourced.'
+# zprof

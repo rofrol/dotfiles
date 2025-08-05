@@ -195,7 +195,7 @@ export LC_MESSAGES=en_US.UTF-8
 
 export PATH=$PATH:~/bin/roc
 
-eval "$(atuin init zsh)"
+eval "$(atuin init zsh --disable-up-arrow)"
 export ATUIN_SESSION=$(atuin uuid)
 ATUIN_HISTORY_ID=""
 

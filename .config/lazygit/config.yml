@@ -11,6 +11,7 @@ gui:
   sidePanelWidth: 0.25
   language: "en"
   timeFormat: "2006-01-02T15:04:05Z07:00" # '02 Jan 06 15:04 MST' # https://pkg.go.dev/time#Time.Format
+  skipDiscardChangeWarning: true
 # https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Command_Keybindings.md
 customCommands:
   - key: null

@@ -15,7 +15,7 @@
     "yellow": "#f1d354"
   },
   "transient_prompt": {
-    "template": " 🕇🧘 \uf43a {{ .Segments.Time.CurrentDate | date .Segments.Time.Format }} ❯ {{ .Segments.Path.Path }} ❯ \n $ ",
+    "template": "🕇🧘 \uf43a {{ .Segments.Time.CurrentDate | date .Segments.Time.Format }} ❯ {{ .Segments.Path.Path }} ❯ \n$ ",
     "foreground": "#000000"
   },
   "blocks": [
@@ -67,7 +67,7 @@
             "cache_duration": "none"
           },
           "trailing_diamond": "\ue0b0",
-          "template": " 🕇🧘 ",
+          "template": "🕇🧘 ",
           "foreground": "p:white",
           "background": "p:purple",
           "type": "text",
@@ -172,7 +172,7 @@
           "properties": {
             "cache_duration": "none"
           },
-          "template": " $ ",
+          "template": "$ ",
           "foreground": "#000000",
           "type": "text",
           "style": "plain"

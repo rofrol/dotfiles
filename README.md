@@ -31,7 +31,7 @@ rm -rf dotfiles
 ## misc
 
 ```shell
-brew install --cask karabiner-elements alt-tab rectangle
+brew install --cask karabiner-elements alt-tab rectangle stats
 # coreutils for ls alias
 brew install neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt curl coreutils gnused
 ```

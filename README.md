@@ -33,7 +33,7 @@ rm -rf dotfiles
 ```shell
 brew install --cask karabiner-elements alt-tab rectangle stats
 # coreutils for ls alias
-brew install neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt curl coreutils gnused
+brew install git git-gui neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt curl coreutils gnused
 ```
 
 `git clone <git@github.com>:rofrol/LazyVim--starter ~/.config/nvim`

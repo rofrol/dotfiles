@@ -59,7 +59,7 @@
 !/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
 
 # misc
-!/bin
+!/scripts
 !/README.md
 !/.global_gitignore
 !/.dotfiles.gitignore

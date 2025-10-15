@@ -142,6 +142,7 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/themes/rofrol.omp.json
 
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
+export PATH=$PATH:~/scripts
 export PATH=$PATH:~/bin
 
 #export PATH=$PATH:~/.zvm/bin
@@ -279,38 +280,38 @@ export PATH="$PATH:$ZVM_INSTALL/"
 
 ## zplug
 
-export ZPLUG_HOME=/opt/homebrew/opt/zplug
-source $ZPLUG_HOME/init.zsh
-zplug "qoomon/zsh-lazyload"
-
-# Install plugins if there are plugins that have not been installed
-if ! zplug check --verbose; then
-    printf "Install? [y/N]: "
-    if read -q; then
-        echo; zplug install
-    fi
-fi
-
-# Then, source plugins and add commands to $PATH
-zplug load --verbose
+# export ZPLUG_HOME=/opt/homebrew/opt/zplug
+# source $ZPLUG_HOME/init.zsh
+# zplug "qoomon/zsh-lazyload"
+#
+# # Install plugins if there are plugins that have not been installed
+# if ! zplug check --verbose; then
+#     printf "Install? [y/N]: "
+#     if read -q; then
+#         echo; zplug install
+#     fi
+# fi
+#
+# # Then, source plugins and add commands to $PATH
+# zplug load --verbose
 
 # source ~/.zshrc_nvm
 # https://ellie.wtf/notes/profiling-zsh
 # https://registerspill.thorstenball.com/p/how-fast-is-your-shell
 # eager: $SHELL -i -c exit  0.43s user 0.59s system 88% cpu 1.151 total
 # lazyload: $SHELL -i -c exit  0.30s user 0.42s system 87% cpu 0.830 total
-lazyload nvm -- 'source ~/.zshrc_nvm'
+# lazyload nvm -- 'source ~/.zshrc_nvm'
 
 export PATH="$HOME/.codeium/windsurf/bin:$PATH"
-eval "$(uv generate-shell-completion zsh)"
+# eval "$(uv generate-shell-completion zsh)"
 export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
 export PATH=$HOME/.cargo/bin:$PATH
 export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
 
 
-. $HOME/.local/bin/env
-. $HOME/.config/openai
+# . $HOME/.local/bin/env
+# . $HOME/.config/openai
 
 # opencode
 export PATH=/Users/roman.frolow/.opencode/bin:$PATH
@@ -324,3 +325,4 @@ export NVM_DIR="$HOME/.nvm"
 
 echo '~/.zshrc sourced.'
 # zprof
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"

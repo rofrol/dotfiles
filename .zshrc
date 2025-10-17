@@ -174,6 +174,11 @@ export PATH=~/.bun/bin:$PATH
 
 export PATH=~/zls:$PATH
 
+
+# Odin
+
+export PATH=~/personal_projects/odin/vendor/ols:$PATH
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 __conda_setup="$('/opt/homebrew/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"

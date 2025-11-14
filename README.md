@@ -33,13 +33,14 @@ rm -rf dotfiles
 casks:
 
 ```shell
-brew install --cask karabiner-elements alt-tab rectangle stats iina firefox google-chrome
+brew install --cask karabiner-elements alt-tab rectangle stats iina firefox google-chrome monitorcontrol
 
 formulas:
 
 # coreutils for ls alias
 # pqdf to decrypt and unprotect pdf files
-brew install git git-gui gh neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt curl coreutils gnused eza yt-dlp mpv qpdf
+# mkvtoolnix for mkvinfo and mkvextract
+brew install git git-gui gh neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt curl coreutils gnused eza yt-dlp mpv qpdf mkvtoolnix alass
 ```
 
 `git clone <git@github.com>:rofrol/LazyVim--starter ~/.config/nvim`

@@ -320,8 +320,10 @@ export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
 
 # opencode
 export PATH=/Users/roman.frolow/.opencode/bin:$PATH
+
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 export PATH=$HOME/personal_projects/fix_polish_characters:$PATH
+export PATH=$HOME/bin/odin:$PATH
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

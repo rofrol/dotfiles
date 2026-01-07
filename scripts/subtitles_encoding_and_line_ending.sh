@@ -4,8 +4,8 @@
 FILE="$1"
 
 if [ ! -f "$FILE" ]; then
-	echo "Provide file name"
-	exit 1
+  echo "Provide file name"
+  exit 1
 fi
 
 # EXT="${FILE##*.}"
@@ -16,6 +16,8 @@ OUT="${NAME}.converted.${EXT}"
 echo "OUT=${OUT}"
 
 iconv -f CP1250 -t UTF-8 "$FILE" >"$OUT"
+rm "$FILE"
+mv "$OUT" "$FILE"
 
 # - `Automator > Quick Action`
 #   - `Workflow receives current: files or folders`

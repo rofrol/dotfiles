@@ -24,7 +24,7 @@
       "alignment": "left",
       "segments": [
         {
-          "properties": {
+          "options": {
             "cache_duration": "none"
           },
           "leading_diamond": "\ue0b6",
@@ -35,7 +35,7 @@
           "style": "diamond"
         },
         {
-          "properties": {
+          "options": {
             "cache_duration": "none"
           },
           "template": "{{ if .Env.PNPPSSITE }} \uf2dd {{ .Env.PNPPSSITE }}{{ end }}",
@@ -46,7 +46,7 @@
           "style": "powerline"
         },
         {
-          "properties": {
+          "options": {
             "cache_duration": "none"
           },
           "trailing_diamond": "\ue0b4",
@@ -63,7 +63,7 @@
       "alignment": "left",
       "segments": [
         {
-          "properties": {
+          "options": {
             "cache_duration": "none"
           },
           "trailing_diamond": "\ue0b0",
@@ -74,7 +74,7 @@
           "style": "diamond"
         },
         {
-          "properties": {
+          "options": {
             "cache_duration": "none",
             "time_format": "15:04"
           },
@@ -85,7 +85,7 @@
           "style": "diamond"
         },
         {
-          "properties": {
+          "options": {
             "cache_duration": "none",
             "folder_icon": "\ue5fe ",
             "folder_separator_icon": "/",
@@ -100,7 +100,7 @@
           "style": "powerline"
         },
         {
-          "properties": {
+          "options": {
             "cache_duration": "none",
             "fetch_stash_count": true,
             "fetch_status": true,
@@ -121,7 +121,7 @@
           ]
         },
         {
-          "properties": {
+          "options": {
             "cache_duration": "none"
           },
           "template": " \ue718 {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} ",
@@ -132,7 +132,7 @@
           "style": "powerline"
         },
         {
-          "properties": {
+          "options": {
             "cache_duration": "none"
           },
           "template": " \ue235 {{ .Full }} ",
@@ -143,7 +143,7 @@
           "style": "powerline"
         },
         {
-          "properties": {
+          "options": {
             "cache_duration": "none"
           },
           "template": " \ue753 {{ .Full }} ",
@@ -160,7 +160,7 @@
       "alignment": "left",
       "segments": [
         {
-          "properties": {
+          "options": {
             "cache_duration": "none"
           },
           "template": "\ue3bf ",
@@ -169,7 +169,7 @@
           "style": "plain"
         },
         {
-          "properties": {
+          "options": {
             "cache_duration": "none"
           },
           "template": "$ ",
@@ -181,5 +181,5 @@
       "newline": true
     }
   ],
-  "version": 3
+  "version": 4
 }

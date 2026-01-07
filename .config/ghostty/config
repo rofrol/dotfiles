@@ -59,7 +59,11 @@ window-height = 10000
 window-width = 10000
 
 # ghostty +list-fonts
-font-family = SourceCodevka
+# font-family = SourceCodevka
+
+# cp /System/Applications/Utilities/Terminal.app/Contents/Resources/Fonts/* ~/Library/Fonts
+# https://github.com/ghostty-org/ghostty/discussions/9614
+font-family = SF Mono Terminal
 
 # font-family = CaskaydiaMono Nerd Font Mono
 # font-style = semilight

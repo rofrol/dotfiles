@@ -13,7 +13,7 @@ EXT=$(echo "$FILE" | sed 's/^.*\.//')
 NAME="${FILE%.*}"
 OUT="${NAME}.converted.${EXT}"
 # OUT="${NAME}.whatsapp.mp4"
-echo "OUT=${OUT}"
+# echo "OUT=${OUT}"
 
 iconv -f CP1250 -t UTF-8 "$FILE" >"$OUT"
 rm "$FILE"

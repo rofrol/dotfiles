@@ -178,6 +178,7 @@ export PATH=~/zls:$PATH
 # Odin
 
 export PATH=~/personal_projects/odin/vendor/ols:$PATH
+# export PATH=$HOME/bin/odin:$PATH
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
@@ -323,7 +324,6 @@ export PATH=/Users/roman.frolow/.opencode/bin:$PATH
 
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 export PATH=$HOME/personal_projects/fix_polish_characters:$PATH
-export PATH=$HOME/bin/odin:$PATH
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -334,3 +334,6 @@ export NVM_DIR="$HOME/.nvm"
 
 echo '~/.zshrc sourced.'
 # zprof
+
+# Created by `pipx` on 2026-02-02 15:23:32
+export PATH="$PATH:/Users/romanfrolow/.local/bin"

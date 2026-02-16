@@ -24,7 +24,7 @@ function onexit() {
 
 git fetch --all --prune
 
-DEFAULT_BRANCH="$(git config --get init.defaultBranch)"
+DEFAULT_BRANCH="$(git for-each-ref --format='%(symref:lstrip=3)' refs/remotes/origin/HEAD | git stripspace)"
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 if [[ "$CURRENT_BRANCH" == "$DEFAULT_BRANCH" ]]; then

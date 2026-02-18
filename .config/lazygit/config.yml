@@ -47,5 +47,9 @@ customCommands:
 keybinding:
   universal:
     openRecentRepos: <disabled> # '<c-r>'
+    prevItem-alt: i
+    nextItem-alt: k
+    prevBlock-alt: j
+    nextBlock-alt: l
 os:
   editPreset: "nvim"

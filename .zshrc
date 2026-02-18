@@ -10,6 +10,10 @@ alias zig-update='zig version && $HOME/personal_projects/zig/zig-utils/scripts/z
 alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
 
 alias gitka='gitk --all &'
+# https://stackoverflow.com/questions/42211882/tell-gitk-to-ignore-all-branches-that-match-pattern
+# https://stackoverflow.com/questions/20977520/is-there-any-way-to-exclude-branches-from-showing-in-gitk
+# https://stackoverflow.com/questions/20979339/use-git-rev-list-to-exclude-a-branch-but-keep-common-ancestors-with-the-include
+alias gitkagh='gitk ^origin/gh-pages --all &'
 
 # https://unix.stackexchange.com/questions/275728/set-ls-l-time-format/693168#693168
 export TIME_STYLE=long-iso

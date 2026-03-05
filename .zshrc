@@ -146,7 +146,6 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/themes/rofrol.omp.json
 
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
-export PATH=$PATH:~/scripts
 export PATH=$PATH:~/bin
 
 #export PATH=$PATH:~/.zvm/bin

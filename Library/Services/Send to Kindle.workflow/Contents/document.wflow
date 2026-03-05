@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AMApplicationBuild</key>
+	<string>520</string>
+	<key>AMApplicationVersion</key>
+	<string>2.10</string>
+	<key>AMDocumentVersion</key>
+	<string>2</string>
+	<key>actions</key>
+	<array>
+		<dict>
+			<key>action</key>
+			<dict>
+				<key>AMAccepts</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Optional</key>
+					<true/>
+					<key>Types</key>
+					<array>
+						<string>com.apple.applescript.object</string>
+					</array>
+				</dict>
+				<key>AMActionVersion</key>
+				<string>1.0.2</string>
+				<key>AMApplication</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>AMParameterProperties</key>
+				<dict>
+					<key>source</key>
+					<dict/>
+				</dict>
+				<key>AMProvides</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Types</key>
+					<array>
+						<string>com.apple.applescript.object</string>
+					</array>
+				</dict>
+				<key>ActionBundlePath</key>
+				<string>/System/Library/Automator/Run AppleScript.action</string>
+				<key>ActionName</key>
+				<string>Run AppleScript</string>
+				<key>ActionParameters</key>
+				<dict>
+					<key>source</key>
+					<string>on run {input, parameters}	set numSupportedDocuments to 0	repeat with thisItem in input		set thisItem to thisItem as text		set thisItem to quoted form of POSIX path of thisItem		set currentType to do shell script "echo " &amp; thisItem &amp; " | sed 's/\\(.*\\)\\(\\.\\)\\(.*\\)/\\3/g' | tr '[A-Z]' '[a-z]'"		set numSupportedDocuments to (numSupportedDocuments + 1)		if numSupportedDocuments &gt; 25 then			set titleMsg to "Send to Kindle error"			display alert "Maximum of 25 supported documents can be sent at a  time." as warning			return {}		end if	end repeat	return inputend run</string>
+				</dict>
+				<key>BundleIdentifier</key>
+				<string>com.apple.Automator.RunScript</string>
+				<key>CFBundleVersion</key>
+				<string>1.0.2</string>
+				<key>CanShowSelectedItemsWhenRun</key>
+				<false/>
+				<key>CanShowWhenRun</key>
+				<true/>
+				<key>Category</key>
+				<array>
+					<string>AMCategoryUtilities</string>
+				</array>
+				<key>Class Name</key>
+				<string>RunScriptAction</string>
+				<key>InputUUID</key>
+				<string>7DB43973-1E1F-48B6-931A-D4AAEC6F6F0B</string>
+				<key>Keywords</key>
+				<array>
+					<string>Run</string>
+				</array>
+				<key>OutputUUID</key>
+				<string>6EFD7BE9-7E20-425A-9ED8-3B2D307A8A1F</string>
+				<key>UUID</key>
+				<string>E06F9C3F-7260-4BBC-B9D3-DC5ADFCDD198</string>
+				<key>UnlocalizedApplications</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>arguments</key>
+				<dict>
+					<key>0</key>
+					<dict>
+						<key>default value</key>
+						<string>on run {input, parameters}
+	
+	(* Your script goes here *)
+	
+	return input
+end run</string>
+						<key>name</key>
+						<string>source</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>0</string>
+					</dict>
+				</dict>
+				<key>isViewVisible</key>
+				<true/>
+				<key>location</key>
+				<string>418.500000:368.000000</string>
+				<key>nibPath</key>
+				<string>/System/Library/Automator/Run AppleScript.action/Contents/Resources/Base.lproj/main.nib</string>
+			</dict>
+			<key>isViewVisible</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>action</key>
+			<dict>
+				<key>AMAccepts</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Optional</key>
+					<true/>
+					<key>Types</key>
+					<array>
+						<string>com.apple.cocoa.string</string>
+					</array>
+				</dict>
+				<key>AMActionVersion</key>
+				<string>2.0.3</string>
+				<key>AMApplication</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>AMParameterProperties</key>
+				<dict>
+					<key>COMMAND_STRING</key>
+					<dict/>
+					<key>CheckedForUserDefaultShell</key>
+					<dict/>
+					<key>inputMethod</key>
+					<dict/>
+					<key>shell</key>
+					<dict/>
+					<key>source</key>
+					<dict/>
+				</dict>
+				<key>AMProvides</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Types</key>
+					<array>
+						<string>com.apple.cocoa.string</string>
+					</array>
+				</dict>
+				<key>ActionBundlePath</key>
+				<string>/System/Library/Automator/Run Shell Script.action</string>
+				<key>ActionName</key>
+				<string>Run Shell Script</string>
+				<key>ActionParameters</key>
+				<dict>
+					<key>COMMAND_STRING</key>
+					<string>#!/usr/bin/perl
+
+if (@ARGV == 0) {
+	exit;
+}
+
+my $args;
+my $file;
+
+$args="-cmd send -launcher shellextension";
+$stkApp="/Applications/Send to Kindle/Send to Kindle.app";
+
+foreach (@ARGV) {
+    $file="$_";
+    $args=$args." -file ".'"'.$file.'"'
+}
+
+system("open -n '$stkApp' --args $args");
+</string>
+					<key>CheckedForUserDefaultShell</key>
+					<true/>
+					<key>inputMethod</key>
+					<integer>1</integer>
+					<key>shell</key>
+					<string>/usr/bin/perl</string>
+					<key>source</key>
+					<string></string>
+				</dict>
+				<key>BundleIdentifier</key>
+				<string>com.apple.RunShellScript</string>
+				<key>CFBundleVersion</key>
+				<string>2.0.3</string>
+				<key>CanShowSelectedItemsWhenRun</key>
+				<false/>
+				<key>CanShowWhenRun</key>
+				<true/>
+				<key>Category</key>
+				<array>
+					<string>AMCategoryUtilities</string>
+				</array>
+				<key>Class Name</key>
+				<string>RunShellScriptAction</string>
+				<key>InputUUID</key>
+				<string>41D724C7-4065-4AC1-9974-0FB3703A7578</string>
+				<key>Keywords</key>
+				<array>
+					<string>Shell</string>
+					<string>Script</string>
+					<string>Command</string>
+					<string>Run</string>
+					<string>Unix</string>
+				</array>
+				<key>OutputUUID</key>
+				<string>8DF8D3CB-8D93-4F89-9B09-785DA77B8A92</string>
+				<key>UUID</key>
+				<string>1B4722DC-CA4D-4D02-B284-5F640E6CC22E</string>
+				<key>UnlocalizedApplications</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>arguments</key>
+				<dict>
+					<key>0</key>
+					<dict>
+						<key>default value</key>
+						<integer>0</integer>
+						<key>name</key>
+						<string>inputMethod</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>0</string>
+					</dict>
+					<key>1</key>
+					<dict>
+						<key>default value</key>
+						<false/>
+						<key>name</key>
+						<string>CheckedForUserDefaultShell</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>1</string>
+					</dict>
+					<key>2</key>
+					<dict>
+						<key>default value</key>
+						<string></string>
+						<key>name</key>
+						<string>source</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>2</string>
+					</dict>
+					<key>3</key>
+					<dict>
+						<key>default value</key>
+						<string></string>
+						<key>name</key>
+						<string>COMMAND_STRING</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>3</string>
+					</dict>
+					<key>4</key>
+					<dict>
+						<key>default value</key>
+						<string>/bin/sh</string>
+						<key>name</key>
+						<string>shell</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>4</string>
+					</dict>
+				</dict>
+				<key>isViewVisible</key>
+				<true/>
+				<key>location</key>
+				<string>418.500000:816.000000</string>
+				<key>nibPath</key>
+				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
+			</dict>
+			<key>isViewVisible</key>
+			<true/>
+		</dict>
+	</array>
+	<key>connectors</key>
+	<dict>
+		<key>9BB1A4F0-9F3D-443B-AC51-27BEF2E72892</key>
+		<dict>
+			<key>from</key>
+			<string>E06F9C3F-7260-4BBC-B9D3-DC5ADFCDD198 - E06F9C3F-7260-4BBC-B9D3-DC5ADFCDD198</string>
+			<key>to</key>
+			<string>1B4722DC-CA4D-4D02-B284-5F640E6CC22E - 1B4722DC-CA4D-4D02-B284-5F640E6CC22E</string>
+		</dict>
+	</dict>
+	<key>state</key>
+	<dict>
+		<key>AMLogTabViewSelectedIndex</key>
+		<integer>0</integer>
+		<key>libraryState</key>
+		<dict>
+			<key>actionsMajorSplitViewState</key>
+			<dict>
+				<key>expandedPosition</key>
+				<real>239</real>
+				<key>subviewState</key>
+				<array>
+					<string>0.000000, 0.000000, 381.000000, 516.000000, NO</string>
+					<string>0.000000, 517.000000, 381.000000, 238.000000, NO</string>
+				</array>
+			</dict>
+			<key>actionsMinorSplitViewState</key>
+			<dict>
+				<key>expandedPosition</key>
+				<real>0.0</real>
+				<key>subviewState</key>
+				<array>
+					<string>0.000000, 0.000000, 163.000000, 516.000000, NO</string>
+					<string>164.000000, 0.000000, 217.000000, 516.000000, NO</string>
+				</array>
+			</dict>
+			<key>variablesMajorSplitViewState</key>
+			<dict>
+				<key>expandedPosition</key>
+				<real>0.0</real>
+				<key>subviewState</key>
+				<array>
+					<string>0.000000, 0.000000, 381.000000, 555.000000, NO</string>
+					<string>0.000000, 556.000000, 381.000000, 199.000000, NO</string>
+				</array>
+			</dict>
+			<key>variablesMinorSplitViewState</key>
+			<dict>
+				<key>expandedPosition</key>
+				<real>0.0</real>
+				<key>subviewState</key>
+				<array>
+					<string>0.000000, 0.000000, 163.000000, 555.000000, NO</string>
+					<string>164.000000, 0.000000, 217.000000, 555.000000, NO</string>
+				</array>
+			</dict>
+		</dict>
+		<key>majorSplitViewState</key>
+		<dict>
+			<key>expandedPosition</key>
+			<real>0.0</real>
+			<key>subviewState</key>
+			<array>
+				<string>0.000000, 0.000000, 381.000000, 800.000000, NO</string>
+				<string>382.000000, 0.000000, 619.000000, 800.000000, NO</string>
+			</array>
+		</dict>
+		<key>minorSplitViewState</key>
+		<dict>
+			<key>expandedPosition</key>
+			<real>0.0</real>
+			<key>subviewState</key>
+			<array>
+				<string>0.000000, 0.000000, 619.000000, 609.000000, NO</string>
+				<string>0.000000, 619.000000, 619.000000, 162.000000, NO</string>
+			</array>
+		</dict>
+		<key>windowFrame</key>
+		<string>{{451, 155}, {1000, 877}}</string>
+		<key>workflowViewScrollPosition</key>
+		<string>{{0, 0}, {619, 609}}</string>
+	</dict>
+	<key>workflowMetaData</key>
+	<dict>
+		<key>applicationBundleID</key>
+		<string>com.apple.finder</string>
+		<key>applicationBundleIDsByPath</key>
+		<dict>
+			<key>/System/Library/CoreServices/Finder.app</key>
+			<string>com.apple.finder</string>
+		</dict>
+		<key>applicationPath</key>
+		<string>/System/Library/CoreServices/Finder.app</string>
+		<key>applicationPaths</key>
+		<array>
+			<string>/System/Library/CoreServices/Finder.app</string>
+		</array>
+		<key>inputTypeIdentifier</key>
+		<string>com.apple.Automator.fileSystemObject</string>
+		<key>outputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>presentationMode</key>
+		<integer>15</integer>
+		<key>processesInput</key>
+		<integer>0</integer>
+		<key>serviceApplicationBundleID</key>
+		<string>com.apple.finder</string>
+		<key>serviceApplicationPath</key>
+		<string>/System/Library/CoreServices/Finder.app</string>
+		<key>serviceInputTypeIdentifier</key>
+		<string>com.apple.Automator.fileSystemObject</string>
+		<key>serviceOutputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>serviceProcessesInput</key>
+		<integer>0</integer>
+		<key>systemImageName</key>
+		<string>NSActionTemplate</string>
+		<key>useAutomaticInputType</key>
+		<integer>0</integer>
+		<key>workflowTypeIdentifier</key>
+		<string>com.apple.Automator.servicesMenu</string>
+	</dict>
+</dict>
+</plist>

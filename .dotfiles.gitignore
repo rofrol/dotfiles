@@ -1,11 +1,11 @@
 # This is dotfiles repository's gitignore (not a global gitignore).
 
 # https://stackoverflow.com/questions/12144633/explain-which-gitignore-rule-is-ignoring-my-file/12168102#12168102
-# git check-ignore -v path/to/file
+# git check-ignore -v -- path/to/file
 
 # Since the worktree is HOME, by default ignore everything...
 /*
-# disabling, bc could not negate ignoring .elinks on Ubuntu 20.10
+# disabling, because could not negate ignoring .elinks on Ubuntu 20.10
 # just /* was not ignoring /.idlerc. But when using /**, I could not negate ignoring /bin
 #/.**
 
@@ -20,9 +20,6 @@
 !/.config/git
 !/.config/ranger
 !/.config/pulse/presets/*
-#!/.config/nvim
-#/.config/nvim/autoload
-#/.config/nvim/.netrwhist
 !/.config/wezterm
 !/.config/systemd/
 !/.config/ripgrep
@@ -121,13 +118,6 @@
 /.config/oh-my-posh/*
 !/.config/oh-my-posh/themes
 
-!/iosevka/
-/iosevka/*
-!/iosevka/private-build-plans.toml
-!/iosevka/IosevkaCustomNerdFont-Regular.ttf
-!/iosevka/README.md
-!/iosevka/reinstall.sh
-
 !/.config/zed/
 /.config/zed/*
 !/.config/zed/*.json
@@ -163,3 +153,7 @@
 /.config/zellij/*
 !/.config/zellij/*.kdl
 !/.config/zellij/layouts
+
+!/Library/
+/Library/*
+!/Library/Services/

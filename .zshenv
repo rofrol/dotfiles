@@ -5,5 +5,6 @@ if [[ -x /opt/homebrew/bin/brew ]]; then
 fi
 
 export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
+export PATH="$HOME/scripts:$PATH"
 
 echo '~/.zshenv sourced.'

@@ -62,6 +62,8 @@
 !/.dotfiles.gitignore
 !/dotfiles.sh
 !/dotfiles.zsh
+!/.zshrc
+!/.zshenv
 !/.zprofile
 !/.zshrc_nvm
 !/.zshrc_pyenv

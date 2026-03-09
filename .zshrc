@@ -335,8 +335,9 @@ export NVM_DIR="$HOME/.nvm"
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local
 
-echo '~/.zshrc sourced.'
-# zprof
 
+# zprof
 # Created by `pipx` on 2026-02-02 15:23:32
 export PATH="$PATH:/Users/romanfrolow/.local/bin"
+
+echo '~/.zshrc sourced.'

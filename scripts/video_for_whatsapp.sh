@@ -46,6 +46,7 @@ rm \
 #   - on the left search for `Run Shell Script` and drag-and-drop it to the right.
 #   - `Pass input: as arguments`
 #   - `Cmd+s` to save it. It will be saved in `~/Library/Services`.
+#   - If you already have workflow file, just double-click it to open in Automator and cmd+s to save. Then it will show up in `~/Library/Services`.
 #
 # The conent will be:
 #

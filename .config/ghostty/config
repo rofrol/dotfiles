@@ -3,6 +3,7 @@
 # https://github.com/search?q=path%3Aghostty%2Fconfig&type=code
 
 theme = Terminal Basic
+scrollback-limit = 30000000
 
 # ghostty +list-keybinds
 

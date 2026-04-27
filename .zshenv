@@ -4,7 +4,8 @@ if [[ -x /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
+export PATH="$(brew --prefix postgresql@18)/bin:$PATH"
 export PATH="$HOME/scripts:$PATH"
+export PATH="$(brew --prefix rsync)/bin:$PATH"
 
 echo '~/.zshenv sourced.'

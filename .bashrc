@@ -28,7 +28,7 @@ fi
 
 alias gitka='gitk --all &'
 
-export EDITOR=nvim
+export EDITOR=ki
 
 # xargs for trimming https://stackoverflow.com/questions/369758/how-to-trim-whitespace-from-a-bash-variable/12973694#12973694
 # https://unix.stackexchange.com/questions/29981/how-can-i-tell-whether-a-build-is-debian-based/29985#29985

@@ -8,9 +8,9 @@ if [[ -z "$HOST" ]]; then
 fi
 
 mkdir -p /tmp/terminfo && \
-infocmp -x xterm-ghostty > /tmp/xterm-ghostty.info
-sed '2s/|ghostty|Ghostty//' /tmp/xterm-ghostty.info > /tmp/xterm-ghostty-clean.info
-tic -x -o /tmp/terminfo /tmp/xterm-ghostty-clean.info
+# error: alias ghostty multiply defined
+infocmp -x xterm-ghostty | sed '2s/|ghostty|Ghostty//' > /tmp/xterm-ghostty.info
+tic -x -o /tmp/terminfo /tmp/xterm-ghostty.info
 ssh -p "$PORT" ${HOST} 'mkdir -p ~/.terminfo/78'
 scp -P ${PORT} /tmp/terminfo/78/xterm-ghostty ${HOST}:~/.terminfo/78/
 rm -rf /tmp/terminfo

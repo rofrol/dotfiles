@@ -14,3 +14,5 @@ tic -x -o /tmp/terminfo /tmp/xterm-ghostty.info
 ssh -p "$PORT" ${HOST} 'mkdir -p ~/.terminfo/78'
 scp -P ${PORT} /tmp/terminfo/78/xterm-ghostty ${HOST}:~/.terminfo/78/
 rm -rf /tmp/terminfo
+
+# https://github.com/ghostty-org/ghostty/discussions/8268#discussioncomment-16769781

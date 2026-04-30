@@ -257,7 +257,6 @@ source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 
 # Since there is .zshrc, setting this in .zprofile was causing that,
 # alt+. was not working correctly for bringing back last used last parameter
-export EDITOR=nvim
 
 # Load Angular CLI autocompletion.
 #source <(ng completion script)

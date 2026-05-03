@@ -44,6 +44,15 @@ alias chrome='open -na Google\ Chrome'
 # https://www.reddit.com/r/zsh/comments/15bxxyv/comment/jtur10r/
 #alias y='noglob yt-dlp'
 
+# When pasting, escapes ? as \?
+# yt-dlp https://www.youtube.com/watch\?v\=-8U5V1rNSII
+# does not work when in history is unescaped
+# https://www.reddit.com/r/zsh/comments/15bxxyv/comment/jttk43f/
+set zle_bracketed_paste
+autoload -Uz bracketed-paste-magic url-quote-magic
+zle -N bracketed-paste bracketed-paste-magic
+zle -N self-insert url-quote-magic
+
 # https://stackoverflow.com/questions/19915683/how-to-find-package-for-installed-file-in-brew/36622898#36622898
 function brew_find_pkg {
     file_to_search="$@"

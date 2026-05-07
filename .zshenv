@@ -8,6 +8,8 @@ export PATH="$(brew --prefix postgresql@18)/bin:$PATH"
 export PATH="$HOME/scripts:$PATH"
 export PATH="$(brew --prefix rsync)/bin:$PATH"
 export PATH=$HOME/bin/tsMuxeR:$PATH
+# cjxl
+export PATH=$(brew --prefix jpeg-xl)/bin:$PATH
 
 export EDITOR=ki
 

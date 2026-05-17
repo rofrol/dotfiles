@@ -1,9 +1,9 @@
 local wezterm = require 'wezterm';
 
 return {
-  --default_prog = {"bash", "-l"},
+  default_prog = {"zsh", "-l"},
   --default_prog = {wezterm.home_dir .. "/AppData/Local/Programs/Git/bin/bash", "-l"},
-  default_prog = {wezterm.home_dir .. "/scoop/apps/git/current/bin/bash", "-l"},
+  --default_prog = {wezterm.home_dir .. "/scoop/apps/git/current/bin/bash", "-l"},
   launch_menu = {
     {
       args = {"top"},
@@ -14,7 +14,7 @@ return {
       label = "Bash",
       -- The argument array to spawn.  If omitted the default program
       -- will be used as described in the documentation above
-      args = {"bash", "-l"},
+      args = {"zsh", "-l"},
 
       -- You can specify an alternative current working directory;
       -- if you don't specify one then a default based on the OSC 7
@@ -34,7 +34,7 @@ return {
   --font = wezterm.font("Campbell"),
   --font = wezterm.font("Consolas"),
   --only this font has acceptable smoothing
-  font = wezterm.font("Ubuntu Mono"),
+  font = wezterm.font("Codevka Nerd Font"),
   font_size = 14.5,
   --font_antialias = "None",
   --font_antialias = "Greyscale",
@@ -46,13 +46,13 @@ return {
   font_rules= {
     {
       italic = false,
-      bold = false,
-      font = wezterm.font("Consolas"),
+      intensity = 'Bold',
+      font = wezterm.font("Codevka Nerd Font"),
     },
     {
       italic = false,
-      bold = false,
-      font = wezterm.font("Ubuntu Mono"),
+      intensity = 'Bold',
+      font = wezterm.font("Codevka Nerd Font"),
     },
   },
   colors = {

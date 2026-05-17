@@ -338,14 +338,16 @@ export PATH=$HOME/personal_projects/fix_polish_characters:$PATH
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads 
 
+# zprof
+# Created by `pipx` on 2026-02-02 15:23:32
+export PATH="$PATH:/Users/romanfrolow/.local/bin"nvm bash_completion
+
+alias node='node --input-type=module -e'
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local
 
 
-# zprof
-# Created by `pipx` on 2026-02-02 15:23:32
-export PATH="$PATH:/Users/romanfrolow/.local/bin"
 
 echo '~/.zshrc sourced.'

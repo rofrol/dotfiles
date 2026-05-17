@@ -1,10 +1,10 @@
 --windows-filenames
---write-subs
---write-auto-subs
+#--write-subs
+#--write-auto-subs
 #--embed-subs
 --sub-format srt
 --convert-subs srt
---sub-langs en
+#--sub-langs en
 --embed-metadata
 --embed-thumbnail
 --embed-chapters

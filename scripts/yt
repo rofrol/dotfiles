@@ -30,7 +30,23 @@ if [[ "$1" =~ ^.*youtu.*$ ]] || [[ "$1" =~ ^.*youtube.*$ ]]; then
 elif [[ "$1" =~ ^.*nourlselected.*$ ]]; then
 	echo "There was an error"
 else
-	yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' "$1"
+	# Pobierz listę napisów (ręczne + auto)
+	SUBS=$(yt-dlp --list-subs "$URL" 2>/dev/null)
+
+	ARGS=()
+
+	if echo "$SUBS" | grep -E -q 'pl(\b|\-)'; then
+		echo "→ Found Polish subtitles"
+		ARGS+=(--write-subs --write-auto-subs --sub-langs "pl")
+	elif echo "$SUBS" | grep -E -q 'en(\b|\-)'; then
+		echo "→ Found English subtitles"
+		ARGS+=(--write-subs --write-auto-subs --sub-langs "en")
+	else
+		echo "→ No subtitles found"
+	fi
+
+	#yt-dlp "${ARGS[@]}" -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' "$1"
+	yt-dlp "${ARGS[@]}" "$1"
 fi
 
 #read -p "Press enter to continue"

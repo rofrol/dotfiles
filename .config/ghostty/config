@@ -61,6 +61,8 @@ window-width = 10000
 
 # ghostty +list-fonts
 font-family = Codevka Nerd Font
+#font-family = Rec Mono Casual
+#font-family = Annotation Mono
 # font-family = Pragmasevka Nerd Font
 
 # cp /System/Applications/Utilities/Terminal.app/Contents/Resources/Fonts/* ~/Library/Fonts

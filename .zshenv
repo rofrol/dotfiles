@@ -14,6 +14,9 @@ export PATH=$(brew --prefix jpeg-xl)/bin:$PATH
 export PATH=$HOME/bin:$PATH
 export PATH=$HOME/.local/pipx/venvs/openai-whisper/bin/:$PATH
 
+# pipx
+export PATH=$HOME/.local/bin/:$PATH
+
 export EDITOR=ki
 
 echo '~/.zshenv sourced.'

@@ -60,8 +60,15 @@ window-height = 10000
 window-width = 10000
 
 # ghostty +list-fonts
+# ghostty +show-face --string="A"
 #font-family = Codevka Nerd Font
-font-family = Readit Mono NF Medium
+
+## https://github.com/pa-0/ReaditMono-NF/releases
+## Readit-Mono-NF.zip
+## ReaditMonoNF-Medium.ttf
+#font-family = Readit Mono NF Medium
+#font-family = Readit Mono NF
+
 #font-family = Rec Mono Casual
 #font-family = Annotation Mono
 # font-family = Pragmasevka Nerd Font
@@ -90,18 +97,31 @@ font-family = Readit Mono NF Medium
 # font-family = SourceCodevka Book Extended # does not work, width 450
 # font-family = SourceCodevka Medium Extended # width 500
 # font-family = Udon mono
+
+
+## https://github.com/reddit/redditsans/blob/main/fonts/mono/variable/RedditMono%5Bwght%5D.ttf
+## font-variation:
+## No patched Nerd Font is variable. Luckily, Ghostty embeds Nerd Font icons, so you don't need to use a patched nerd font1, and you should rely on font fallback instead2 of patching fonts in the first place as patching destroys fonts.
+## https://github.com/ghostty-org/ghostty/discussions/5948#user-content-fn-2-1fd8493a0323a7b331a77adcfb72f54a
+## https://fontdrop.info/
+font-family = Reddit Mono
+
 # font-size started working after setting font-family
 font-size = 17
 font-synthetic-style = no-bold,no-italic,no-bold-italic
-font-thicken = false
-# font-thicken-strength = 10
+#font-thicken = true
+#font-thicken-strength = 100
+
+# https://mitchellh.com/writing/ghostty-devlog-004
+font-variation = wght=450
 
 # -calt disables font ligatures
 font-feature = -calt, -liga, -dlig
 
 unfocused-split-opacity = 1
 
-adjust-cell-height=9
+adjust-cell-height=4
+#adjust-cell-height = "-10%"
 adjust-cursor-height=9
 
 window-inherit-font-size = false

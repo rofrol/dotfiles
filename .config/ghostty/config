@@ -108,9 +108,13 @@ font-family = Reddit Mono
 
 # font-size started working after setting font-family
 font-size = 17
-font-synthetic-style = no-bold,no-italic,no-bold-italic
 #font-thicken = true
 #font-thicken-strength = 100
+font-synthetic-style = no-bold,no-italic,no-bold-italic
+font-style-bold = false
+font-style-bold-italic = false
+font-style-italic = false
+bold-is-bright = false
 
 # https://mitchellh.com/writing/ghostty-devlog-004
 font-variation = wght=450

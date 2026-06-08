@@ -37,10 +37,10 @@ else
 
 	if echo "$SUBS" | grep -E -q 'pl(\b|\-)'; then
 		echo "→ Found Polish subtitles"
-		ARGS+=(--write-subs --write-auto-subs --sub-langs "pl")
+		ARGS+=(--write-subs --write-auto-subs --sub-format vtt --sub-langs "pl")
 	elif echo "$SUBS" | grep -E -q 'en(\b|\-)'; then
 		echo "→ Found English subtitles"
-		ARGS+=(--write-subs --write-auto-subs --sub-langs "en")
+		ARGS+=(--write-subs --write-auto-subs --sub-format ass --sub-langs "en")
 	else
 		echo "→ No subtitles found"
 	fi

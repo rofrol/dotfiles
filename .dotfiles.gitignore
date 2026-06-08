@@ -41,6 +41,9 @@
 /.config/mpv/*
 !/.config/mpv/mpv.conf
 !/.config/mpv/input.conf
+!/.config/mpv/fonts/
+!/.config/mpv/scripts/
+!/.config/mpv/script-opts/
 
 # firefox
 !/.mozilla/

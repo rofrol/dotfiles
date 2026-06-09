@@ -1,0 +1,6 @@
+font-family = Maple Mono
+font-size = 18
+font-variation = wght=400
+adjust-cell-height=9
+# @J
+font-feature = +zero, +cv01, +cv03, +cv04, +cv06, -cv01, -cv05, -cv08, -cv10, -cv11, +cv12, +cv07

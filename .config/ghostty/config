@@ -104,27 +104,45 @@ window-width = 10000
 ## No patched Nerd Font is variable. Luckily, Ghostty embeds Nerd Font icons, so you don't need to use a patched nerd font1, and you should rely on font fallback instead2 of patching fonts in the first place as patching destroys fonts.
 ## https://github.com/ghostty-org/ghostty/discussions/5948#user-content-fn-2-1fd8493a0323a7b331a77adcfb72f54a
 ## https://fontdrop.info/
-font-family = Reddit Mono
+## https://mitchellh.com/writing/ghostty-devlog-004
+## https://ghostty.org/docs/config/reference#font-feature
+
+#font-family = JetBrains Mono
+#font-family = 0xProto
+#font-family = Maple Mono Normal
+#font-family = Monaspace Argon Var
+#font-family = League Mono
+#font-family = Chivo Mono
+
+#font-family = Code Saver
+#font-size = 18
 
 # font-size started working after setting font-family
-font-size = 17
-#font-thicken = true
-#font-thicken-strength = 100
+
+config-file = fonts/reddit-mono
+#config-file = fonts/recursive
+#config-file = fonts/commitmono
+#config-file = fonts/maple-mono
+
+## 0xProto
+#font-size = 16
+#adjust-cell-height=2
+
+## League Mono
+#font-size = 18
+#font-variation = wdth=80
+
 font-synthetic-style = no-bold,no-italic,no-bold-italic
 font-style-bold = false
 font-style-bold-italic = false
 font-style-italic = false
 bold-is-bright = false
 
-# https://mitchellh.com/writing/ghostty-devlog-004
-font-variation = wght=450
-
-# -calt disables font ligatures
+## -calt disables font ligatures
 font-feature = -calt, -liga, -dlig
 
 unfocused-split-opacity = 1
 
-adjust-cell-height=4
 #adjust-cell-height = "-10%"
 adjust-cursor-height=9
 

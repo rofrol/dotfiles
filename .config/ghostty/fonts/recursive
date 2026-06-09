@@ -1,0 +1,8 @@
+## to make font visible with: ghostty +list-fonts
+## ~/personal_projects/codevka/fpfix.py ~/Library/Fonts/Recursive_VF_1.085.ttf
+font-family = Recursive
+font-size = 18
+font-variation = wght=400
+font-variation = MONO=1
+adjust-cell-height=14
+font-feature = +aalt, +case, +dlig, +ss01, +ss02, +ss03, +ss04, +ss05, +ss09, +ss11

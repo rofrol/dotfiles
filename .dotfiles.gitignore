@@ -141,6 +141,7 @@
 !/.config/ghostty/
 /.config/ghostty/*
 !/.config/ghostty/config
+!/.config/ghostty/fonts/
 
 !/.config/helix/
 /.config/helix/*

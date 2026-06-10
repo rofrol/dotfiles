@@ -3,4 +3,5 @@ font-size = 18
 font-variation = wght=450
 adjust-cell-height=10
 adjust-cell-width=2
-font-feature = +cv15
+font-feature = +cv01, +cv15, +cv03, +cv04, +cv07, +cv09, +cv11
+# pqrstuWw

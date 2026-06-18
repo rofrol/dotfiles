@@ -1,22 +1,25 @@
 --windows-filenames
-#--write-subs
-#--write-auto-subs
-#--embed-subs
-#--sub-format srt
-#--convert-subs srt
-#--sub-langs en
+# https://www.reddit.com/r/youtubedl/comments/ypvn7j/ytdlp_restrictfilenames_but_keep_common_non/
+--replace-in-metadata "uploader,title,channel,playlist" "[& '\"]" "_"
+#--replace-in-metadata "title,channel,playlist" "[^0-9a-zA-Z\- а-яА-Я\.]" ""
+--cookies-from-browser chrome --embed-subs --no-embed-info-json --write-auto-subs --write-subs --sub-format vtt
+# delete sub file because it will be embeded
+--compat-options no-keep-subs
 --embed-metadata
---embed-thumbnail
+#--embed-thumbnail
 --embed-chapters
 --merge-output-format mkv
---sponsorblock-remove sponsor,selfpromo,interaction
+#--sponsorblock-remove sponsor,selfpromo,interaction
 --no-mtime
 --no-abort-on-error
 #--trim-filenames 30
+--no-playlist
 #--skip-playlist-after-errors 20
 --playlist-reverse
 #-P "~/storage/shared/Download/"
 #-o "%(extractor)s/%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s [%(id)s].%(ext)s"
 #-o "%(title)s.%(ext)s"
 -P "~/Downloads/"
--o "%(extractor)s/uploader--%(uploader)s__playlist--%(playlist)s__plstid%(playlist_index)s__title--%(title)s__id--%(id)s__date--%(upload_date)s.%(ext)s"
+#-o "%(extractor)s/uploader--%(uploader)s__playlist--%(playlist)s__plstid%(playlist_index)s__title--%(title)s__id--%(id)s__date--%(upload_date)s.%(ext)s"
+# .150B https://github.com/yt-dlp/yt-dlp/issues/6972#issuecomment-1532066462
+-o "%(extractor)s/%(uploader)s--%(title).150B--%(id)s--%(upload_date)s.%(ext)s"

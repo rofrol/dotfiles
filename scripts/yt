@@ -35,18 +35,19 @@ else
 
 	ARGS=()
 
-	if echo "$SUBS" | grep -E -q 'pl(\b|\-)'; then
+	if echo "$SUBS" | grep -E -q '^pl'; then
 		echo "→ Found Polish subtitles"
-		ARGS+=(--write-subs --write-auto-subs --sub-format vtt --sub-langs "pl")
-	elif echo "$SUBS" | grep -E -q 'en(\b|\-)'; then
+		ARGS+=("pl")
+	elif echo "$SUBS" | grep -E -q '^en'; then
 		echo "→ Found English subtitles"
-		ARGS+=(--write-subs --write-auto-subs --sub-format ass --sub-langs "en")
+		ARGS+=("en")
 	else
 		echo "→ No subtitles found"
 	fi
 
 	#yt-dlp "${ARGS[@]}" -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' "$1"
-	yt-dlp "${ARGS[@]}" "$1"
+	# --write-subs
+	yt-dlp --cookies-from-browser firefox --write-auto-subs --sub-format vtt --sub-langs "${ARGS[@]}" "$1"
 fi
 
 #read -p "Press enter to continue"

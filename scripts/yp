@@ -2,5 +2,5 @@
 
 # TOD: The problem with this solution: when there is some other problem than no subs in this language,
 # It will still download them.
-#yt-dlp --sub-langs en "$1" || yt-dlp --sub-langs pl "$1" || yt-dlp --no-write-subs --no-write-auto-subs "$1"
-yt-dlp --sub-langs en "$1"
+#yt-dlp --sub-langs pl "$1" || yt-dlp --no-write-subs --no-write-auto-subs "$1"
+yt-dlp --sub-langs pl "$1"

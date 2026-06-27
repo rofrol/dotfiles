@@ -1,6 +1,11 @@
 --windows-filenames
 # https://www.reddit.com/r/youtubedl/comments/ypvn7j/ytdlp_restrictfilenames_but_keep_common_non/
---replace-in-metadata "uploader,title,channel,playlist" "[& '\"]" "_"
+--replace-in-metadata "uploader,title,channel,playlist" " +" "_"
+--replace-in-metadata "uploader,title,channel,playlist" "&" "and"
+--replace-in-metadata "uploader,title,channel,playlist" "[ '\"]" "_"
+# yt-dlp will replace : with ：
+# below yt-dlp will replace ? with ？
+--replace-in-metadata "uploader,title,channel,playlist" "❓" "?"
 #--replace-in-metadata "title,channel,playlist" "[^0-9a-zA-Z\- а-яА-Я\.]" ""
 --cookies-from-browser chrome --embed-subs --no-embed-info-json --write-auto-subs --write-subs --sub-format vtt
 # delete sub file because it will be embeded

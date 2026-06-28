@@ -1,3 +1,4 @@
+# https://github.com/yt-dlp/yt-dlp#output-template
 --windows-filenames
 # https://www.reddit.com/r/youtubedl/comments/ypvn7j/ytdlp_restrictfilenames_but_keep_common_non/
 --replace-in-metadata "uploader,title,channel,playlist" " +" "_"
@@ -18,7 +19,7 @@
 --no-mtime
 --no-abort-on-error
 #--trim-filenames 30
---no-playlist
+#--no-playlist
 #--skip-playlist-after-errors 20
 --playlist-reverse
 #-P "~/storage/shared/Download/"
@@ -27,4 +28,6 @@
 -P "~/Downloads/"
 #-o "%(extractor)s/uploader--%(uploader)s__playlist--%(playlist)s__plstid%(playlist_index)s__title--%(title)s__id--%(id)s__date--%(upload_date)s.%(ext)s"
 # .150B https://github.com/yt-dlp/yt-dlp/issues/6972#issuecomment-1532066462
--o "%(extractor)s/%(uploader)s--%(title).150B--%(id)s--%(upload_date)s.%(ext)s"
+# %(autonumber)s https://askubuntu.com/questions/694848/how-to-download-a-youtube-playlist-with-numbered-prefix-via-youtube-dl/844773#844773
+# https://www.reddit.com/r/youtubedl/comments/104c1l4/comment/j46gg79/
+-o "%(extractor)s/%(playlist)s/%(playlist_index)03d%(playlist_index&--)s%(uploader)s--%(title).150B--%(id)s--%(upload_date)s.%(ext)s"

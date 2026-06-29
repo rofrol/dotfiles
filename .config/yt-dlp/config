@@ -26,6 +26,7 @@
 #-o "%(extractor)s/%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s [%(id)s].%(ext)s"
 #-o "%(title)s.%(ext)s"
 -P "~/Downloads/"
+--output-na-placeholder ""
 #-o "%(extractor)s/uploader--%(uploader)s__playlist--%(playlist)s__plstid%(playlist_index)s__title--%(title)s__id--%(id)s__date--%(upload_date)s.%(ext)s"
 # .150B https://github.com/yt-dlp/yt-dlp/issues/6972#issuecomment-1532066462
 # %(autonumber)s https://askubuntu.com/questions/694848/how-to-download-a-youtube-playlist-with-numbered-prefix-via-youtube-dl/844773#844773

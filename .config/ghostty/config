@@ -148,6 +148,9 @@ adjust-cursor-height=9
 
 window-inherit-font-size = false
 
-## 2025-06-09 19:53
-
-
+# A Keyboard shortcut to enable/disable Secure Keyboard Entry on MacOS
+# https://github.com/ghostty-org/ghostty/discussions/4119#discussioncomment-11700050
+# cmd+s
+#keybind = global:super+s=toggle_secure_input
+# https://ghostty.org/docs/config/reference#macos-auto-secure-input
+#macos-auto-secure-input = false

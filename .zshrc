@@ -352,11 +352,6 @@ alias nodem='node --input-type=module -e'
 eval "$(zoxide init zsh --cmd cd)"
 alias cdi='__zoxide_zi'
 
-
-# https://www.reddit.com/r/commandline/comments/1r8tljk/comment/o67xaxn/
-# https://zoxide.org/blog/advanced-zoxide-techniques/
-alias ll='ls --color=auto -h -H --group-directories-first --time-style=long-iso -l -F'
-
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local
 

@@ -17,8 +17,11 @@ alias gitka='(git rev-parse --verify origin/gh-pages >/dev/null 2>&1 && gitk ^or
 
 # https://unix.stackexchange.com/questions/275728/set-ls-l-time-format/693168#693168
 export TIME_STYLE=long-iso
-alias l='ls -lA'
-alias ll='ls -lA --color=auto --group-directories-first'
+# https://www.reddit.com/r/commandline/comments/1r8tljk/comment/o67xaxn/
+# https://zoxide.org/blog/advanced-zoxide-techniques/
+alias ll='ls --color=auto -h -H --group-directories-first --time-style=long-iso -l -A -F'
+alias lltr='ls --color=auto -h -H --group-directories-first --time-style=long-iso -l -A -F'
+
 
 alias et='eza --icons -lt modified --time-style "+%Y-%m-%d %H:%M"'
 alias etr='eza --icons -lt modified --sort modified --time-style "+%Y-%m-%d %H:%M"'

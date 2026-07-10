@@ -351,6 +351,9 @@ export PATH="$PATH:$HOME/.local/bin"nvm bash_completion
 
 alias nodem='node --input-type=module -e'
 
+# Added by Antigravity IDE
+export PATH="$HOME/.antigravity-ide/antigravity-ide/bin:$PATH"
+
 eval "$(zoxide init zsh --cmd cd)"
 alias cdi='__zoxide_zi'
 

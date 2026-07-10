@@ -20,7 +20,7 @@ export TIME_STYLE=long-iso
 # https://www.reddit.com/r/commandline/comments/1r8tljk/comment/o67xaxn/
 # https://zoxide.org/blog/advanced-zoxide-techniques/
 alias ll='ls --color=auto -h -H --group-directories-first --time-style=long-iso -l -A -F'
-alias lltr='ls --color=auto -h -H --group-directories-first --time-style=long-iso -l -A -F'
+alias lltr='ls --color=auto -h -H --group-directories-first --time-style=long-iso -ltr -A -F'
 
 
 alias et='eza --icons -lt modified --time-style "+%Y-%m-%d %H:%M"'

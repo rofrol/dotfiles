@@ -347,7 +347,7 @@ export NVM_DIR="$HOME/.nvm"
 
 # zprof
 # Created by `pipx` on 2026-02-02 15:23:32
-export PATH="$PATH:/Users/romanfrolow/.local/bin"nvm bash_completion
+export PATH="$PATH:$HOME/.local/bin"nvm bash_completion
 
 alias nodem='node --input-type=module -e'
 

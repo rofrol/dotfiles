@@ -3,6 +3,7 @@ font-size = 18
 adjust-cell-height = 1
 adjust-cell-width = 1
 
-## Disabling this, as I have made this default in RedditMono[wght]_switched_variants.ttf
+## Disabling this, as I have made this default
+## https://github.com/rofrol/codevka/blob/main/RedditMono%5Bwght%5D_customized.ttf
 #font-variation = wght=450
 #font-feature = +cv01, +cv15, +cv03, +cv04, +cv07, +cv09, +cv11

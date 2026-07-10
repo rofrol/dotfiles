@@ -32,10 +32,6 @@ don() {
 	# after setting https://github.com/nvm-sh/nvm#zsh
 
 	#set -u
-	# add safeguard against git clean
-	git() {
-		command git "$@"
-	}
 	pushd ~ 1>/dev/null # remember location
 	export GIT_DIR="$DOTFILES_HOME"
 	export GIT_WORK_TREE="$HOME"
@@ -47,8 +43,6 @@ don() {
 	alias fd='fd --ignore-file .dotfiles.gitignore'
 
 	#set +u
-
-	source_config
 }
 
 dof() {
@@ -60,6 +54,7 @@ dof() {
 	unset GIT_PS1_FMT
 	popd 1>/dev/null # restore previous location
 	unalias rg
+	unalias fd
 }
 
 # changed to check for != "true"

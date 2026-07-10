@@ -345,6 +345,10 @@ export NVM_DIR="$HOME/.nvm"
 export PATH="$PATH:/Users/romanfrolow/.local/bin"nvm bash_completion
 
 alias nodem='node --input-type=module -e'
+
+eval "$(zoxide init zsh --cmd cd)"
+alias cdi='__zoxide_zi'
+
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local
 

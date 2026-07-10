@@ -247,6 +247,8 @@ function _atuin_precmd() {
 # https://github.com/ellie/atuin/issues/969
 # alias nf='nvim $(fd | zf)'
 alias nf='f=$(fd | zf); print -rs nvim $f; _atuin_preexec "nvim $f"; nvim $f; _atuin_precmd $ATUIN_HISTORY_ID'
+alias of='f=$(fd --type f | fzf); print -rs open "$f"; _atuin_preexec "open \"$f\""; open "$f"; _atuin_precmd $ATUIN_HISTORY_ID'
+
 
 # source <(fzf --zsh)
 

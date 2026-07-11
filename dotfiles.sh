@@ -57,12 +57,13 @@ dof() {
 	unalias fd
 }
 
+# disabling, because it messes with repos inside ~/personal_projects etc.
 # changed to check for != "true"
 # https://www.reddit.com/r/unixporn/comments/1bbi7qr/comment/mrfg1b9/
-git() {
-	if [[ "$1" != clone && "$PWD" =~ "$HOME" && "$(command git rev-parse --is-inside-work-tree 2>/dev/null)" != "true" ]]; then
-		command git --git-dir="$HOME/.dotfiles.git" --work-tree="$HOME" "$@"
-	else
-		command git "$@"
-	fi
-}
+# git() {
+# 	if [[ "$1" != clone && "$PWD" =~ "$HOME" && "$(command git rev-parse --is-inside-work-tree 2>/dev/null)" != "true" ]]; then
+# 		command git --git-dir="$HOME/.dotfiles.git" --work-tree="$HOME" "$@"
+# 	else
+# 		command git "$@"
+# 	fi
+# }

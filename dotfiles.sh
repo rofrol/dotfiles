@@ -46,9 +46,6 @@ don() {
 }
 
 dof() {
-	unset -f git
-	source_config
-
 	unset GIT_DIR
 	unset GIT_WORK_TREE
 	unset GIT_PS1_FMT

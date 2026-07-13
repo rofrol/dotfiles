@@ -190,6 +190,7 @@ function _atuin_precmd() {
 # alias nf='nvim $(fd | zf)'
 alias nf='f=$(fd | zf); print -rs nvim $f; _atuin_preexec "nvim $f"; nvim $f; _atuin_precmd $ATUIN_HISTORY_ID'
 alias of='f=$(fd --type f | fzf); print -rs open "$f"; _atuin_preexec "open \"$f\""; open "$f"; _atuin_precmd $ATUIN_HISTORY_ID'
+alias fdotfiles="fd -HI -E 'Library' -E '.cargo' -E 'personal_projects' -E '.vscode' -E '.npm' -E 'Downloads' -E '.cache' -E 'projects' -E '.rustup' -E '.nvm' -E '.antigravity-ide'"
 
 
 # source <(fzf --zsh)

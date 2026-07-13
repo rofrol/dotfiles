@@ -1,4 +1,8 @@
 #!/bin/bash
+# alternative, not tested
+#mkvmerge -o "out.mkv" "$1" \
+#--language 0:eng --track-name 0:"English" "$2" \
+#--language 0:pol --track-name 0:"Polish" "$3" \
 ffmpeg -i "$1" -i "$2" -i "$3" \
 	-c copy \
 	-map 0 -map 1 -map 2 \

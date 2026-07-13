@@ -17,12 +17,12 @@ alias gitka='(git rev-parse --verify origin/gh-pages >/dev/null 2>&1 && gitk ^or
 
 # https://www.reddit.com/r/commandline/comments/1r8tljk/comment/o67xaxn/
 # https://zoxide.org/blog/advanced-zoxide-techniques/
-alias ll='ls --color=auto -h -H --group-directories-first --time-style=long-iso -l -A -F'
-alias lltr='ls --color=auto -h -H --group-directories-first --time-style=long-iso -ltr -A -F'
+alias l='ls --color=auto -h -H --group-directories-first --time-style=long-iso -l -A -F'
+alias ltr='ls --color=auto -h -H --group-directories-first --time-style=long-iso -ltr -A -F'
 
 
 alias et='eza --icons -lt modified --time-style "+%Y-%m-%d %H:%M"'
-alias etr='eza --icons -lt modified --sort modified --time-style "+%Y-%m-%d %H:%M"'
+alias etr='eza --group --icons -lt modified --sort modified --time-style "+%Y-%m-%d %H:%M"'
 
 # https://stackoverflow.com/questions/57972341/how-to-install-and-use-gnu-ls-on-macos
 eval "$(/opt/homebrew/bin/gdircolors -b)"

@@ -19,12 +19,13 @@ alias gitka='(git rev-parse --verify origin/gh-pages >/dev/null 2>&1 && gitk ^or
 # https://stackoverflow.com/questions/57972341/how-to-install-and-use-gnu-ls-on-macos
 eval "$(/opt/homebrew/bin/gdircolors -b)"
 # https://zoxide.org/blog/advanced-zoxide-techniques/
-alias ls='command gls --color=auto -h -H --group-directories-first --time-style=long-iso -l -A -F'
-alias ltr='command gls --color=auto -h -H --group-directories-first --time-style=long-iso -ltr -A -F'
+# honours export TIME_STYLE=long-iso
+alias ls='command gls --color=auto -h -H --group-directories-first -A -F -l'
+alias ltr='ls -tr'
 
-
-alias eza='eza --group --icons -lt modified --time-style "+%Y-%m-%d %H:%M" --almost-all --group-directories-first'
-alias etr='command eza --group --icons -lt modified --sort modified --time-style "+%Y-%m-%d %H:%M" --almost-all --group-directories-first'
+# honours export TIME_STYLE=long-iso
+alias eza='eza --group --icons -lt modified --almost-all --group-directories-first'
+alias etr='eza --sort modified'
 
 alias gh-repo-private='gh repo create --private'
 # https://stackoverflow.com/questions/73778273/how-to-add-a-remote-repo-using-gh-cli/74764582#74764582

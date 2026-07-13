@@ -189,7 +189,26 @@ function _atuin_precmd() {
 # https://github.com/ellie/atuin/issues/969
 # alias nf='nvim $(fd | zf)'
 alias nf='f=$(fd | zf); print -rs nvim $f; _atuin_preexec "nvim $f"; nvim $f; _atuin_precmd $ATUIN_HISTORY_ID'
-alias of='f=$(fd --type f | fzf); print -rs open "$f"; _atuin_preexec "open \"$f\""; open "$f"; _atuin_precmd $ATUIN_HISTORY_ID'
+
+# fd and fzf and atuin combined
+ffa() {
+  local f
+  f=$(fd --type f | fzf)
+  # Exit cleanly if you press ESC or Ctrl+C in fzf
+  [[ -z "$f" ]] && return 0
+  # ${(qq)f} safely wraps the filename in single quotes, protecting '!'
+  # otherwise filename with ! will not work when inside double quotes "
+  local cmd="open ${(qq)f}"
+  # Add to standard zsh history
+  print -rs "$cmd"
+  # Add to atuin history
+  _atuin_preexec "$cmd"
+  # Execute the command
+  eval "$cmd"
+  # Finish atuin history tracking
+  _atuin_precmd $ATUIN_HISTORY_ID
+}
+
 alias fdotfiles="fd -HI -E 'Library' -E '.cargo' -E 'personal_projects' -E '.vscode' -E '.npm' -E 'Downloads' -E '.cache' -E 'projects' -E '.rustup' -E '.nvm' -E '.antigravity-ide'"
 
 

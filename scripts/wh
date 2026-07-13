@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# pipx install mlx_whisper
+mlx_whisper \
+	--model mlx-community/whisper-large-v3-mlx \
+	--condition-on-previous-text False \
+	--word-timestamps True \
+	--hallucination-silence-threshold 2 \
+	--output-format vtt "$@"

@@ -16,17 +16,15 @@ alias gitkaa='gitk --all &'
 alias gitka='(git rev-parse --verify origin/gh-pages >/dev/null 2>&1 && gitk ^origin/gh-pages --all || gitk --all)&'
 
 # https://www.reddit.com/r/commandline/comments/1r8tljk/comment/o67xaxn/
-# https://zoxide.org/blog/advanced-zoxide-techniques/
-alias l='ls --color=auto -h -H --group-directories-first --time-style=long-iso -l -A -F'
-alias ltr='ls --color=auto -h -H --group-directories-first --time-style=long-iso -ltr -A -F'
-
-
-alias et='eza --icons -lt modified --time-style "+%Y-%m-%d %H:%M"'
-alias etr='eza --group --icons -lt modified --sort modified --time-style "+%Y-%m-%d %H:%M"'
-
 # https://stackoverflow.com/questions/57972341/how-to-install-and-use-gnu-ls-on-macos
 eval "$(/opt/homebrew/bin/gdircolors -b)"
-alias ls="gls"
+# https://zoxide.org/blog/advanced-zoxide-techniques/
+alias ls='command gls --color=auto -h -H --group-directories-first --time-style=long-iso -l -A -F'
+alias ltr='command gls --color=auto -h -H --group-directories-first --time-style=long-iso -ltr -A -F'
+
+
+alias eza='eza --group --icons -lt modified --time-style "+%Y-%m-%d %H:%M" --almost-all --group-directories-first'
+alias etr='command eza --group --icons -lt modified --sort modified --time-style "+%Y-%m-%d %H:%M" --almost-all --group-directories-first'
 
 alias gh-repo-private='gh repo create --private'
 # https://stackoverflow.com/questions/73778273/how-to-add-a-remote-repo-using-gh-cli/74764582#74764582

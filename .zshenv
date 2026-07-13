@@ -14,10 +14,10 @@ export PATH=$HOME/bin/tsMuxeR:$PATH
 export PATH=$(brew --prefix jpeg-xl)/bin:$PATH
 
 export PATH=$HOME/bin:$PATH
-export PATH=$HOME/.local/pipx/venvs/openai-whisper/bin/:$PATH
+export PATH=$HOME/.local/pipx/venvs/openai-whisper/bin:$PATH
 
 # pipx
-export PATH=$HOME/.local/bin/:$PATH
+export PATH=$HOME/.local/bin:$PATH
 
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
@@ -34,13 +34,13 @@ export PATH=$HOME/.bun/bin:$PATH
 export PATH=$HOME/personal_projects/odin/vendor/ols:$PATH
 # export PATH=$HOME/bin/odin:$PATH
 
-export PATH=$PATH:/opt/homebrew/bin/
+export PATH=$PATH:/opt/homebrew/bin
 
 export PATH=$PATH:~/.local/share/npm/bin
 
 export PATH="$HOME/personal_projects/docker/vendor/regclient/bin/:$PATH"
 
-export PATH="$(brew --prefix git)/bin/:$PATH"
+export PATH="$(brew --prefix git)/bin:$PATH"
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/roman.frolow/.lmstudio/bin"

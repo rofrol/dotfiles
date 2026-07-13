@@ -7,18 +7,34 @@
 // custom settings, run the `open default settings` command
 // from the command palette or from `Zed` application menu.
 {
-  "features": {
-    "edit_prediction_provider": "zed"
+  "outline_panel": {
+    "dock": "left"
   },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "agent": {
+    "dock": "right",
+    "favorite_models": [],
+    "model_parameters": []
+  },
+  "git_panel": {
+    "dock": "left"
+  },
+  // "features": {
+  //   "edit_prediction_provider": "zed"
+  // },
   "theme": "One Light",
   "vim_mode": true,
   "ui_font_size": 16,
   "buffer_font_size": 18,
   // "buffer_font_family": "Zed Mono",
   // "buffer_font_size": 19,
-  "buffer_font_family": "IosevkaRofrol Nerd Font",
-  "ui_font_family": "Zed Sans",
-  "hour_format": "hour24",
+  //"buffer_font_weight": 400.0,
+  "buffer_font_family": "Reddit Mono",
+  "buffer_font_fallbacks": ["Symbols Nerd Font"],
+  //"ui_font_family": "Zed Sans",
+  //"hour_format": "hour24",
   "telemetry": {
     "metrics": false
   },

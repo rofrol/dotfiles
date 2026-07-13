@@ -15,8 +15,6 @@ alias gitkaa='gitk --all &'
 # https://stackoverflow.com/questions/20979339/use-git-rev-list-to-exclude-a-branch-but-keep-common-ancestors-with-the-include
 alias gitka='(git rev-parse --verify origin/gh-pages >/dev/null 2>&1 && gitk ^origin/gh-pages --all || gitk --all)&'
 
-# https://unix.stackexchange.com/questions/275728/set-ls-l-time-format/693168#693168
-export TIME_STYLE=long-iso
 # https://www.reddit.com/r/commandline/comments/1r8tljk/comment/o67xaxn/
 # https://zoxide.org/blog/advanced-zoxide-techniques/
 alias ll='ls --color=auto -h -H --group-directories-first --time-style=long-iso -l -A -F'
@@ -27,7 +25,8 @@ alias et='eza --icons -lt modified --time-style "+%Y-%m-%d %H:%M"'
 alias etr='eza --icons -lt modified --sort modified --time-style "+%Y-%m-%d %H:%M"'
 
 # https://stackoverflow.com/questions/57972341/how-to-install-and-use-gnu-ls-on-macos
-alias ls="/opt/homebrew/opt/coreutils/libexec/gnubin/ls"
+eval "$(/opt/homebrew/bin/gdircolors -b)"
+alias ls="gls"
 
 alias gh-repo-private='gh repo create --private'
 # https://stackoverflow.com/questions/73778273/how-to-add-a-remote-repo-using-gh-cli/74764582#74764582
@@ -126,49 +125,7 @@ function yargs() {
 # https://www.reddit.com/r/fzf/comments/zazcrt/comment/jfo5z8k/
 function cdfzf() { file="$(fd --type file --hidden --no-ignore --exclude node_modules | fzf)"; [ -n "$file" ] && cd "$(dirname "$file")"; }
 
-## Prompts
-
-# https://github.com/zsh-git-prompt/zsh-git-prompt
-# https://stackoverflow.com/questions/1128496/to-get-a-prompt-which-indicates-git-branch-in-zsh/2902338#2902338
-source "$HOMEBREW_PREFIX/opt/zsh-git-prompt/zshrc.sh"
-# an example prompt
-# default macos:
-#PROMPT=%n@%m %1~ %#
-# default zsh-git-prompt
-#PROMPT='%B%m%~%b$(git_super_status) %# '
-# https://superuser.com/questions/1108413/zsh-prompt-with-current-working-directory/1108504#1108504
-ZSH_THEME_GIT_PROMPT_PREFIX=" ["
-#PROMPT='%2d$(git_super_status) %# '
-
-# checks, whether the path is at least 4 elements long, and in that case prints the first element (%-1~),
-# some dots (/…/) and the last 2 elements.
-# otherwise the last 3 elements.
-# https://unix.stackexchange.com/questions/273529/shorten-path-in-zsh-prompt/273567#273567
-SHOW_DIRS=%(4~|%-1~/…/%2~|%3~)
-PROMPT='$SHOW_DIRS$(git_super_status) %# '
-
-# eval "$(starship init zsh)"
-# eval "$(oh-my-posh init zsh)"
-# eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/M365Princess.omp.json)"
 eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/themes/rofrol.omp.json)"
-
-## Exports
-
-# Paths are evaluated in the order given. One should also be weary that listing too many uncommon special-case paths before commonly used ones like /bin and /usr/bin could have a performance impact (especially if network file systems are involved). I only prepend paths if I really need to override existing commands, which is quite uncommon https://stackoverflow.com/questions/25235357/path-at-end-or-beginning-of-path-export-in-bash-profile-for-git-on-mac#comment39313448_25235487
-
-export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
-
-export PATH=$PATH:~/bin
-
-#export PATH=$PATH:~/.zvm/bin
-#export PATH=$PATH:$HOME/personal_projects/zig/vendor/zig/stage3/bin/
-#export PATH=$PATH:~/bin/zig
-export PATH=$PATH:$HOME/.local/zig/current
-export PATH=$PATH:$HOME/zls
-
-# export PATH="$(brew --prefix python)/libexec/bin":$PATH
-
-export PATH="$(brew --prefix keydb)/bin":$PATH
 
 # https://apple.stackexchange.com/questions/88515/how-do-i-edit-current-shell-command-in-vi/443515#443515
 # https://nuclearsquid.com/writings/edit-long-commands/
@@ -179,21 +136,12 @@ zle -N edit-command-line
 bindkey '^xe' edit-command-line
 bindkey '^x^e' edit-command-line
 
-export PATH=~/.bun/bin:$PATH
-
 # Load Angular CLI autocompletion.
 #source <(ng completion script)
 
 
 #eval "$(direnv hook zsh)"
 
-export PATH=~/zls:$PATH
-
-
-# Odin
-
-export PATH=~/personal_projects/odin/vendor/ols:$PATH
-# export PATH=$HOME/bin/odin:$PATH
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
@@ -209,14 +157,6 @@ else
 fi
 unset __conda_setup
 # <<< conda initialize <<<
-
-export PATH=$PATH:/opt/homebrew/bin/
-export PATH=$PATH:~/personal_projects/zig/vendor/sm2/zig-out/bin/
-
-# https://blog.remibergsma.com/2012/07/10/setting-locales-correctly-on-mac-osx-terminal-application/
-export LC_MESSAGES=en_US.UTF-8
-
-export PATH=$PATH:~/bin/roc
 
 eval "$(atuin init zsh --disable-up-arrow)"
 export ATUIN_SESSION=$(atuin uuid)
@@ -239,6 +179,9 @@ function _atuin_precmd() {
         printf -v duration %.0f $(((__atuin_precmd_time - __atuin_preexec_time) * 1000000000))
     fi
 
+    
+    # ki editor reports error below: invalid parameter name.
+    # probably because it is using tree-sitter-bash and not tree-sitter-zsh
     (ATUIN_LOG=error atuin history end --exit $EXIT ${=duration:+--duration $duration} -- $ATUIN_HISTORY_ID &) >/dev/null 2>&1
     export ATUIN_HISTORY_ID=""
 }
@@ -262,10 +205,6 @@ source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 # i.e. copied _cursor to completions from cursor installation files
 fpath=(~/.zsh/completions $fpath)
 
-export PATH=$PATH:~/.local/share/npm/bin
-
-export PATH=$PATH:~/go/bin/
-
 # Added by OrbStack: command-line tools and integration
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 
@@ -275,23 +214,9 @@ source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 # Load Angular CLI autocompletion.
 #source <(ng completion script)
 
-export PATH="$HOME/personal_projects/docker/vendor/regclient/bin/:$PATH"
-
-export PATH="$(brew --prefix git)/bin/:$PATH"
-export PATH="$HOME/.zvm/self:$PATH"
-export PATH="$HOME/.zvm/bin:$PATH"
-export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/roman.frolow/.lmstudio/bin"
 
 # bun completions
-[ -s "/Users/roman.frolow/.bun/_bun" ] && source "/Users/roman.frolow/.bun/_bun"
-
-# ZVM
-export ZVM_INSTALL="$HOME/.zvm/self"
-export PATH="$PATH:$HOME/.zvm/bin"
-export PATH="$PATH:$ZVM_INSTALL/"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # ? is a wildcard in Bash, too. The difference you are seeing occurs because in Zsh,
 # a failed match leads to an error, whereas in Bash, it is silently ignored.
@@ -300,59 +225,17 @@ export PATH="$PATH:$ZVM_INSTALL/"
 # https://unix.stackexchange.com/questions/310540/how-to-get-rid-of-no-match-found-when-running-rm/313187#313187
 #unsetopt nomatch
 
-## zplug
-
-# export ZPLUG_HOME=/opt/homebrew/opt/zplug
-# source $ZPLUG_HOME/init.zsh
-# zplug "qoomon/zsh-lazyload"
-#
-# # Install plugins if there are plugins that have not been installed
-# if ! zplug check --verbose; then
-#     printf "Install? [y/N]: "
-#     if read -q; then
-#         echo; zplug install
-#     fi
-# fi
-#
-# # Then, source plugins and add commands to $PATH
-# zplug load --verbose
-
-# source ~/.zshrc_nvm
-# https://ellie.wtf/notes/profiling-zsh
-# https://registerspill.thorstenball.com/p/how-fast-is-your-shell
-# eager: $SHELL -i -c exit  0.43s user 0.59s system 88% cpu 1.151 total
-# lazyload: $SHELL -i -c exit  0.30s user 0.42s system 87% cpu 0.830 total
-# lazyload nvm -- 'source ~/.zshrc_nvm'
-
-export PATH="$HOME/.codeium/windsurf/bin:$PATH"
 # eval "$(uv generate-shell-completion zsh)"
-export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
-export PATH=$HOME/.cargo/bin:$PATH
-export PATH="$HOMEBREW_PREFIX/opt/gnu-sed/libexec/gnubin:$PATH"
 
 
 # . $HOME/.local/bin/env
 # . $HOME/.config/openai
 
-# opencode
-export PATH=/Users/roman.frolow/.opencode/bin:$PATH
-
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-export PATH=$HOME/personal_projects/fix_polish_characters:$PATH
-
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads 
 
-# zprof
-# Created by `pipx` on 2026-02-02 15:23:32
-export PATH="$PATH:$HOME/.local/bin"nvm bash_completion
-
 alias nodem='node --input-type=module -e'
-
-# Added by Antigravity IDE
-export PATH="$HOME/.antigravity-ide/antigravity-ide/bin:$PATH"
 
 eval "$(zoxide init zsh --cmd cd)"
 alias cdi='__zoxide_zi'

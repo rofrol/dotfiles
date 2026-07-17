@@ -163,3 +163,7 @@
 !/Library/
 /Library/*
 !/Library/Services/
+
+!/.config/bat/
+/.config/bat/*
+!/.config/bat/config

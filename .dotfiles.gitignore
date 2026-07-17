@@ -167,3 +167,7 @@
 !/.config/bat/
 /.config/bat/*
 !/.config/bat/config
+
+!/.config/ki/
+/.config/ki/*
+!/.config/ki/config.json

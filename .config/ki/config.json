@@ -1,0 +1,10 @@
+{
+  "languages": {
+    "scheme": {
+      "formatter": {
+        "command": "guix-style.scm",
+        "arguments": ["localhost", "2222"]
+      }
+    }
+  }
+}

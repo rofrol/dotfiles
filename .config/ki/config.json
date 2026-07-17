@@ -4,7 +4,9 @@
       "formatter": {
         "command": "guix-style.scm",
         "arguments": ["localhost", "2222"]
-      }
+      },
+      "extensions": ["ss", "scm", "sld"],
+      "file_names": []
     }
   }
 }

@@ -2,6 +2,7 @@
 
 # pipx install mlx_whisper
 mlx_whisper \
+	--language en \
 	--model mlx-community/whisper-large-v3-mlx \
 	--condition-on-previous-text False \
 	--word-timestamps True \

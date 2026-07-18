@@ -26,6 +26,7 @@ alias ltr='ls -tr'
 # honours export TIME_STYLE=long-iso
 alias eza='eza --group --icons -lt modified --almost-all --group-directories-first'
 alias etr='eza --sort modified'
+alias ezatotal='command eza --group --icons -lt modified --almost-all --sort modified --total-size --sort=size'
 
 alias gh-repo-private='gh repo create --private'
 # https://stackoverflow.com/questions/73778273/how-to-add-a-remote-repo-using-gh-cli/74764582#74764582

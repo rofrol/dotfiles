@@ -19,7 +19,7 @@
 --no-mtime
 --no-abort-on-error
 #--trim-filenames 30
-#--no-playlist
+--no-playlist
 #--skip-playlist-after-errors 20
 --playlist-reverse
 #-P "~/storage/shared/Download/"

@@ -172,13 +172,11 @@
 /.config/ki/*
 !/.config/ki/config.json
 
-!/.config/mpd/
-/.config/mpd/*
-!/.config/mpd/mpd.conf
+!/.mpdconf
 
 !/.config/rmpc/
 /.config/rmpc/*
 !/.config/rmpc/config.ron
 !/.config/rmpc/themes/
 /.config/rmpc/themes/*
-!/.config/rmpc/themes/default.ron
+!/.config/rmpc/themes/roman.ron

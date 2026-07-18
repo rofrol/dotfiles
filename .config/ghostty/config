@@ -119,7 +119,8 @@ window-width = 10000
 
 # font-size started working after setting font-family
 
-config-file = fonts/reddit-mono
+#config-file = fonts/reddit-mono
+config-file = fonts/victor-mono
 #config-file = fonts/recursive
 #config-file = fonts/commitmono
 #config-file = fonts/maple-mono

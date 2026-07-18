@@ -66,4 +66,6 @@ export LC_MESSAGES=en_US.UTF-8
 export TIME_STYLE=long-iso
 
 export EDITOR=ki
+export PATH="$(brew --prefix mpd)/bin:$PATH"
+
 echo '~/.zshenv sourced.'

@@ -1,6 +1,6 @@
 font-family = Victor Mono
 font-size = 18
-adjust-cell-height = 1
+adjust-cell-height = +20%
 adjust-cell-width = 0
 
 ## Disabling this, as I have made this default

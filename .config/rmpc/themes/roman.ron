@@ -71,18 +71,18 @@
     ],
     song_table_format: [
         (
-            prop: (kind: Property(Artist),
-                default: (kind: Text("Unknown"))
-            ),
-            label_prop: (kind: Text("Artist")),
-            width: "40%",
-        ),
-        (
             prop: (kind: Property(Title),
                 default: (kind: Text("Unknown"))
             ),
             label_prop: (kind: Text("Title")),
-            width: "55%",
+            width: "80%",
+        ),
+        (
+            prop: (kind: Property(Artist),
+                default: (kind: Text("Unknown"))
+            ),
+            label_prop: (kind: Text("Artist")),
+            width: "15%",
         ),
         (
             prop: (kind: Property(Duration),

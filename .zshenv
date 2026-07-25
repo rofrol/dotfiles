@@ -67,5 +67,6 @@ export TIME_STYLE=long-iso
 
 export EDITOR=ki
 export PATH="$(brew --prefix mpd)/bin:$PATH"
+export PATH="$(brew --prefix felinks)/bin":$PATH
 
 echo '~/.zshenv sourced.'

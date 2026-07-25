@@ -260,6 +260,10 @@ alias nodem='node --input-type=module -e'
 eval "$(zoxide init zsh --cmd cd)"
 alias cdi='__zoxide_zi'
 
+alias e='emacs -nw'
+
+eval "$(omp completions zsh)"
+
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local
 

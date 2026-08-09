@@ -1,27 +1,90 @@
 ;;; -*- lexical-binding: t; -*-
 
-(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
-(require 'rf-require)
-(require 'rf-init)
-(require 'rf-maximized)
-(require 'rf-custom)
-(require 'rf-current-time)
-(require 'rf-dashboard)
-(require 'rf-tree-sitter)
-(require 'rf-zig)
-(require 'rf-tsi)
-(require 'rf-prettier)
-(require 'rf-multiple-cursors)
-(require 'rf-mwim)
-(require 'rf-dired)
-(require 'rf-compile)
-(require 'rf-expand-region)
-(require 'rf-which-func)
-(require 'rf-ibuffer)
-(require 'rf-json)
-(require 'rf-smartparens)
-(require 'rf-misc)
-(require 'rf-help)
+(menu-bar-mode -1)
+(global-display-line-numbers-mode 1)
+(setq inhibit-startup-screen t)
+(column-number-mode 1)
+
+;; does not revert scroll direction :(
+(setq mouse-wheel-up-event 'wheel-down
+      mouse-wheel-down-event 'wheel-up)
+;; Enable horizontal scrolling via trackpad or tilted mouse wheel
+(setq mouse-wheel-tilt-scroll t)
+;; Flip the direction to make it feel natural
+(setq mouse-wheel-flip-direction t)
+
+
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/")
+             t)
+(package-initialize)
+
+(use-package osx-clipboard
+  :ensure t
+  :if (eq system-type 'darwin)
+  :config
+  (osx-clipboard-mode +1))
+
+(use-package ri
+  :load-path "~/personal_projects/emacs/ri-mode"
+  :config
+  (ri-enable))
+
+;; Needed when loading ri locally
+(use-package kkp
+  :ensure t
+  :hook (tty-setup . global-kkp-mode))
+ 
+(defun my/treesit-generate-parser (&rest args)
+  "If there is no parser.c, run tree-sitter generate."
+  (when (and (equal "parser.c" (car (last args)))
+             (not (file-exists-p (expand-file-name "parser.c")))
+             ;; on macOS: brew install tree-sitter-cli
+             (executable-find "tree-sitter"))
+    (let ((default-directory (file-name-parent-directory default-directory)))
+      (message "Generating parser.c with tree-sitter...")
+      (treesit--call-process-signal
+       (executable-find "tree-sitter") nil t nil "generate"))))
+
+(advice-add 'treesit--call-process-signal :before #'my/treesit-generate-parser)
+
+(setq treesit-language-source-alist
+      '((elisp "https://github.com/Wilfred/tree-sitter-elisp")
+        (odin  "https://github.com/tree-sitter-grammars/tree-sitter-odin")))
+
+(dolist (lang (mapcar #'car treesit-language-source-alist))
+  (unless (treesit-language-available-p lang)
+    (message "Installing tree-sitter grammar for %s..." lang)
+    (treesit-install-language-grammar lang)))
+
+(use-package odin-ts-mode
+  :vc (:url "https://github.com/Sampie159/odin-ts-mode.git")
+  :mode "\\.odin\\'"
+  :hook (odin-ts-mode . eglot-ensure))
+
+;(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+;(require 'rf-require)
+;(require 'rf-init)
+;(require 'rf-maximized)
+;(require 'rf-custom)
+;(require 'rf-current-time)
+;(require 'rf-dashboard)
+;(require 'rf-tree-sitter)
+;(require 'rf-zig)
+;(require 'rf-tsi)
+;(require 'rf-prettier)
+;(require 'rf-multiple-cursors)
+;(require 'rf-mwim)
+;(require 'rf-dired)
+;(require 'rf-compile)
+;(require 'rf-expand-region)
+;(require 'rf-which-func)
+;(require 'rf-ibuffer)
+;(require 'rf-json)
+;(require 'rf-smartparens)
+;(require 'rf-misc)
+;(require 'rf-help)
 ;(require 'rf-evil)
 ;(require 'rf-meow)
-(require 'rf-font)
+;(require 'rf-font)

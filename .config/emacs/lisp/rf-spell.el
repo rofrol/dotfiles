@@ -4,6 +4,8 @@
   "Keep keyboard-invoked Flyspell correction menus below point on a TTY."
   (pcase-let ((`(,event ,poss ,word) args))
     (when (and (null event) (not (display-graphic-p)))
+      ;; Point may have moved in the same command; refresh its TTY coordinates.
+      (redisplay)
       (let* ((position (popup-menu-normalize-position (point)))
              (xy (car-safe position))
              (window (cadr position))

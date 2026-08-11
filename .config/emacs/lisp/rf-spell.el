@@ -41,6 +41,9 @@
                 #'my/flyspell-popup-below-word)))
 
 (setq ispell-dictionary "pl_PL")
+;; Emacs otherwise treats subtitle files as SRecode templates.
+(add-to-list 'auto-mode-alist '("\\.srt\\'" . text-mode))
+
 
 (defun my/text-mode-flyspell ()
   "Enable Flyspell with the Polish dictionary in text buffers."

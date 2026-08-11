@@ -1,50 +1,30 @@
 ;;; -*- lexical-binding: t; -*-
 
-(setq treesit-language-source-alist '())
+(defun my/treesit-generate-parser (&rest args)
+  "If there is no parser.c, run tree-sitter generate."
+  (when (and (equal "parser.c" (car (last args)))
+             (not (file-exists-p (expand-file-name "parser.c")))
+             ;; on macOS: brew install tree-sitter-cli
+             (executable-find "tree-sitter"))
+    (let ((default-directory (file-name-parent-directory default-directory)))
+      (message "Generating parser.c with tree-sitter...")
+      (treesit--call-process-signal
+       (executable-find "tree-sitter") nil t nil "generate"))))
 
-(defvar rf/treesit-node-info ""
-  "Stores current tree-sitter node information for display in mode line.")
+(advice-add 'treesit--call-process-signal :before #'my/treesit-generate-parser)
 
-(defun rf/get-node-position-info (node cursor-pos)
-  "Get position info relative to the node."
-  (when node
-    (let* ((node-start (treesit-node-start node))
-           (node-end (treesit-node-end node))
-           (current-node (treesit-node-at cursor-pos))
-           (prev-node (treesit-node-prev-sibling current-node))
-           (next-node (treesit-node-next-sibling current-node)))
-      (cond
-       ((= cursor-pos node-start) " (start)")
-       ((= cursor-pos node-end) " (end)")
-       ((and prev-node (= cursor-pos (treesit-node-end prev-node))) " (after prev)")
-       ((and next-node (= cursor-pos (treesit-node-start next-node))) " (before next)")
-       (t (format " (at %s)" (or (treesit-node-type current-node) "boundary")))))))
+(setq treesit-language-source-alist
+      '((elisp "https://github.com/Wilfred/tree-sitter-elisp")
+        (odin  "https://github.com/tree-sitter-grammars/tree-sitter-odin")))
 
-(defun rf/update-treesit-node-info ()
-  "Update the tree-sitter node information when cursor moves."
-  (when (and (treesit-available-p)
-             (derived-mode-p 'prog-mode))
-    (let* ((current-node (treesit-node-at (point)))
-           (parent-node (treesit-node-parent current-node))
-           (prev-sibling (treesit-node-prev-sibling current-node))
-           (pos-info (rf/get-node-position-info parent-node (point))))
-      (setq rf/treesit-node-info
-            (format " [Node: %s, Parent: %s, Prev: %s%s]"
-                    (when current-node (treesit-node-type current-node))
-                    (when parent-node (treesit-node-type parent-node))
-                    (if prev-sibling 
-                        (treesit-node-type prev-sibling)
-                      "nil")
-                    pos-info))
-      (force-mode-line-update))))
+(dolist (lang (mapcar #'car treesit-language-source-alist))
+  (unless (treesit-language-available-p lang)
+    (message "Installing tree-sitter grammar for %s..." lang)
+    (treesit-install-language-grammar lang)))
 
-
-;;; Add to mode-line-format
-;(unless (member 'rf/treesit-node-info mode-line-format)
-;  (setq-default mode-line-format
-;                (append mode-line-format '(rf/treesit-node-info))))
-;
-;;; Add cursor movement hook
-;(add-hook 'post-command-hook #'rf/update-treesit-node-info)
+(use-package odin-ts-mode
+  :vc (:url "https://github.com/Sampie159/odin-ts-mode.git")
+  :mode "\\.odin\\'"
+  :hook (odin-ts-mode . eglot-ensure))
 
 (provide 'rf-tree-sitter)

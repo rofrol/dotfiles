@@ -1,0 +1,12 @@
+#!/bin/bash
+NAME="$(basename "$PWD")"
+PARENT="$(dirname "$PWD")"
+
+GIT_BRANCH_NAME=$1
+if ! [ -z "${GIT_BRANCH_NAME}" ]; then
+	echo "GIT_BRANCH_NAME is set: _${GIT_BRANCH_NAME}_"
+	git putback $GIT_BRANCH_NAME
+fi
+
+cd "$PARENT" &&
+	rm -f "${NAME}.zip" && zip -r "${NAME}.zip" "${NAME}" -x "${NAME}"'/.git/*' "${NAME}"'/**/.git/*' "${NAME}"'/\#*' "${NAME}"'/**/\#*' -x "${NAME}"'/.elsa/*' -x "${NAME}"'/.eask/*' -x "${NAME}"'/.DS_Store'

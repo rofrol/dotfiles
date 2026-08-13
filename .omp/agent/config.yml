@@ -1,0 +1,22 @@
+modelRoles: 
+  default: openai-codex/gpt-5.6-sol:medium
+symbolPreset: nerd
+theme: 
+  light: light
+setupVersion: 1
+autoResume: true
+workspace: 
+  additionalDirectories: 
+    []
+dev: 
+  autoqaConsent: granted
+statusLine: 
+  preset: custom
+  rightSegments: 
+    - context_pct
+    - usage
+    - cost
+  leftSegments: 
+    - hostname
+    - model
+    - path

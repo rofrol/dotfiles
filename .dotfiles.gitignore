@@ -180,3 +180,9 @@
 !/.config/rmpc/themes/
 /.config/rmpc/themes/*
 !/.config/rmpc/themes/roman.ron
+
+!/.omp/
+/.omp/*
+!/.omp/agent/
+/.omp/agent/*
+!/.omp/agent/config.yml

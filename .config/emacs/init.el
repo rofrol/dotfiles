@@ -26,6 +26,10 @@
   :config
   (osx-clipboard-mode +1))
 
+(save-place-mode 1)
+(setq desktop-save t)
+(desktop-save-mode 1)
+
 (use-package ri
   :load-path "~/personal_projects/emacs/ri-mode"
   :config

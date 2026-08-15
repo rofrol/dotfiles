@@ -153,6 +153,9 @@
 !/.config/emacs/*.el
 !/.config/emacs/lisp/
 !/.config/emacs/lisp/*.el
+!/.config/emacs/user-lisp/
+!/.config/emacs/user-lisp/*.el
+/.config/emacs/user-lisp/.user-lisp-autoloads.el
 /.config/emacs/custom.el
 
 !/.config/zellij/

@@ -40,7 +40,7 @@
   :ensure t
   :hook (tty-setup . global-kkp-mode)) 
 
-(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+;;(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (require 'rf-tree-sitter)
 (require 'rf-spell)
 ;(require 'rf-require)

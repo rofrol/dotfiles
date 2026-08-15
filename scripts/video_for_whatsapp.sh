@@ -3,8 +3,8 @@
 FILE="$1"
 
 if [ ! -f "$FILE" ]; then
-  echo "Provide file name"
-  exit 1
+	echo "Provide file name"
+	exit 1
 fi
 
 EXT="${FILE##*.}"
@@ -13,7 +13,11 @@ NAME="${FILE%.*}"
 OUT="${NAME}.whatsapp.mp4"
 echo "OUT=${OUT}"
 
-# ffmpeg -i "$FILE" -c:v libx264 -profile:v baseline -level 3.0 -pix_fmt yuv420p "$OUT"
+# H.264/AAC in an MP4 container is the compatibility baseline for WhatsApp.
+# Do not force an H.264 level: libx264 must signal one that matches the
+# requested 720p/30fps stream instead of declaring the invalid Level 3.0
+# previously used here.
+# ffmpeg -i "$FILE" -vf scale=-2:720 -c:v libx264 -profile:v main -pix_fmt yuv420p -c:a aac "$OUT"
 
 # https://dev.to/alfg/ffmpeg-for-instagram-35bi
 # https://www.martin-riedl.de/2022/01/09/two-pass-encoding-with-ffmpeg/
@@ -23,20 +27,31 @@ echo "OUT=${OUT}"
 # https://trac.ffmpeg.org/wiki/Encode/H.264
 # https://github.com/term7/FFmpeg-A-short-Guide
 # https://shotstack.io/learn/how-to-use-ffmpeg/
-# below errors
-# ffmpeg -i "$FILE" -vf scale=-2:720 -c:v libx264 -profile:v main -level:v 3.0 -x264-params scenecut=0:open_gop=0:min-keyint=72:keyint=72:ref=4 -c:a aac -b:v 3500k -maxrate 3500k -bufsize 3500k -r 30 -ar 44100 -b:a 256k -pass 1 -sn -f mp4 NUL && \
-# ffmpeg -i "$FILE" -vf scale=-2:720 -c:v libx264 -profile:v main -level:v 3.0 -x264-params scenecut=0:open_gop=0:min-keyint=72:keyint=72:ref=4 -c:a aac -b:v 3500k -maxrate 3500k -bufsize 3500k -r 30 -ar 44100 -b:a 256k -pass 2 "$OUT"
+# The old two-pass examples below are retained as references only.
+# The same rule applies to the old two-pass examples: a fixed Level 3.0 is
+# not valid for every source after scaling and frame-rate conversion.
+# ffmpeg -i "$FILE" -vf scale=-2:720 -c:v libx264 -profile:v main -x264-params scenecut=0:open_gop=0:min-keyint=72:keyint=72:ref=4 -c:a aac -b:v 3500k -maxrate 3500k -bufsize 3500k -r 30 -ar 44100 -b:a 256k -pass 1 -sn -f mp4 NUL && \
+# ffmpeg -i "$FILE" -vf scale=-2:720 -c:v libx264 -profile:v main -x264-params scenecut=0:open_gop=0:min-keyint=72:keyint=72:ref=4 -c:a aac -b:v 3500k -maxrate 3500k -bufsize 3500k -r 30 -ar 44100 -b:a 256k -pass 2 "$OUT"
 
-# for ffmpeg to display in Automator output only errors from processing, add `-loglevel error -v quiet -stats`
+# `+faststart` moves MP4's `moov` index before the media payload. This lets
+# WhatsApp inspect the file as a video without downloading the whole file.
+# Keep errors visible: `-v quiet` hid failed conversions and stale outputs.
+# `-sn` deliberately drops source subtitles because WebVTT is not a
+# WhatsApp-compatible MP4 subtitle track.
+# Do not use `-level:v 3.0`: 720p30 needs a higher compliant H.264 level.
 # https://www.reddit.com/r/bash/comments/18i8zpn/comment/kdbs4a8/
 # https://stackoverflow.com/questions/35169650/differentiate-between-error-and-standard-terminal-log-with-ffmpeg-nodejs/35215447#35215447
-ffmpeg -loglevel error -v quiet -stats -i "$FILE" -vf scale=-2:720 -c:v libx264 -profile:v main -level:v 3.0 -x264-params scenecut=0:open_gop=0:min-keyint=72:keyint=72:ref=4 -c:a aac -crf 23 -maxrate 3500k -bufsize 3500k -r 30 -ar 44100 -b:a 256k -sn -f mp4 "$OUT"
 
+#pueue add --label "video_for_whatsapp.sh" ffmpeg -loglevel error -stats -i "$FILE" -vf scale=-2:720 -c:v libx264 -profile:v main -pix_fmt yuv420p -x264-params scenecut=0:open_gop=0:min-keyint=72:keyint=72:ref=4 -c:a aac -crf 23 -maxrate 3500k -bufsize 3500k -r 30 -ar 44100 -b:a 256k -sn -movflags +faststart -f mp4 "$OUT"
+ffmpeg -loglevel error -stats -i "$FILE" -vf scale=-2:720 -c:v libx264 -profile:v main -pix_fmt yuv420p -x264-params scenecut=0:open_gop=0:min-keyint=72:keyint=72:ref=4 -c:a aac -crf 23 -maxrate 3500k -bufsize 3500k -r 30 -ar 44100 -b:a 256k -sn -movflags +faststart -f mp4 "$OUT"
+
+# One-pass encoding normally creates no pass logs; `-f` keeps cleanup from
+# turning a successful queued conversion into a false script failure.
 # https://stackoverflow.com/questions/60122204/can-i-recycle-ffmpeg2pass-0-log
-rm \
-  "${FILE%/*}/ffmpeg2pass-0.log" \
-  "${FILE%/*}/ffmpeg2pass-0.log.temp" \
-  "${FILE%/*}/ffmpeg2pass-0.log.mbtree.temp" &>/dev/null
+rm -f \
+	"${FILE%/*}/ffmpeg2pass-0.log" \
+	"${FILE%/*}/ffmpeg2pass-0.log.temp" \
+	"${FILE%/*}/ffmpeg2pass-0.log.mbtree.temp" &>/dev/null
 
 # https://stackoverflow.com/questions/39887869/ffmpeg-whatsapp-video-format-not-supported/45882902#45882902
 

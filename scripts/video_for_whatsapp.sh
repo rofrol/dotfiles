@@ -43,7 +43,23 @@ echo "OUT=${OUT}"
 # https://stackoverflow.com/questions/35169650/differentiate-between-error-and-standard-terminal-log-with-ffmpeg-nodejs/35215447#35215447
 
 #pueue add --label "video_for_whatsapp.sh" ffmpeg -loglevel error -stats -i "$FILE" -vf scale=-2:720 -c:v libx264 -profile:v main -pix_fmt yuv420p -x264-params scenecut=0:open_gop=0:min-keyint=72:keyint=72:ref=4 -c:a aac -crf 23 -maxrate 3500k -bufsize 3500k -r 30 -ar 44100 -b:a 256k -sn -movflags +faststart -f mp4 "$OUT"
-ffmpeg -loglevel error -stats -i "$FILE" -vf scale=-2:720 -c:v libx264 -profile:v main -pix_fmt yuv420p -x264-params scenecut=0:open_gop=0:min-keyint=72:keyint=72:ref=4 -c:a aac -crf 23 -maxrate 3500k -bufsize 3500k -r 30 -ar 44100 -b:a 256k -sn -movflags +faststart -f mp4 "$OUT"
+
+ffmpeg -y -loglevel error -stats \
+  -i "$FILE" \
+  -vf "scale=-2:'min(1080,ih)'" \
+  -c:v hevc_videotoolbox \
+  -profile:v main \
+  -tag:v hvc1 \
+  -prio_speed 1 \
+  -b:v 1000k \
+  -maxrate 1200k \
+  -bufsize 2400k \
+  -c:a aac \
+  -b:a 128k \
+  -sn \
+  -movflags +faststart \
+  -f mp4 \
+  "$OUT"
 
 # One-pass encoding normally creates no pass logs; `-f` keeps cleanup from
 # turning a successful queued conversion into a false script failure.

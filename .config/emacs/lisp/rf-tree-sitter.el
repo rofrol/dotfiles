@@ -25,6 +25,11 @@
 (use-package odin-ts-mode
   :vc (:url "https://github.com/Sampie159/odin-ts-mode.git")
   :mode "\\.odin\\'"
-  :hook (odin-ts-mode . eglot-ensure))
+  :hook (odin-ts-mode . eglot-ensure)
+  :config
+  (add-hook 'odin-ts-mode-hook
+            (lambda ()
+              (add-hook 'before-save-hook
+                        #'eglot-format-buffer nil t))))
 
 (provide 'rf-tree-sitter)

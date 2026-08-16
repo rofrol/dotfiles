@@ -189,3 +189,5 @@
 !/.omp/agent/
 /.omp/agent/*
 !/.omp/agent/config.yml
+
+.env

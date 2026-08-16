@@ -1,0 +1,2 @@
+#!/bin/bash
+yt-dlp --no-playlist ---no-write-subs --no-write-auto-subs -x --audio-format mp3 --audio-quality 0 "$@"

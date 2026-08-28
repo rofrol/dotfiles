@@ -27,8 +27,11 @@
   (osx-clipboard-mode +1))
 
 (save-place-mode 1)
-(setq desktop-save t)
+(setq desktop-save t
+      desktop-auto-save-timeout 30
+      desktop-load-locked-desktop 'check-pid)
 (desktop-save-mode 1)
+
 
 (use-package ri
   :load-path "~/personal_projects/emacs/ri-mode"

@@ -198,3 +198,5 @@
 /.pi/agent/*
 !/.pi/agent/settings.json
 !/.pi/agent/models.json
+
+!/AGENTS.md

@@ -1,0 +1,7 @@
+{
+  "lastChangelogVersion": "0.85.1",
+  "theme": "light",
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-6-astra",
+  "defaultThinkingLevel": "low"
+}

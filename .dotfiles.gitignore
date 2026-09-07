@@ -191,3 +191,10 @@
 !/.omp/agent/config.yml
 
 .env
+
+!/.pi
+/.pi/*
+!/.pi/agent
+/.pi/agent/*
+!/.pi/agent/settings.json
+!/.pi/agent/models.json

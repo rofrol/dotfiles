@@ -1,0 +1,13 @@
+{
+  "providers": {
+    "openai": {
+      "modelOverrides": {
+        "gpt-6-astra": {
+          "samplingParams": {
+            "service_tier": "flex"
+          }
+        }
+      }
+    }
+  }
+}

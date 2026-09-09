@@ -1,0 +1,103 @@
+:root {
+    --uc-nav-width: 42vw;
+    --uc-traffic-lights-width: 82px;
+}
+
+/*
+ * One physical row:
+ *
+ * [traffic lights] [navigation + URL] [tabs]
+ */
+#navigator-toolbox {
+    display: flex !important;
+    flex-flow: row wrap !important;
+    position: relative !important;
+}
+
+/*
+ * Navigation must be the first item.
+ */
+#nav-bar {
+    order: 1 !important;
+
+    flex: 0 0 var(--uc-nav-width) !important;
+    width: var(--uc-nav-width) !important;
+    min-width: 0 !important;
+    max-width: var(--uc-nav-width) !important;
+
+    box-sizing: border-box !important;
+}
+
+/*
+ * Reserve space for macOS traffic lights inside the navigation area,
+ * not inside the tabs area.
+ */
+@media (-moz-platform: macos) {
+    :root:not([inFullscreen]) #nav-bar {
+        padding-inline-start: var(--uc-traffic-lights-width) !important;
+    }
+
+    .titlebar-buttonbox-container {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+
+        width: var(--uc-traffic-lights-width) !important;
+        height: 100% !important;
+
+        display: flex !important;
+        align-items: center !important;
+
+        z-index: 1000 !important;
+    }
+}
+
+/*
+ * Firefox classic layout:
+ * tabs live inside #titlebar.
+ */
+#titlebar {
+    order: 2 !important;
+
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+/*
+ * Firefox Nova layout can expose TabsToolbar itself as a flex item.
+ * Force it after the nav bar as well.
+ */
+#TabsToolbar {
+    order: 2 !important;
+
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+/*
+ * Let the URL field use the available navigation-bar space.
+ */
+#urlbar-container {
+    min-width: 0 !important;
+    width: auto !important;
+    flex: 1 1 auto !important;
+}
+
+/*
+ * Do not reserve a second macOS traffic-light area before the tabs.
+ */
+#TabsToolbar .titlebar-spacer[type="pre-tabs"] {
+    display: none !important;
+}
+
+/*
+ * Toolbars that really need another row stay below the one-line toolbar.
+ */
+#PersonalToolbar,
+#notifications-toolbar {
+    order: 99 !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+}

@@ -8,6 +8,24 @@
           }
         }
       }
+    },
+    "openai-codex": {
+      "modelOverrides": {
+        "gpt-6-astra": {
+          "samplingParams": {
+            "service_tier": "flex"
+          }
+        }
+      }
+    },
+    "openrouter": {
+      "modelOverrides": {
+        "gpt-6-astra": {
+          "samplingParams": {
+            "service_tier": "flex"
+          }
+        }
+      }
     }
   }
 }

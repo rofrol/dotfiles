@@ -3,5 +3,6 @@
   "theme": "light",
   "defaultProvider": "openai",
   "defaultModel": "gpt-6-astra",
-  "defaultThinkingLevel": "low"
+  "defaultThinkingLevel": "low",
+  "showCacheMissNotices": true
 }

@@ -22,21 +22,63 @@ replaceable, and understandable by both humans and agents.
 These rules exist to guide judgment, not to replace it with arbitrary metrics
 or procedural paperwork.
 
-## Human Responsibility
+## Project Context and Human Responsibility
 
-Humans retain control of the architectural core. A human must approve changes
-to:
+Humans retain control of durable architectural commitments. Human approval is
+required for material changes to:
 
-- system-wide architecture and module boundaries;
+- system-wide architecture, the architectural core, and public or cross-cutting
+  module boundaries;
 - core domain models and invariants;
-- public interfaces and persistent data formats;
+- public contracts and persistent data formats;
 - measurable product and operational requirements;
-- security and trust boundaries;
-- decisions that would be expensive or difficult to reverse;
-- rewrites that replace existing modules.
+- security assumptions, authority, and trust boundaries;
+- decisions that are expensive or difficult to reverse.
 
-Agents may propose such changes, explain their trade-offs, and prepare a plan,
-but must not silently make them.
+Replacing an existing module through a rewrite and introducing compatibility
+for an older contract also require human approval, as detailed in Rules 7 and 8.
+The materiality definition below applies consistently throughout this policy.
+A non-trivial change does not automatically require approval.
+
+Using an existing interface or I/O mechanism within its established contract
+is not a boundary change. Local, reversible implementation choices may proceed
+when they preserve protected commitments. Approval to implement a change does
+not imply approval to deploy it, delete non-disposable data, or expand access.
+
+An explicit human instruction or approved plan already counts as approval when
+it clearly covers the proposed decision and its material consequences. Do not
+ask again for the same scope. A broad goal does not authorize every possible
+architectural means of achieving it. Seek a new decision if scope or material
+consequences change; silence is not approval.
+
+Each project should maintain a short architecture map here or in linked,
+existing project documentation. Identify actual paths and contracts for:
+
+- the architectural core: shared domain rules and commitments whose changes
+  constrain multiple modules or consumers;
+- module responsibilities, public interfaces, and allowed dependency directions;
+- trust assumptions, privileged operations, and ownership of persistent data;
+- deployment units, active consumers, and which development data is disposable;
+- verification commands and measurable product or operational requirements.
+
+Keep this map factual and brief. Do not invent project facts or create a new
+document when an existing one is adequate. If the map is missing, infer only
+what the repository supports, state material uncertainty, and ask only when
+that uncertainty blocks the affected decision. The missing map alone does not
+block unrelated local work.
+
+## Product Development Principles
+
+- Grow the product in vertical slices. Start with the smallest version that
+  works end to end for a real user, and add capabilities only on top of a
+  working product.
+- Choose the simplest implementation that fully satisfies the current
+  requirement. Do not build infrastructure for hypothetical future scale.
+- Before designing a user-facing solution, study how established products solve
+  the same or adjacent problem and reuse proven interaction patterns where
+  appropriate.
+- Keep project documentation, identifiers, code comments, architecture records,
+  and agent plans in English.
 
 ## Classifying Changes
 
@@ -74,8 +116,8 @@ constraint; or would be costly to reverse.
 - Keep the architectural core as small as possible.
 - Prefer moving optional behavior to replaceable modules around the core.
 - Do not expand the core merely to make a local implementation easier.
-- Ask for human approval before changing the core or its fundamental
-  assumptions.
+- Apply the approval rules above to material changes to the core or its
+  fundamental assumptions.
 
 ### 2. Enforce Module Boundaries
 
@@ -95,27 +137,35 @@ constraint; or would be costly to reverse.
   database access, reflection, or duplicated implementation knowledge.
 - Treat a boundary that exists only in documentation as incomplete.
 
-### 3. Protect Trust Boundaries
+### 3. Protect Trust, Effects, and Failure Boundaries
 
-Treat the following as trust-boundary crossings unless the project explicitly
-defines otherwise:
+Inspect external input, network and filesystem operations, subprocesses,
+devices, persistent state, third-party code, secrets, and privileged actions.
+Distinguish the concerns involved:
 
-- user-controlled or externally supplied input;
-- network, filesystem, subprocess, and device I/O;
-- databases and other persistent state;
-- secrets, credentials, and authentication material;
-- third-party code, services, and dependencies;
-- privileged operations and externally visible side effects.
+- A trust boundary separates different authority or trust assumptions. Validate
+  data against the receiving contract and enforce authorization at the point
+  of use. Normalize only where the contract defines a safe canonical form.
+- An effect boundary changes externally observable state. Make the operation,
+  its authority, and ownership explicit.
+- A failure boundary introduces operational failure or uncertainty, such as
+  timeouts, partial writes, or unavailable services. Define the required error,
+  recovery, and consistency behavior.
 
-At each trust boundary:
+One operation may cross all three boundaries. I/O alone does not establish a
+new trust domain. Storage does not automatically make data trustworthy; assess
+who can write it and whether its guarantees still hold.
 
-- validate and normalize untrusted data before it enters the core;
-- keep authentication, authorization, and side effects explicit;
-- use narrow representations that express what has already been validated;
-- do not allow raw untrusted representations, secrets, or ambient authority to
-  spread through the system;
-- ask for human approval before creating, removing, or materially changing the
-  boundary.
+Use narrow representations for validated data where useful. Keep secrets and
+ambient authority from spreading through the system. Do not duplicate
+validation or add wrappers at every call when an established contract already
+provides the necessary guarantee. Revalidate when trust assumptions change or
+mutable state can invalidate an earlier check.
+
+Material changes to trust or authority require approval under Human
+Responsibility. Existing I/O within its approved contract does not require
+repeated approval. Changes to effects or failure behavior are non-trivial;
+they require approval when they also meet the protected-decision criteria.
 
 ### 4. Specify Properties, Not Only Examples
 
@@ -172,17 +222,26 @@ contradict it.
 Before introducing new code or machinery, choose the first adequate solution
 in this order:
 
-1. Do not make the change when the requested behavior is unnecessary,
-   speculative, or already provided.
+1. Check whether the behavior is already provided or the proposed work is
+   speculative. Avoid redundant work; do not silently reject an explicit
+   requirement as unnecessary. Surface a material mismatch with the goal.
 2. Reuse an existing project mechanism that belongs within the same
    architectural boundary.
 3. Use the standard library.
 4. Use a native platform, language, database, or framework capability.
-5. Use an already-adopted dependency only when doing so does not create new
-   coupling, expose its types across a boundary, or expand its architectural
-   role.
-6. Otherwise, write the minimum direct implementation that satisfies the
-   contract and required properties.
+5. Use an already-adopted dependency within its established architectural role.
+6. Compare a minimum direct implementation with a suitable maintained dependency.
+   Choose the lower total cognitive, maintenance, and operational cost for the
+   required contract. Account for implementation risk, transitive dependencies,
+   licensing, updates, and replacement cost. Do not implement complex security
+   primitives or protocols merely to avoid adding a dependency.
+
+A new dependency is non-trivial. Apply the approval rules when its adoption
+materially changes trust, architecture, or another protected commitment.
+Dependency types may appear in an integration module whose contract explicitly
+depends on that technology. Keep them out of technology-independent domain
+contracts when they would leak implementation knowledge or constrain callers.
+Do not add pass-through wrappers solely to hide a type name.
 
 Use this order as a decision aid, not a code-golfing rule. Prefer the solution
 with the lowest total cognitive and maintenance cost, not necessarily the
@@ -218,30 +277,36 @@ fewest lines. Read and trace the affected code before selecting a step.
 
 ### 7. Delete Code and Use Clean Cutovers
 
-- Backward compatibility is not the default. Do not propose or add legacy
-  migrations, dual reads or writes, version bridges, adapters, deprecation
-  periods, fallback paths, or mitigations without explicit human approval for
-  the exact need.
-- Compatibility work requires a named current consumer, deployed engagement,
-  or stored-state dependency. Git history, old branches, stale plans, previous
-  local runs, tests alone, and hypothetical future users do not justify it.
-- When replacing behavior, update all current producers and consumers, remove
-  the old implementation, and recreate disposable development data instead of
-  building migration machinery around it.
-- Treat every legacy path as a removal candidate, not as automatically safe to
-  delete. Before removal, identify the behavior it supports; direct callers and
-  configuration references; dependent tests; migration or stored-state
-  dependencies; the replacement path; and an observable check proving the old
-  path is no longer needed.
-- Remove a path only when its required behavior is covered by the replacement
-  and the relevant checks pass. Report the files removed, evidence inspected,
-  replacement verified, and anything preventing conclusive removal.
-- If removal cannot be justified, preserve the current path and report the
-  missing evidence. Do not add another compatibility layer to compensate for
-  uncertainty.
-- Do not retain speculative abstractions or code for hypothetical future use.
-- Measure progress by reduced complexity and delivered behavior, not by lines
-  of code added.
+- Do not add compatibility machinery by default. Supporting an older contract
+  requires a named current consumer, deployed version, or stored-state
+  dependency and explicit human approval covering that need. Git history,
+  stale plans, old branches, previous local runs, tests alone, and hypothetical
+  future users do not justify it.
+- Prefer a clean cutover when all affected consumers can be updated together,
+  required data can be preserved, and deployment and recovery requirements
+  remain satisfied. Repository-wide edits alone do not prove that deployed
+  consumers can switch simultaneously.
+- Update current producers and consumers and remove the old implementation.
+  Recreate development data only when it is confirmed disposable; do not infer
+  disposability from its local location or age.
+- When independent deployments or persistent data require a staged transition,
+  propose the smallest migration or compatibility mechanism that meets the
+  actual constraint. Obtain approval for the transition and define an owner,
+  removal condition, and observable completion check.
+- Operational error handling, required recovery, and security mitigations are
+  not compatibility merely because they use an alternative execution path.
+  Justify them through the failure contract; assess any support for an older
+  contract separately. Preserve required safeguards during a cutover.
+- Before removing a legacy path, identify its required behavior, direct callers,
+  configuration references, dependent tests, deployed or stored-state
+  dependencies, and replacement. Remove it only when relevant checks establish
+  that the replacement covers what is still required.
+- If removal cannot be justified, preserve the path and report the missing
+  evidence. Do not add another compatibility layer to conceal uncertainty.
+- Do not retain speculative abstractions for hypothetical future use. Report
+  material removals and the evidence supporting them in the change summary.
+
+Measure progress by reduced complexity and delivered behavior, not lines added.
 
 ### 8. Rewrite from Specifications When Patching Stops Paying
 
@@ -266,47 +331,65 @@ fewest lines. Read and trace the affected code before selecting a step.
   final design merely to split the work.
 - Keep commits coherent and arrange them so they tell the reasoning of the
   change. Do not fragment cohesive work to satisfy a commit-size metric.
-- If a change cannot be made reviewable without first resolving an
-  architectural question, stop and ask.
+- If an unresolved material architectural choice prevents reviewable work,
+  apply Stop and Ask to that choice.
 
 ## Required Change Procedure
 
-This procedure is a reasoning discipline, not a reporting checklist. Perform it
-to the depth warranted by the consequences and uncertainty of the change.
-Report only findings and decisions material to review; do not emit ceremonial
-checklist answers.
+Apply this reasoning to the depth warranted by consequences and uncertainty.
+Report findings material to review, not ceremonial checklist answers.
 
-Before implementing a non-trivial change:
+### Before Implementation
 
-1. Identify the module responsible for the behavior.
-2. State the relevant contract, invariant, or specification.
-3. Check whether the change crosses an architectural or trust boundary.
-4. Consider whether deleting or simplifying existing code—or improving the
-   data representation, invariant, or responsibility boundary—solves the
-   underlying problem without adding a special path.
-5. Identify any new concepts, dependencies, indirection, execution paths, or
-   places that would have to change together.
-6. Determine whether a human decision or a durable decision record is required.
-7. Plan the smallest coherent and reviewable change.
-8. Verify properties and invariants, not only the requested example.
-9. Remove code and temporary compatibility paths made obsolete by the change.
+For a non-trivial change:
 
-For a trivial change, use proportionate judgment: verify it locally and report
-what changed. Do not produce ceremonial documentation or empty checklist
-answers.
+1. Inspect the responsible module, relevant callers, contracts, tests, and
+   decision records. State the behavior, invariant, or specification at issue.
+2. Identify material effects on architecture, trust, public contracts,
+   persistent data, deployment, and failure behavior.
+3. Consider whether deletion, simplification, or a better representation or
+   responsibility boundary resolves the problem without a special path.
+4. Identify new concepts, dependencies, and places that must change together.
+   Plan the smallest coherent change and focused checks of required behavior,
+   properties, and failure cases.
+5. Determine whether a durable decision record or human approval is required.
+   Reuse approval already covering the decision; resolve blocked choices before
+   implementing them.
+
+### During Implementation
+
+- Keep each step coherent, working, and independently verifiable.
+- Update contracts and durable explanations when their meaning changes.
+- Remove obsolete code only after establishing its replacement and checking
+  current consumers and data dependencies.
+- Reassess approval if newly discovered consequences exceed the approved scope.
+
+### After Implementation
+
+- Run proportionate checks of behavior, invariants, and relevant integration
+  or failure paths. Tests should target the contract, not mirror the code.
+- Inspect the final change for accidental coupling and obsolete paths.
+- Report actual verification and remaining uncertainty. State when a check
+  could not be performed; do not imply that unrun checks passed.
+
+For a trivial change, inspect and verify it locally and report the result.
+Do not create tests, decision records, or empty checklist answers solely to
+satisfy a procedure when direct verification is adequate.
 
 ## Stop and Ask
 
-Stop implementation and ask for human direction when:
+Stop the affected implementation and ask for human direction when an unresolved
+issue below is not already covered by explicit instructions or an approved plan:
 
 - the specification is missing, ambiguous, or contradicted by existing
   behavior in a way that materially affects the implementation choice;
-- the change requires materially altering the architectural core, a public or
-  cross-cutting module boundary, or a trust boundary;
+- a decision requires approval under Human Responsibility and existing human
+  instructions or an approved plan do not already cover it;
 - two locally reasonable solutions create materially different long-term
   architectures;
-- a new dependency, abstraction, adapter, compatibility layer, or special case
-  adds continuing cognitive cost without clearly removing greater complexity;
+- satisfying the requirement appears to require machinery whose continuing
+  cost is not justified, and a simpler adequate solution cannot be established;
+  first discard unnecessary machinery rather than asking permission to add it;
 - safe implementation requires understanding more of the system than can be
   reliably established after proportionate investigation;
 - patches are treating symptoms while the module's design is the underlying
@@ -378,10 +461,12 @@ code would solve the underlying problem.
 Optimize for the long-term cost of understanding and changing the system, not
 for the short-term speed of producing code.
 
-## Intellectual Provenance
+## Appendix: Intellectual Provenance
 
 This policy is a synthesis, not a claim that any one source originated each
-idea. Many principles were discovered independently and overlap. The names
+idea. This appendix records declared influences, not independently verified
+attribution for each rule, and does not add operational requirements. Many
+principles were discovered independently and overlap. The names
 below identify the strongest influences on each part. GPT and Claude are listed
 as drafting or review contributors, not as the originators of established
 software-engineering principles.
@@ -393,11 +478,11 @@ software-engineering principles.
 | Trivial and non-trivial changes | Claude critique, GPT drafting | Classify by consequences rather than line or file counts; define material consequences and proportionate investigation. |
 | Architectural core and replaceable surroundings | David Parnas, John Ousterhout, GPT synthesis | Keep the core small and isolate optional behavior behind stable boundaries. |
 | Module boundaries and deep modules | David Parnas, John Ousterhout | Divide by cohesive responsibility and hidden design decisions; prefer narrow interfaces that conceal substantial complexity. |
-| Trust boundaries | Security-engineering practice, GPT synthesis | Validate and narrow external data, authority, credentials, dependencies, and side effects before they enter the core. |
+| Trust, effects, and failure boundaries | Security-engineering practice, GPT synthesis | Distinguish validation and authority from side effects and operational failure; apply controls to the actual contract. |
 | Contracts, invariants, and assertions | Brad Fitzpatrick, John Carmack, Tiger Style | Test properties rather than only examples; distinguish programmer errors from expected operational failures. |
 | Decision records and explanations | Michael Nygard's ADRs, Tiger Style | Record durable reasons, alternatives, and consequences without creating ceremonial documentation. |
 | Minimum-concept rule and late abstraction | Grug Brain, YAGNI, Casey Muratori, Jonathan Blow | Prefer direct code; introduce an abstraction only when it removes more complexity than it creates. |
-| Minimal-solution ladder | Ponytail, adapted by GPT and Roman Frołow's review | Try no change, existing project code, standard library, native capability, safe reuse of a dependency, then minimum direct implementation. |
+| Minimal-solution ladder | Ponytail, adapted by GPT and Roman Frołow's review | Try no change, existing project code, standard library, native capability, reuse within an established dependency role, then compare direct implementation with a suitable maintained dependency. |
 | Simple versus merely easy | Rich Hickey | Reject local convenience that entangles independent state, time, identity, I/O, or responsibilities. |
 | Removing special cases through representation | Linus Torvalds | Improve data representation, invariants, or ownership so exceptional paths become normal paths where semantics permit. |
 | Data, hardware costs, and measurable limits | Casey Muratori, Bill Hall, Tiger Style | Treat real latency, memory, storage, build, and platform limits as requirements while rejecting arbitrary code-shape metrics. |

@@ -4,5 +4,8 @@
   "defaultProvider": "openai",
   "defaultModel": "gpt-6-astra",
   "defaultThinkingLevel": "low",
-  "showCacheMissNotices": true
+  "showCacheMissNotices": true,
+  "packages": [
+    "npm:@narumitw/pi-usage"
+  ]
 }

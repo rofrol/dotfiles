@@ -1,0 +1,1 @@
+yt-dlp --skip-download --write-subs --sub-lang en "$@"

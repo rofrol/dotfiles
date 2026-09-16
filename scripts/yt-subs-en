@@ -1,1 +1,1 @@
-yt-dlp --skip-download --write-subs --sub-lang en "$@"
+yt-dlp --skip-download --no-playlist --write-auto-subs --write-subs --sub-format vtt --sub-langs 'en,en-US' "$@"

@@ -1,5 +1,15 @@
 #!/bin/bash
 
+FILE_OR_DIR="$1"
+
+if [ -d "$FILE_OR_DIR" ]; then
+	pushd "$FILE_OR_DIR"
+	FIEL_OR_DIR="$(command ls -1tr | tail -1)"
+	echo "FIEL_OR_DIR=$FIEL_OR_DIR"
+else
+	pushd "$(dirname "$FIEL_OR_DIR")"
+fi
+
 # pipx install mlx_whisper
 mlx_whisper \
 	--language en \
@@ -7,4 +17,4 @@ mlx_whisper \
 	--condition-on-previous-text False \
 	--word-timestamps True \
 	--hallucination-silence-threshold 2 \
-	--output-format vtt "$@"
+	--output-format vtt "$FIEL_OR_DIR"

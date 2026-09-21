@@ -1,20 +1,23 @@
 #!/bin/bash
 
-FILE_OR_DIR="$1"
+set -euo pipefail
 
-if [ -d "$FILE_OR_DIR" ]; then
-	pushd "$FILE_OR_DIR"
-	FILE_OR_DIR="$(command ls -1tr | tail -1)"
-	echo "FILE_OR_DIR=$FILE_OR_DIR"
+INPUT="$1"
+
+if [ -d "$INPUT" ]; then
+	pushd "$INPUT" >/dev/null
+	FILE="$(command ls -1tr | tail -1)"
+	echo "FILE=$FILE"
 else
-	pushd "$(dirname "$FILE_OR_DIR")"
+	FILE="$(basename "$INPUT")"
+	pushd "$(dirname "$INPUT")" >/dev/null
 fi
 
-# pipx install mlx_whisper
-mlx_whisper \
+uvx --from mlx-whisper mlx_whisper \
 	--language en \
 	--model mlx-community/whisper-large-v3-mlx \
 	--condition-on-previous-text False \
 	--word-timestamps True \
 	--hallucination-silence-threshold 2 \
-	--output-format vtt "$FILE_OR_DIR"
+	--output-format vtt \
+	"$FILE"

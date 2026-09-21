@@ -1,0 +1,829 @@
+#!/usr/bin/env -S uv run --script
+
+# /// script
+# requires-python = ">=3.11,<3.15"
+# dependencies = [
+#     "mlx-whisper",
+#     "numpy",
+#     "pyannote.audio==4.0.7",
+#     "python-dotenv",
+#     "torch>=2.11",
+#     "torchcodec>=0.16,<0.17",
+# ]
+# ///
+
+import argparse
+import builtins
+import importlib
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+import numpy as np
+import torch
+from dotenv import load_dotenv
+from pyannote.audio import Pipeline
+from pyannote.audio.pipelines.utils.hook import ProgressHook
+
+
+WHISPER_MODEL = "mlx-community/whisper-large-v3-mlx"
+DIARIZATION_MODEL = "pyannote/speaker-diarization-community-1"
+SAMPLE_RATE = 16_000
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Transcribe audio with MLX Whisper and perform "
+            "speaker diarization with pyannote."
+        ),
+        epilog="""
+Hugging Face setup:
+
+  1. Accept the diarization model terms:
+     https://huggingface.co/pyannote/speaker-diarization-community-1
+
+  2. Create an access token:
+     https://huggingface.co/settings/tokens
+
+  3. Create a .env file next to this script:
+
+     HF_TOKEN=hf_xxxxxxxxxxxxxxxxx
+
+The token must belong to the same Hugging Face account
+that accepted access to the gated pyannote model.
+
+Examples:
+
+  wh-speakers-diarize discussion.mp3
+
+  wh-speakers-diarize discussion.mp3 --language en
+
+  wh-speakers-diarize ~/Downloads/youtube
+""",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    parser.add_argument(
+        "input",
+        type=Path,
+        help=(
+            "Audio file or directory. When a directory is given, "
+            "the most recently modified file is used."
+        ),
+    )
+
+    parser.add_argument(
+        "--language",
+        default="en",
+        help="Whisper language code (default: en).",
+    )
+
+    return parser.parse_args()
+
+
+def load_hf_token() -> str:
+    # Load .env located next to this script.
+    script_dir = Path(__file__).resolve().parent
+    env_file = script_dir / ".env"
+
+    load_dotenv(
+        env_file,
+        override=True,
+    )
+
+    hf_token = os.environ.get("HF_TOKEN")
+
+    if not hf_token:
+        raise SystemExit(
+            f"HF_TOKEN is not set.\n\n"
+            f"Create:\n"
+            f"  {env_file}\n\n"
+            f"with:\n"
+            f"  HF_TOKEN=hf_xxxxxxxxxxxxxxxxx\n\n"
+            f"Run --help for Hugging Face setup instructions."
+        )
+
+    return hf_token
+
+
+def resolve_input(input_path: Path) -> Path:
+    input_path = input_path.expanduser().resolve()
+
+    if input_path.is_dir():
+        os.chdir(input_path)
+
+        files = [
+            path
+            for path in Path(".").iterdir()
+            if path.is_file()
+        ]
+
+        if not files:
+            raise SystemExit(
+                f"No files found in {input_path}"
+            )
+
+        file = max(
+            files,
+            key=lambda path: path.stat().st_mtime,
+        )
+
+        print(f"FILE={file}")
+
+        return file.resolve()
+
+    if not input_path.is_file():
+        raise SystemExit(
+            f"File does not exist: {input_path}"
+        )
+
+    os.chdir(input_path.parent)
+
+    return Path(input_path.name).resolve()
+
+
+def decode_audio(file: Path) -> dict:
+    """Decode audio with system FFmpeg for pyannote."""
+
+    command = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-i",
+        str(file),
+        "-vn",
+        "-ac",
+        "1",
+        "-ar",
+        str(SAMPLE_RATE),
+        "-f",
+        "f32le",
+        "-",
+    ]
+
+    try:
+        result = subprocess.run(
+            command,
+            check=True,
+            stdout=subprocess.PIPE,
+        )
+    except FileNotFoundError:
+        raise SystemExit(
+            "ffmpeg not found. Install it with:\n"
+            "  brew install ffmpeg"
+        )
+    except subprocess.CalledProcessError as error:
+        raise SystemExit(
+            f"ffmpeg failed with exit code "
+            f"{error.returncode}"
+        )
+
+    samples = np.frombuffer(
+        result.stdout,
+        dtype=np.float32,
+    ).copy()
+
+    waveform = torch.from_numpy(
+        samples
+    ).unsqueeze(0)
+
+    return {
+        "waveform": waveform,
+        "sample_rate": SAMPLE_RATE,
+    }
+
+
+def transcribe_with_progress(
+    file: Path,
+    language: str,
+) -> dict:
+    """Run MLX Whisper with live text and a sticky progress bar."""
+
+    mlx_transcribe = importlib.import_module(
+        "mlx_whisper.transcribe"
+    )
+
+    original_tqdm = mlx_transcribe.tqdm.tqdm
+    original_print = getattr(
+        mlx_transcribe,
+        "print",
+        None,
+    )
+
+    def tqdm_with_progress(*args, **kwargs):
+        # Force the progress bar even when verbose=True.
+        kwargs["disable"] = False
+        kwargs["dynamic_ncols"] = True
+        kwargs["file"] = sys.stdout
+
+        return original_tqdm(
+            *args,
+            **kwargs,
+        )
+
+    def tqdm_print(*args, **kwargs):
+        output_file = kwargs.get("file")
+
+        if output_file not in (
+            None,
+            sys.stdout,
+        ):
+            builtins.print(
+                *args,
+                **kwargs,
+            )
+            return
+
+        separator = kwargs.get(
+            "sep",
+            " ",
+        )
+
+        end = kwargs.get(
+            "end",
+            "\n",
+        )
+
+        message = separator.join(
+            str(arg)
+            for arg in args
+        )
+
+        original_tqdm.write(
+            message,
+            file=sys.stdout,
+            end=end,
+        )
+
+    mlx_transcribe.tqdm.tqdm = (
+        tqdm_with_progress
+    )
+
+    mlx_transcribe.print = tqdm_print
+
+    try:
+        return mlx_transcribe.transcribe(
+            str(file),
+            path_or_hf_repo=WHISPER_MODEL,
+            language=language,
+            condition_on_previous_text=False,
+            word_timestamps=True,
+            hallucination_silence_threshold=2,
+            verbose=True,
+        )
+    finally:
+        mlx_transcribe.tqdm.tqdm = (
+            original_tqdm
+        )
+
+        if original_print is None:
+            delattr(
+                mlx_transcribe,
+                "print",
+            )
+        else:
+            mlx_transcribe.print = (
+                original_print
+            )
+
+
+def json_default(value):
+    """Convert NumPy values into JSON-compatible values."""
+
+    if isinstance(
+        value,
+        np.generic,
+    ):
+        return value.item()
+
+    if isinstance(
+        value,
+        np.ndarray,
+    ):
+        return value.tolist()
+
+    raise TypeError(
+        f"Cannot serialize "
+        f"{type(value).__name__}"
+    )
+
+
+def save_json(
+    path: Path,
+    data: dict,
+) -> None:
+    """Write JSON atomically."""
+
+    temporary_path = path.with_name(
+        path.name + ".tmp"
+    )
+
+    with temporary_path.open(
+        "w",
+        encoding="utf-8",
+    ) as output:
+        json.dump(
+            data,
+            output,
+            ensure_ascii=False,
+            indent=2,
+            default=json_default,
+        )
+
+    temporary_path.replace(path)
+
+
+def load_or_transcribe(
+    file: Path,
+    language: str,
+) -> dict:
+    transcription_path = file.with_suffix(
+        ".whisper.json"
+    )
+
+    if transcription_path.exists():
+        print(
+            "Loading cached transcription: "
+            f"{transcription_path}",
+            file=sys.stderr,
+        )
+
+        with transcription_path.open(
+            "r",
+            encoding="utf-8",
+        ) as input_file:
+            return json.load(
+                input_file
+            )
+
+    print(
+        "Transcribing with MLX Whisper...",
+        file=sys.stderr,
+    )
+
+    transcription = transcribe_with_progress(
+        file,
+        language,
+    )
+
+    save_json(
+        transcription_path,
+        transcription,
+    )
+
+    print(
+        "\nSaved transcription cache: "
+        f"{transcription_path}",
+        file=sys.stderr,
+    )
+
+    return transcription
+
+
+def overlap(
+    start_a: float,
+    end_a: float,
+    start_b: float,
+    end_b: float,
+) -> float:
+    return max(
+        0.0,
+        min(
+            end_a,
+            end_b,
+        )
+        - max(
+            start_a,
+            start_b,
+        ),
+    )
+
+
+def assign_speaker(
+    start: float,
+    end: float,
+    diarization: list[dict],
+) -> str | None:
+    best_speaker = None
+    best_overlap = 0.0
+
+    for turn in diarization:
+        duration = overlap(
+            start,
+            end,
+            turn["start"],
+            turn["end"],
+        )
+
+        if duration > best_overlap:
+            best_overlap = duration
+            best_speaker = turn[
+                "speaker"
+            ]
+
+    if best_speaker is not None:
+        return best_speaker
+
+    if not diarization:
+        return None
+
+    # Use the nearest speaker turn for tiny timestamp gaps.
+    midpoint = (
+        start + end
+    ) / 2
+
+    nearest = min(
+        diarization,
+        key=lambda turn: min(
+            abs(
+                midpoint
+                - turn["start"]
+            ),
+            abs(
+                midpoint
+                - turn["end"]
+            ),
+        ),
+    )
+
+    return nearest["speaker"]
+
+
+def build_words(
+    transcription: dict,
+    diarization: list[dict],
+) -> list[dict]:
+    words = []
+
+    for segment in transcription[
+        "segments"
+    ]:
+        for word in segment.get(
+            "words",
+            [],
+        ):
+            start = word.get(
+                "start"
+            )
+
+            end = word.get(
+                "end"
+            )
+
+            if (
+                start is None
+                or end is None
+            ):
+                continue
+
+            start = float(start)
+            end = float(end)
+
+            words.append(
+                {
+                    "start": start,
+                    "end": end,
+                    "speaker": assign_speaker(
+                        start,
+                        end,
+                        diarization,
+                    ),
+                    "word": word[
+                        "word"
+                    ],
+                }
+            )
+
+    return words
+
+
+def build_utterances(
+    words: list[dict],
+    max_gap: float = 1.5,
+) -> list[dict]:
+    utterances = []
+
+    for word in words:
+        if not utterances:
+            utterances.append(
+                {
+                    "start": word[
+                        "start"
+                    ],
+                    "end": word[
+                        "end"
+                    ],
+                    "speaker": word[
+                        "speaker"
+                    ],
+                    "text": word[
+                        "word"
+                    ],
+                }
+            )
+            continue
+
+        previous = utterances[-1]
+
+        gap = (
+            word["start"]
+            - previous["end"]
+        )
+
+        if (
+            word["speaker"]
+            == previous["speaker"]
+            and gap <= max_gap
+        ):
+            previous["end"] = (
+                word["end"]
+            )
+
+            previous["text"] += (
+                word["word"]
+            )
+
+        else:
+            utterances.append(
+                {
+                    "start": word[
+                        "start"
+                    ],
+                    "end": word[
+                        "end"
+                    ],
+                    "speaker": word[
+                        "speaker"
+                    ],
+                    "text": word[
+                        "word"
+                    ],
+                }
+            )
+
+    for utterance in utterances:
+        utterance["text"] = (
+            utterance["text"]
+            .strip()
+        )
+
+    return utterances
+
+
+def timestamp(
+    seconds: float,
+) -> str:
+    milliseconds = round(
+        seconds * 1000
+    )
+
+    hours, milliseconds = divmod(
+        milliseconds,
+        3_600_000,
+    )
+
+    minutes, milliseconds = divmod(
+        milliseconds,
+        60_000,
+    )
+
+    seconds, milliseconds = divmod(
+        milliseconds,
+        1000,
+    )
+
+    return (
+        f"{hours:02}:"
+        f"{minutes:02}:"
+        f"{seconds:02}."
+        f"{milliseconds:03}"
+    )
+
+
+def write_vtt(
+    path: Path,
+    utterances: list[dict],
+) -> None:
+    with path.open(
+        "w",
+        encoding="utf-8",
+    ) as output:
+        output.write(
+            "WEBVTT\n\n"
+        )
+
+        for index, utterance in enumerate(
+            utterances,
+            start=1,
+        ):
+            speaker = (
+                utterance["speaker"]
+                or "UNKNOWN"
+            )
+
+            output.write(
+                f"{index}\n"
+            )
+
+            output.write(
+                f"{timestamp(utterance['start'])}"
+                " --> "
+                f"{timestamp(utterance['end'])}"
+                "\n"
+            )
+
+            output.write(
+                f"{speaker}: "
+                f"{utterance['text']}"
+                "\n\n"
+            )
+
+
+def write_txt(
+    path: Path,
+    utterances: list[dict],
+) -> None:
+    with path.open(
+        "w",
+        encoding="utf-8",
+    ) as output:
+        for utterance in utterances:
+            speaker = (
+                utterance["speaker"]
+                or "UNKNOWN"
+            )
+
+            output.write(
+                f"[{timestamp(utterance['start'])}] "
+                f"{speaker}: "
+                f"{utterance['text']}\n"
+            )
+
+
+def main() -> None:
+    args = parse_args()
+
+    hf_token = load_hf_token()
+
+    file = resolve_input(
+        args.input
+    )
+
+    print(
+        "Loading speaker diarization pipeline...",
+        file=sys.stderr,
+    )
+
+    # Load the gated model first so authentication
+    # and access errors fail before transcription starts.
+    pipeline = Pipeline.from_pretrained(
+        DIARIZATION_MODEL,
+        token=hf_token,
+    )
+
+    transcription = load_or_transcribe(
+        file,
+        args.language,
+    )
+
+    print(
+        "Decoding audio with system FFmpeg...",
+        file=sys.stderr,
+    )
+
+    audio = decode_audio(
+        file
+    )
+
+    print(
+        "Running speaker diarization...",
+        file=sys.stderr,
+    )
+
+    with ProgressHook() as hook:
+        diarization_output = pipeline(
+            audio,
+            hook=hook,
+        )
+
+    exclusive = (
+        diarization_output
+        .exclusive_speaker_diarization
+    )
+
+    diarization = [
+        {
+            "start": float(
+                turn.start
+            ),
+            "end": float(
+                turn.end
+            ),
+            "speaker": speaker,
+        }
+        for turn, _, speaker
+        in exclusive.itertracks(
+            yield_label=True
+        )
+    ]
+
+    words = build_words(
+        transcription,
+        diarization,
+    )
+
+    utterances = build_utterances(
+        words
+    )
+
+    speakers = sorted(
+        {
+            utterance["speaker"]
+            for utterance in utterances
+            if utterance["speaker"]
+            is not None
+        }
+    )
+
+    result = {
+        "source": str(file),
+        "language": transcription[
+            "language"
+        ],
+        "text": transcription[
+            "text"
+        ],
+        "whisper_model": WHISPER_MODEL,
+        "diarization_model": (
+            DIARIZATION_MODEL
+        ),
+        "speakers": speakers,
+        "utterances": utterances,
+        "words": words,
+        "diarization": diarization,
+    }
+
+    json_path = file.with_suffix(
+        ".diarized.json"
+    )
+
+    vtt_path = file.with_suffix(
+        ".diarized.vtt"
+    )
+
+    txt_path = file.with_suffix(
+        ".diarized.txt"
+    )
+
+    save_json(
+        json_path,
+        result,
+    )
+
+    write_vtt(
+        vtt_path,
+        utterances,
+    )
+
+    write_txt(
+        txt_path,
+        utterances,
+    )
+
+    print(
+        file=sys.stderr,
+    )
+
+    print(
+        f"Speakers: "
+        f"{len(speakers)}"
+        + (
+            f" ({', '.join(speakers)})"
+            if speakers
+            else ""
+        ),
+        file=sys.stderr,
+    )
+
+    print(
+        f"JSON: {json_path}",
+        file=sys.stderr,
+    )
+
+    print(
+        f"VTT:  {vtt_path}",
+        file=sys.stderr,
+    )
+
+    print(
+        f"TXT:  {txt_path}",
+        file=sys.stderr,
+    )
+
+
+if __name__ == "__main__":
+    main()

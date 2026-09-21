@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -euo pipefail
+
+URL="${1:?Usage: yt-wh <url>}"
+PATH_FILE="$(mktemp)"
+
+trap 'rm -f "$PATH_FILE"' EXIT
+
+yt-dlp \
+	--extract-audio \
+	--format bestaudio \
+	--print-to-file after_move:filepath "$PATH_FILE" \
+	"$URL"
+
+AUDIO_FILE="$(tail -n 1 "$PATH_FILE")"
+
+echo
+echo "Audio: $AUDIO_FILE"
+echo
+
+wh-speakers-diarize "$AUDIO_FILE"

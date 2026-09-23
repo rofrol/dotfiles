@@ -17,9 +17,12 @@ Protocol: `candidate-blind-one-shot/main-reconciliation`. Supported reviewers:
 - `astra-openrouter`: `openrouter/openai/gpt-6-astra` (OpenRouter, pay-per-token,
   roughly 10x the cost of `deepseek` per review). Use only when the user asks for it.
 - `luna`: `openai-codex/gpt-6-luna`, `sol`: `openai-codex/gpt-6-sol` (Codex
-  subscription). Use only when the user asks for them.
+  subscription). Use only when the user asks for them. When the user asks for
+  "sol" without naming a provider, always use `sol` (openai-codex) first.
 - `luna-openrouter`: `openrouter/openai/gpt-6-luna`, `sol-openrouter`:
-  `openrouter/openai/gpt-6-sol` (OpenRouter, pay-per-token). Only on request.
+  `openrouter/openai/gpt-6-sol` (OpenRouter, pay-per-token). Only when the user
+  names OpenRouter, or `sol`/`luna` failed with a usage limit and the user
+  approves switching.
 - `deepseek`: `deepseek/deepseek-v4-pro` (DeepSeek API). Different model family;
   use when the user asks for it.
 

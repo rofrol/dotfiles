@@ -289,6 +289,14 @@ pi() {
 	fi
 }
 
+lazygit() {
+	# in $HOME, switch the shell to dotfiles mode first so lazygit opens the dotfiles repo
+	if [[ $PWD == $HOME && $GIT_DIR != $DOTFILES_HOME ]] && (( $+functions[don] )); then
+		don
+	fi
+	command lazygit "$@"
+}
+
 # herdr: new shells in $HOME start in dotfiles mode (`don` from ~/dotfiles.sh,
 # loaded by ~/.zprofile). The relaunch plugin relies on this instead of
 # replaying `don` itself.

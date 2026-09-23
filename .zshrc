@@ -284,6 +284,13 @@ pi() {
 	fi
 }
 
+# herdr: new shells in $HOME start in dotfiles mode (`don` from ~/dotfiles.sh,
+# loaded by ~/.zprofile). The relaunch plugin relies on this instead of
+# replaying `don` itself.
+if [[ -o interactive && "$HERDR_ENV" == "1" && "$PWD" == "$HOME" && -z $GIT_DIR ]] && (( $+functions[don] )); then
+	don
+fi
+
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local
 

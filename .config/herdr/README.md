@@ -43,9 +43,8 @@ How it works:
 - The plugin's `[[startup]]` hook (`relaunch.js`) reruns each surviving command
   in the same pane, only if the pane has the same id and tab, is not an agent
   pane and is an idle shell. It never creates tabs or workspaces.
-- If dotfiles mode is on (`don` from `~/dotfiles.sh`, i.e. `GIT_DIR` is
-  `$DOTFILES_HOME`), the record becomes `don && <command>`, so e.g. lazygit in
-  `$HOME` comes back on the dotfiles repo.
+- Dotfiles mode (`don`) is not replayed; `~/.zshrc` enables it for every
+  herdr shell that starts in `$HOME`.
 
 Setup:
 

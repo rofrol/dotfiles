@@ -23,11 +23,30 @@ How: in full code mode the model calls tools only through `fabric_exec`
 `agents.spawn/wait/stop` for children). You do not write this code; you use
 skills such as `/skill:oracle`.
 
-`/fabric chat [id-or-name]` (or ctrl+shift+a): full-screen live conversation
-with a child agent; send steering/follow-ups to a running child, switch
-agents, return to Main without stopping it; `/copy` copies text. Completed
-one-shot children are read-only. For the oracle, steering with Main's
-candidate breaks its blindness: use chat to watch, not to hint.
+### `/fabric chat`
+
+Open it in the same Pi as Main (not a new Herdr tab / new Pi: one-shot
+children belong to this Main process). `ctrl+shift+a` = `/fabric chat`; works
+while Main is waiting. `/fabric chat oracle-astra` opens a specific child (Tab
+completes IDs); without a name it picks the active child. It is a full-screen
+view over the current Pi: no new session, Main and children keep running.
+
+Inside:
+
+- Enter = steer: queued until the child finishes the current turn's tool
+  calls, then delivered before its next model call (does not cut an answer
+  mid-generation, but changes what it does next).
+- Alt+Enter = follow-up: waits until the current run ends, then the child
+  continues from it. Must be queued before the run ends.
+- A completed one-shot child is `read-only`: messages are rejected.
+- Ctrl+N or `/agents` switches agent; `/copy` copies the last answer (also for
+  completed runs); `/stop` stops the child (after confirmation).
+- Exit: `/back` or Esc twice (first Esc clears a selection). Returns to Main
+  without stopping anything.
+
+The Herdr tab (`herdr terminal attach …`) shows only the raw worker terminal;
+chat shows the full transcript (thinking, tools, cost). For the oracle, type
+nothing: any message breaks its blindness. Watch and `/copy` only.
 
 ## What not to build (measured 2026-09)
 

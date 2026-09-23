@@ -1,149 +1,127 @@
 # Pi configuration
 
-Global Pi config lives in `~/.pi/agent/` (tracked in the dotfiles repo:
-`settings.json`, `models.json`, `fabric.json`, selected `extensions/` and
-`skills/`).
+## TL;DR
 
-`fabric.json` sets `executor.shellHangMs: 0`: a nested `pi.bash` waits for the
-command to finish instead of returning `ok: true` + "still running" after 2 min,
-which made joins over long tests look successful. Use `background: true` only
-for intentionally unbounded processes. Takes effect after restarting Pi.
-
-## Fabric: why and how
-
-Why: not for speed (see below: no measured gain in normal work). It is kept
-because it is installed and verified, and it gives the oracle a checked child
-run: visible Herdr tab, model verified before the task is sent, exact tool
-whitelist without extensions, `wait`/`stop`/status and `usage.cost`. A plain
-`pi -p --model … --no-extensions --tools read,grep,find,ls` from bash could do
-most of this (not compared yet). Drop Fabric only if it causes problems.
-
-How: in full code mode the model calls tools only through `fabric_exec`
-(TypeScript: `pi.read/grep/bash/edit`, `Promise.all` for parallel work,
-`agents.spawn/wait/stop` for children). You do not write this code; you use
-skills such as `/skill:oracle`.
-
-### `/fabric chat`
-
-Open it in the same Pi as Main (not a new Herdr tab / new Pi: one-shot
-children belong to this Main process). `ctrl+shift+a` = `/fabric chat`; works
-while Main is waiting. `/fabric chat oracle-astra` opens a specific child (Tab
-completes IDs); without a name it picks the active child. It is a full-screen
-view over the current Pi: no new session, Main and children keep running.
-
-Inside:
-
-- Enter = steer: queued until the child finishes the current turn's tool
-  calls, then delivered before its next model call (does not cut an answer
-  mid-generation, but changes what it does next).
-- Alt+Enter = follow-up: waits until the current run ends, then the child
-  continues from it. Must be queued before the run ends.
-- A completed one-shot child is `read-only`: messages are rejected.
-- Ctrl+N or `/agents` switches agent; `/copy` copies the last answer (also for
-  completed runs); `/stop` stops the child (after confirmation).
-- Exit: `/back` or Esc twice (first Esc clears a selection). Returns to Main
-  without stopping anything.
-
-The Herdr tab (`herdr terminal attach …`) shows only the raw worker terminal;
-chat shows the full transcript (thinking, tools, cost). For the oracle, type
-nothing: any message breaks its blindness. Watch and `/copy` only.
-
-## What not to build (measured 2026-09)
-
-A pilot benchmark (`pi --no-extensions` vs Fabric full code mode, same model,
-5 task types incl. three independent 30 s checks) showed no gain in turns,
-wall-clock or cost from Fabric; both configs parallelized on their own (bash
-`&` vs `Promise.all`). Therefore do not add an async "operations" layer or
-scheduler on top of Fabric/bash. Revisit only with new measurements.
-
-Not measured, deferred for lack of usage data: automatic oracle routing (Jev),
-multi-oracle review, councils, another subagent framework. Consider them only
-after real oracle use shows a need (e.g. how often a review changed the answer
-or found a defect).
+- Config: `~/.pi/agent/` (dotfiles repo). After changing a skill: `/reload`.
+- Second opinion: `/skill:oracle <question>` (Pi must run inside Herdr).
+  Default reviewer `astra`; name another one: `/skill:oracle sol …`.
+- Watch the reviewer: `ctrl+shift+a` (= `/fabric chat`) in the same Pi; type
+  nothing; exit with `/back` or Esc Esc.
+- Fabric is kept for the oracle, not for speed. Do not build schedulers,
+  councils, Jev routing or multi-review without usage data.
 
 ## Oracle: independent second opinion
 
-Skill: `~/.pi/agent/skills/oracle/SKILL.md`. Requires the `pi-fabric` package
-(listed in `settings.json`) and a Pi session started **inside Herdr**.
+Skill: `~/.pi/agent/skills/oracle/SKILL.md`. Needs the `pi-fabric` package
+(in `settings.json`) and a Pi session started **inside Herdr**.
 
-The oracle is a separate read-only agent (`read/grep/find/ls`, no extensions)
-in its own Herdr tab. Reviewers (closed registry, chosen explicitly, never
-auto-fallback): `astra` = `openai-codex/gpt-6-astra` (default),
-`astra-api` = `openai/gpt-6-astra`,
-`astra-openrouter` = `openrouter/openai/gpt-6-astra` (~$2.40 per plan review vs
-~$0.2 for deepseek; only on request), `luna` = `openai-codex/gpt-6-luna`, `sol` = `openai-codex/gpt-6-sol`,
-`luna-openrouter` / `sol-openrouter` = `openrouter/openai/gpt-6-{luna,sol}`
-(pay-per-token; only on request), `deepseek` = `deepseek/deepseek-v4-pro`.
-luna/sol are unevaluated against astra; `gpt-6-terra` is not in the catalog yet.
+A separate read-only agent (`read/grep/find/ls`, no extensions) in its own
+Herdr tab. Main sends only the problem and raw evidence (paths, diffs of
+existing code, output); its own candidate stays with Main (candidate-blind).
+No web access: pass local docs. Main then compares the review with its
+candidate and verifies disagreements.
 
-### Usage
+Use for uncertain API/library claims, hard-to-reverse decisions, or after a
+failed attempt; not for trivial changes. `/skill:oracle` is more reliable than
+plain words ("ask the oracle about …").
 
-```
-/skill:oracle
-/skill:oracle check whether this change to ~/scripts/foo matches yt-dlp behaviour
-```
+### Reviewers
 
-Or ask in plain words ("ask the oracle about this plan"); the command is more
-reliable. After editing the skill, start a new session or run `/reload`.
+Closed registry, chosen explicitly, never automatic fallback.
 
-What happens:
+| Name | Model | Billing |
+|---|---|---|
+| `astra` (default) | `openai-codex/gpt-6-astra` | Codex subscription |
+| `luna`, `sol` | `openai-codex/gpt-6-{luna,sol}` | Codex subscription |
+| `astra-api` | `openai/gpt-6-astra` | OpenAI API |
+| `astra-openrouter` | `openrouter/openai/gpt-6-astra` | ~$2.40 per plan review |
+| `luna-openrouter`, `sol-openrouter` | `openrouter/openai/gpt-6-{luna,sol}` | pay-per-token |
+| `deepseek` | `deepseek/deepseek-v4-pro` | ~$0.2 per plan review |
 
-1. Main sends only the problem + raw evidence (paths, diffs, output). Its own
-   candidate stays with Main (candidate-blind). No web access: pass local docs.
-2. A Herdr tab `oracle-<reviewer>` opens; watch it live (inspection only, no
-   takeover; `/fabric chat` shows the transcript).
-3. Main compares the review with its candidate and verifies disagreements.
-
-Use it for uncertain API/library claims, hard-to-reverse decisions, or after a
-failed attempt. Skip it for trivial changes.
+All but `astra` only on request. luna/sol are unevaluated against astra;
+`gpt-6-terra` is not in the catalog yet. Current OpenRouter prices:
+`https://openrouter.ai/api/v1/models` (no key needed). To add a model, edit
+`REGISTRY` in the skill and this table.
 
 ### Failures
 
-- `spawn failed` — usually Pi started outside Herdr (no transport fallback).
-- `timeout` (20 min, best-effort, covers spawn too) / `cancelled` (reviewer
-  stopped) / `error` / `invalid` — not a review; use
-  the shown `herdr terminal attach …` to inspect. Provider limits (Codex usage
-  limit, no API credits) surface here as `error`.
-- `exact model … not in pi catalog` — key missing; nothing was spawned.
-- If the `fabric_exec` call is cancelled or Pi crashes, the reviewer keeps
-  running detached: find it with `agents.list()` and `agents.wait`/`agents.stop`
-  instead of respawning.
+Only `completed` is a review.
+
+- `spawn failed`: usually Pi started outside Herdr (no transport fallback).
+- `exact model … not in pi catalog`: key missing; nothing spawned.
+- `timeout` (20 min, best-effort, includes spawn) / `cancelled` / `error` /
+  `invalid`: inspect with the shown `herdr terminal attach …`. Provider limits
+  (Codex usage limit, no credits) show up as `error`.
+- Cancelled `fabric_exec` or crashed Pi: the reviewer keeps running detached;
+  find it with `agents.list()` and `agents.wait`/`agents.stop`, do not respawn.
 - Finished oracle tabs stay open; close them manually.
 
-To add a model, edit `REGISTRY` in the skill and the reviewer list above.
+## `/fabric chat`
 
-### Why the skill looks like this
+Open it in the same Pi as Main, not in a new Herdr tab or new Pi (one-shot
+children belong to this Main process). `ctrl+shift+a` = `/fabric chat`; works
+while Main is waiting. `/fabric chat oracle-astra` opens a specific child (Tab
+completes IDs); without a name it picks the active child. Full-screen view over
+the current Pi: no new session, Main and children keep running.
 
-Verified against pi-fabric 0.93.1 (docs and runtime tests inside Herdr):
+- Enter = steer: delivered after the child's current tool calls, before its
+  next model call (does not cut an answer, but changes what it does next).
+- Alt+Enter = follow-up: runs after the current run ends; must be queued
+  before it ends.
+- Completed one-shot child: `read-only`, messages rejected.
+- Ctrl+N or `/agents` switches agent; `/copy` copies the last answer (also for
+  completed runs); `/stop` stops the child (after confirmation).
+- Exit: `/back` or Esc twice (first Esc clears a selection); nothing stops.
 
-- **Fuzzy model resolution.** A near-miss key (e.g. `gpt-6-astr`) silently
-  resolves to the closest model on the same provider. Hence exact registry keys
-  and the `handle.model === expected` assertion.
+The Herdr tab shows only the raw worker terminal; chat shows the full
+transcript (thinking, tools, cost). For the oracle, type nothing: any message
+breaks its blindness.
+
+## Fabric: why and how
+
+Not for speed: a pilot benchmark (2026-09, `pi --no-extensions` vs Fabric full
+code mode, same model, 5 task types incl. three independent 30 s checks) showed
+no gain in turns, wall-clock or cost; both parallelized on their own (bash `&`
+vs `Promise.all`). Kept because it is installed and verified and gives the
+oracle a checked child run: Herdr tab, model verified before the task is sent,
+exact tool whitelist, `wait`/`stop`/status and `usage.cost`. Plain `pi -p
+--model … --no-extensions --tools read,grep,find,ls` could do most of it (not
+compared). Drop Fabric only if it causes problems.
+
+In full code mode the model calls tools only through `fabric_exec`
+(TypeScript `pi.*`, `agents.*`); you do not write this code, you use skills.
+
+`fabric.json` sets `executor.shellHangMs: 0`: a nested `pi.bash` waits for the
+command instead of returning `ok: true` + "still running" after 2 min, which
+made joins over long tests look successful. Use `background: true` only for
+intentionally unbounded processes. Needs a Pi restart.
+
+Deferred until measured need: an async "operations" layer or scheduler,
+automatic oracle routing (Jev), multi-oracle review, councils, another
+subagent framework.
+
+## Why the oracle skill looks like this
+
+Verified against pi-fabric 0.93.1 (docs and tests inside Herdr):
+
+- **Fuzzy model resolution.** A near-miss or missing key silently resolves to
+  the closest model of that provider; an alias named like a canonical key wins.
+  Hence exact registry keys, catalog preflight and `model === expected` checks
+  on handle and result. Fabric also verifies the model before sending the task;
+  residual races are accepted.
 - **`tools` alone is not read-only.** Extension-enabled children keep
-  `fabric_exec` as an outer tool. `extensions: false` + `read/grep/find/ls`
-  left only those four tools; a write attempt failed.
-- **`timeoutMs` cannot shorten a run.** Values below `agents.timeoutMs`
-  (default 24 h) are ignored. Hence the caller-side 20-minute race plus
-  `agents.stop`.
-- **Caller abort detaches, not stops,** a child that already made progress
-  (any turn or tool call). Hence explicit `agents.stop` on timeout.
-- **No follow-up after completion.** A finished one-shot child cannot receive a
-  second message, so "independent answer, then show the candidate" in one child
-  is not possible; Main does the comparison.
-- **Exact-key preflight.** A missing `provider/id` key silently fuzzy-matches
-  another model of that provider, and an alias named like a canonical key wins.
-  The skill checks the catalog before spawning; residual races are accepted.
-- **`stop` returning is not proof the process died**; reported as
-  `stopAcknowledged`.
+  `fabric_exec`. `extensions: false` + `read/grep/find/ls` left exactly those
+  four; a write attempt failed.
+- **`timeoutMs` cannot shorten a run** (values below `agents.timeoutMs`,
+  default 24 h, are ignored). Hence a caller-side 20-minute race plus
+  `agents.stop`. Caller abort detaches rather than stops a started child.
+  `stop` returning is not proof the process died (`stopAcknowledged`).
 - **Candidate-blind one-shot is the default, not a weak fallback.** The
-  reviewer's conclusion cannot anchor on a candidate it never saw; the only
-  residual bias is Main doing the comparison. A two-turn actor review is
-  deferred until usage shows Main wrongly dismissing correct reviews.
+  reviewer cannot anchor on a candidate it never saw; the residual bias is Main
+  doing the comparison. A finished one-shot takes no second message, so a
+  two-turn review would need a per-review actor; deferred until usage shows
+  Main wrongly dismissing correct reviews.
 - **`workspaceLabel`, not a fingerprint.** `HEAD` + hash of `git status` misses
-  content changes in already-modified files and evidence outside the repo.
+  content changes in modified files and evidence outside the repo.
 - **Provider choice is a disclosure decision.** Read-only prevents mutation,
   not sending evidence to that provider.
-
-Fabric itself verifies the child's model before sending the task and fails
-(without sending) on mismatch or unknown models; a failed run returns an empty
-`text`, which the skill reports as an error, not as a review.

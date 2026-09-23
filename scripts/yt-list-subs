@@ -1,73 +1,26 @@
 #!/bin/bash
+
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+	echo "Usage: $(basename "$0") <youtube-url>" >&2
+	exit 1
+fi
+
 URL="$1"
-yt-dlp -J --skip-download --no-playlist "$1" | jq -r '
-    . as $root
-    |
+
+yt-dlp -J --skip-download --no-playlist "$URL" |
+	jq -r '
     [
-      (
-        (.subtitles // {})
-        | to_entries[]
-        | .key as $alias
-        | .value
-        | map(select(.ext == "vtt")) as $vtts
-        | select($vtts | length > 0)
-        | {
-            alias: $alias,
-            type: "manual",
-            urls: ($vtts | map(.url)),
-            source_urls: (
-              $vtts
-              | map(select((.url | contains("tlang=")) | not) | .url)
-              | unique
-            ),
-            safe: (
-              $vtts | all((.url | contains("tlang=")) | not)
-            )
-          }
-      ),
-      (
-        (.automatic_captions // {})
-        | to_entries[]
-        | .key as $alias
-        | .value
-        | map(select(.ext == "vtt")) as $vtts
-        | select($vtts | length > 0)
-        | {
-            alias: $alias,
-            type: "auto",
-            urls: ($vtts | map(.url)),
-            source_urls: (
-              $vtts
-              | map(select((.url | contains("tlang=")) | not) | .url)
-              | unique
-            ),
-            safe: (
-              $vtts | all((.url | contains("tlang=")) | not)
-            )
-          }
-      )
+      (.subtitles // {}),
+      (.automatic_captions // {})
     ]
-    | . as $aliases
-    |
-    [
-      $aliases[]
-      | .source_urls[]
-      | {url: .}
-    ]
-    | unique_by(.url)
-    | .[]
-    | .url as $url
-    |
-    [
-      $aliases[]
-      | select(.source_urls | index($url))
-    ] as $matches
-    |
-    ($matches | map(select(.safe)) | .[0].alias // null) as $use
-    |
-    (try ($url | capture("[?&]lang=(?<x>[^&]+)") | .x) catch "?") as $lang
-    |
-    (try ($url | capture("[?&]variant=(?<x>[^&]+)") | .x) catch "-") as $variant
-    |
-    "\($lang)\t\($matches[0].type)\t\($variant)\taliases=[\($matches | map(.alias) | unique | join(","))]\tuse=\($use // "DIRECT-URL")"
-  '
+    | add
+    | to_entries[]
+    | .key as $alias
+    | [.value[] | select(.ext == "vtt")] as $vtts
+    | select($vtts | length > 0)
+    | select($vtts | all((.url | contains("tlang=")) | not))
+    | $alias
+  ' |
+	sort -u

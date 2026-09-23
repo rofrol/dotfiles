@@ -26,6 +26,10 @@
 !/.config/elinks
 !/.config/npm
 !/.config/readline
+# herdr: only config (skip logs, sockets, session state)
+!/.config/herdr/
+/.config/herdr/*
+!/.config/herdr/config.toml
 
 # and ssh configuration
 !/.ssh/

@@ -1,4 +1,19 @@
 #!/bin/bash
+#
+# Pick subtitle languages of a single YouTube video with fzf and download them
+# as VTT into the current directory (yt-dlp's configured output template
+# applies). The video itself is not downloaded.
+#
+# Goal: offer only aliases whose download will not hit an on-demand
+# translation (`tlang=`), because YouTube frequently answers those with
+# HTTP 429. The filter below predicts exactly which entry yt-dlp picks.
+#
+# Behavior verified against yt-dlp 2026.08.19 source (YoutubeDL.py,
+# process_subtitles; utils orderedSet_from_options). Re-check that code if
+# yt-dlp changes its subtitle selection.
+#
+# Exit status: 1 usage, 127 missing dependency, 2 no safe subtitles,
+# fzf's status on cancel (130), otherwise yt-dlp's status.
 
 set -euo pipefail
 
@@ -16,8 +31,14 @@ done
 
 URL="$1"
 
-# Fetch metadata once: subtitles are validated and downloaded from the same
-# snapshot, so the safety check below still holds at download time.
+# INVARIANT: the jq filter mirrors yt-dlp's selection only for this exact flag
+# set. If any of --write-subs, --write-auto-subs or --sub-format changes in
+# the final yt-dlp call, the filter must be updated too.
+
+# Fetch metadata once. The final call uses --load-info-json on the same file,
+# so the subtitle URLs checked here are exactly the ones downloaded. Fetching
+# twice would let YouTube return a different subtitle list (TOCTOU).
+# --no-playlist is needed only here; the info JSON already describes one video.
 INFO=$(mktemp)
 trap 'rm -f "$INFO"' EXIT
 yt-dlp -J --no-playlist --no-warnings -- "$URL" >"$INFO"
@@ -28,10 +49,14 @@ yt-dlp -J --no-playlist --no-warnings -- "$URL" >"$INFO"
 #
 # - Manual subtitles take precedence over automatic captions with the same
 #   alias; in jq object addition the right-hand side wins, so auto + manual
-#   reproduces that.
+#   reproduces that. Do not reorder the operands.
 # - For each alias yt-dlp downloads only the last VTT entry, so only that
 #   entry is checked. It is rejected when it is an on-demand translation
-#   (`tlang=...`), which YouTube often rate-limits (HTTP 429).
+#   (`tlang=...`), which YouTube often rate-limits (HTTP 429). Other VTT
+#   entries of the same alias are irrelevant because yt-dlp never tries them.
+# - If the winning (manual) entry has no VTT at all, yt-dlp would fall back to
+#   another format with a warning; such aliases are skipped, not replaced by
+#   the automatic caption, because yt-dlp would not use the automatic one.
 SUBS=$(
 	jq -r '
 		((.automatic_captions // {}) + (.subtitles // {}))
@@ -50,11 +75,17 @@ if [[ -z $SUBS ]]; then
 	exit 2
 fi
 
-# fzf exits 130 on cancel; propagate it instead of reporting success.
+# fzf exits 130 on cancel (1 on no match); under `set -e` the failing
+# assignment ends the script with that status instead of reporting success.
+# Output is one alias per line, never empty on success.
 SELECTED=$(printf '%s\n' "$SUBS" | fzf --multi --prompt='Subtitles: ')
 
-# --sub-langs takes regexes (applied with fullmatch); escape aliases so they
-# match literally.
+# --sub-langs takes comma-separated regexes applied with re.fullmatch and
+# re.IGNORECASE, so no ^...$ anchors are needed; escape metacharacters so each
+# alias matches literally. Known, accepted gaps: aliases differing only by
+# case would both match, and a literal alias named "all" or starting with "-"
+# would be interpreted by yt-dlp as a keyword/exclusion. YouTube language
+# codes do not have these forms.
 LANGS=$(printf '%s\n' "$SELECTED" | sed 's/[][\.*^$+?(){}|]/\\&/g' | paste -sd, -)
 
 yt-dlp \

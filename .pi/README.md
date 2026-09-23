@@ -41,6 +41,24 @@ failed attempt. Skip it for trivial changes.
   `agents.models({ runner: "pi" })`.
 - Finished oracle tabs stay open; close them manually.
 
-To change the model, edit the one-line `REGISTRY` in the skill. Background and
-test results: `~/pi-fabric-herdr-oracle-plan.md`,
-`~/pi-fabric-phase1-findings.md` (untracked).
+To change the model, edit the one-line `REGISTRY` in the skill.
+
+### Why the skill looks like this
+
+Verified against pi-fabric 0.93.1 (docs and runtime tests inside Herdr):
+
+- **Fuzzy model resolution.** A near-miss key (e.g. `gpt-6-astr`) silently
+  resolves to the closest model on the same provider. Hence exact registry keys
+  and the `handle.model === expected` assertion.
+- **`tools` alone is not read-only.** Extension-enabled children keep
+  `fabric_exec` as an outer tool. `extensions: false` + `read/grep/find/ls`
+  left only those four tools; a write attempt failed.
+- **`timeoutMs` cannot shorten a run.** Values below `agents.timeoutMs`
+  (default 24 h) are ignored. Hence the caller-side 20-minute race plus
+  `agents.stop`.
+- **Caller abort detaches, not stops,** a child that already made progress
+  (any turn or tool call). Hence explicit `agents.stop` on timeout.
+
+Fabric itself verifies the child's model before sending the task and fails
+(without sending) on mismatch or unknown models; a failed run returns an empty
+`text`, which the skill reports as an error, not as a review.

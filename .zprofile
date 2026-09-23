@@ -24,7 +24,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # https://apple.stackexchange.com/questions/337320/how-to-get-rid-of-application-downloaded-from-the-internet-message-when-instal/376476#376476
 export HOMEBREW_CASK_OPTS=--no-quarantine
 
-export DOTFILES_HOME=$HOME/.dotfiles.git
+export DOTFILES_HOME=$HOME/personal_projects/dotfiles
 source ~/dotfiles.sh
 
 echo '~/.zprofile sourced.'

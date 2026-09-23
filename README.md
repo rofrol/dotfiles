@@ -17,15 +17,18 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 
 # general instructions for all windows, macos, linux
 # git clone <your dotfiles repo>
-mv dotfiles/.git ~/.dotfiles.git
-export DOTFILES_HOME=$HOME/.dotfiles.git
-source dotfiles.sh
-don
+# Bare repo outside $HOME's discovery path; the work tree ($HOME) is attached
+# only by the d/don wrappers in dotfiles.sh (GIT_WORK_TREE=$HOME).
+# Do not set core.worktree: then a plain `git` inside the repo dir would operate on $HOME.
+git clone --bare git@github.com:rofrol/dotfiles.git ~/personal_projects/dotfiles
+export DOTFILES_HOME=$HOME/personal_projects/dotfiles
+git --git-dir=$DOTFILES_HOME config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
 # .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name
-git config core.excludesFile .dotfiles.gitignore
-git restore .
-dof
-rm -rf dotfiles
+# absolute path, so it also works when git runs from a cwd other than $HOME
+git --git-dir=$DOTFILES_HOME config core.excludesFile "$HOME/.dotfiles.gitignore"
+# fails on existing files instead of overwriting them; review, then add -f if intended
+git --git-dir=$DOTFILES_HOME --work-tree=$HOME checkout
+source ~/dotfiles.sh
 ```
 
 ## misc

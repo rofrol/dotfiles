@@ -1,7 +1,7 @@
 source $HOME/.xdg.sh
 
 [ -f ~/.bashrc_default_from_distribution ] && source ~/.bashrc_default_from_distribution
-export DOTFILES_HOME=$HOME/.dotfiles.git
+export DOTFILES_HOME=$HOME/personal_projects/dotfiles
 source ~/dotfiles.sh
 
 # https://unix.stackexchange.com/questions/285924/how-to-compare-a-programs-version-in-a-shell-script/567537#567537

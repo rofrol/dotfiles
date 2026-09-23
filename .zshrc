@@ -267,6 +267,23 @@ eval "$(omp completions zsh)"
 # herdr: remember foreground commands per pane (local.relaunch plugin)
 [[ -n $HERDR_PANE_ID ]] && source ~/.config/herdr/local-plugins/relaunch/relaunch.zsh
 
+
+pi() {
+	# pi detects subcommands only as argv[0] – do not prepend the flag
+	case ${1-} in
+		install|remove|uninstall|update|list|config|auth) command pi "$@"; return ;;
+	esac
+
+	local root policy="$HOME/AGENTS.policy.md"
+	# like lazygit: git root honors GIT_DIR/GIT_WORK_TREE (`don` mode)
+	root=$(git rev-parse --show-toplevel 2>/dev/null)
+	if [[ -n $root && $root -ef $HOME && -r $policy ]]; then
+		command pi --append-system-prompt "$policy" "$@"
+	else
+		command pi "$@"
+	fi
+}
+
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local
 

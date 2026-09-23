@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.85.1",
   "theme": "light",
-  "defaultProvider": "openai",
-  "defaultModel": "gpt-6-astra",
+  "defaultProvider": "openrouter",
+  "defaultModel": "anthropic/claude-opus-5.5",
   "defaultThinkingLevel": "low",
   "showCacheMissNotices": true,
   "packages": [

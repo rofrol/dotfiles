@@ -1,0 +1,75 @@
+#!/bin/bash
+
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+	echo "Usage: $(basename "$0") <youtube-url>" >&2
+	exit 1
+fi
+
+for cmd in yt-dlp jq fzf; do
+	command -v "$cmd" >/dev/null || {
+		echo "Missing dependency: $cmd" >&2
+		exit 127
+	}
+done
+
+URL="$1"
+
+# Fetch metadata once: subtitles are validated and downloaded from the same
+# snapshot, so the safety check below still holds at download time.
+INFO=$(mktemp)
+trap 'rm -f "$INFO"' EXIT
+yt-dlp -J --no-playlist --no-warnings -- "$URL" >"$INFO"
+
+# List subtitle aliases that are safe to use with:
+#
+#   --write-subs --write-auto-subs --sub-format vtt --sub-langs <alias>
+#
+# Manual and automatic captions must be checked together. The same alias can
+# exist in both; merging the objects with `+` would overwrite duplicate keys.
+#
+# An alias is rejected if any of its VTT entries is an on-demand translation
+# (`tlang=...`), because yt-dlp may try that entry when the alias is selected.
+SUBS=$(
+	jq -r '
+		[
+			(.subtitles, .automatic_captions)
+			| . // {}
+			| to_entries[]
+			| .key as $lang
+			| .value[]?
+			| select(.ext == "vtt")
+			| {lang: $lang, url: .url}
+		]
+		| group_by(.lang)[]
+		| select(
+			all(
+				.[];
+				(.url | type) == "string"
+				and (.url | length) > 0
+				and (.url | test("[?&]tlang=") | not)
+			)
+		)
+		| .[0].lang
+	' "$INFO"
+)
+
+if [[ -z $SUBS ]]; then
+	echo "No safe VTT subtitles found" >&2
+	exit 2
+fi
+
+# fzf exits 130 on cancel; propagate it instead of reporting success.
+SELECTED=$(printf '%s\n' "$SUBS" | fzf --multi --prompt='Subtitles: ')
+
+# --sub-langs takes regexes; escape aliases so they match literally.
+LANGS=$(printf '%s\n' "$SELECTED" | sed 's/[][\.*^$+?(){}|]/\\&/g' | paste -sd, -)
+
+yt-dlp \
+	--load-info-json "$INFO" \
+	--skip-download \
+	--write-subs \
+	--write-auto-subs \
+	--sub-format vtt \
+	--sub-langs "$LANGS"

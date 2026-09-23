@@ -264,6 +264,9 @@ alias e='emacs -nw'
 
 eval "$(omp completions zsh)"
 
+# herdr: remember foreground commands per pane (local.relaunch plugin)
+[[ -n $HERDR_PANE_ID ]] && source ~/.config/herdr/local-plugins/relaunch/relaunch.zsh
+
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local
 

@@ -198,5 +198,12 @@
 /.pi/agent/*
 !/.pi/agent/settings.json
 !/.pi/agent/models.json
+!/.pi/agent/extensions
+/.pi/agent/extensions/*
+!/.pi/agent/extensions/remember-model.ts
+!/.pi/README.md
+!/.pi/agent/skills
+/.pi/agent/skills/*
+!/.pi/agent/skills/oracle
 
 !/AGENTS.md

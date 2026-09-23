@@ -6,6 +6,7 @@
   "defaultThinkingLevel": "low",
   "showCacheMissNotices": true,
   "packages": [
-    "npm:@narumitw/pi-usage"
+    "npm:@narumitw/pi-usage",
+    "npm:pi-fabric"
   ]
 }

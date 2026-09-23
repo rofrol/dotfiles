@@ -9,6 +9,26 @@ command to finish instead of returning `ok: true` + "still running" after 2 min,
 which made joins over long tests look successful. Use `background: true` only
 for intentionally unbounded processes. Takes effect after restarting Pi.
 
+## Fabric: why and how
+
+Why: not for speed (see below: no measured gain in normal work). It is kept
+because it is installed and verified, and it gives the oracle a checked child
+run: visible Herdr tab, model verified before the task is sent, exact tool
+whitelist without extensions, `wait`/`stop`/status and `usage.cost`. A plain
+`pi -p --model … --no-extensions --tools read,grep,find,ls` from bash could do
+most of this (not compared yet). Drop Fabric only if it causes problems.
+
+How: in full code mode the model calls tools only through `fabric_exec`
+(TypeScript: `pi.read/grep/bash/edit`, `Promise.all` for parallel work,
+`agents.spawn/wait/stop` for children). You do not write this code; you use
+skills such as `/skill:oracle`.
+
+`/fabric chat [id-or-name]` (or ctrl+shift+a): full-screen live conversation
+with a child agent; send steering/follow-ups to a running child, switch
+agents, return to Main without stopping it; `/copy` copies text. Completed
+one-shot children are read-only. For the oracle, steering with Main's
+candidate breaks its blindness: use chat to watch, not to hint.
+
 ## What not to build (measured 2026-09)
 
 A pilot benchmark (`pi --no-extensions` vs Fabric full code mode, same model,

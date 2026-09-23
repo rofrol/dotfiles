@@ -274,6 +274,11 @@ pi() {
 		install|remove|uninstall|update|list|config|auth) command pi "$@"; return ;;
 	esac
 
+	# in $HOME, switch the shell to dotfiles mode first so git sees the dotfiles repo
+	if [[ $PWD == $HOME && $GIT_DIR != $DOTFILES_HOME ]] && (( $+functions[don] )); then
+		don
+	fi
+
 	local root policy="$HOME/AGENTS.policy.md"
 	# like lazygit: git root honors GIT_DIR/GIT_WORK_TREE (`don` mode)
 	root=$(git rev-parse --show-toplevel 2>/dev/null)

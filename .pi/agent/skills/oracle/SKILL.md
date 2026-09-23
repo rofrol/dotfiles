@@ -112,8 +112,9 @@ try {
     return done({ error: `exact model ${expected} not in pi catalog; not spawned` });
   }
 
+  const [provider, ...modelParts] = expected.split("/");
   const spawning = agents.spawn({
-    name: `oracle-${reviewer}`, runner: "pi", model: expected, thinking: "high",
+    name: `oracle-${modelParts.join("-")}@${provider}`, runner: "pi", model: expected, thinking: "high",
     tools: ["read", "grep", "find", "ls"], extensions: false, transport: "herdr", task,
   });
   let h: any;

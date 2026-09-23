@@ -30,7 +30,9 @@ Skill: `~/.pi/agent/skills/oracle/SKILL.md`. Requires the `pi-fabric` package
 The oracle is a separate read-only agent (`read/grep/find/ls`, no extensions)
 in its own Herdr tab. Reviewers (closed registry, chosen explicitly, never
 auto-fallback): `astra` = `openai-codex/gpt-6-astra` (default),
-`astra-api` = `openai/gpt-6-astra`, `deepseek` = `deepseek/deepseek-v4-pro`.
+`astra-api` = `openai/gpt-6-astra`,
+`astra-openrouter` = `openrouter/openai/gpt-6-astra` (~$2.40 per plan review vs
+~$0.2 for deepseek; only on request), `deepseek` = `deepseek/deepseek-v4-pro`.
 
 ### Usage
 
@@ -56,7 +58,8 @@ failed attempt. Skip it for trivial changes.
 ### Failures
 
 - `spawn failed` — usually Pi started outside Herdr (no transport fallback).
-- `timeout` (20 min, best-effort) / `error` / `invalid` — not a review; use
+- `timeout` (20 min, best-effort, covers spawn too) / `cancelled` (reviewer
+  stopped) / `error` / `invalid` — not a review; use
   the shown `herdr terminal attach …` to inspect. Provider limits (Codex usage
   limit, no API credits) surface here as `error`.
 - `exact model … not in pi catalog` — key missing; nothing was spawned.
@@ -90,6 +93,14 @@ Verified against pi-fabric 0.93.1 (docs and runtime tests inside Herdr):
   The skill checks the catalog before spawning; residual races are accepted.
 - **`stop` returning is not proof the process died**; reported as
   `stopAcknowledged`.
+- **Candidate-blind one-shot is the default, not a weak fallback.** The
+  reviewer's conclusion cannot anchor on a candidate it never saw; the only
+  residual bias is Main doing the comparison. A two-turn actor review is
+  deferred until usage shows Main wrongly dismissing correct reviews.
+- **`workspaceLabel`, not a fingerprint.** `HEAD` + hash of `git status` misses
+  content changes in already-modified files and evidence outside the repo.
+- **Provider choice is a disclosure decision.** Read-only prevents mutation,
+  not sending evidence to that provider.
 
 Fabric itself verifies the child's model before sending the task and fails
 (without sending) on mismatch or unknown models; a failed run returns an empty

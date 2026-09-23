@@ -32,7 +32,10 @@ in its own Herdr tab. Reviewers (closed registry, chosen explicitly, never
 auto-fallback): `astra` = `openai-codex/gpt-6-astra` (default),
 `astra-api` = `openai/gpt-6-astra`,
 `astra-openrouter` = `openrouter/openai/gpt-6-astra` (~$2.40 per plan review vs
-~$0.2 for deepseek; only on request), `deepseek` = `deepseek/deepseek-v4-pro`.
+~$0.2 for deepseek; only on request), `luna` = `openai-codex/gpt-6-luna`, `sol` = `openai-codex/gpt-6-sol`,
+`luna-openrouter` / `sol-openrouter` = `openrouter/openai/gpt-6-{luna,sol}`
+(pay-per-token; only on request), `deepseek` = `deepseek/deepseek-v4-pro`.
+luna/sol are unevaluated against astra; `gpt-6-terra` is not in the catalog yet.
 
 ### Usage
 

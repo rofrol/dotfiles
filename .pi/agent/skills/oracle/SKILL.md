@@ -16,6 +16,10 @@ Protocol: `candidate-blind-one-shot/main-reconciliation`. Supported reviewers:
   approves switching.
 - `astra-openrouter`: `openrouter/openai/gpt-6-astra` (OpenRouter, pay-per-token,
   roughly 10x the cost of `deepseek` per review). Use only when the user asks for it.
+- `luna`: `openai-codex/gpt-6-luna`, `sol`: `openai-codex/gpt-6-sol` (Codex
+  subscription). Use only when the user asks for them.
+- `luna-openrouter`: `openrouter/openai/gpt-6-luna`, `sol-openrouter`:
+  `openrouter/openai/gpt-6-sol` (OpenRouter, pay-per-token). Only on request.
 - `deepseek`: `deepseek/deepseek-v4-pro` (DeepSeek API). Different model family;
   use when the user asks for it.
 
@@ -56,6 +60,10 @@ const REGISTRY = {
   astra: "openai-codex/gpt-6-astra",
   "astra-api": "openai/gpt-6-astra",
   "astra-openrouter": "openrouter/openai/gpt-6-astra",
+  luna: "openai-codex/gpt-6-luna",
+  "luna-openrouter": "openrouter/openai/gpt-6-luna",
+  sol: "openai-codex/gpt-6-sol",
+  "sol-openrouter": "openrouter/openai/gpt-6-sol",
   deepseek: "deepseek/deepseek-v4-pro",
 } as const;
 const reviewer: keyof typeof REGISTRY = "astra";

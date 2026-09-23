@@ -30,6 +30,7 @@
 !/.config/herdr/
 /.config/herdr/*
 !/.config/herdr/config.toml
+!/.config/herdr/README.md
 
 # and ssh configuration
 !/.ssh/

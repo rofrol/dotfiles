@@ -14,13 +14,13 @@ for intentionally unbounded processes. Takes effect after restarting Pi.
 A pilot benchmark (`pi --no-extensions` vs Fabric full code mode, same model,
 5 task types incl. three independent 30 s checks) showed no gain in turns,
 wall-clock or cost from Fabric; both configs parallelized on their own (bash
-`&` vs `Promise.all`). Therefore do not add:
+`&` vs `Promise.all`). Therefore do not add an async "operations" layer or
+scheduler on top of Fabric/bash. Revisit only with new measurements.
 
-- an async "operations" layer or scheduler on top of Fabric/bash;
-- automatic oracle routing (Jev), multi-oracle review, councils;
-- another subagent framework, unless Fabric lacks a concrete capability.
-
-Revisit only with new measurements.
+Not measured, deferred for lack of usage data: automatic oracle routing (Jev),
+multi-oracle review, councils, another subagent framework. Consider them only
+after real oracle use shows a need (e.g. how often a review changed the answer
+or found a defect).
 
 ## Oracle: independent second opinion
 

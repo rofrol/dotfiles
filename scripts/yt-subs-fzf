@@ -22,36 +22,26 @@ INFO=$(mktemp)
 trap 'rm -f "$INFO"' EXIT
 yt-dlp -J --no-playlist --no-warnings -- "$URL" >"$INFO"
 
-# List subtitle aliases that are safe to use with:
+# Mirror yt-dlp's subtitle selection (YoutubeDL.process_subtitles) for:
 #
 #   --write-subs --write-auto-subs --sub-format vtt --sub-langs <alias>
 #
-# Manual and automatic captions must be checked together. The same alias can
-# exist in both; merging the objects with `+` would overwrite duplicate keys.
-#
-# An alias is rejected if any of its VTT entries is an on-demand translation
-# (`tlang=...`), because yt-dlp may try that entry when the alias is selected.
+# - Manual subtitles take precedence over automatic captions with the same
+#   alias; in jq object addition the right-hand side wins, so auto + manual
+#   reproduces that.
+# - For each alias yt-dlp downloads only the last VTT entry, so only that
+#   entry is checked. It is rejected when it is an on-demand translation
+#   (`tlang=...`), which YouTube often rate-limits (HTTP 429).
 SUBS=$(
 	jq -r '
-		[
-			(.subtitles, .automatic_captions)
-			| . // {}
-			| to_entries[]
-			| .key as $lang
-			| .value[]?
-			| select(.ext == "vtt")
-			| {lang: $lang, url: .url}
-		]
-		| group_by(.lang)[]
-		| select(
-			all(
-				.[];
-				(.url | type) == "string"
-				and (.url | length) > 0
-				and (.url | test("[?&]tlang=") | not)
-			)
-		)
-		| .[0].lang
+		((.automatic_captions // {}) + (.subtitles // {}))
+		| to_entries[]
+		| .key as $lang
+		| [.value[]? | select(.ext == "vtt")] as $vtts
+		| select($vtts | length > 0)
+		| $vtts[-1].url
+		| select(type == "string" and length > 0 and (test("[?&]tlang=") | not))
+		| $lang
 	' "$INFO"
 )
 
@@ -63,7 +53,8 @@ fi
 # fzf exits 130 on cancel; propagate it instead of reporting success.
 SELECTED=$(printf '%s\n' "$SUBS" | fzf --multi --prompt='Subtitles: ')
 
-# --sub-langs takes regexes; escape aliases so they match literally.
+# --sub-langs takes regexes (applied with fullmatch); escape aliases so they
+# match literally.
 LANGS=$(printf '%s\n' "$SELECTED" | sed 's/[][\.*^$+?(){}|]/\\&/g' | paste -sd, -)
 
 yt-dlp \

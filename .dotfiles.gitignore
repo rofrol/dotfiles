@@ -212,4 +212,4 @@
 /.pi/agent/skills/*
 !/.pi/agent/skills/oracle
 
-!/AGENTS.md
+!/AGENTS.policy.md

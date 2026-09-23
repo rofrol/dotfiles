@@ -25,6 +25,8 @@ Protocol: `candidate-blind-one-shot/main-reconciliation`. Supported reviewers:
   approves switching.
 - `deepseek`: `deepseek/deepseek-v4-pro` (DeepSeek API). Different model family;
   use when the user asks for it.
+- `gemini-flash`: `openrouter/google/gemini-3.8-flash` (OpenRouter, pay-per-token,
+  cheap). Different model family (Google); use when the user asks for it.
 
 Reject any other name; do not invent model keys. Never fall back between
 reviewers automatically.
@@ -68,6 +70,7 @@ const REGISTRY = {
   sol: "openai-codex/gpt-6-sol",
   "sol-openrouter": "openrouter/openai/gpt-6-sol",
   deepseek: "deepseek/deepseek-v4-pro",
+  "gemini-flash": "openrouter/google/gemini-3.8-flash",
 } as const;
 const reviewers: (keyof typeof REGISTRY)[] = ["astra"]; // one or more; run in parallel
 const protocol = "candidate-blind-one-shot/main-reconciliation";

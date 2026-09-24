@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Ask DeepSeek for a second opinion. Prompt from args or stdin; files via -f."""
-import argparse, json, os, sys, urllib.request, urllib.error
+import argparse, json, os, select, sys, urllib.request, urllib.error
 from pathlib import Path
 
 KEY_FILE = Path.home() / ".config/deepseek/api_key"
+STDIN_WAIT = 10
 
 def get_key():
     key = os.environ.get("DEEPSEEK_API_KEY")
@@ -24,7 +25,9 @@ def main():
     a = p.parse_args()
 
     prompt = " ".join(a.prompt)
-    if not sys.stdin.isatty():
+    # A background job can inherit an open stdin that never sends data or EOF;
+    # read it only if it becomes readable within STDIN_WAIT seconds.
+    if not sys.stdin.isatty() and select.select([sys.stdin], [], [], STDIN_WAIT)[0]:
         piped = sys.stdin.read()
         prompt = f"{prompt}\n\n{piped}" if prompt else piped
     for f in a.file:

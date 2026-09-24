@@ -9,7 +9,9 @@ dir="${1:-$PWD}"
 find "$dir" -type f -print0 |
 	while IFS= read -r -d '' f; do
 		case "$(file -b --mime-type -- "$f")" in
-		video/*) printf '%s\t%s\n' "$(stat -f%z -- "$f")" "$f" ;;
+		# wc -c instead of stat: stat flags differ between BSD and GNU;
+		# BSD wc pads the number with spaces, arithmetic strips them
+		video/*) printf '%s\t%s\n' "$(($(wc -c <"$f")))" "$f" ;;
 		esac
 	done |
 	sort -t $'\t' -k1,1nr |

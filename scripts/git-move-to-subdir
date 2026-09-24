@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#
+# Move the whole history (every branch and tag) into subdirectory DIR, with
+# git filter-repo (brew install git-filter-repo). Typical use: merging this
+# repo into another one while keeping its history:
+#
+#   git clone other-repo /tmp/other && cd /tmp/other
+#   git move-to-subdir other
+#   cd ~/target-repo
+#   git remote add other /tmp/other && git fetch other
+#   git merge --allow-unrelated-histories other/main
+#
+#   git move-to-subdir DIR [filter-repo args...]
+#
+# filter-repo refuses a repo that is not a fresh clone; add --force to
+# override. It also removes the origin remote so the rewritten history is not
+# pushed by accident.
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+	echo "Usage: git move-to-subdir DIR [filter-repo args...]" >&2
+	exit 1
+fi
+
+dir=${1%/}
+shift
+
+case "/$dir/" in
+//* | */../* | */./*)
+	echo "DIR must be a relative path without . or .. components: '$dir'" >&2
+	exit 1
+	;;
+esac
+
+git filter-repo --to-subdirectory-filter "$dir" "$@"
+
+# https://github.com/newren/git-filter-repo/blob/main/Documentation/git-filter-repo.txt (--to-subdirectory-filter)

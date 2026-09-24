@@ -268,41 +268,8 @@ eval "$(omp completions zsh)"
 [[ -n $HERDR_PANE_ID ]] && source ~/.config/herdr/local-plugins/relaunch/relaunch.zsh
 
 
-pi() {
-	# pi detects subcommands only as argv[0] – do not prepend the flag
-	case ${1-} in
-		install|remove|uninstall|update|list|config|auth) command pi "$@"; return ;;
-	esac
-
-	# in $HOME, switch the shell to dotfiles mode first so git sees the dotfiles repo
-	if [[ $PWD == $HOME && $GIT_DIR != $DOTFILES_HOME ]] && (( $+functions[don] )); then
-		don
-	fi
-
-	local root policy="$HOME/AGENTS.policy.md"
-	# like lazygit: git root honors GIT_DIR/GIT_WORK_TREE (`don` mode)
-	root=$(git rev-parse --show-toplevel 2>/dev/null)
-	if [[ -n $root && $root -ef $HOME && -r $policy ]]; then
-		command pi --append-system-prompt "$policy" "$@"
-	else
-		command pi "$@"
-	fi
-}
-
-lazygit() {
-	# in $HOME, switch the shell to dotfiles mode first so lazygit opens the dotfiles repo
-	if [[ $PWD == $HOME && $GIT_DIR != $DOTFILES_HOME ]] && (( $+functions[don] )); then
-		don
-	fi
-	command lazygit "$@"
-}
-
-# herdr: new shells in $HOME start in dotfiles mode (`don` from ~/dotfiles.sh,
-# loaded by ~/.zprofile). The relaunch plugin relies on this instead of
-# replaying `don` itself.
-if [[ -o interactive && "$HERDR_ENV" == "1" && "$PWD" == "$HOME" && $GIT_DIR != $DOTFILES_HOME ]] && (( $+functions[don] )); then
-	don
-fi
+# tool wrappers that enter dotfiles mode when run in $HOME
+[ -f ~/.zshrc_dotfiles_mode ] && source ~/.zshrc_dotfiles_mode
 
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local

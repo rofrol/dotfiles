@@ -77,6 +77,7 @@
 !/.zshrc_pyenv
 !/.zshrc_sdkman
 !/.zshrc_atuin
+!/.zshrc_dotfiles_mode
 
 # and a selection of hidden configuration files.
 !/.*rc

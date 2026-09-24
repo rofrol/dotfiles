@@ -1,0 +1,34 @@
+# Wrappers that switch the shell to dotfiles mode (`don` from ~/dotfiles.sh)
+# when started in $HOME, so the tool sees the dotfiles repo as git root.
+# Sourced by ~/.zshrc. New shells do NOT enter dotfiles mode on their own.
+
+# in $HOME, switch the shell to dotfiles mode first so git sees the dotfiles repo
+_dotfiles_on_in_home() {
+	if [[ $PWD == $HOME && $GIT_DIR != $DOTFILES_HOME ]] && (( $+functions[don] )); then
+		don
+	fi
+}
+
+pi() {
+	# pi detects subcommands only as argv[0] – do not prepend the flag
+	case ${1-} in
+		install|remove|uninstall|update|list|config|auth) command pi "$@"; return ;;
+	esac
+
+	_dotfiles_on_in_home
+
+	local root policy="$HOME/AGENTS.policy.md"
+	# like lazygit: git root honors GIT_DIR/GIT_WORK_TREE (`don` mode)
+	root=$(git rev-parse --show-toplevel 2>/dev/null)
+	if [[ -n $root && $root -ef $HOME && -r $policy ]]; then
+		command pi --append-system-prompt "$policy" "$@"
+	else
+		command pi "$@"
+	fi
+}
+
+lazygit() { _dotfiles_on_in_home; command lazygit "$@"; }
+claude()  { _dotfiles_on_in_home; command claude "$@"; }
+codex()   { _dotfiles_on_in_home; command codex "$@"; }
+agi()     { _dotfiles_on_in_home; command agi "$@"; }
+omp()     { _dotfiles_on_in_home; command omp "$@"; }

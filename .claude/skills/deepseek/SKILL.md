@@ -11,10 +11,10 @@ Run the helper script (stdlib Python, no deps):
 ~/.claude/skills/deepseek/ask_deepseek.py "question"                  # deepseek-flash = DeepSeek V4.1 (default)
 ~/.claude/skills/deepseek/ask_deepseek.py -m deepseek-v4-pro "q"     # older V4-Pro-0813, only if asked
 ~/.claude/skills/deepseek/ask_deepseek.py -f src/foo.py "Find bugs in this file"
-git diff | ~/.claude/skills/deepseek/ask_deepseek.py "Review this diff"
+git diff | ~/.claude/skills/deepseek/ask_deepseek.py -f - "Review this diff"   # stdin only via -f -
 ```
 
-Options: `-f FILE` (repeatable), `-s SYSTEM_PROMPT`, `--show-reasoning`, env `DEEPSEEK_MODEL`, `DEEPSEEK_BASE_URL`.
+Options: `-f FILE` (repeatable; `-f -` = stdin, never read implicitly), `-s SYSTEM_PROMPT`, `--show-reasoning`, env `DEEPSEEK_MODEL`, `DEEPSEEK_BASE_URL`.
 Answers can take a few minutes — use a Bash timeout of 600000.
 
 Guidelines:

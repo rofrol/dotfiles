@@ -18,10 +18,10 @@ when gpt-6-sol/luna appear there, update the `case` in ask_gpt.sh.
 ~/.claude/skills/gpt/ask_gpt.sh -e high "hard question"     # more reasoning, uses more of the Plus limit
 ~/.claude/skills/gpt/ask_gpt.sh -m luna "q"                 # gpt-5.6-luna: older, fast; also sol, terra
 ~/.claude/skills/gpt/ask_gpt.sh -f src/foo.py "Find bugs in this file"
-git diff | ~/.claude/skills/gpt/ask_gpt.sh "Review this diff"
+git diff | ~/.claude/skills/gpt/ask_gpt.sh -f - "Review this diff"   # stdin only via -f -
 ```
 
-Options: `-m astra|sol|terra|luna|<full id>`, `-e low|medium|high|xhigh` (reasoning effort), `-f FILE` (repeatable), env `GPT_MODEL`.
+Options: `-m astra|sol|terra|luna|<full id>`, `-e low|medium|high|xhigh` (reasoning effort), `-f FILE` (repeatable; `-f -` = stdin, never read implicitly), env `GPT_MODEL`.
 Codex runs ephemeral, read-only sandbox, in an empty temp dir — it sees only what you put in the prompt.
 Answers can take a few minutes — use a Bash timeout of 600000.
 

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Ask DeepSeek for a second opinion. Prompt from args or stdin; files via -f."""
-import argparse, json, os, select, sys, urllib.request, urllib.error
+"""Ask DeepSeek for a second opinion. Prompt from args; files via -f (-f - reads stdin)."""
+import argparse, json, os, sys, urllib.request, urllib.error
 from pathlib import Path
 
 KEY_FILE = Path.home() / ".config/deepseek/api_key"
-STDIN_WAIT = 10
 
 def get_key():
     key = os.environ.get("DEEPSEEK_API_KEY")
@@ -19,19 +18,16 @@ def main():
     p.add_argument("prompt", nargs="*")
     p.add_argument("-m", "--model", default=os.environ.get("DEEPSEEK_MODEL", "deepseek-flash"),
                    help="deepseek-flash = DeepSeek V4.1 (default) or deepseek-v4-pro = V4-Pro-0813")
-    p.add_argument("-f", "--file", action="append", default=[], help="attach file contents")
+    p.add_argument("-f", "--file", action="append", default=[], help="attach file contents (- = stdin)")
     p.add_argument("-s", "--system", default="You are a senior engineer giving a candid second opinion. Be concise and concrete; point out mistakes and risks.")
     p.add_argument("--show-reasoning", action="store_true")
     a = p.parse_args()
 
     prompt = " ".join(a.prompt)
-    # A background job can inherit an open stdin that never sends data or EOF;
-    # read it only if it becomes readable within STDIN_WAIT seconds.
-    if not sys.stdin.isatty() and select.select([sys.stdin], [], [], STDIN_WAIT)[0]:
-        piped = sys.stdin.read()
-        prompt = f"{prompt}\n\n{piped}" if prompt else piped
+    # stdin only via -f -: a background job can inherit an open stdin that never sends EOF.
     for f in a.file:
-        prompt += f"\n\n--- {f} ---\n{Path(f).read_text(errors='replace')}"
+        text = sys.stdin.read() if f == "-" else Path(f).read_text(errors="replace")
+        prompt += f"\n\n--- {'stdin' if f == '-' else f} ---\n{text}"
     if not prompt.strip():
         sys.exit("Pusty prompt")
 

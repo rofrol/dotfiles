@@ -64,23 +64,8 @@ env -u GIT_DIR -u GIT_WORK_TREE git push --force-with-lease
 herdr status   # compare client/server version and protocol
 ```
 
-Then pick up the new binary without losing panes:
-
-- Client-side changes (TUI: mouse, notifications — everything in this fork so
-  far): detach with `prefix+q` and run `herdr` again. Panes and agents live in
-  the server and keep running.
-- Server-side changes: swap the running server in place with the live
-  handoff (what `herdr update --handoff` uses; pane processes survive):
-
-  ```sh
-  herdr server live-handoff --import-exe ~/.cargo/bin/herdr
-  herdr status
-  ```
-
-  Upstream marks live handoff experimental (Unix only); a running agent may
-  briefly show as idle after it. If it fails, the old server normally keeps
-  running; otherwise `herdr server stop` + `herdr` restarts it (panes come back as
-  shells, see relaunch below).
+To pick up the new binary without losing panes, see the fork's README
+(`~/personal_projects/herdr/README.md`, "Fork changes").
 
 ## Relaunching programs after a restart
 

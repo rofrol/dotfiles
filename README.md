@@ -1,119 +1,182 @@
-Run `don` and `dof` to enable/disable git repo here.
+Dotfiles kept in a bare git repo (`$DOTFILES_HOME=~/personal_projects/dotfiles`) with `$HOME` as the work tree.
+
+- `git` is shimmed by `~/scripts/dotfiles-shim/git` (put first in `PATH` by `~/.zshrc_dotfiles_mode`): in `$HOME` and in dirs not ignored by `.dotfiles.gitignore`, outside other repos, plain `git`, lazygit etc. operate on the dotfiles repo. `GIT_DIR` is not exported. Disable with `DOTFILES_AUTO=0`.
+- `don` / `dof` from `dotfiles.sh` force / undo dotfiles mode in the current shell (export `GIT_DIR` and `GIT_WORK_TREE`).
 
 Architecture based on <https://github.com/jan-warchol/dotfiles>
 
 Another interesting approach <https://mitxela.com/projects/dotfiles_management>
 
-After cloning repository:
+## Bootstrap
+
+macOS: install Homebrew and git first:
 
 ```bash
-# install git on macos
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+eval "$(/opt/homebrew/bin/brew shellenv)"
 brew install git
 export PATH="$(brew --prefix git)/bin/:$PATH"
+```
 
+Generate an SSH key and add `~/.ssh/id_ed25519.pub` to github.com > Settings > SSH and GPG keys > New SSH key:
+
+```bash
 ssh-keygen -t ed25519 -C "your_email@example.com"
-# add ~/.ssh/id_ed25519.pub to github.com > Settings > SSH and GPG keys > New SSH key
+```
 
-# general instructions for all windows, macos, linux
-# git clone <your dotfiles repo>
+Clone the repo (bash/zsh on macOS and Linux, Git Bash or WSL on Windows):
+
+```bash
 # Bare repo outside $HOME's discovery path; the work tree ($HOME) is attached
-# only by the d/don wrappers in dotfiles.sh (GIT_WORK_TREE=$HOME).
+# only by the git shim and don (GIT_WORK_TREE=$HOME).
 # Do not set core.worktree: then a plain `git` inside the repo dir would operate on $HOME.
+mkdir -p ~/personal_projects
 git clone --bare git@github.com:rofrol/dotfiles.git ~/personal_projects/dotfiles
 export DOTFILES_HOME=$HOME/personal_projects/dotfiles
 git --git-dir=$DOTFILES_HOME config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+git --git-dir=$DOTFILES_HOME fetch origin
+git --git-dir=$DOTFILES_HOME branch --set-upstream-to=origin/master master
 # .gitignore is read by ripgrep and fd-find in Ubuntu WSL2 and git bash, so I need to use different file name
 # absolute path, so it also works when git runs from a cwd other than $HOME
 git --git-dir=$DOTFILES_HOME config core.excludesFile "$HOME/.dotfiles.gitignore"
 # fails on existing files instead of overwriting them; review, then add -f if intended
 git --git-dir=$DOTFILES_HOME --work-tree=$HOME checkout
-source ~/dotfiles.sh
+# new login shell: ~/.zprofile sets DOTFILES_HOME and sources dotfiles.sh,
+# ~/.zshrc enables the git shim
+exec zsh -l
 ```
 
-## misc
+## macOS
 
-casks:
+### Homebrew packages
+
+Casks:
 
 ```shell
 brew install --cask karabiner-elements alt-tab rectangle stats iina firefox google-chrome monitorcontrol
-
-formulas:
-
-# coreutils for ls alias
-# pqdf to decrypt and unprotect pdf files
-# mkvtoolnix for mkvinfo and mkvextract
-brew install git git-gui gh neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt curl coreutils gnused eza yt-dlp mpv qpdf mkvtoolnix alass ffmpeg
 ```
 
-`git clone <git@github.com>:rofrol/LazyVim--starter ~/.config/nvim`
+Formulas:
 
+```shell
+# coreutils for ls alias
+# qpdf to decrypt and unprotect pdf files
+# mkvtoolnix for mkvinfo and mkvextract
+brew install git git-gui gh neovim ripgrep atuin fzf zsh-autosuggestions oh-my-posh zsh-git-prompt curl coreutils gnu-sed eza yt-dlp mpv qpdf mkvtoolnix alass ffmpeg
 ```
 
 `atuin login`
+
+### Neovim
+
+```shell
+git clone git@github.com:rofrol/LazyVim--starter.git ~/.config/nvim
+```
 
 mason in neovim needs npm:
 
 ```shell
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+. ~/.nvm/nvm.sh # or restart the shell
 nvm install node
 nvm alias default node
 ```
 
-`mkdir -p ~/.zsh && cd ~/.zsh && git clone https://github.com/zsh-users/zsh-autosuggestions`
-
-## lazygit
+### lazygit
 
 ```shell
+mkdir -p ~/Library/Application\ Support/lazygit
 ln -s ~/.config/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml
 brew install diff-so-fancy
 ```
 
-## .ignore
+### nushell
+
+`ln -s ~/.config/nushell ~/Library/Application\ Support/`
+
+- <https://github.com/nushell/nushell/issues/10746>
+- <https://github.com/nushell/nushell/issues/893>
+- my answer <https://superuser.com/questions/1804643/how-do-i-change-the-default-location-for-nushell-configration-files/1827175#1827175>
+
+In iTerm2 set `Preferences > Profiles > General > Command > Command` to `/opt/homebrew/bin/nu`
+
+`brew install nushell starship`
+
+Run in nushell:
+
+```nu
+mkdir ~/.cache/starship
+starship init nu | save -f ~/.cache/starship/init.nu
+```
+
+## Common
+
+### .ignore
 
 I have added some directories like `/projects/` to `.ignore`, so that ripgrep or telescope in neovim do not search them.
 
-if you start a glob pattern with a `/`, then it will only match that specific path relative to where ripgrep is running
+A glob pattern starting with `/` is anchored to the directory containing the `.ignore` file (here `$HOME`), so it matches only that path, not `projects/` in subdirectories.
 
 <https://stackoverflow.com/questions/64373137/ripgrep-to-only-exclude-a-file-in-the-root-of-the-folder/64389725#64389725>
 
-## Neovim config
+### Rust
 
-`cd ~/.config && git clone git@github.com:rofrol/kickstart.nvim.git nvim`
+Install from <https://rustup.rs/>
 
-## Ubuntu packages
+On Ubuntu you need `sudo apt install -y build-essential`. On Windows install Visual Studio Build Tools with the "Desktop development with C++" workload.
 
-```bash
-sudo apt-add-repository ppa:git-core/ppa
-sudo apt install -y build-essential gitk curl tig fzf libssl-dev
+```shell
+cargo install ripgrep fd-find tokei cargo-watch cargo-edit watchexec-cli
 ```
 
-## Rust
+### tmux
 
-Install Rust from rustup.rs/
+`git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
 
-On Ubuntu you need `sudo apt install -y build-essential`. On Windows `npm i -g windows-build-tools`.
+### Firefox
 
+Link the shared `chrome` directory into your profile. Profile locations:
+
+- macOS: `~/Library/Application Support/Firefox/Profiles/your-profile`
+- Linux: `~/.mozilla/firefox/your-profile`
+
+```shell
+ln -s ~/.mozilla/firefox/shared/chrome ~/.mozilla/firefox/your-profile/
 ```
-cargo install ripgrep fd-find tokei cargo-watch cargo-edit watchexec
-```
 
-### git
+On Windows run cmd.exe as Administrator and:
+
+`mklink /d C:\Users\user\AppData\Roaming\Mozilla\Firefox\Profiles\your-profile\chrome C:\Users\user\.mozilla\firefox\shared\chrome`
+
+In Firefox run `about:config` and set
+
+`toolkit.legacyUserProfileCustomizations.stylesheets` to `true`
+
+- <https://www.userchrome.org/how-create-userchrome-css.html>
+
+## Legacy: Ubuntu
 
 ```bash
 sudo add-apt-repository ppa:git-core/ppa
-apt install git
+sudo apt update
+sudo apt install -y build-essential git gitk curl tig fzf libssl-dev
 ```
 
 <https://git-scm.com/download/linux>
 
 ### fzf
 
-Install using git <https://github.com/junegunn/fzf#using-git>. Version from deb was to old for nvim integration script (0.20 vs 0.24).
+Install using git <https://github.com/junegunn/fzf#using-git>. Version from deb was too old for nvim integration script (0.20 vs 0.24).
 
-## scoop
+### Map capslock to escape
 
-Scoop is a Windows package manager.
+`sudo sh ~/bin/maps_capslock_to_escape.sh`
+
+## Legacy: Windows
+
+### scoop
+
+Scoop is a Windows package manager. Install: <https://scoop.sh/>
 
 ```cmd.exe
 scoop bucket add extras
@@ -130,16 +193,15 @@ scoop cache rm *
 scoop update \*
 ```
 
-- <https://github.com/lukesampson/scoop#installation>
-- <https://github.com/lukesampson/scoop/issues/897#issuecomment-391909564>
+- <https://github.com/ScoopInstaller/Scoop/issues/897#issuecomment-391909564>
 - <https://github.com/ScoopInstaller/Main/tree/master/bucket>
-- <https://github.com/lukesampson/scoop-extras/tree/master/bucket>
-- <https://github.com/lukesampson/scoop/wiki/Open-With-Icons>
+- <https://github.com/ScoopInstaller/Extras/tree/master/bucket>
+- <https://github.com/ScoopInstaller/Scoop/wiki/Open-With-Icons>
 - <https://rasa.github.io/scoop-directory/by-stars>
 
 Shortcuts in `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Scoop Apps`
 
-### scoop does not install newest version
+#### scoop does not install newest version
 
 ```
 $ cd ~/scoop/buckets/main/
@@ -150,16 +212,16 @@ $ git reset --hard origin/master
 ```
 
 - <https://gist.github.com/573/e806447bf55a09376cf457a8a403ec44>
-  - <https://github.com/lukesampson/scoop/issues/3045#issuecomment-493345130>
+  - <https://github.com/ScoopInstaller/Scoop/issues/3045#issuecomment-493345130>
 
 ### mpv
 
 mpv from scoop does not read `%APPDATA%\mpv`. Portable one reads it.
 
-Create env MPV_HOME
+Create env MPV_HOME (applies to newly started processes):
 
-```
-setx MPV_HOME %USERPROFILE\.confing\mpv
+```cmd.exe
+setx MPV_HOME "%USERPROFILE%\.config\mpv"
 ```
 
 <https://github.com/mpv-player/mpv/blob/master/DOCS/man/mpv.rst#files-on-windows>
@@ -186,119 +248,47 @@ Maybe add thumbnails with icaros <https://www.majorgeeks.com/files/details/icaro
 
 ### wezterm
 
-For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Othwerwise there will be problems.
+For wezterm use this `%USERPROFILE%\scoop\apps\wezterm\current\wezterm-gui.exe` instead of wezterm.exe. Otherwise there will be problems.
 
 Install UbuntuMono-R.ttf from <https://design.ubuntu.com/font/>
 
 ### calibre
 
-Instal calibre-normal instead of calibre. For calibre (which is portable version) there is problem.
+Install calibre-normal instead of calibre. For calibre (which is portable version) there is problem.
 
-Long paths needs to be enabled or it asks where to install. Otherwise scoop cannot create shim.
+Long paths need to be enabled or it asks where to install. Otherwise scoop cannot create shim.
 
-- <https://github.com/lukesampson/scoop-extras/issues/1765#issuecomment-471170974>
-- <https://github.com/lukesampson/scoop-extras/issues/2535>
+- <https://github.com/ScoopInstaller/Extras/issues/1765#issuecomment-471170974>
+- <https://github.com/ScoopInstaller/Extras/issues/2535>
 
-### vcredist2015
-
-```
-breoffice-stable' (7.0.1) was installed successfully!
-'libreoffice-stable' suggests installing 'extras/vcredist2015'.
-$ scoop install vcredist2015
-Installing 'vcredist2015' (14.0.24215) [64bit]
-vc_redist.x64.exe (14,6 MB) [=================================================================================================================] 100%
-Checking hash of vc_redist.x64.exe ... ok.
-vc_redist.x86.exe (13,8 MB) [=================================================================================================================] 100%
-Checking hash of vc_redist.x86.exe ... ok.
-Linking ~\scoop\apps\vcredist2015\current => ~\scoop\apps\vcredist2015\14.0.24215
-Running post-install script...
-ERROR Exit code was 1638!
-ERROR Exit code was 1638!
-'vcredist2015' (14.0.24215) was installed successfully!
-Notes
------
-You can now remove this installer with 'scoop uninstall vcredist2015'
-```
-
-### authotkey
+### AutoHotkey
 
 There are two versions:
 
-- <https://github.com/lukesampson/scoop-extras/blob/master/bucket/autohotkey.json>
-- <https://github.com/lukesampson/scoop-extras/blob/master/bucket/autohotkey-installer.json>
+- <https://github.com/ScoopInstaller/Extras/blob/master/bucket/autohotkey.json>
+- <https://github.com/ScoopInstaller/Extras/blob/master/bucket/autohotkey-installer.json>
 
 ### vscode and git bash
 
-```
-    "terminal.integrated.shell.windows": "${env:USERPROFILE}\\scoop\\apps\\git\\current\\bin\\bash.exe"
+```json
+"terminal.integrated.profiles.windows": {
+  "Git Bash": {
+    "path": "${env:USERPROFILE}\\scoop\\apps\\git\\current\\bin\\bash.exe"
+  }
+},
+"terminal.integrated.defaultProfile.windows": "Git Bash"
 ```
 
-### Inverse mouse scroll with x mouse button control
+### Inverse mouse scroll with X-Mouse Button Control
 
 Add shortcut to `%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`
 
-## Map capslock to escape
+### Rust: linking with `link.exe` failed: exit code: 3221225781
 
-`sudo sh ~/bin/maps_capslock_to_escape.sh`
-
-## Firefox
-
-`ln -s ~/.mozilla/firefox/shared/chrome ~/.mozilla/firefox/your_profile/`
-
-on Windows run cmd.exe as Administrator and:
-
-`mklink /d C:\Users\user\AppData\Roaming\Mozilla\Firefox\Profiles\your-profile\chrome C:\Users\user\.mozilla\firefox\shared\chrome`
-
-In Firefox run `about:config` and set
-
-`toolkit.legacyUserProfileCustomizations.stylesheets` to `true`
-
-- <https://www.userchrome.org/how-create-userchrome-css.html>
-
-## tmux
-
-`git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
-
-## rust
-
-Install from <https://rustup.rs/>
-
-### error: linking with `link.exe` failed: exit code: 3221225781
-
-# 42744
-
-Start PowerShell as Administrator and run:
-
-`npm install --global windows-build-tools`
+Install Visual Studio Build Tools with the "Desktop development with C++" workload (the old `windows-build-tools` npm package is deprecated).
 
 - <https://github.com/rust-lang/rust/issues/42744#issuecomment-309387002>
-- <https://github.com/felixrieseberg/windows-build-tools>
 
-### Packages
+### Emacs
 
-`cargo install ripgrep fd-find tokei cargo-edit`
-
-## Emacs
-
-On Windows10 you need to set user env `HOME` pointing `%USERPROFILE%` for emacs to read `~/.config/emacs/init.el`. Otherwise it will read from `~/AppData/Roaming/.emacs.d`.
-
-## macos and nushell
-
-`ln -s ~/.config/nushell ~/Library/Application\ Support/`
-
-- <https://github.com/nushell/nushell/issues/10746>
-- <https://github.com/nushell/nushell/issues/893>
-- my answer <https://superuser.com/questions/1804643/how-do-i-change-the-default-location-for-nushell-configration-files/1827175#1827175>
-
-in iterm2 set `Preferences > Profiles > General > Command > Command` to `/opt/homebrew/bin/nu`
-
-`brew install nushell starship`
-
-```shell
-mkdir ~/.cache/starship
-starship init nu | save -f ~/.cache/starship/init.nu
-```
-
-## lazygit and macos
-
-`ln -s ~/.config/lazygit ~/Library/Application\ Support/`
+On Windows 10 you need to set user env `HOME` pointing to `%USERPROFILE%` for Emacs to read `~/.config/emacs/init.el`. Otherwise it will read from `~/AppData/Roaming/.emacs.d`.

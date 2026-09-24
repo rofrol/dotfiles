@@ -19,10 +19,13 @@ when gpt-6-sol/luna appear there, update the `case` in ask_gpt.sh.
 ~/.claude/skills/gpt/ask_gpt.sh -m luna "q"                 # gpt-5.6-luna: older, fast; also sol, terra
 ~/.claude/skills/gpt/ask_gpt.sh -f src/foo.py "Find bugs in this file"
 git diff | ~/.claude/skills/gpt/ask_gpt.sh -f - "Review this diff"   # stdin only via -f -
+~/.claude/skills/gpt/ask_gpt.sh -r "Review ... (see Code review below)"  # run in the current git repo, read-only
 ```
 
-Options: `-m astra|sol|terra|luna|<full id>`, `-e low|medium|high|xhigh` (reasoning effort), `-f FILE` (repeatable; `-f -` = stdin, never read implicitly), env `GPT_MODEL`.
-Codex runs ephemeral, read-only sandbox, in an empty temp dir — it sees only what you put in the prompt.
+Options: `-m astra|sol|terra|luna|<full id>`, `-e low|medium|high|xhigh` (reasoning effort), `-f FILE` (repeatable; `-f -` = stdin, never read implicitly), `-r` (repo mode), env `GPT_MODEL`.
+Codex runs ephemeral, in a read-only sandbox. By default it runs in an empty temp dir and sees only what you put in the prompt.
+With `-r` it runs at the top of the current git repo (refuses `$HOME`), so it can read files, callers, tests and git history itself;
+everything in that checkout it reads (including untracked files like `.env`) goes to OpenAI.
 Answers can take a few minutes — use a Bash timeout of 600000.
 
 Guidelines:
@@ -31,3 +34,35 @@ Guidelines:
 - Treat the answer as a second opinion, not ground truth — verify claims, and tell the user where you agree/disagree.
 - If the user asks for "GPT and DeepSeek", run both in parallel and compare.
 - On a usage-limit error, tell the user (Plus limits), don't retry in a loop.
+
+## Code review
+
+Use `-r` for reviewing changes in a repo, so the reviewer gathers evidence itself instead of seeing only what you picked.
+Review consequential changes (auth, migrations, concurrency, data integrity, public APIs/protocols, unfamiliar code,
+uncertain diagnoses), not routine edits. For expensive or hard-to-reverse designs, review the plan before implementing.
+
+Give intent, not a summary or selection of the code. Prompt template:
+
+```text
+Independently review this change for actionable correctness, security and regression bugs.
+Intent / acceptance criteria: ...
+Constraints: ...
+Scope: base <SHA>, head <SHA> (plus staged/unstaged changes, if intended)
+Tests actually run: ...
+Inspect the diff and the relevant repository context (callers, tests, history).
+Report only problems introduced by this change. For each: file:line, trigger, impact, evidence.
+Separate demonstrated bugs from unverified concerns. "No actionable findings" is a valid answer.
+Do not edit files.
+```
+
+Use explicit SHAs: `master...HEAD` excludes uncommitted changes.
+Each review is a fresh session; don't carry a reviewer across tasks.
+
+After the review:
+- Triage every finding as accepted / rejected / needs user decision. Reject only with concrete evidence
+  (counterexample, invariant, code path), not "I disagree". Before fixing an alleged bug, trace it and preferably
+  reproduce it or add a regression test.
+- Show the user the triage. Questions of intent, scope and tradeoffs are the user's call; present both positions
+  and a recommendation instead of arguing with the reviewer.
+- At most one fix round plus one focused re-check of the disputed findings and the fixes. If serious issues remain,
+  stop and ask the user; the plan is probably wrong.

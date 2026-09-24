@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Ask GPT via Codex CLI, billed to the ChatGPT subscription; credentials come from pi (~/.pi/agent/auth.json).
-# Usage: ask_gpt.sh [-m sol|luna|astra|<id>] [-e low|medium|high|xhigh] [-f FILE]... "prompt"   (-f - reads stdin)
+# Usage: ask_gpt.sh [-m sol|luna|astra|<id>] [-e low|medium|high|xhigh] [-r] [-f FILE]... "prompt"   (-f - reads stdin)
+# -r: run Codex in the current git repo (read-only), so it can read files and git history itself.
 set -euo pipefail
-model="${GPT_MODEL:-astra}"; effort=""; files=()
-while getopts "m:e:f:" o; do
-  case $o in m) model=$OPTARG;; e) effort=$OPTARG;; f) files+=("$OPTARG");; *) exit 2;; esac
+model="${GPT_MODEL:-astra}"; effort=""; files=(); repo=""
+while getopts "m:e:f:r" o; do
+  case $o in m) model=$OPTARG;; e) effort=$OPTARG;; f) files+=("$OPTARG");; r) repo=1;; *) exit 2;; esac
 done
 shift $((OPTIND-1))
 case $model in astra) model=gpt-6-astra;; sol|luna|terra) model="gpt-5.6-$model";; esac
@@ -26,9 +27,16 @@ PI_CODEX_ACCOUNT=$(jq -er '."openai-codex".accountId' ~/.pi/agent/auth.json) || 
 
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 out="$tmp/answer"; mkdir "$tmp/cwd" "$tmp/home"
+cwd="$tmp/cwd"
+if [ -n "$repo" ]; then
+  # The dotfiles env (GIT_DIR/GIT_WORK_TREE) would point git, and Codex's git commands, at the home repo.
+  unset GIT_DIR GIT_WORK_TREE
+  cwd=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "-r: $PWD nie jest w repozytorium git" >&2; exit 1; }
+  [ "$cwd" != "$HOME" ] || { echo "-r: odmawiam uruchomienia w \$HOME (Codex widziałby cały katalog domowy)" >&2; exit 1; }
+fi
 provider='model_providers.pi={name="pi",base_url="https://chatgpt.com/backend-api/codex",wire_api="responses",env_key="PI_CODEX_TOKEN",env_http_headers={"chatgpt-account-id"="PI_CODEX_ACCOUNT"}}'
 export CODEX_HOME="$tmp/home"
-args=(exec --ignore-user-config --ephemeral --skip-git-repo-check -s read-only -C "$tmp/cwd" -m "$model" -o "$out"
+args=(exec --ignore-user-config --ephemeral --skip-git-repo-check -s read-only -C "$cwd" -m "$model" -o "$out"
       -c model_provider=pi -c "$provider")
 [ -n "$effort" ] && args+=(-c "model_reasoning_effort=\"$effort\"")
 printf '%s' "$prompt" | codex "${args[@]}" - >/dev/null 2>"$tmp/err" || { cat "$tmp/err" >&2; exit 1; }

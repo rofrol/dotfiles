@@ -9,3 +9,6 @@ prompt_new_tab_name = false
 
 [ui.toast]
 delivery = "system"
+
+[usage]
+enabled = true

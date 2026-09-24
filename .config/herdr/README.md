@@ -6,25 +6,81 @@
 notification (plus sound) when an agent finishes or needs input in a
 background workspace.
 
-Without `terminal-notifier` installed, herdr delivers notifications via
-`osascript`, which macOS attributes to **Script Editor**. Setup:
+herdr uses `terminal-notifier` (`brew install terminal-notifier`, installed
+here). With the fork build (see "herdr from my fork" below) an agent
+notification shows the agent's task (terminal title) as the message and
+workspace · tab as the subtitle, replaces the previous one from the same pane,
+and clicking it brings Ghostty to the front and focuses that agent's pane
+(`herdr agent focus`, falling back to `herdr tab focus`). Upstream 0.9.1 only
+activates the terminal (feature request herdrdev/herdr#4480). Setup:
 
-1. Open Script Editor once so it appears in notification settings.
-2. System Settings → Notifications → Script Editor → Allow notifications
-   (Desktop, alert style Temporary).
-3. Focus modes silently hide banners. To still get agent notifications:
+1. System Settings → Notifications → **terminal-notifier** → Allow
+   notifications (Desktop, alert style Temporary). The entry appears after
+   the first notification.
+2. Focus modes silently hide banners. To still get agent notifications:
    System Settings → Focus → (each mode) → Allowed Notifications → add
-   **Script Editor**.
+   **terminal-notifier**.
+
+Without `terminal-notifier` herdr falls back to `osascript`: notifications
+are attributed to **Script Editor** (allow it in the same places) and
+clicking one opens Script Editor instead of the terminal.
 
 Test:
 
 ```sh
-osascript -e 'display notification "test" with title "Herdr test"'
 herdr notification show "Herdr test" --body "works" --sound done
 ```
 
 Apply config changes without restarting: `herdr server reload-config`
 (validate first with `herdr config check`).
+
+## herdr from my fork
+
+herdr is installed from the fork `rofrol/herdr`, not Homebrew:
+
+- checkout: `~/personal_projects/herdr` (`origin` = rofrol/herdr,
+  `upstream` = herdrdev/herdr); fork commits live directly on `master`,
+  rebased on `upstream/master` (no PRs upstream)
+- binary: `~/.cargo/bin/herdr` (`cargo install --path . --locked`)
+- fork changes: middle click on a tab / sidebar workspace closes it (same
+  confirmation as the menu's Close); clickable, richer notifications (above);
+  notification titles like `(repo)` no longer crash terminal-notifier
+
+The dotfiles env (`GIT_DIR`/`GIT_WORK_TREE`) breaks git in the checkout and the
+herdr git tests, so unset it: `env -u GIT_DIR -u GIT_WORK_TREE git ...`.
+Building needs Zig 0.16.0 (`brew install zig`).
+
+Do not run `herdr update`: it installs the upstream release over the fork.
+
+Update from upstream and reinstall:
+
+```sh
+cd ~/personal_projects/herdr
+env -u GIT_DIR -u GIT_WORK_TREE git fetch upstream
+env -u GIT_DIR -u GIT_WORK_TREE git rebase upstream/master
+env -u GIT_DIR -u GIT_WORK_TREE cargo test --locked --bin herdr -- client:: platform::
+env -u GIT_DIR -u GIT_WORK_TREE cargo install --path . --locked
+env -u GIT_DIR -u GIT_WORK_TREE git push --force-with-lease
+herdr status   # compare client/server version and protocol
+```
+
+Then pick up the new binary without losing panes:
+
+- Client-side changes (TUI: mouse, notifications — everything in this fork so
+  far): detach with `prefix+q` and run `herdr` again. Panes and agents live in
+  the server and keep running.
+- Server-side changes: swap the running server in place with the live
+  handoff API (what `herdr update --handoff` uses; pane processes survive):
+
+  ```sh
+  printf '%s\n' '{"id":"fork-handoff","method":"server.live_handoff","params":{"import_exe":"'"$HOME"'/.cargo/bin/herdr"}}' \
+    | nc -U ~/.config/herdr/herdr.sock
+  herdr status
+  ```
+
+  Not tried here yet. If it fails, the old server normally keeps running;
+  otherwise `herdr server stop` + `herdr` restarts it (panes come back as
+  shells, see relaunch below).
 
 ## Relaunching programs after a restart
 

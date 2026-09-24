@@ -70,15 +70,15 @@ Then pick up the new binary without losing panes:
   far): detach with `prefix+q` and run `herdr` again. Panes and agents live in
   the server and keep running.
 - Server-side changes: swap the running server in place with the live
-  handoff API (what `herdr update --handoff` uses; pane processes survive):
+  handoff (what `herdr update --handoff` uses; pane processes survive):
 
   ```sh
-  printf '%s\n' '{"id":"fork-handoff","method":"server.live_handoff","params":{"import_exe":"'"$HOME"'/.cargo/bin/herdr"}}' \
-    | nc -U ~/.config/herdr/herdr.sock
+  herdr server live-handoff --import-exe ~/.cargo/bin/herdr
   herdr status
   ```
 
-  Not tried here yet. If it fails, the old server normally keeps running;
+  Upstream marks live handoff experimental (Unix only); a running agent may
+  briefly show as idle after it. Not tried here yet. If it fails, the old server normally keeps running;
   otherwise `herdr server stop` + `herdr` restarts it (panes come back as
   shells, see relaunch below).
 

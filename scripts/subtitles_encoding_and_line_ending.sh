@@ -26,16 +26,20 @@ for FILE in "$@"; do
     continue
   fi
 
-  # temp file next to the original, so mv is a rename on the same filesystem
-  TMP=$(mktemp "$(dirname "$FILE")/.$(basename "$FILE").XXXXXX") || { status=1; continue; }
-  if iconv -f CP1250 -t UTF-8 "$FILE" >"$TMP"; then
-    chmod "$(stat -f %Lp "$FILE")" "$TMP"
-    mv "$TMP" "$FILE"
-    echo "Converted: $FILE"
-  else
+  # Write the result back into the original file (not mv) so its mode,
+  # owner and links stay as they were, without BSD/GNU-specific stat.
+  TMP=$(mktemp) || { status=1; continue; }
+  if ! iconv -f CP1250 -t UTF-8 "$FILE" >"$TMP"; then
     rm -f "$TMP"
     echo "iconv failed, original kept: $FILE" >&2
     status=1
+  elif ! cat "$TMP" >"$FILE"; then
+    # the original may be partly overwritten; keep the converted copy
+    echo "Writing $FILE failed; converted copy kept in $TMP" >&2
+    status=1
+  else
+    rm -f "$TMP"
+    echo "Converted: $FILE"
   fi
 done
 exit "$status"

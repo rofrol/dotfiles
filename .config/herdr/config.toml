@@ -4,5 +4,8 @@ onboarding = false
 name = "one-light"
 auto_switch = false
 
+[ui]
+prompt_new_tab_name = false
+
 [ui.toast]
 delivery = "system"

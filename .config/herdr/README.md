@@ -78,8 +78,8 @@ Then pick up the new binary without losing panes:
   ```
 
   Upstream marks live handoff experimental (Unix only); a running agent may
-  briefly show as idle after it. Not tried here yet. If it fails, the old server normally keeps running;
-  otherwise `herdr server stop` + `herdr` restarts it (panes come back as
+  briefly show as idle after it. If it fails, the old server normally keeps
+  running; otherwise `herdr server stop` + `herdr` restarts it (panes come back as
   shells, see relaunch below).
 
 ## Relaunching programs after a restart

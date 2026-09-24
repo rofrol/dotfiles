@@ -1,0 +1,184 @@
+#!/usr/bin/env python3
+"""Show what eats energy on macOS and what looks stuck.
+
+  energy-top            # sample 30 s with `sudo powermetrics`
+  energy-top 60         # sample 60 s
+  energy-top -f pm.txt  # analyze saved powermetrics output (no sudo)
+
+Sections:
+  1. processes by average Energy Impact (grouped by name)
+  2. apps: energy summed over each live process tree, like Activity Monitor
+     does (a terminal gets charged for claude/node/builds it launched)
+  3. fork storms: many short-lived PIDs (polling loops like `while; ps; sleep 0.1`)
+  4. suspects: long-running orphans (ppid 1) that burn CPU/energy, zombies, stuck (U) ones
+
+Energy Impact is a unitless relative score; compare numbers within one run only.
+"""
+
+import argparse
+import re
+import subprocess
+import sys
+from collections import defaultdict
+
+# Last 8 columns of a task row: ID, CPU ms/s, User%, 2 deadline cols, 2 wakeup cols, Energy Impact.
+TASK_ROW = re.compile(r"^(.+?)\s+(-?\d+)\s+([\d.]+)\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)\s*$")
+POWER_ROW = re.compile(r"^Combined Power \(CPU \+ GPU \+ ANE\): (\d+) mW")
+SYSTEM_PREFIXES = ("/System/", "/usr/libexec/", "/usr/sbin/", "/sbin/", "/usr/bin/", "/Library/Apple/")
+
+
+def run_powermetrics(seconds):
+    cmd = ["sudo", "powermetrics", "--samplers", "tasks,cpu_power,gpu_power",
+           "--show-process-energy", "-i", "1000", "-n", str(seconds)]
+    print(f"sampling {seconds} s: {' '.join(cmd)}", file=sys.stderr)
+    return subprocess.run(cmd, check=True, capture_output=True, text=True).stdout
+
+
+def parse_powermetrics(text):
+    """Return (samples, rows, power_mw). rows: list of (sample_idx, name, pid, cpu_ms_s, energy)."""
+    samples, rows, power = 0, [], []
+    in_tasks = False
+    for line in text.splitlines():
+        if line.startswith("*** Sampled system activity"):
+            samples += 1
+        if line.startswith("*** Running tasks"):
+            in_tasks = True
+            continue
+        if line.startswith("***"):
+            in_tasks = False
+        if m := POWER_ROW.match(line):
+            power.append(int(m[1]))
+        if in_tasks and (m := TASK_ROW.match(line)):
+            rows.append((samples, m[1].strip(), int(m[2]), float(m[3]), float(m[4])))
+    return samples, rows, power
+
+
+def snapshot_processes():
+    """pid -> dict(ppid, etime_s, cpu_s, state, command) for processes alive right now."""
+    out = subprocess.run(["ps", "-axww", "-o", "pid=,ppid=,etime=,time=,state=,command="],
+                         check=True, capture_output=True, text=True).stdout
+    procs = {}
+    for line in out.splitlines():
+        parts = line.split(None, 5)
+        if len(parts) == 6:
+            pid, ppid, etime, cputime, state, command = parts
+            procs[int(pid)] = dict(ppid=int(ppid), etime_s=etime_seconds(etime), cpu_s=int(etime_seconds(cputime)),
+                                   state=state, command=command)
+    return procs
+
+
+def etime_seconds(etime):
+    """ps etime/time format: [[dd-]hh:]mm:ss[.cc]"""
+    days, _, rest = etime.rpartition("-")
+    nums = [float(x) for x in rest.split(":")]
+    while len(nums) < 3:
+        nums.insert(0, 0)
+    return int((int(days) if days else 0) * 86400 + nums[0] * 3600 + nums[1] * 60 + nums[2])
+
+
+def app_root(pid, procs):
+    """Topmost ancestor below launchd; that is roughly who Activity Monitor charges."""
+    seen = set()
+    while pid in procs and procs[pid]["ppid"] > 1 and pid not in seen:
+        seen.add(pid)
+        pid = procs[pid]["ppid"]
+    return pid
+
+
+def short_command(command, width=70):
+    exe = command.split(" -", 1)[0]
+    name = exe.rsplit(".app/", 1)[0].rsplit("/", 1)[-1] if ".app/" in exe else exe.rsplit("/", 1)[-1]
+    return (name + "  " + command)[:width] if name != command[:width] else command[:width]
+
+
+def human_duration(s):
+    return f"{s // 86400}d{s % 86400 // 3600}h" if s >= 86400 else f"{s // 3600}h{s % 3600 // 60:02d}m"
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("seconds", nargs="?", type=int, default=30)
+    ap.add_argument("-f", "--file", help="saved powermetrics output instead of sampling")
+    ap.add_argument("-n", "--top", type=int, default=15)
+    ap.add_argument("--orphan-hours", type=float, default=1.0, help="min age of a suspect orphan")
+    ap.add_argument("--orphan-cpu-min", type=float, default=10.0,
+                    help="min total CPU minutes of a suspect orphan (or it must use energy now)")
+    args = ap.parse_args()
+
+    text = open(args.file).read() if args.file else run_powermetrics(args.seconds)
+    samples, rows, power = parse_powermetrics(text)
+    if not samples:
+        sys.exit("no powermetrics samples found")
+    procs = snapshot_processes()
+
+    total = sum(e for _, name, _, _, e in rows if name == "ALL_TASKS") / samples
+    by_name = defaultdict(lambda: [0.0, 0.0, set()])
+    by_pid = defaultdict(float)
+    for _, name, pid, cpu, energy in rows:
+        if name == "ALL_TASKS":
+            continue
+        agg = by_name[name]
+        agg[0] += energy / samples
+        agg[1] += cpu / samples
+        agg[2].add(pid)
+        by_pid[pid] += energy / samples
+
+    print(f"\n{samples} samples; total Energy Impact avg {total:.0f}", end="")
+    if power:
+        print(f"; CPU+GPU+ANE avg {sum(power) / len(power) / 1000:.1f} W (without display, SSD, etc.)", end="")
+    print()
+
+    print("\n== 1. Processes by Energy Impact (avg per second)")
+    print(f"{'name':32} {'energy':>8} {'share':>6} {'CPU ms/s':>9} {'pids':>5}")
+    for name, (energy, cpu, pids) in sorted(by_name.items(), key=lambda kv: -kv[1][0])[:args.top]:
+        share = 100 * energy / total if total else 0
+        print(f"{name[:32]:32} {energy:8.1f} {share:5.1f}% {cpu:9.1f} {len(pids):5}")
+
+    print("\n== 2. Apps: energy of live process trees (what Activity Monitor would show)")
+    by_root = defaultdict(lambda: [0.0, 0])
+    for pid, energy in by_pid.items():
+        if pid in procs:
+            root = app_root(pid, procs)
+            by_root[root][0] += energy
+            by_root[root][1] += 1
+    for root, (energy, count) in sorted(by_root.items(), key=lambda kv: -kv[1][0])[:args.top]:
+        cmd = procs[root]["command"] if root in procs else "?"
+        own = by_pid.get(root, 0.0)
+        print(f"{energy:8.1f}  own {own:7.1f}  {count:3} procs  pid {root:<6} {short_command(cmd)}")
+
+    print("\n== 3. Fork storms (short-lived processes)")
+    dead = by_name.pop("DEAD_TASKS", [0.0, 0.0, set()])[0]
+    print(f"DEAD_TASKS (processes that exited during a sample): {dead:.1f} = "
+          f"{100 * dead / total if total else 0:.1f}% of total")
+    storms = [(name, len(pids)) for name, (_, _, pids) in by_name.items()
+              if len(pids) >= max(5, samples // 4) and not any(p in procs for p in pids)]
+    for name, count in sorted(storms, key=lambda kv: -kv[1]):
+        print(f"  {name}: {count} distinct PIDs in {samples} s, none alive now")
+    loops = [p for p in procs.values()
+             if re.search(r"\bsleep 0?\.\d", p["command"]) and "energy-top" not in p["command"]]
+    for p in loops:
+        parent = procs.get(p["ppid"], {}).get("command", "?")
+        print(f"  sub-second sleep now: `{p['command']}` <- {parent[:100]}")
+    if not storms and not loops:
+        print("  none seen")
+
+    print("\n== 4. Suspects: long-running busy orphans, zombies, stuck processes")
+    found = False
+    for pid, p in sorted(procs.items(), key=lambda kv: -kv[1]["etime_s"]):
+        cmd = p["command"]
+        busy = by_pid.get(pid, 0) >= 5 or p["cpu_s"] >= args.orphan_cpu_min * 60
+        orphan = (p["ppid"] == 1 and p["etime_s"] >= args.orphan_hours * 3600 and busy
+                  and not cmd.startswith(SYSTEM_PREFIXES) and ".app/Contents/MacOS/" not in cmd)
+        bad_state = p["state"][0] in "ZU"
+        if orphan or bad_state:
+            found = True
+            why = {"Z": "zombie", "U": "stuck in kernel (U)"}.get(p["state"][0], "orphan (ppid 1)")
+            print(f"  pid {pid:<6} {human_duration(p['etime_s']):>7}  cpu {human_duration(p['cpu_s']):>6}  "
+                  f"energy {by_pid.get(pid, 0):7.1f}  "
+                  f"{why:20} {cmd[:90]}")
+    if not found:
+        print("  none")
+
+
+if __name__ == "__main__":
+    main()

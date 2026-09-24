@@ -8,18 +8,16 @@ socket timeout alone can wait forever.
 import argparse, json, os, signal, sys, time, urllib.request, urllib.error
 from pathlib import Path
 
-KEY_FILE = Path.home() / ".config/deepseek/api_key"
+AUTH_FILE = Path.home() / ".pi/agent/auth.json"
 
 class Deadline(Exception):
     pass
 
 def get_key():
-    key = os.environ.get("DEEPSEEK_API_KEY")
-    if not key and KEY_FILE.exists():
-        key = KEY_FILE.read_text().strip()
-    if not key:
-        sys.exit(f"Brak klucza: ustaw DEEPSEEK_API_KEY albo zapisz go w {KEY_FILE}")
-    return key
+    try:
+        return json.loads(AUTH_FILE.read_text())["deepseek"]["key"]
+    except (OSError, ValueError, KeyError) as e:
+        sys.exit(f"Brak klucza deepseek w {AUTH_FILE}: {e!r}")
 
 def main():
     p = argparse.ArgumentParser()

@@ -6,8 +6,8 @@ description: Consult OpenAI GPT (GPT-6 Astra; GPT-5.6 Sol/Terra/Luna) via Codex 
 # Consulting GPT
 
 Goes through Codex CLI (`codex exec`), billed to the user's ChatGPT Plus subscription — not the API.
-Requires `codex login` (ChatGPT account); the script refuses to run if Codex is logged in with an API key.
-It runs with `--ignore-user-config` because ~/.codex/config.toml forces an API provider and `service_tier=flex`, which ChatGPT rejects.
+Credentials come from pi: `openai-codex` in `~/.pi/agent/auth.json` (token via `pi auth print-bearer-token`, which refreshes it).
+~/.codex (config.toml, auth.json) is not used — the script runs with `--ignore-user-config` and a temporary `CODEX_HOME`.
 
 Models available on ChatGPT (as of 2026-09-24): only **gpt-6-astra** is GPT-6. GPT-6 Sol/Luna are API-only so far —
 `sol`/`luna`/`terra` map to older **gpt-5.6-*** models. Check with `jq -r '.models[].slug' ~/.codex/models_cache.json`;

@@ -22,5 +22,5 @@ Guidelines:
 - Sending code sends it to DeepSeek's servers (China). Don't send secrets, credentials, or code the user marked as confidential; ask first if unsure.
 - Treat the answer as a second opinion, not ground truth — verify claims, and tell the user where you agree/disagree.
 
-API key: `DEEPSEEK_API_KEY` env var or `~/.config/deepseek/api_key` (gitignored in the home dotfiles repo — never put the key in a tracked file).
-Model list: `curl -s https://api.deepseek.com/models -H "Authorization: Bearer $(cat ~/.config/deepseek/api_key)"` (names change over time).
+API key: `.deepseek.key` in `~/.pi/agent/auth.json` (shared with pi) — never put the key in a tracked file.
+Model list: `curl -s https://api.deepseek.com/models -H "Authorization: Bearer $(jq -r .deepseek.key ~/.pi/agent/auth.json)"` (names change over time).

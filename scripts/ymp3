@@ -1,2 +1,4 @@
 #!/bin/bash
+# Audio only, as mp3 at best quality. -x already picks the best audio format.
+# For a whole playlist: ymp3 --yes-playlist URL
 yt-dlp --no-playlist --no-write-subs --no-write-auto-subs -x --audio-format mp3 --audio-quality 0 "$@"

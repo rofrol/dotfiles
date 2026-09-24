@@ -39,6 +39,12 @@
 	) | /usr/bin/security -i
 	printf "\n"
 
+	# The password is needed only while this script runs; do not leave it
+	# in the login keychain.
+	at_exit "
+    /usr/bin/security delete-generic-password -s 'dotfiles' -a '${USER}' >/dev/null 2>&1
+  "
+
 	SUDO_ASKPASS="$(/usr/bin/mktemp)"
 	printf "SUDO_ASKPASS: $SUDO_ASKPASS\n"
 
@@ -67,14 +73,15 @@
 	#brew update && brew upgrade && brew upgrade --cask --greedy && \
 	echo "------------------- brew update"
 	brew update
-	echo "------------------- brew upgrade"
-	brew upgrade -y
+	# --formula: a bare `brew upgrade` would also upgrade the casks excluded below
+	echo "------------------- brew upgrade --formula"
+	brew upgrade -y --formula
 	list=$(brew list --cask -1 | sort | uniq | grep -v zscaler | grep -v microsoft-office | grep -v microsoft-teams | tr '\n' ' ')
 	echo "------------------- brew upgrade --cask --greedy $list"
 	brew upgrade -y --cask --greedy $list
 
 	# brew cleanup doesn't clean ~/Library/Caches/Homebrew https://github.com/Homebrew/brew/issues/3784
-	brew cleanup -s && rm -rf $(brew --cache) &&
+	brew cleanup -s && rm -rf "$(brew --cache)" &&
 		# https://apple.stackexchange.com/questions/359456/brew-cleanup-doesnt-scrub-the-caskroom#comment654930_424947
 		find "$(brew --prefix)/Caskroom" -type f '(' -name '*.dmg' -or -name '*.pkg' ')' -delete &&
 		brew doctor

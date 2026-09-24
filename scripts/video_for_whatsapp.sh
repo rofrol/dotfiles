@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# fix_video_for_whatsapp.sh
+# video_for_whatsapp.sh
 #
 # Purpose:
 #   Takes a video file and re-packages/re-encodes it so that:
@@ -49,7 +49,7 @@
 #   - ffmpeg and ffprobe installed (e.g. `brew install ffmpeg` on macOS)
 #
 # Usage:
-#   ./fix_video_for_whatsapp.sh input.mov [output.mp4] [--crf N] [--preset NAME]
+#   video_for_whatsapp.sh [--crf N] [--preset NAME] [--30fps] [-o OUT] input...
 #
 #   --crf N        Constant Rate Factor, lower = higher quality/bigger file.
 #                   Default: 18 (visually near-lossless for x264).
@@ -58,40 +58,92 @@
 #                   Default: slow. Options (fastest→slowest, worst→best
 #                   compression): ultrafast, superfast, veryfast, faster,
 #                   fast, medium, slow, slower, veryslow.
+#   --30fps        Small and fast instead of faithful: always re-encode to
+#                   30 fps, 1280 px wide, AAC 128k. Defaults become
+#                   --crf 23 --preset veryfast. Output "<name>.whatsapp.30fps.mp4".
+#   -o OUT         Output path; only with a single input.
 #
-# If output path is omitted, the script writes "<input_basename>_wa.mp4"
-# next to the input file.
+# Without -o the script writes "<input_basename>_wa.mp4" next to each input.
+# Several inputs (e.g. a Finder selection passed by Automator) are processed
+# one by one; a failure is reported and the rest still run.
+#
+# Automator: Quick Action, "Workflow receives current files or folders in
+# Finder", Run Shell Script with "Pass input: as arguments":
+#   video_for_whatsapp.sh "$@"            (or with --30fps)
+# Automator runs scripts non-login and non-interactive, so PATH (homebrew,
+# ~/scripts) has to be set in ~/.zshenv.
 
 set -euo pipefail
 
-CRF="18"
-PRESET="slow"
-POSITIONAL=()
+CRF=""
+PRESET=""
+FPS30=false
+OUTPUT=""
+FORWARD=()
+INPUTS=()
+
+usage() {
+    echo "Usage: $0 [--crf N] [--preset NAME] [--30fps] [-o OUT] <input_video>..." >&2
+    exit 1
+}
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --crf)
-            CRF="$2"
+            CRF="${2:?--crf needs a value}"
+            FORWARD+=("$1" "$2")
             shift 2
             ;;
         --preset)
-            PRESET="$2"
+            PRESET="${2:?--preset needs a value}"
+            FORWARD+=("$1" "$2")
             shift 2
             ;;
+        --30fps)
+            FPS30=true
+            FORWARD+=("$1")
+            shift
+            ;;
+        -o|--output)
+            OUTPUT="${2:?-o needs a path}"
+            shift 2
+            ;;
+        --)
+            shift
+            INPUTS+=("$@")
+            break
+            ;;
+        -*)
+            echo "Unknown option: $1" >&2
+            usage
+            ;;
         *)
-            POSITIONAL+=("$1")
+            INPUTS+=("$1")
             shift
             ;;
     esac
 done
-set -- "${POSITIONAL[@]}"
 
-if [[ $# -lt 1 ]]; then
-    echo "Usage: $0 <input_video> [output_video.mp4] [--crf N] [--preset NAME]" >&2
-    exit 1
+if [[ ${#INPUTS[@]} -eq 0 ]]; then
+    usage
 fi
 
-INPUT="$1"
+# Several inputs: run this script once per file, so `set -e` still aborts
+# each file on its first error without stopping the others.
+if [[ ${#INPUTS[@]} -gt 1 ]]; then
+    if [[ -n "$OUTPUT" ]]; then
+        echo "Error: -o works only with a single input" >&2
+        exit 1
+    fi
+    STATUS=0
+    for f in "${INPUTS[@]}"; do
+        "$0" ${FORWARD[@]+"${FORWARD[@]}"} -- "$f" || { echo "FAILED: $f" >&2; STATUS=1; }
+        echo ""
+    done
+    exit "$STATUS"
+fi
+
+INPUT="${INPUTS[0]}"
 
 if [[ ! -f "$INPUT" ]]; then
     echo "Error: input file not found: $INPUT" >&2
@@ -103,14 +155,32 @@ if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; 
     exit 1
 fi
 
-# Default output path: same folder, same name, "_wa.mp4" suffix
-if [[ $# -ge 2 ]]; then
-    OUTPUT="$2"
-else
-    DIR="$(dirname "$INPUT")"
-    BASE="$(basename "${INPUT%.*}")"
-    OUTPUT="${DIR}/${BASE}_wa.mp4"
+DIR="$(dirname "$INPUT")"
+BASE="$(basename "${INPUT%.*}")"
+
+if [[ "$FPS30" == true ]]; then
+    CRF="${CRF:-23}"
+    PRESET="${PRESET:-veryfast}"
+    OUTPUT="${OUTPUT:-${DIR}/${BASE}.whatsapp.30fps.mp4}"
+    echo "Encoding $INPUT -> $OUTPUT (30 fps, 1280 px, CRF ${CRF}, preset ${PRESET})"
+
+    # -loglevel error -stats: in Automator's output show only errors and progress.
+    ffmpeg -y -loglevel error -stats \
+        -i "$INPUT" \
+        -vf "fps=30,scale=1280:-2" \
+        -c:v libx264 -profile:v high -preset "${PRESET}" -crf "${CRF}" \
+        -pix_fmt yuv420p \
+        -c:a aac -b:a 128k \
+        -movflags +faststart \
+        "$OUTPUT"
+
+    echo "Done. Output written to: $OUTPUT"
+    exit 0
 fi
+
+CRF="${CRF:-18}"
+PRESET="${PRESET:-slow}"
+OUTPUT="${OUTPUT:-${DIR}/${BASE}_wa.mp4}"
 
 echo "Analyzing source file: $INPUT"
 

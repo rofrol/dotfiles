@@ -14,8 +14,8 @@ Run the helper script (stdlib Python, no deps):
 git diff | ~/.claude/skills/deepseek/ask_deepseek.py -f - "Review this diff"   # stdin only via -f -
 ```
 
-Options: `-f FILE` (repeatable; `-f -` = stdin, never read implicitly), `-s SYSTEM_PROMPT`, `--show-reasoning`, env `DEEPSEEK_MODEL`, `DEEPSEEK_BASE_URL`.
-Answers can take a few minutes — use a Bash timeout of 600000.
+Options: `-f FILE` (repeatable; `-f -` = stdin, never read implicitly), `-s SYSTEM_PROMPT`, `--show-reasoning`, `-t SECONDS` (hard limit on the whole request, default 420), env `DEEPSEEK_MODEL`, `DEEPSEEK_BASE_URL`, `DEEPSEEK_TIMEOUT`.
+Answers can take a few minutes — use a Bash timeout of 600000. The answer is streamed; on hitting the limit the script prints what it has, notes it on stderr and exits 1.
 
 Guidelines:
 - DeepSeek has no context of this conversation: include the goal, relevant code and constraints in the prompt.

@@ -25,12 +25,18 @@ function onexit() {
 git fetch --all --prune
 
 DEFAULT_BRANCH="$(git for-each-ref --format='%(symref:lstrip=3)' refs/remotes/origin/HEAD | git stripspace)"
+if [[ -z "$DEFAULT_BRANCH" ]]; then
+  echo "origin/HEAD is not set; run: git remote set-head origin --auto" >&2
+  onexit 1
+fi
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 if [[ "$CURRENT_BRANCH" == "$DEFAULT_BRANCH" ]]; then
   git merge --ff-only "origin/$DEFAULT_BRANCH"
 else
-  git fetch -f . "origin/$DEFAULT_BRANCH":"$DEFAULT_BRANCH"
+  # No -f/+: fetch then refuses a non-fast-forward update, so local commits
+  # on the default branch that are not on origin are never thrown away.
+  git fetch . "origin/$DEFAULT_BRANCH":"$DEFAULT_BRANCH"
 fi
 
 # https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch/67170894#67170894

@@ -12,7 +12,8 @@ case $model in astra) model=gpt-6-astra;; sol|luna|terra) model="gpt-5.6-$model"
 prompt="$*"
 [ -t 0 ] || prompt="$prompt"$'\n\n'"$(cat)"
 for f in ${files[@]+"${files[@]}"}; do prompt="$prompt"$'\n\n'"--- $f ---"$'\n'"$(cat "$f")"; done
-[ -n "${prompt//[[:space:]]/}" ] || { echo "Pusty prompt" >&2; exit 1; }
+# Regex match instead of ${prompt//[[:space:]]/}: the substitution is quadratic in bash and hangs on long prompts.
+[[ $prompt =~ [^[:space:]] ]] || { echo "Pusty prompt" >&2; exit 1; }
 
 codex login status 2>&1 | grep -q ChatGPT || { echo "Codex nie jest zalogowany przez ChatGPT — uruchom: codex login" >&2; exit 1; }
 

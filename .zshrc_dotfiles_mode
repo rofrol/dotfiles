@@ -1,13 +1,13 @@
-# Wrappers that switch the shell to dotfiles mode (`don` from ~/dotfiles.sh)
-# when started in $HOME, so the tool sees the dotfiles repo as git root.
-# Sourced by ~/.zshrc. New shells do NOT enter dotfiles mode on their own.
+# Automatic dotfiles repo: ~/scripts/dotfiles-shim/git picks the dotfiles repo
+# per git call when the cwd is $HOME or a dir not ignored by .dotfiles.gitignore
+# (and not inside another repo). GIT_DIR is not exported, so programs started
+# here (lazygit, nvim, agents) see the right repo wherever they run git.
+# Sourced by ~/.zshrc. Disable with DOTFILES_AUTO=0; `don` still forces it.
 
-# in $HOME, switch the shell to dotfiles mode first so git sees the dotfiles repo
-_dotfiles_on_in_home() {
-	if [[ $PWD == $HOME && $GIT_DIR != $DOTFILES_HOME ]] && (( $+functions[don] )); then
-		don
-	fi
-}
+export DOTFILES_AUTO=1
+# first in PATH, also after brew shellenv / nvm reorder it
+path=("$HOME/scripts/dotfiles-shim" ${path:#$HOME/scripts/dotfiles-shim})
+rehash
 
 pi() {
 	# pi detects subcommands only as argv[0] – do not prepend the flag
@@ -15,10 +15,8 @@ pi() {
 		install|remove|uninstall|update|list|config|auth) command pi "$@"; return ;;
 	esac
 
-	_dotfiles_on_in_home
-
 	local root policy="$HOME/AGENTS.policy.md"
-	# like lazygit: git root honors GIT_DIR/GIT_WORK_TREE (`don` mode)
+	# git root via the shim (or GIT_DIR in `don` mode), like lazygit sees it
 	root=$(git rev-parse --show-toplevel 2>/dev/null)
 	if [[ -n $root && $root -ef $HOME && -r $policy ]]; then
 		command pi --append-system-prompt "$policy" "$@"
@@ -26,9 +24,3 @@ pi() {
 		command pi "$@"
 	fi
 }
-
-lazygit() { _dotfiles_on_in_home; command lazygit "$@"; }
-claude()  { _dotfiles_on_in_home; command claude "$@"; }
-codex()   { _dotfiles_on_in_home; command codex "$@"; }
-agi()     { _dotfiles_on_in_home; command agi "$@"; }
-omp()     { _dotfiles_on_in_home; command omp "$@"; }

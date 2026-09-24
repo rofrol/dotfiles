@@ -268,7 +268,7 @@ eval "$(omp completions zsh)"
 [[ -n $HERDR_PANE_ID ]] && source ~/.config/herdr/local-plugins/relaunch/relaunch.zsh
 
 
-# tool wrappers that enter dotfiles mode when run in $HOME
+# automatic dotfiles repo via the git shim (no exported GIT_DIR)
 [ -f ~/.zshrc_dotfiles_mode ] && source ~/.zshrc_dotfiles_mode
 
 # Should be last

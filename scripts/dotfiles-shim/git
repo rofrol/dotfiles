@@ -1,0 +1,74 @@
+#!/bin/sh
+# git shim for the dotfiles bare repo ($DOTFILES_HOME, work tree $HOME).
+#
+# Decides per invocation, from the effective cwd (after -C), so no GIT_DIR
+# has to be exported and nothing leaks into long-running children:
+#   dotfiles repo  when DOTFILES_AUTO=1, cwd is $HOME or a dir not ignored by
+#                  the dotfiles excludes, with no .git between cwd and $HOME,
+#                  and the command is not init/clone
+#   plain git      otherwise (nested repos, ignored dirs, outside $HOME)
+# Explicit --git-dir/--work-tree or a GIT_DIR from elsewhere always wins.
+# Put this directory first in PATH (see ~/.zshrc_dotfiles_mode).
+
+REAL=${DOTFILES_REAL_GIT:-/opt/homebrew/bin/git}
+[ -x "$REAL" ] || REAL=/usr/bin/git
+WT=$HOME
+
+# Dotfiles GIT_DIR inherited from an old `don` shell: drop it inside a nested
+# repo, so e.g. an agent started in ~ does not commit there into dotfiles.
+if [ -n "$DOTFILES_HOME" ] && [ "${GIT_DIR-}" = "$DOTFILES_HOME" ]; then
+	d=$(pwd -P)
+	while :; do
+		case $d in "$WT"/*) ;; *) break ;; esac
+		if [ -e "$d/.git" ]; then
+			unset GIT_DIR GIT_WORK_TREE
+			exec "$REAL" "$@"
+		fi
+		d=${d%/*}
+	done
+fi
+
+[ "${DOTFILES_AUTO:-0}" = 1 ] && [ -n "$DOTFILES_HOME" ] || exec "$REAL" "$@"
+[ -z "${GIT_DIR+x}${GIT_WORK_TREE+x}" ] || exec "$REAL" "$@"
+
+# global options before the subcommand; only -C changes the cwd
+eff=$(pwd -P) next=
+for a in "$@"; do
+	if [ -n "$next" ]; then
+		if [ "$next" = C ]; then
+			case $a in '') ;; /*) t=$a ;; *) t=$eff/$a ;; esac
+			[ -z "$a" ] || eff=$(CDPATH= cd -P -- "$t" 2>/dev/null && pwd -P) || exec "$REAL" "$@"
+		fi
+		next=
+		continue
+	fi
+	case $a in
+		-C) next=C ;;
+		-c|--exec-path|--namespace|--config-env|--attr-source) next=skip ;;
+		--git-dir|--git-dir=*|--work-tree|--work-tree=*|--bare) exec "$REAL" "$@" ;;
+		-*) ;;
+		init|clone) exec "$REAL" "$@" ;;
+		*) break ;;
+	esac
+done
+
+case $eff in "$WT"|"$WT"/*) ;; *) exec "$REAL" "$@" ;; esac
+
+# a real repo (.git dir or file) between cwd and $HOME wins
+d=$eff
+while [ "$d" != "$WT" ]; do
+	[ -e "$d/.git" ] && exec "$REAL" "$@"
+	d=${d%/*}
+done
+# no ~/.git on purpose; if one appears, let git handle it
+[ -e "$WT/.git" ] && exec "$REAL" "$@"
+
+# rc 0 = ignored, 1 = allowed, 128 = error; no trailing slash: "dir/" would
+# match "/dir/*" and count as ignored
+if [ "$eff" != "$WT" ]; then
+	"$REAL" -C "$WT" --git-dir="$DOTFILES_HOME" --work-tree="$WT" \
+		check-ignore --no-index -q -- "${eff#"$WT"/}" >/dev/null 2>&1
+	[ $? -eq 1 ] || exec "$REAL" "$@"
+fi
+
+exec "$REAL" --git-dir="$DOTFILES_HOME" --work-tree="$WT" "$@"

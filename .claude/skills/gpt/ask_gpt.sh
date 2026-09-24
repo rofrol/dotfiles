@@ -16,9 +16,9 @@ for f in ${files[@]+"${files[@]}"}; do prompt="$prompt"$'\n\n'"--- $f ---"$'\n'"
 
 codex login status 2>&1 | grep -q ChatGPT || { echo "Codex nie jest zalogowany przez ChatGPT — uruchom: codex login" >&2; exit 1; }
 
-out=$(mktemp); trap 'rm -f "$out"' EXIT
-args=(exec --ignore-user-config --ephemeral --skip-git-repo-check -s read-only -C "$(mktemp -d)" -m "$model" -o "$out")
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+out="$tmp/answer"; mkdir "$tmp/cwd"
+args=(exec --ignore-user-config --ephemeral --skip-git-repo-check -s read-only -C "$tmp/cwd" -m "$model" -o "$out")
 [ -n "$effort" ] && args+=(-c "model_reasoning_effort=\"$effort\"")
-printf '%s' "$prompt" | codex "${args[@]}" - >/dev/null 2>"$out.err" || { cat "$out.err" >&2; rm -f "$out.err"; exit 1; }
-rm -f "$out.err"
+printf '%s' "$prompt" | codex "${args[@]}" - >/dev/null 2>"$tmp/err" || { cat "$tmp/err" >&2; exit 1; }
 cat "$out"

@@ -213,3 +213,9 @@
 !/.pi/agent/skills/oracle
 
 !/AGENTS.policy.md
+
+!/.claude/
+/.claude/*
+!/.claude/skills/
+/.claude/skills/*
+!/.claude/skills/deepseek/

@@ -11,7 +11,7 @@
 # file:// protocol) or streaming files over an accepted protocol.
 #
 #music_directory		"$XDG_MUSIC_DIR"
-music_directory		"~/music-mpd"
+music_directory		"~/personal_projects/music-mpd"
 #
 # This setting sets the MPD internal playlist directory. The purpose of this
 # directory is storage for playlists created by MPD. The server will use

@@ -1,0 +1,15 @@
+id = "local.relaunch"
+name = "Relaunch tab programs"
+version = "0.2.0"
+min_herdr_version = "0.9.0"
+description = "Remember foreground programs in panes and relaunch them after a server restart"
+platforms = ["macos", "linux"]
+
+[[actions]]
+id = "preview"
+title = "Relaunch: preview (dry run)"
+contexts = ["workspace"]
+command = ["node", "relaunch.js", "--dry-run"]
+
+[[startup]]
+command = ["node", "relaunch.js"]

@@ -1,5 +1,15 @@
 #!/bin/bash
+# Put the uncommitted changes of tracked files away: commit them on a new
+# branch NAME, then switch back to where you were (now clean).
+set -euo pipefail
 
-git switch -c $1
-git commit -a -m $1
+name="${1:?Usage: git putback <new-branch-name>}"
+
+git switch -c "$name"
+if ! git commit -a -m "$name"; then
+	# nothing to commit or a hook failed: go back, changes stay in the work tree
+	git switch -
+	git branch -d "$name"
+	exit 1
+fi
 git switch -

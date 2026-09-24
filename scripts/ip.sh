@@ -1,23 +1,18 @@
 #!/usr/bin/env bash
+# Local IPv4 address of the interface that carries the default route.
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
-Linux*) machine=Linux ;;
-Darwin*) machine=Darwin ;;
-CYGWIN*) machine=Cygwin ;;
-MINGW*) machine=MinGw ;;
-MSYS_NT*) machine=Git ;;
-*) machine="UNKNOWN:${unameOut}" ;;
+case "$(uname -s)" in
+Darwin)
+	ipconfig getifaddr "$(route -n get default | awk '/interface: / {print $2}')"
+	;;
+Linux)
+	ip route get 1 | awk '{for (i = 1; i < NF; i++) if ($i == "src") {print $(i + 1); exit}}'
+	;;
+*)
+	echo "unsupported OS: $(uname -s)" >&2
+	exit 1
+	;;
 esac
 
-if [ $machine == "Darwin" ]; then
-	#ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'
-	#ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | head -1 | awk '{ print $2 }'
-	osascript -e 'return IPv4 address of (get system info)'
-elif [ $machine == "Linux" ]; then
-	ip route get 1 | awk '{print $NF;exit}'
-fi
-
 # https://apple.stackexchange.com/questions/20547/how-do-i-find-my-ip-address-from-the-command-line/
-# https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux
 # https://stackoverflow.com/questions/13322485/how-to-get-the-primary-ip-address-of-the-local-machine-on-linux-and-os-x/25851186#25851186

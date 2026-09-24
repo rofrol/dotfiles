@@ -14,6 +14,13 @@
     ]
   },
   "theme": "light",
+  "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true,
-  "remoteControlAtStartup": true
+  "permissions": {
+    "deny": [
+      "Edit(~/.claude/settings.json)",
+      "Edit(~/.claude/hooks/**)",
+      "Edit(~/Library/LaunchAgents/**)"
+    ]
+  }
 }

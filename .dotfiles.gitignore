@@ -220,3 +220,4 @@
 /.claude/skills/*
 !/.claude/skills/deepseek/
 !/.claude/skills/gpt/
+!/.claude/settings.json

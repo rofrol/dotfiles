@@ -95,6 +95,3 @@ eval "$(atuin init bash --disable-up-arrow)"
 
 eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/rofrol.omp.json)"
 
-alias zig-update='zig version; $HOME/personal_projects/zig/zig-utils/scripts/zupd x86_64-linux'
-export PATH=$HOME/.local/zig/current:$PATH
-export PATH=$HOME/zls:$PATH

@@ -52,7 +52,6 @@
 ;(require 'rf-custom)
 ;(require 'rf-current-time)
 ;(require 'rf-dashboard)
-;(require 'rf-zig)
 ;(require 'rf-tsi)
 ;(require 'rf-prettier)
 ;(require 'rf-multiple-cursors)

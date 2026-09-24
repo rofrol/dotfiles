@@ -5,10 +5,6 @@
 
 ## Aliases and functions
 
-alias zig-update='zig version && $HOME/personal_projects/zig/zig-utils/scripts/zupd aarch64-macos'
-
-alias ziglings='watchexec -w exercises -i zig-cache -e zig zig build'
-
 alias gitkaa='gitk --all &'
 # https://stackoverflow.com/questions/42211882/tell-gitk-to-ignore-all-branches-that-match-pattern
 # https://stackoverflow.com/questions/20977520/is-there-any-way-to-exclude-branches-from-showing-in-gitk
@@ -33,8 +29,6 @@ alias gh-repo-private='gh repo create --private'
 alias gh-remote='git remote add origin $(gh repo view $repo --json sshUrl --jq .sshUrl)'
 
 alias ghc='gh repo create --add-readme -c -l Apache-2.0 --public'
-
-alias exercismwatch="watchexec -i zig-cache -e zig -r -c reset 'zig test test* 2>&1| less'"
 
 # alias n='nvim --headless "+Lazy! sync" "+TSUpdateSync" +qa && nvim'
 alias n=nvim

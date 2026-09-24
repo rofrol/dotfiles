@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+#
+# Rewrite author and committer OLD_EMAIL -> NEW_NAME <NEW_EMAIL> in every
+# branch and tag, with git filter-repo (brew install git-filter-repo).
+#
+#   git rewrite-author                                  # list authors/committers
+#   git rewrite-author OLD_EMAIL "New Name" NEW_EMAIL [filter-repo args...]
+#
+# filter-repo refuses a repo that is not a fresh clone; add --force to
+# override. It also removes the origin remote so the rewritten history is not
+# pushed by accident; add it back and force-push deliberately.
+#
+# To only change how a name is shown (log, shortlog, blame) without
+# rewriting history, add a line to .mailmap instead:
+#   New Name <new@example.com> <old@example.com>
+
+set -euo pipefail
+
+if [[ $# -eq 0 ]]; then
+	git shortlog -sne --all
+	echo >&2
+	echo "Usage: git rewrite-author OLD_EMAIL \"New Name\" NEW_EMAIL [filter-repo args...]" >&2
+	exit 0
+fi
+
+if [[ $# -lt 3 ]]; then
+	echo "Usage: git rewrite-author OLD_EMAIL \"New Name\" NEW_EMAIL [filter-repo args...]" >&2
+	exit 1
+fi
+
+old=$1 name=$2 new=$3
+shift 3
+
+# <, > and newlines would break the mailmap line
+for v in "$old" "$name" "$new"; do
+	if [[ -z $v || $v == *[\<\>]* || $v == *$'\n'* ]]; then
+		echo "Invalid value: '$v'" >&2
+		exit 1
+	fi
+done
+
+mailmap=$(mktemp)
+trap 'rm -f "$mailmap"' EXIT
+printf '%s <%s> <%s>\n' "$name" "$new" "$old" >"$mailmap"
+
+git filter-repo --mailmap "$mailmap" "$@"
+
+echo
+git shortlog -sne --all
+
+# https://github.com/newren/git-filter-repo/blob/main/Documentation/git-filter-repo.txt (--mailmap)
+# https://git-scm.com/docs/gitmailmap

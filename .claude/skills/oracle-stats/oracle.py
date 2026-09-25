@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Log oracle consultations (gpt, gemini, deepseek skills), rate them after triage, show stats per model.
 
-  oracle.py log --skill S --model M --status ok|error [--mode M] [--seconds N] [--prompt-chars N] [--answer-chars N]
+  oracle.py log --skill S --model M --status ok|error [--effort E] [--mode M] [--seconds N] [--prompt-chars N] [--answer-chars N]
   oracle.py rate ID useful|partial|useless [--findings N] [--accepted N] [--unique N] [--note TEXT]
   oracle.py self --calls ID,ID [--model M] [--findings N] [--accepted N] [--refuted N] [--unique N] [--missed N] [--note TEXT]
   oracle.py stats [--days N]
@@ -40,10 +40,15 @@ def load():
     return calls, ratings, rounds
 
 
+def label(c):
+    """skill/model, plus @effort when the call set one (gemini has it in the model id, deepseek has none)."""
+    return f'{c["skill"]}/{c["model"]}' + (f'@{c["effort"]}' if c.get("effort") else "")
+
+
 def cmd_log(a):
     cid = uuid.uuid4().hex[:8]
     append({"type": "call", "id": cid, "ts": int(time.time()), "skill": a.skill, "model": a.model,
-            "mode": a.mode, "status": a.status, "seconds": a.seconds,
+            "effort": a.effort, "mode": a.mode, "status": a.status, "seconds": a.seconds,
             "prompt_chars": a.prompt_chars, "answer_chars": a.answer_chars, "cwd": os.getcwd()})
     print(f"[oracle id: {cid}]", file=sys.stderr)
 
@@ -74,7 +79,7 @@ def cmd_stats(a):
     for c in calls.values():
         if c["ts"] < since:
             continue
-        s = rows[f'{c["skill"]}/{c["model"]}']
+        s = rows[label(c)]
         s["calls"] += 1
         s["errors"] += c["status"] != "ok"
         if c["status"] == "ok" and c.get("seconds") is not None:
@@ -124,7 +129,7 @@ def cmd_recent(a):
         r = ratings.get(c["id"])
         rated = f'{r["verdict"]} {r.get("accepted") or 0}/{r.get("findings") or 0} u{r.get("unique") or 0}' if r else "unrated"
         when = time.strftime("%Y-%m-%d %H:%M", time.localtime(c["ts"]))
-        print(f'{c["id"]}  {when}  {c["skill"] + "/" + c["model"]:34} {c["status"]:5}  {rated}  {Path(c.get("cwd") or "").name}')
+        print(f'{c["id"]}  {when}  {label(c):34} {c["status"]:5}  {rated}  {Path(c.get("cwd") or "").name}')
     covered = {i for k in rounds for i in k.split(",")}
     todo = sorted(i for i in calls if i not in covered and i in ratings)
     if todo:
@@ -137,6 +142,7 @@ def main():
     l = sub.add_parser("log")
     l.add_argument("--skill", required=True); l.add_argument("--model", required=True)
     l.add_argument("--status", required=True, choices=["ok", "error"]); l.add_argument("--mode", default="")
+    l.add_argument("--effort", default="")
     for k in ("--seconds", "--prompt-chars", "--answer-chars"):
         l.add_argument(k, type=int)
     r = sub.add_parser("rate")

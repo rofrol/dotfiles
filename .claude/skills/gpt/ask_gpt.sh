@@ -34,7 +34,7 @@ start=$SECONDS; answer_chars=""
 # Log every call for oracle-stats; logging must not change the exit code or fail the call.
 oracle_log() {
   local rc=$?; rm -rf "$tmp" 2>/dev/null || true  # a straggling Codex child can still be writing there
-  ~/.claude/skills/oracle-stats/oracle.py log --skill gpt --model "$model" --mode "${repo:+repo}" \
+  ~/.claude/skills/oracle-stats/oracle.py log --skill gpt --model "$model" --effort "${effort:-default}" --mode "${repo:+repo}" \
     --status "$([ $rc = 0 ] && echo ok || echo error)" --seconds $((SECONDS-start)) \
     --prompt-chars ${#prompt} ${answer_chars:+--answer-chars $answer_chars} || true
   exit $rc

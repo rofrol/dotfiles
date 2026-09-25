@@ -5,7 +5,7 @@ description: Statistics of consulted oracle models (gpt: astra/sol/terra, gemini
 
 # Oracle statistics
 
-The gpt, gemini and deepseek scripts log every call to `~/.local/state/oracle/log.jsonl` (skill, model, mode, status,
+The gpt, gemini and deepseek scripts log every call to `~/.local/state/oracle/log.jsonl` (skill, model, effort, mode, status,
 seconds, prompt/answer size, cwd) and print `[oracle id: XXXXXXXX]` on stderr. Usefulness comes from ratings:
 
 ```bash

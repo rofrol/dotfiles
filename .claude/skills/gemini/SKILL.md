@@ -43,7 +43,10 @@ Guidelines:
 - Sending code sends it to Google's servers. Don't send secrets, credentials, or code the user marked as confidential; ask first if unsure.
 - Treat the answer as a second opinion, not ground truth — verify claims, and tell the user where you agree/disagree.
 - If the user asks for several models ("Gemini i GPT", "wszystkie"), run them in parallel and compare.
-- On a quota/usage-limit error, tell the user (subscription limits), don't retry in a loop.
+- Exit 3 = weekly quota exhausted (the script checks `agy -p /quota` first and remembers the reset time in
+  `~/.local/state/oracle/gemini-quota-reset`; nothing was sent). Don't call Gemini again until the reset
+  and don't retry or swap models; in a multi-oracle round go on with the others and tell the user Gemini was
+  skipped (and until when). The same for any other quota/usage-limit error.
 - After triaging the answer, rate it (id is printed on stderr as `[oracle id: ...]`):
   `~/.claude/skills/oracle-stats/oracle.py rate <id> useful|partial|useless --findings N --accepted N --unique N --note "..."`
   — see the oracle-stats skill for what the fields mean. Then score yourself for the round with `oracle.py self`

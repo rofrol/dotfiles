@@ -15,7 +15,25 @@ case $model in
   flash) model="gemini-3.8-flash-$effort";;
   pro|gemini-*-pro-*) echo "Gemini Pro jest wyłączony — użyj Flash" >&2; exit 2;;
 esac
-if [ -z "${ORACLE_IN_JOB:-}" ] && [ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
+# Exhausted weekly quota: refuse up front (exit 3), without a request or a herdr tab. The reset time is remembered,
+# so until then not even `agy -p /quota` (~3 s) runs. ISO UTC timestamps compare as strings.
+if [ -z "${ORACLE_IN_JOB:-}" ]; then
+  quota_file=~/.local/state/oracle/gemini-quota-reset; now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  reset=$(cat "$quota_file" 2>/dev/null) || reset=""
+  if [[ -z $reset || ! $reset > $now ]]; then
+    reset=""
+    # "Gemini Models<TAB>Weekly Limit Remaining<TAB>0%<TAB>2026-10-01T00:06:12Z"; if /quota fails, don't block.
+    line=$(timeout 30 agy -p /quota 2>/dev/null | grep '^Gemini Models') || true
+    IFS=$'\t' read -r _ _ left until <<<"$line" || true
+    if [ "${left:-}" = 0% ] && [[ ${until:-} > $now ]]; then
+      reset=$until; mkdir -p "${quota_file%/*}"; printf '%s\n' "$reset" >"$quota_file"
+    fi
+  fi
+  if [ -n "$reset" ]; then
+    echo "Limit Gemini wyczerpany do $reset (UTC) — nie odpytuj Gemini do tego czasu" >&2; exit 3
+  fi
+fi
+if [ -z "${ORACLE_IN_JOB:-}" ] &&[ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
   exec ~/.claude/skills/oracle-stats/in_herdr_job.sh "gemini ${model#gemini-}" "$0" ${orig[@]+"${orig[@]}"}  # watch it in its own herdr tab
 fi
 

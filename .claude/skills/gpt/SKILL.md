@@ -38,7 +38,7 @@ Guidelines:
   prompt and effort (unless the user named one model), compare them, and rate each call separately — `--unique` counts
   what the other two (and Claude) missed. Luna only on request.
 - If the user asks for "GPT and DeepSeek", run both in parallel and compare.
-- On a usage-limit error, tell the user (Plus limits), don't retry in a loop.
+- On a usage-limit error, tell the user (Plus limits) and don't call GPT again in this session (no retries, no other GPT model); in a multi-oracle round go on with the others.
 - After triaging the answer, rate it (id is printed on stderr as `[oracle id: ...]`):
   `~/.claude/skills/oracle-stats/oracle.py rate <id> useful|partial|useless --findings N --accepted N --unique N --note "..."`
   — see the oracle-stats skill for what the fields mean. Then score yourself for the round with `oracle.py self`

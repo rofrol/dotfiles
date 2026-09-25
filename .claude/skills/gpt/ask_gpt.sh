@@ -24,12 +24,6 @@ done
 # Regex match instead of ${prompt//[[:space:]]/}: the substitution is quadratic in bash and hangs on long prompts.
 [[ $prompt =~ [^[:space:]] ]] || { echo "Pusty prompt" >&2; exit 1; }
 
-# pi refreshes the OAuth token if needed and writes it back to its auth.json; Codex only gets a bearer token,
-# so it never refreshes (rotating) tokens itself. Separate CODEX_HOME: ~/.codex (and its auth.json) is not used.
-export PI_CODEX_TOKEN PI_CODEX_ACCOUNT
-PI_CODEX_TOKEN=$(pi auth print-bearer-token --provider openai-codex --min-expiry 15m) || { echo "Brak tokenu openai-codex w pi — zaloguj się w pi (/login)" >&2; exit 1; }
-PI_CODEX_ACCOUNT=$(jq -er '."openai-codex".accountId' ~/.pi/agent/auth.json) || { echo "Brak accountId openai-codex w ~/.pi/agent/auth.json" >&2; exit 1; }
-
 start=$SECONDS; answer_chars=""
 # Log every call for oracle-stats; logging must not change the exit code or fail the call.
 oracle_log() {
@@ -45,6 +39,14 @@ oracle_log() {
   exit $rc
 }
 tmp=$(mktemp -d); trap oracle_log EXIT
+
+# After the trap, so a failed login is logged as an error too.
+# pi refreshes the OAuth token if needed and writes it back to its auth.json; Codex only gets a bearer token,
+# so it never refreshes (rotating) tokens itself. Separate CODEX_HOME: ~/.codex (and its auth.json) is not used.
+export PI_CODEX_TOKEN PI_CODEX_ACCOUNT
+PI_CODEX_TOKEN=$(pi auth print-bearer-token --provider openai-codex --min-expiry 15m) || { echo "Brak tokenu openai-codex w pi — zaloguj się w pi (/login)" >&2; exit 1; }
+PI_CODEX_ACCOUNT=$(jq -er '."openai-codex".accountId' ~/.pi/agent/auth.json) || { echo "Brak accountId openai-codex w ~/.pi/agent/auth.json" >&2; exit 1; }
+
 out="$tmp/answer"; mkdir "$tmp/cwd" "$tmp/home"
 cwd="$tmp/cwd"
 if [ -n "$repo" ]; then

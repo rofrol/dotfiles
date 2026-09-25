@@ -19,6 +19,7 @@ from pathlib import Path
 LOG = Path(os.environ.get("ORACLE_LOG", Path.home() / ".local/state/oracle/log.jsonl"))
 VERDICTS = {"useful": 1.0, "partial": 0.5, "useless": 0.0}
 USAGE_KEYS = ("input", "cached", "output", "reasoning")
+PAIR_REF = {"gpt": "gpt-6-astra"}  # reference model for --pairs, when it is in the group
 
 
 def append(rec):
@@ -207,8 +208,8 @@ def print_pairs(calls, ratings):
               f'{1e5 * s["score"] / s["out"]:10.2f}')
     print("sums over calls, not means of per-call ratios; n<5 is anecdotal.")
 
-    # Pair each model with its vendor's reference: the model in most shared rounds of that skill/mode/effort
-    # (ties: alphabetical, so astra for gpt).
+    # Pair each model with its vendor's reference: PAIR_REF, else the model in most shared rounds of that
+    # skill/mode/effort (ties: alphabetical).
     groups = defaultdict(lambda: defaultdict(dict))  # (skill, mode, effort) -> round -> model -> call
     for c in usable:
         if c.get("round"):
@@ -218,7 +219,7 @@ def print_pairs(calls, ratings):
         seen = Counter(m for models in by_round.values() if len(models) > 1 for m in models)
         if not seen:
             continue
-        ref = max(sorted(seen), key=seen.get)
+        ref = PAIR_REF.get(skill) if PAIR_REF.get(skill) in seen else max(sorted(seen), key=seen.get)
         for model in sorted(seen):
             if model == ref:
                 continue

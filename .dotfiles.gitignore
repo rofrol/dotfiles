@@ -206,6 +206,7 @@
 !/.pi/agent/settings.json
 !/.pi/agent/models.json
 !/.pi/agent/fabric.json
+!/.pi/agent/AGENTS.md
 !/.pi/agent/extensions
 /.pi/agent/extensions/*
 !/.pi/agent/extensions/remember-model.ts

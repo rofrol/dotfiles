@@ -12,3 +12,10 @@ delivery = "system"
 
 [usage]
 enabled = true
+
+[ui.sidebar.agents]
+rows = [
+  ["state_icon", "machine", "workspace", "tab"],
+  ["agent"],
+  ["$jobs", "$bg"],
+]

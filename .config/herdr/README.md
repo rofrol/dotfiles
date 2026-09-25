@@ -67,51 +67,19 @@ herdr status   # compare client/server version and protocol
 To pick up the new binary without losing panes, see the fork's README
 (`~/personal_projects/herdr/README.md`, "Fork changes").
 
-## Relaunching programs after a restart
+## Plugins from the fork
 
-After a server restart (or reboot) herdr restores layout, cwd and supported
-agents (pi, ...), but other panes come back as empty shells. The local plugin
-`local-plugins/relaunch/` brings back whatever was running in them (lazygit,
-ki, ...), with no list of programs to maintain and nothing running in the
-background.
+The plugins live in the herdr fork (`~/personal_projects/herdr/plugins/`) and
+are linked from there; see their READMEs for details.
 
-How it works:
-
-- `relaunch.zsh` hooks zsh: `preexec` writes the command you start to
-  `~/.local/state/herdr/plugins/local.relaunch/<socket>/<pane>`, `precmd`
-  deletes it when the prompt returns. A restart kills the program before the
-  prompt returns, so the record survives.
-- The plugin's `[[startup]]` hook (`relaunch.js`) reruns each surviving command
-  in the same pane, only if the pane has the same id and tab, is not an agent
-  pane and is an idle shell. It never creates tabs or workspaces.
-- Dotfiles mode (`don`) is not replayed and not needed: the git shim
-  (`~/scripts/dotfiles-shim/git`) picks the dotfiles repo per directory.
-
-Setup:
-
-1. Link the plugin once:
-
-   ```sh
-   herdr plugin link ~/.config/herdr/local-plugins/relaunch
-   ```
-
-2. Enable the zsh hook: add to the end of `~/.zshrc` (already done here):
-
-   ```sh
-   # herdr: remember foreground commands per pane (local.relaunch plugin)
-   [[ -n $HERDR_PANE_ID ]] && source ~/.config/herdr/local-plugins/relaunch/relaunch.zsh
-   ```
-
-   It only takes effect in shells started afterwards (new panes, or
-   `exec zsh` in an existing one). Check: `whence -v _herdr_relaunch_preexec`.
-
-Use:
-
-- Preview what would be relaunched:
-  `node ~/.config/herdr/local-plugins/relaunch/relaunch.js --dry-run`
-- Logs after a restart: `herdr plugin log list --plugin local.relaunch`
-- Disable: `herdr plugin unlink local.relaunch` and remove the `~/.zshrc` line.
-
-Limits: programs start fresh (no in-app state); only commands typed in zsh are
-recorded; a one-shot command killed mid-way (e.g. a migration) runs again.
-Records are 0600 and may contain command-line secrets, like shell history.
+- **relaunch** reruns the programs panes were running (lazygit, ki, ...) after
+  a server restart or reboot. Linked with
+  `herdr plugin link ~/personal_projects/herdr/plugins/relaunch`; `~/.zshrc`
+  sources its `relaunch.zsh`.
+- **job**: `herdr-job run --name "Build" -- make` runs long work in its own tab
+  and shows `⏳`/`✓`/`✗` in the sidebar (`$jobs` row in `config.toml`).
+  `herdr-job` and `herdr-bg-badge` are symlinked into `~/.local/bin`; the
+  "Long-running work" section in `~/.claude/CLAUDE.md` and
+  `~/.pi/agent/AGENTS.md` tells agents to use it.
+- Dotfiles mode (`don`) is not replayed by relaunch and not needed: the git
+  shim (`~/scripts/dotfiles-shim/git`) picks the dotfiles repo per directory.

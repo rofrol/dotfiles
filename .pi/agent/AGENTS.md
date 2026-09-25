@@ -1,8 +1,3 @@
-# Język i formy gramatyczne
-
-- Po polsku zwracaj się do mnie w formach męskich (np. „zrobiłeś”, „masz rację, sprawdziłeś”), nie żeńskich ani bezosobowych-na-siłę.
-- O sobie mów w formach męskich (np. „sprawdziłem”, „zrobiłem”, „zauważyłem”), nie „sprawdziłam”, „zrobiłam”.
-
 # Long-running work
 
 Run work that takes more than a minute (builds, exports, VM or remote jobs,

@@ -41,6 +41,9 @@ git --git-dir=$DOTFILES_HOME branch --set-upstream-to=origin/master master
 git --git-dir=$DOTFILES_HOME config core.excludesFile "$HOME/.dotfiles.gitignore"
 # fails on existing files instead of overwriting them; review, then add -f if intended
 git --git-dir=$DOTFILES_HOME --work-tree=$HOME checkout
+# machine-local filter + pre-commit hook: keep Claude Code's autoMode block
+# out of the tracked ~/.claude/settings.json (needs jq)
+sh ~/scripts/dotfiles-setup-filters.sh
 # new login shell: ~/.zprofile sets DOTFILES_HOME and sources dotfiles.sh,
 # ~/.zshrc enables the git shim
 exec zsh -l

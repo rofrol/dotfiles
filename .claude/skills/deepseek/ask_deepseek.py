@@ -20,12 +20,18 @@ def get_key():
     except (OSError, ValueError, KeyError) as e:
         sys.exit(f"Brak klucza deepseek w {AUTH_FILE}: {e!r}")
 
-def log_call(model, status, seconds, prompt_chars, answer_chars):
+def log_call(model, status, seconds, prompt_chars, answer_chars, usage=None):
     """Record the call for oracle-stats; never let logging fail the consultation."""
+    args = []
+    if usage:  # normalized: input includes cache hits, output includes reasoning
+        norm = {"input": usage.get("prompt_tokens"), "cached": usage.get("prompt_cache_hit_tokens"),
+                "output": usage.get("completion_tokens"),
+                "reasoning": (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")}
+        args = ["--usage", json.dumps(norm), "--usage-raw", json.dumps(usage)]
     try:
         subprocess.run([str(ORACLE), "log", "--skill", "deepseek", "--model", model, "--status", status,
                         "--seconds", str(int(seconds)), "--prompt-chars", str(prompt_chars),
-                        "--answer-chars", str(answer_chars)], timeout=10)
+                        "--answer-chars", str(answer_chars), *args], timeout=10)
     except (OSError, subprocess.SubprocessError):
         pass
 
@@ -71,7 +77,7 @@ def main():
     if not prompt.strip():
         sys.exit("Pusty prompt")
 
-    body = {"model": a.model, "stream": True, "messages": [
+    body = {"model": a.model, "stream": True, "stream_options": {"include_usage": True}, "messages": [
         {"role": "system", "content": a.system},
         {"role": "user", "content": prompt}]}
     req = urllib.request.Request(
@@ -86,7 +92,7 @@ def main():
     signal.alarm(a.timeout)  # hard cap, fires even while blocked in a read
 
     start = time.monotonic()
-    reasoning, content, finish = [], [], None
+    reasoning, content, finish, usage = [], [], None, None
     live = live_output()
     try:
         with urllib.request.urlopen(req, timeout=min(120, a.timeout)) as r:
@@ -97,16 +103,18 @@ def main():
                 data = line[5:].strip()
                 if data == "[DONE]":
                     break
-                choice = json.loads(data)["choices"][0]
-                delta = choice.get("delta") or {}
-                if delta.get("reasoning_content"):
-                    reasoning.append(delta["reasoning_content"])
-                    if live:
-                        live.write(f"\x1b[2m{delta['reasoning_content']}\x1b[0m")
-                        live.flush()
-                if delta.get("content"):
-                    content.append(delta["content"])
-                finish = choice.get("finish_reason") or finish
+                chunk = json.loads(data)
+                usage = chunk.get("usage") or usage  # the last chunk carries it, with empty choices
+                for choice in chunk.get("choices") or []:
+                    delta = choice.get("delta") or {}
+                    if delta.get("reasoning_content"):
+                        reasoning.append(delta["reasoning_content"])
+                        if live:
+                            live.write(f"\x1b[2m{delta['reasoning_content']}\x1b[0m")
+                            live.flush()
+                    if delta.get("content"):
+                        content.append(delta["content"])
+                    finish = choice.get("finish_reason") or finish
     except Deadline:
         finish = "deadline"
     except urllib.error.HTTPError as e:
@@ -121,7 +129,8 @@ def main():
     if live:
         live.write("\n\n--- answer ---\n")
         live.close()
-    log_call(a.model, "ok" if finish in ("stop", None) else "error", time.monotonic() - start, len(prompt), len(answer))
+    log_call(a.model, "ok" if finish in ("stop", None) else "error", time.monotonic() - start, len(prompt), len(answer),
+             usage)
     if a.show_reasoning and reasoning:
         print("=== reasoning ===\n" + "".join(reasoning) + "\n=== answer ===")
     print(answer)

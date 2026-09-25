@@ -19,10 +19,14 @@ for a in "$@"; do
   prev=$a
 done
 
+# The job tab starts from its own environment: pass on the round id, the log path and model settings.
+passenv=()
+while IFS= read -r v; do passenv+=("$v=${!v}"); done < <(compgen -e | grep -E '^(ORACLE_ROUND|ORACLE_LOG|GPT_|GEMINI_|DEEPSEEK_)' || true)
+
 last=${*: -1}
 question=$(tr -s '[:space:]' ' ' <<<"$last")
 id=$(herdr-job run --name "ask $skill: ${question:0:40}" --why "${question:0:200}" --notify never --cwd "$PWD" -- \
-  env ORACLE_IN_JOB=1 ORACLE_STDIN="$dir/stdin" D="$dir" \
+  env ORACLE_IN_JOB=1 ORACLE_STDIN="$dir/stdin" D="$dir" ${passenv[@]+"${passenv[@]}"} \
   bash -c 'set -o pipefail; "$@" 2>"$D/err" | tee "$D/out"; rc=$?; cat "$D/err" >&2; exit $rc' _ "$@")
 rc=0; herdr-job wait --quiet "$id" >/dev/null || rc=$?
 [ -f "$dir/out" ] && cat "$dir/out"

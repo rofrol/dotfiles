@@ -33,10 +33,15 @@ PI_CODEX_ACCOUNT=$(jq -er '."openai-codex".accountId' ~/.pi/agent/auth.json) || 
 start=$SECONDS; answer_chars=""
 # Log every call for oracle-stats; logging must not change the exit code or fail the call.
 oracle_log() {
-  local rc=$?; rm -rf "$tmp" 2>/dev/null || true  # a straggling Codex child can still be writing there
+  local rc=$? usage=""
+  # Token usage from the last Codex event that has one; read before $tmp goes away.
+  usage=$(jq -c 'select(.usage? | type == "object") | .usage' "$tmp/events" 2>/dev/null | tail -1) || true
+  rm -rf "$tmp" 2>/dev/null || true  # a straggling Codex child can still be writing there
   ~/.claude/skills/oracle-stats/oracle.py log --skill gpt --model "$model" --effort "${effort:-default}" --mode "${repo:+repo}" \
     --status "$([ $rc = 0 ] && echo ok || echo error)" --seconds $((SECONDS-start)) \
-    --prompt-chars ${#prompt} ${answer_chars:+--answer-chars $answer_chars} || true
+    --prompt-chars ${#prompt} ${answer_chars:+--answer-chars $answer_chars} \
+    ${usage:+--usage-raw "$usage"} ${usage:+--usage "$(jq -c '{input: .input_tokens, cached: .cached_input_tokens,
+      output: .output_tokens, reasoning: (.reasoning_output_tokens // .reasoning_tokens)}' <<<"$usage" 2>/dev/null)"} || true
   exit $rc
 }
 tmp=$(mktemp -d); trap oracle_log EXIT
@@ -50,11 +55,12 @@ if [ -n "$repo" ]; then
 fi
 provider='model_providers.pi={name="pi",base_url="https://chatgpt.com/backend-api/codex",wire_api="responses",env_key="PI_CODEX_TOKEN",env_http_headers={"chatgpt-account-id"="PI_CODEX_ACCOUNT"}}'
 export CODEX_HOME="$tmp/home"
-args=(exec --ignore-user-config --ephemeral --skip-git-repo-check -s read-only -C "$cwd" -m "$model" -o "$out"
+args=(exec --json --ignore-user-config --ephemeral --skip-git-repo-check -s read-only -C "$cwd" -m "$model" -o "$out"
       -c model_provider=pi -c "$provider")
 [ -n "$effort" ] && args+=(-c "model_reasoning_effort=\"$effort\"")
-# Codex's progress (stderr) goes to the herdr-job tab when there is one, the answer to $out.
+# Codex's progress (stderr) goes to the herdr-job tab when there is one, its JSON events (with usage) to
+# $tmp/events, the answer to $out.
 progress=${HERDR_JOB_TTY:-/dev/null}
-printf '%s' "$prompt" | codex "${args[@]}" - 2>&1 >/dev/null | tee "$tmp/err" >"$progress" || { cat "$tmp/err" >&2; exit 1; }
+printf '%s' "$prompt" | codex "${args[@]}" - 2>&1 >"$tmp/events" | tee "$tmp/err" >"$progress" || { cat "$tmp/err" >&2; exit 1; }
 answer_chars=$(wc -m <"$out" | tr -d " ")
 cat "$out"

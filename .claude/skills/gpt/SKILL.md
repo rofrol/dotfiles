@@ -43,6 +43,9 @@ Guidelines:
   `~/.claude/skills/oracle-stats/oracle.py rate <id> useful|partial|useless --findings N --accepted N --unique N --note "..."`
   — see the oracle-stats skill for what the fields mean. Then score yourself for the round with `oracle.py self`
   (write your own findings down before reading the answers).
+- Every consultation is a round: start the command with `export ORACLE_ROUND=$(~/.claude/skills/oracle-stats/oracle.py new-round)`
+  and launch all oracles for that question in the same Bash call, so their calls share the round id
+  (paired token comparisons in `oracle.py stats --pairs`; `oracle.py self --round <id>`).
 
 ## Code review
 

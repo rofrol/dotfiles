@@ -32,10 +32,15 @@ done
 start=$SECONDS; answer_chars=""
 # Log every call for oracle-stats; logging must not change the exit code or fail the call.
 oracle_log() {
-  local rc=$?; rm -rf "$tmp"
+  local rc=$? usage=""
+  # Token usage from agy's result event; read before $tmp goes away. output_tokens includes thinking_tokens.
+  usage=$(jq -c 'select(.event=="result") | .result.usage // empty' "$tmp/out" 2>/dev/null | tail -1) || true
+  rm -rf "$tmp" 2>/dev/null || true
   ~/.claude/skills/oracle-stats/oracle.py log --skill gemini --model "$model" --mode "${repo:+repo}" \
     --status "$([ $rc = 0 ] && echo ok || echo error)" --seconds $((SECONDS-start)) \
-    --prompt-chars ${#prompt} ${answer_chars:+--answer-chars $answer_chars} || true
+    --prompt-chars ${#prompt} ${answer_chars:+--answer-chars $answer_chars} \
+    ${usage:+--usage-raw "$usage"} ${usage:+--usage "$(jq -c '{input: .input_tokens, cached: .cache_read_tokens,
+      output: .output_tokens, reasoning: .thinking_tokens}' <<<"$usage" 2>/dev/null)"} || true
   exit $rc
 }
 tmp=$(mktemp -d); trap oracle_log EXIT

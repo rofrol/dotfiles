@@ -6,13 +6,15 @@ description: Statistics of consulted oracle models (gpt: astra/sol/terra, gemini
 # Oracle statistics
 
 The gpt, gemini and deepseek scripts log every call to `~/.local/state/oracle/log.jsonl` (skill, model, effort, mode, status,
-seconds, prompt/answer size, cwd) and print `[oracle id: XXXXXXXX]` on stderr. Usefulness comes from ratings:
+seconds, prompt/answer size, cwd, round id from `$ORACLE_ROUND`, token usage) and print `[oracle id: XXXXXXXX]` on stderr. Usefulness comes from ratings:
 
 ```bash
 O=~/.claude/skills/oracle-stats/oracle.py
 $O rate <id> useful|partial|useless [--findings N] [--accepted N] [--unique N] [--note "..."]
-$O self --calls <id>,<id> --model <your model id> --findings N --accepted N --refuted N --unique N --missed N [--note "..."]
+$O new-round            # round id: export ORACLE_ROUND=$($O new-round) before launching a round's oracles
+$O self --round <round> --model <your model id> --findings N --accepted N --refuted N --unique N --missed N [--note "..."]
 $O stats [--days 30]     # per skill/model + per coordinator (Claude): rounds, accepted/findings, refuted, unique, missed, recall
+$O stats --pairs         # + token efficiency (acc/1M output tokens) and paired within-round token ratios (e.g. sol vs astra)
 $O recent [-n 20]        # latest calls with their ids and ratings (find unrated ones)
 ```
 
@@ -35,5 +37,14 @@ Claude is scored too, once per round (all oracle calls on the same question), wi
   disproved by an oracle or by verification (your errors); `--unique` accepted ones no oracle had; `--missed` accepted
   oracle findings you did not have. `--model` = your exact model id (e.g. claude-opus-5-5).
 - `--note`: what you got wrong or missed (e.g. "assumed MBID stable across releases; missed video recordings").
-- Log it even for a single-oracle round. Re-running `self` with the same calls replaces the entry.
+- Log it even for a single-oracle round. Re-running `self` with the same round (or calls) replaces the entry.
   `recent` lists rated calls that have no coordinator entry yet.
+
+## Tokens
+
+Usage is normalized across vendors: `input` includes `cached`, `output` includes `reasoning` (GPT's
+`reasoning_output_tokens`, Gemini's `thinking_tokens`, DeepSeek's `reasoning_tokens`); the provider's own object is kept
+as `usage_raw`. Codex and agy add ~10k input tokens of their own system prompt, so compare output tokens.
+When reading `stats --pairs`: compare tokens only within one vendor (tokenizers differ), trust paired rounds over
+per-model sums, and remember `unique` depends on who else was asked (a model asked alone gets everything as unique).
+Calls before 2026-09-25 have no usage.

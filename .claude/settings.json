@@ -1,4 +1,20 @@
 {
+  "permissions": {
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.pi/agent/auth.json)",
+      "Read(~/.netrc)",
+      "Read(**/.env)",
+      "Read(**/.env.local)",
+      "Read(**/.env.*.local)",
+      "Read(**/.env.production)",
+      "Edit(~/.claude/settings.json)",
+      "Edit(~/.claude/hooks/**)",
+      "Edit(~/Library/LaunchAgents/**)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
@@ -11,16 +27,36 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/bin/herdr-bg-badge",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/bin/herdr-bg-badge",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   },
   "theme": "light",
   "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true,
-  "permissions": {
-    "deny": [
-      "Edit(~/.claude/settings.json)",
-      "Edit(~/.claude/hooks/**)",
-      "Edit(~/Library/LaunchAgents/**)"
-    ]
+  "voiceEnabled": true,
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
   }
 }

@@ -51,12 +51,13 @@
       }
     ]
   },
-  "theme": "light",
-  "remoteControlAtStartup": true,
-  "agentPushNotifEnabled": true,
-  "voiceEnabled": true,
+  "language": "polish",
   "voice": {
     "enabled": true,
     "mode": "hold"
-  }
+  },
+  "theme": "light",
+  "remoteControlAtStartup": true,
+  "agentPushNotifEnabled": true,
+  "voiceEnabled": true
 }

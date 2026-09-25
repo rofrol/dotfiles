@@ -5,10 +5,11 @@ Streams the answer (SSE) and enforces a hard deadline on the whole request:
 DeepSeek keeps a queued connection alive with keep-alive lines, so a per-read
 socket timeout alone can wait forever.
 """
-import argparse, json, os, signal, sys, time, urllib.request, urllib.error
+import argparse, json, os, signal, subprocess, sys, time, urllib.request, urllib.error
 from pathlib import Path
 
 AUTH_FILE = Path.home() / ".pi/agent/auth.json"
+ORACLE = Path.home() / ".claude/skills/oracle-stats/oracle.py"
 
 class Deadline(Exception):
     pass
@@ -18,6 +19,15 @@ def get_key():
         return json.loads(AUTH_FILE.read_text())["deepseek"]["key"]
     except (OSError, ValueError, KeyError) as e:
         sys.exit(f"Brak klucza deepseek w {AUTH_FILE}: {e!r}")
+
+def log_call(model, status, seconds, prompt_chars, answer_chars):
+    """Record the call for oracle-stats; never let logging fail the consultation."""
+    try:
+        subprocess.run([str(ORACLE), "log", "--skill", "deepseek", "--model", model, "--status", status,
+                        "--seconds", str(int(seconds)), "--prompt-chars", str(prompt_chars),
+                        "--answer-chars", str(answer_chars)], timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        pass
 
 def main():
     p = argparse.ArgumentParser()
@@ -74,15 +84,18 @@ def main():
     except Deadline:
         finish = "deadline"
     except urllib.error.HTTPError as e:
+        log_call(a.model, "error", time.monotonic() - start, len(prompt), 0)
         sys.exit(f"HTTP {e.code}: {e.read().decode(errors='replace')}")
     except (urllib.error.URLError, TimeoutError, OSError) as e:
         finish = f"error: {e}"
     finally:
         signal.alarm(0)
 
+    answer = "".join(content)
+    log_call(a.model, "ok" if finish in ("stop", None) else "error", time.monotonic() - start, len(prompt), len(answer))
     if a.show_reasoning and reasoning:
         print("=== reasoning ===\n" + "".join(reasoning) + "\n=== answer ===")
-    print("".join(content))
+    print(answer)
     if finish not in ("stop", None):
         elapsed = int(time.monotonic() - start)
         state = "no answer yet" if not content else "answer is partial"

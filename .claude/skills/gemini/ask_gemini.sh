@@ -25,7 +25,16 @@ done
 # Regex match instead of ${prompt//[[:space:]]/}: the substitution is quadratic in bash and hangs on long prompts.
 [[ $prompt =~ [^[:space:]] ]] || { echo "Pusty prompt" >&2; exit 1; }
 
-tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+start=$SECONDS; answer_chars=""
+# Log every call for oracle-stats; logging must not change the exit code or fail the call.
+oracle_log() {
+  local rc=$?; rm -rf "$tmp"
+  ~/.claude/skills/oracle-stats/oracle.py log --skill gemini --model "$model" --mode "${repo:+repo}" \
+    --status "$([ $rc = 0 ] && echo ok || echo error)" --seconds $((SECONDS-start)) \
+    --prompt-chars ${#prompt} ${answer_chars:+--answer-chars $answer_chars} || true
+  exit $rc
+}
+tmp=$(mktemp -d); trap oracle_log EXIT
 mkdir "$tmp/cwd"; cwd="$tmp/cwd"
 if [ -n "$repo" ]; then
   # The dotfiles env (GIT_DIR/GIT_WORK_TREE) would point git, and agy's git commands, at the home repo.
@@ -52,4 +61,5 @@ denied=$(jq -r '[.denied_actions[]?.action] | unique | join(", ")' <<<"$result")
 [ -z "$denied" ] || echo "Uwaga: agy odmówił narzędzi: $denied" >&2
 answer=$(jq -r .response <<<"$result")
 [[ $answer =~ [^[:space:]] ]] || { echo "Pusta odpowiedź (prawdopodobnie model próbował użyć zablokowanego narzędzia)" >&2; cat "$tmp/err" >&2; exit 1; }
+answer_chars=${#answer}
 printf '%s\n' "$answer"

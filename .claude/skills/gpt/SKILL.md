@@ -34,6 +34,9 @@ Guidelines:
 - Treat the answer as a second opinion, not ground truth — verify claims, and tell the user where you agree/disagree.
 - If the user asks for "GPT and DeepSeek", run both in parallel and compare.
 - On a usage-limit error, tell the user (Plus limits), don't retry in a loop.
+- After triaging the answer, rate it (id is printed on stderr as `[oracle id: ...]`):
+  `~/.claude/skills/oracle-stats/oracle.py rate <id> useful|partial|useless --findings N --accepted N --unique N --note "..."`
+  — see the oracle-stats skill for what the fields mean.
 
 ## Code review
 

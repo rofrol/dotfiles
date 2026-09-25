@@ -25,7 +25,16 @@ export PI_CODEX_TOKEN PI_CODEX_ACCOUNT
 PI_CODEX_TOKEN=$(pi auth print-bearer-token --provider openai-codex --min-expiry 15m) || { echo "Brak tokenu openai-codex w pi — zaloguj się w pi (/login)" >&2; exit 1; }
 PI_CODEX_ACCOUNT=$(jq -er '."openai-codex".accountId' ~/.pi/agent/auth.json) || { echo "Brak accountId openai-codex w ~/.pi/agent/auth.json" >&2; exit 1; }
 
-tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+start=$SECONDS; answer_chars=""
+# Log every call for oracle-stats; logging must not change the exit code or fail the call.
+oracle_log() {
+  local rc=$?; rm -rf "$tmp"
+  ~/.claude/skills/oracle-stats/oracle.py log --skill gpt --model "$model" --mode "${repo:+repo}" \
+    --status "$([ $rc = 0 ] && echo ok || echo error)" --seconds $((SECONDS-start)) \
+    --prompt-chars ${#prompt} ${answer_chars:+--answer-chars $answer_chars} || true
+  exit $rc
+}
+tmp=$(mktemp -d); trap oracle_log EXIT
 out="$tmp/answer"; mkdir "$tmp/cwd" "$tmp/home"
 cwd="$tmp/cwd"
 if [ -n "$repo" ]; then
@@ -40,4 +49,5 @@ args=(exec --ignore-user-config --ephemeral --skip-git-repo-check -s read-only -
       -c model_provider=pi -c "$provider")
 [ -n "$effort" ] && args+=(-c "model_reasoning_effort=\"$effort\"")
 printf '%s' "$prompt" | codex "${args[@]}" - >/dev/null 2>"$tmp/err" || { cat "$tmp/err" >&2; exit 1; }
+answer_chars=$(wc -m <"$out" | tr -d " ")
 cat "$out"

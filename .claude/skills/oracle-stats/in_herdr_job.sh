@@ -2,9 +2,9 @@
 # Runs an ask_* oracle script in its own herdr-job tab, so the user can watch it, and waits for it.
 # The caller still gets the answer on stdout, the script's stderr on stderr, and its exit code.
 # No desktop notification: the agent that asked reports the answer itself.
-# Usage, at the top of an ask_* script (ORACLE_IN_JOB stops the recursion):
+# Usage, in an ask_* script once the model is known (ORACLE_IN_JOB stops the recursion):
 #   if [ -z "${ORACLE_IN_JOB:-}" ] && [ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
-#     exec ~/.claude/skills/oracle-stats/in_herdr_job.sh <skill> "$0" "$@"
+#     exec ~/.claude/skills/oracle-stats/in_herdr_job.sh "<skill> <model>" "$0" "$@"
 #   fi
 # Inside the job: ORACLE_STDIN is the file holding the caller's stdin (for -f -),
 # and HERDR_JOB_TTY (set by herdr-job) is the job tab, for progress the caller should not get.

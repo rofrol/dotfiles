@@ -29,13 +29,14 @@ def log_call(model, status, seconds, prompt_chars, answer_chars):
     except (OSError, subprocess.SubprocessError):
         pass
 
-def run_in_herdr_job():
+def run_in_herdr_job(model):
     """Re-run in its own herdr-job tab, so the user can watch it (see in_herdr_job.sh)."""
     import shutil
     if os.environ.get("ORACLE_IN_JOB") or not os.environ.get("HERDR_SOCKET_PATH") or not shutil.which("herdr-job"):
         return
     wrap = Path.home() / ".claude/skills/oracle-stats/in_herdr_job.sh"
-    os.execv(str(wrap), [str(wrap), "deepseek", str(Path(__file__).resolve()), *sys.argv[1:]])
+    label = "deepseek " + model.removeprefix("deepseek-")  # the model shows in the tab name
+    os.execv(str(wrap), [str(wrap), label, str(Path(__file__).resolve()), *sys.argv[1:]])
 
 def live_output():
     """The herdr-job tab, for reasoning the caller should not get; None outside a job."""
@@ -47,7 +48,6 @@ def live_output():
         return None
 
 def main():
-    run_in_herdr_job()
     p = argparse.ArgumentParser()
     p.add_argument("prompt", nargs="*")
     p.add_argument("-m", "--model", default=os.environ.get("DEEPSEEK_MODEL", "deepseek-flash"),
@@ -58,6 +58,7 @@ def main():
                    help="hard limit in seconds for the whole request (default 420)")
     p.add_argument("--show-reasoning", action="store_true")
     a = p.parse_args()
+    run_in_herdr_job(a.model)
 
     prompt = " ".join(a.prompt)
     # stdin only via -f -: a background job can inherit an open stdin that never sends EOF.

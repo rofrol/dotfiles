@@ -3,14 +3,15 @@
 # Usage: ask_gpt.sh [-m astra|sol|terra|luna|<id>] [-e low|medium|high|xhigh] [-r] [-f FILE]... "prompt"   (-f - reads stdin)
 # -r: run Codex in the current git repo (read-only), so it can read files and git history itself.
 set -euo pipefail
-if [ -z "${ORACLE_IN_JOB:-}" ] && [ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
-  exec ~/.claude/skills/oracle-stats/in_herdr_job.sh gpt "$0" "$@"  # watch it in its own herdr tab
-fi
+orig=("$@")  # for the herdr-job re-run, once the model is known
 model="${GPT_MODEL:-astra}"; effort=""; files=(); repo=""
 while getopts "m:e:f:r" o; do
   case $o in m) model=$OPTARG;; e) effort=$OPTARG;; f) files+=("$OPTARG");; r) repo=1;; *) exit 2;; esac
 done
 shift $((OPTIND-1))
+if [ -z "${ORACLE_IN_JOB:-}" ] && [ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
+  exec ~/.claude/skills/oracle-stats/in_herdr_job.sh "gpt $model/${effort:-default}" "$0" ${orig[@]+"${orig[@]}"}  # watch it in its own herdr tab
+fi
 case $model in astra|sol|luna) model="gpt-6-$model";; terra) model=gpt-5.6-terra;; esac  # no GPT-6 Terra yet
 
 prompt="$*"

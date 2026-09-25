@@ -3,9 +3,7 @@
 # Usage: ask_gemini.sh [-m flash|<id>] [-e low|medium|high] [-r] [-f FILE]... "prompt"   (-f - reads stdin)
 # -r: run agy in the current git repo, so it can read files itself (writes are denied in headless mode).
 set -euo pipefail
-if [ -z "${ORACLE_IN_JOB:-}" ] && [ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
-  exec ~/.claude/skills/oracle-stats/in_herdr_job.sh gemini "$0" "$@"  # watch it in its own herdr tab
-fi
+orig=("$@")  # for the herdr-job re-run, once the model is known
 model="${GEMINI_MODEL:-}"; effort=high; files=(); repo=""
 while getopts "m:e:f:r" o; do
   case $o in m) model=$OPTARG;; e) effort=$OPTARG;; f) files+=("$OPTARG");; r) repo=1;; *) exit 2;; esac
@@ -17,6 +15,9 @@ case $model in
   flash) model="gemini-3.8-flash-$effort";;
   pro|gemini-*-pro-*) echo "Gemini Pro jest wyłączony — użyj Flash" >&2; exit 2;;
 esac
+if [ -z "${ORACLE_IN_JOB:-}" ] && [ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
+  exec ~/.claude/skills/oracle-stats/in_herdr_job.sh "gemini ${model#gemini-}" "$0" ${orig[@]+"${orig[@]}"}  # watch it in its own herdr tab
+fi
 
 prompt="$*"
 # stdin only via -f -: a background job can inherit an open stdin that never sends EOF.

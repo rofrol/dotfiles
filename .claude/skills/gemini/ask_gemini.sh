@@ -3,6 +3,9 @@
 # Usage: ask_gemini.sh [-m pro|flash|<id>] [-e low|medium|high] [-r] [-f FILE]... "prompt"   (-f - reads stdin)
 # -r: run agy in the current git repo, so it can read files itself (writes are denied in headless mode).
 set -euo pipefail
+if [ -z "${ORACLE_IN_JOB:-}" ] && [ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
+  exec ~/.claude/skills/oracle-stats/in_herdr_job.sh gemini "$0" "$@"  # watch it in its own herdr tab
+fi
 model="${GEMINI_MODEL:-}"; effort=high; files=(); repo=""
 while getopts "m:e:f:r" o; do
   case $o in m) model=$OPTARG;; e) effort=$OPTARG;; f) files+=("$OPTARG");; r) repo=1;; *) exit 2;; esac
@@ -20,6 +23,7 @@ prompt="$*"
 # stdin only via -f -: a background job can inherit an open stdin that never sends EOF.
 for f in ${files[@]+"${files[@]}"}; do
   [ "$f" = - ] && label=stdin || label=$f
+  if [ "$f" = - ] && [ -n "${ORACLE_STDIN:-}" ]; then f=$ORACLE_STDIN; fi  # saved by in_herdr_job.sh
   prompt="$prompt"$'\n\n'"--- $label ---"$'\n'"$(cat "$f")"
 done
 # Regex match instead of ${prompt//[[:space:]]/}: the substitution is quadratic in bash and hangs on long prompts.

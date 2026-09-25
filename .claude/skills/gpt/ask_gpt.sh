@@ -3,6 +3,9 @@
 # Usage: ask_gpt.sh [-m sol|luna|astra|<id>] [-e low|medium|high|xhigh] [-r] [-f FILE]... "prompt"   (-f - reads stdin)
 # -r: run Codex in the current git repo (read-only), so it can read files and git history itself.
 set -euo pipefail
+if [ -z "${ORACLE_IN_JOB:-}" ] && [ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
+  exec ~/.claude/skills/oracle-stats/in_herdr_job.sh gpt "$0" "$@"  # watch it in its own herdr tab
+fi
 model="${GPT_MODEL:-astra}"; effort=""; files=(); repo=""
 while getopts "m:e:f:r" o; do
   case $o in m) model=$OPTARG;; e) effort=$OPTARG;; f) files+=("$OPTARG");; r) repo=1;; *) exit 2;; esac
@@ -14,6 +17,7 @@ prompt="$*"
 # stdin only via -f -: a background job can inherit an open stdin that never sends EOF.
 for f in ${files[@]+"${files[@]}"}; do
   [ "$f" = - ] && label=stdin || label=$f
+  if [ "$f" = - ] && [ -n "${ORACLE_STDIN:-}" ]; then f=$ORACLE_STDIN; fi  # saved by in_herdr_job.sh
   prompt="$prompt"$'\n\n'"--- $label ---"$'\n'"$(cat "$f")"
 done
 # Regex match instead of ${prompt//[[:space:]]/}: the substitution is quadratic in bash and hangs on long prompts.
@@ -48,6 +52,8 @@ export CODEX_HOME="$tmp/home"
 args=(exec --ignore-user-config --ephemeral --skip-git-repo-check -s read-only -C "$cwd" -m "$model" -o "$out"
       -c model_provider=pi -c "$provider")
 [ -n "$effort" ] && args+=(-c "model_reasoning_effort=\"$effort\"")
-printf '%s' "$prompt" | codex "${args[@]}" - >/dev/null 2>"$tmp/err" || { cat "$tmp/err" >&2; exit 1; }
+# Codex's progress (stderr) goes to the herdr-job tab when there is one, the answer to $out.
+progress=${HERDR_JOB_TTY:-/dev/null}
+printf '%s' "$prompt" | codex "${args[@]}" - 2>&1 >/dev/null | tee "$tmp/err" >"$progress" || { cat "$tmp/err" >&2; exit 1; }
 answer_chars=$(wc -m <"$out" | tr -d " ")
 cat "$out"

@@ -17,6 +17,8 @@ git diff | ~/.claude/skills/deepseek/ask_deepseek.py -f - "Review this diff"   #
 Options: `-f FILE` (repeatable; `-f -` = stdin, never read implicitly), `-s SYSTEM_PROMPT`, `--show-reasoning`, `-t SECONDS` (hard limit on the whole request, default 420), env `DEEPSEEK_MODEL`, `DEEPSEEK_BASE_URL`, `DEEPSEEK_TIMEOUT`.
 Answers can take a few minutes — use a Bash timeout of 600000. The answer is streamed; on hitting the limit the script prints what it has, notes it on stderr and exits 1.
 
+Inside herdr the script runs in its own herdr-job tab (no notification) so the user can watch it; output and exit code are unchanged.
+
 Guidelines:
 - DeepSeek has no context of this conversation: include the goal, relevant code and constraints in the prompt.
 - Sending code sends it to DeepSeek's servers (China). Don't send secrets, credentials, or code the user marked as confidential; ask first if unsure.

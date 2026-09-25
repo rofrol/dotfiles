@@ -28,6 +28,8 @@ With `-r` it runs at the top of the current git repo (refuses `$HOME`), so it ca
 everything in that checkout it reads (including untracked files like `.env`) goes to OpenAI.
 Answers can take a few minutes — use a Bash timeout of 600000.
 
+Inside herdr the script runs in its own herdr-job tab (no notification) so the user can watch it; output and exit code are unchanged.
+
 Guidelines:
 - GPT has no context of this conversation: include the goal, relevant code and constraints in the prompt.
 - Sending code sends it to OpenAI's servers. Don't send secrets, credentials, or code the user marked as confidential; ask first if unsure.

@@ -38,6 +38,8 @@ Headless limits (agy 1.2.x):
 - Conversations are saved in agy's history (no ephemeral mode).
 Answers usually take seconds to a couple of minutes — use a Bash timeout of 600000.
 
+Inside herdr the script runs in its own herdr-job tab (no notification) so the user can watch it; output and exit code are unchanged.
+
 Guidelines:
 - Gemini has no context of this conversation: include the goal, relevant code and constraints in the prompt.
 - Sending code sends it to Google's servers. Don't send secrets, credentials, or code the user marked as confidential; ask first if unsure.

@@ -29,7 +29,25 @@ def log_call(model, status, seconds, prompt_chars, answer_chars):
     except (OSError, subprocess.SubprocessError):
         pass
 
+def run_in_herdr_job():
+    """Re-run in its own herdr-job tab, so the user can watch it (see in_herdr_job.sh)."""
+    import shutil
+    if os.environ.get("ORACLE_IN_JOB") or not os.environ.get("HERDR_SOCKET_PATH") or not shutil.which("herdr-job"):
+        return
+    wrap = Path.home() / ".claude/skills/oracle-stats/in_herdr_job.sh"
+    os.execv(str(wrap), [str(wrap), "deepseek", str(Path(__file__).resolve()), *sys.argv[1:]])
+
+def live_output():
+    """The herdr-job tab, for reasoning the caller should not get; None outside a job."""
+    if not os.environ.get("HERDR_JOB_TTY"):
+        return None
+    try:
+        return open(os.environ["HERDR_JOB_TTY"], "w")
+    except OSError:
+        return None
+
 def main():
+    run_in_herdr_job()
     p = argparse.ArgumentParser()
     p.add_argument("prompt", nargs="*")
     p.add_argument("-m", "--model", default=os.environ.get("DEEPSEEK_MODEL", "deepseek-flash"),
@@ -44,7 +62,10 @@ def main():
     prompt = " ".join(a.prompt)
     # stdin only via -f -: a background job can inherit an open stdin that never sends EOF.
     for f in a.file:
-        text = sys.stdin.read() if f == "-" else Path(f).read_text(errors="replace")
+        if f == "-" and os.environ.get("ORACLE_STDIN"):  # saved by in_herdr_job.sh
+            text = Path(os.environ["ORACLE_STDIN"]).read_text(errors="replace")
+        else:
+            text = sys.stdin.read() if f == "-" else Path(f).read_text(errors="replace")
         prompt += f"\n\n--- {'stdin' if f == '-' else f} ---\n{text}"
     if not prompt.strip():
         sys.exit("Pusty prompt")
@@ -65,6 +86,7 @@ def main():
 
     start = time.monotonic()
     reasoning, content, finish = [], [], None
+    live = live_output()
     try:
         with urllib.request.urlopen(req, timeout=min(120, a.timeout)) as r:
             for raw in r:
@@ -78,6 +100,9 @@ def main():
                 delta = choice.get("delta") or {}
                 if delta.get("reasoning_content"):
                     reasoning.append(delta["reasoning_content"])
+                    if live:
+                        live.write(f"\x1b[2m{delta['reasoning_content']}\x1b[0m")
+                        live.flush()
                 if delta.get("content"):
                     content.append(delta["content"])
                 finish = choice.get("finish_reason") or finish
@@ -92,6 +117,9 @@ def main():
         signal.alarm(0)
 
     answer = "".join(content)
+    if live:
+        live.write("\n\n--- answer ---\n")
+        live.close()
     log_call(a.model, "ok" if finish in ("stop", None) else "error", time.monotonic() - start, len(prompt), len(answer))
     if a.show_reasoning and reasoning:
         print("=== reasoning ===\n" + "".join(reasoning) + "\n=== answer ===")

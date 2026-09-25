@@ -25,7 +25,8 @@ Guidelines:
 - Treat the answer as a second opinion, not ground truth — verify claims, and tell the user where you agree/disagree.
 - After triaging the answer, rate it (id is printed on stderr as `[oracle id: ...]`):
   `~/.claude/skills/oracle-stats/oracle.py rate <id> useful|partial|useless --findings N --accepted N --unique N --note "..."`
-  — see the oracle-stats skill for what the fields mean.
+  — see the oracle-stats skill for what the fields mean. Then score yourself for the round with `oracle.py self`
+  (write your own findings down before reading the answers).
 
 API key: `.deepseek.key` in `~/.pi/agent/auth.json` (shared with pi) — never put the key in a tracked file.
 Model list: `curl -s https://api.deepseek.com/models -H "Authorization: Bearer $(jq -r .deepseek.key ~/.pi/agent/auth.json)"` (names change over time).

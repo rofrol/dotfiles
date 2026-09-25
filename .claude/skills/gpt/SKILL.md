@@ -41,7 +41,8 @@ Guidelines:
 - On a usage-limit error, tell the user (Plus limits), don't retry in a loop.
 - After triaging the answer, rate it (id is printed on stderr as `[oracle id: ...]`):
   `~/.claude/skills/oracle-stats/oracle.py rate <id> useful|partial|useless --findings N --accepted N --unique N --note "..."`
-  — see the oracle-stats skill for what the fields mean.
+  — see the oracle-stats skill for what the fields mean. Then score yourself for the round with `oracle.py self`
+  (write your own findings down before reading the answers).
 
 ## Code review
 

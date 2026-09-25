@@ -11,7 +11,8 @@ seconds, prompt/answer size, cwd) and print `[oracle id: XXXXXXXX]` on stderr. U
 ```bash
 O=~/.claude/skills/oracle-stats/oracle.py
 $O rate <id> useful|partial|useless [--findings N] [--accepted N] [--unique N] [--note "..."]
-$O stats [--days 30]     # per skill/model: calls, errors, avg seconds, rated, score, accepted/findings, unique
+$O self --calls <id>,<id> --model <your model id> --findings N --accepted N --refuted N --unique N --missed N [--note "..."]
+$O stats [--days 30]     # per skill/model + per coordinator (Claude): rounds, accepted/findings, refuted, unique, missed, recall
 $O recent [-n 20]        # latest calls with their ids and ratings (find unrated ones)
 ```
 
@@ -24,3 +25,15 @@ Rate after triaging the answer, not on first read:
 - `--note`: a few words on why (e.g. "caught race in cache invalidation", "hallucinated API").
 
 When showing stats, point out small samples (<5 rated calls per model) instead of drawing conclusions from them.
+
+## Claude as coordinator
+
+Claude is scored too, once per round (all oracle calls on the same question), with `self`:
+- **Before reading any oracle answer**, write down your own findings/hypotheses (in the conversation or a scratchpad
+  file). Counting them afterwards is biased — oracles' answers leak into what you "already knew".
+- After triage: `--findings` your own claims; `--accepted` how many survived verification; `--refuted` your claims
+  disproved by an oracle or by verification (your errors); `--unique` accepted ones no oracle had; `--missed` accepted
+  oracle findings you did not have. `--model` = your exact model id (e.g. claude-opus-5-5).
+- `--note`: what you got wrong or missed (e.g. "assumed MBID stable across releases; missed video recordings").
+- Log it even for a single-oracle round. Re-running `self` with the same calls replaces the entry.
+  `recent` lists rated calls that have no coordinator entry yet.

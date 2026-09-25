@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Ask Gemini via Antigravity CLI (agy), billed to the Google AI subscription; uses agy's own login.
-# Usage: ask_gemini.sh [-m pro|flash|<id>] [-e low|medium|high] [-r] [-f FILE]... "prompt"   (-f - reads stdin)
+# Usage: ask_gemini.sh [-m flash|<id>] [-e low|medium|high] [-r] [-f FILE]... "prompt"   (-f - reads stdin)
 # -r: run agy in the current git repo, so it can read files itself (writes are denied in headless mode).
 set -euo pipefail
 if [ -z "${ORACLE_IN_JOB:-}" ] && [ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
@@ -11,12 +11,11 @@ while getopts "m:e:f:r" o; do
   case $o in m) model=$OPTARG;; e) effort=$OPTARG;; f) files+=("$OPTARG");; r) repo=1;; *) exit 2;; esac
 done
 shift $((OPTIND-1))
-# Flash by default: Pro costs far more of the shared weekly Gemini quota, and in agy it has
-# only view_file (no list_dir/grep_search), which also makes it weak in repo mode.
+# Flash only: Pro drained the shared weekly quota, had only view_file in agy, and scored lowest in oracle-stats.
 [ -n "$model" ] || model=flash
 case $model in
-  pro)   [ "$effort" = high ] && model=gemini-3.1-pro-high || model=gemini-3.1-pro-low;;  # Pro has only high/low
   flash) model="gemini-3.8-flash-$effort";;
+  pro|gemini-*-pro-*) echo "Gemini Pro jest wyłączony — użyj Flash" >&2; exit 2;;
 esac
 
 prompt="$*"

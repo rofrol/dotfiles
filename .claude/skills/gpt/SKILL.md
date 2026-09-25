@@ -1,6 +1,6 @@
 ---
 name: gpt
-description: Consult OpenAI GPT (GPT-6 Astra; GPT-5.6 Sol/Terra/Luna) via Codex CLI + ChatGPT subscription for a second opinion — use when the user asks to "ask/consult GPT", "zapytaj GPT/Astrę/Sol/Lunę", or wants an independent review of a plan, bug hypothesis, design or code snippet from OpenAI.
+description: Consult OpenAI GPT (GPT-6 Astra/Sol/Luna, GPT-5.6 Terra) via Codex CLI + ChatGPT subscription for a second opinion — use when the user asks to "ask/consult GPT", "zapytaj GPT/Astrę/Sol/Terrę/Lunę", or wants an independent review of a plan, bug hypothesis, design or code snippet from OpenAI.
 ---
 
 # Consulting GPT
@@ -9,14 +9,14 @@ Goes through Codex CLI (`codex exec`), billed to the user's ChatGPT Plus subscri
 Credentials come from pi: `openai-codex` in `~/.pi/agent/auth.json` (token via `pi auth print-bearer-token`, which refreshes it).
 ~/.codex (config.toml, auth.json) is not used — the script runs with `--ignore-user-config` and a temporary `CODEX_HOME`.
 
-Models available on ChatGPT (as of 2026-09-24): only **gpt-6-astra** is GPT-6. GPT-6 Sol/Luna are API-only so far —
-`sol`/`luna`/`terra` map to older **gpt-5.6-*** models. Check with `jq -r '.models[].slug' ~/.codex/models_cache.json`;
-when gpt-6-sol/luna appear there, update the `case` in ask_gpt.sh.
+Models available on ChatGPT (as of 2026-09-25): `astra`/`sol`/`luna` = **gpt-6-***; `terra` = **gpt-5.6-terra**
+(no GPT-6 Terra yet). Check with `jq -r '.models[].slug' ~/.codex/models_cache.json`; when gpt-6-terra appears there,
+update the `case` in ask_gpt.sh.
 
 ```bash
 ~/.claude/skills/gpt/ask_gpt.sh "question"                  # astra = gpt-6-astra (default)
 ~/.claude/skills/gpt/ask_gpt.sh -e high "hard question"     # more reasoning, uses more of the Plus limit
-~/.claude/skills/gpt/ask_gpt.sh -m luna "q"                 # gpt-5.6-luna: older, fast; also sol, terra
+~/.claude/skills/gpt/ask_gpt.sh -m sol "q"                  # gpt-6-sol; also terra (gpt-5.6-terra), luna (gpt-6-luna, fast)
 ~/.claude/skills/gpt/ask_gpt.sh -f src/foo.py "Find bugs in this file"
 git diff | ~/.claude/skills/gpt/ask_gpt.sh -f - "Review this diff"   # stdin only via -f -
 ~/.claude/skills/gpt/ask_gpt.sh -r "Review ... (see Code review below)"  # run in the current git repo, read-only
@@ -34,6 +34,9 @@ Guidelines:
 - GPT has no context of this conversation: include the goal, relevant code and constraints in the prompt.
 - Sending code sends it to OpenAI's servers. Don't send secrets, credentials, or code the user marked as confidential; ask first if unsure.
 - Treat the answer as a second opinion, not ground truth — verify claims, and tell the user where you agree/disagree.
+- Data collection for oracle-stats: whenever you consult GPT, ask **astra, sol and terra in parallel** with the same
+  prompt and effort (unless the user named one model), compare them, and rate each call separately — `--unique` counts
+  what the other two (and Claude) missed. Luna only on request.
 - If the user asks for "GPT and DeepSeek", run both in parallel and compare.
 - On a usage-limit error, tell the user (Plus limits), don't retry in a loop.
 - After triaging the answer, rate it (id is printed on stderr as `[oracle id: ...]`):

@@ -1,6 +1,6 @@
 ---
 name: gemini
-description: Consult Google Gemini (Gemini 3.1 Pro, Gemini 3.8 Flash) via Antigravity CLI (agy) + Google AI subscription for a second opinion — use when the user asks to "ask/consult Gemini", "zapytaj Gemini/Gemini'ego", or wants an independent review of a plan, bug hypothesis, design or code snippet from Google.
+description: Consult Google Gemini (Gemini 3.8 Flash) via Antigravity CLI (agy) + Google AI subscription for a second opinion — use when the user asks to "ask/consult Gemini", "zapytaj Gemini/Gemini'ego", or wants an independent review of a plan, bug hypothesis, design or code snippet from Google.
 ---
 
 # Consulting Gemini
@@ -8,27 +8,25 @@ description: Consult Google Gemini (Gemini 3.1 Pro, Gemini 3.8 Flash) via Antigr
 Goes through Antigravity CLI (`agy -p`, headless), billed to the user's Google AI subscription — not the API.
 Uses agy's own login (`~/.gemini/antigravity-cli/`). Gemini CLI (`gemini`) no longer serves AI Pro/Ultra accounts; don't use it.
 
-Models on the plan (as of 2026-09-25, check with `agy models`): **gemini-3.1-pro-{high,low}** (Pro flagship; 3.5 Pro not out),
-**gemini-3.8-flash-{high,medium,low}** (newest Flash). When a newer Pro/Flash appears there, update the `case` in ask_gemini.sh.
+Only **gemini-3.8-flash-{high,medium,low}** is used (check with `agy models`; when a newer Flash appears, update the
+`case` in ask_gemini.sh). Gemini Pro is disabled by the user's decision (2026-09-25): it drained the shared weekly
+quota, had only `view_file` in agy, and scored lowest in oracle-stats — the script refuses `-m pro`.
 
 ```bash
 ~/.claude/skills/gemini/ask_gemini.sh "question"                   # gemini-3.8-flash-high (default)
-~/.claude/skills/gemini/ask_gemini.sh -m pro "q"                   # gemini-3.1-pro-high: only for hard questions
-~/.claude/skills/gemini/ask_gemini.sh -m flash -e low "q"          # flash effort: low|medium|high; pro: low|high
+~/.claude/skills/gemini/ask_gemini.sh -e low "q"                   # effort: low|medium|high
 ~/.claude/skills/gemini/ask_gemini.sh -f src/foo.py "Find bugs in this file"
 git diff | ~/.claude/skills/gemini/ask_gemini.sh -f - "Review this diff"   # stdin only via -f -
 ~/.claude/skills/gemini/ask_gemini.sh -r "Review ... (see Code review below)"  # run in the current git repo
 ```
 
-Options: `-m pro|flash|<full id>`, `-e low|medium|high`, `-f FILE` (repeatable; `-f -` = stdin, never read implicitly), `-r` (repo mode), env `GEMINI_MODEL`.
+Options: `-m flash|<full id>`, `-e low|medium|high`, `-f FILE` (repeatable; `-f -` = stdin, never read implicitly), `-r` (repo mode), env `GEMINI_MODEL`.
 The prompt goes to agy via stdin (stream-json), so large diffs are fine.
 
 By default agy runs in an empty temp dir and sees only what you put in the prompt; it's told not to use tools.
 With `-r` it runs at the top of the current git repo (refuses `$HOME`) and can view, list and search files itself;
 everything it reads (including untracked files like `.env`) goes to Google, and agy loads the repo's AGENTS.md as rules.
-The default model is **flash**: Flash and Pro share one weekly quota consumed by token cost, so Pro drains it
-much faster (check with `agy -p /quota`). Use `-m pro` only when Flash's answer is not good enough. In `-r` stay
-on Flash anyway: in agy, Pro has only `view_file` (no listing/grep) and guesses instead of searching.
+The weekly quota is consumed by token cost (check with `agy -p /quota`).
 
 Headless limits (agy 1.2.x):
 - Writes are auto-denied, and so are shell commands except those in `permissions.allow` of

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Ask GPT via Codex CLI, billed to the ChatGPT subscription; credentials come from pi (~/.pi/agent/auth.json).
-# Usage: ask_gpt.sh [-m sol|luna|astra|<id>] [-e low|medium|high|xhigh] [-r] [-f FILE]... "prompt"   (-f - reads stdin)
+# Usage: ask_gpt.sh [-m astra|sol|terra|luna|<id>] [-e low|medium|high|xhigh] [-r] [-f FILE]... "prompt"   (-f - reads stdin)
 # -r: run Codex in the current git repo (read-only), so it can read files and git history itself.
 set -euo pipefail
 if [ -z "${ORACLE_IN_JOB:-}" ] && [ -n "${HERDR_SOCKET_PATH:-}" ] && command -v herdr-job >/dev/null; then
@@ -11,7 +11,7 @@ while getopts "m:e:f:r" o; do
   case $o in m) model=$OPTARG;; e) effort=$OPTARG;; f) files+=("$OPTARG");; r) repo=1;; *) exit 2;; esac
 done
 shift $((OPTIND-1))
-case $model in astra) model=gpt-6-astra;; sol|luna|terra) model="gpt-5.6-$model";; esac
+case $model in astra|sol|luna) model="gpt-6-$model";; terra) model=gpt-5.6-terra;; esac  # no GPT-6 Terra yet
 
 prompt="$*"
 # stdin only via -f -: a background job can inherit an open stdin that never sends EOF.
@@ -32,7 +32,7 @@ PI_CODEX_ACCOUNT=$(jq -er '."openai-codex".accountId' ~/.pi/agent/auth.json) || 
 start=$SECONDS; answer_chars=""
 # Log every call for oracle-stats; logging must not change the exit code or fail the call.
 oracle_log() {
-  local rc=$?; rm -rf "$tmp"
+  local rc=$?; rm -rf "$tmp" 2>/dev/null || true  # a straggling Codex child can still be writing there
   ~/.claude/skills/oracle-stats/oracle.py log --skill gpt --model "$model" --mode "${repo:+repo}" \
     --status "$([ $rc = 0 ] && echo ok || echo error)" --seconds $((SECONDS-start)) \
     --prompt-chars ${#prompt} ${answer_chars:+--answer-chars $answer_chars} || true

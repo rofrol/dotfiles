@@ -1,6 +1,6 @@
 ---
 name: oracle-stats
-description: Statistics of consulted oracle models (gpt, gemini, deepseek skills) — which were most useful. Use when the user asks for oracle/model statistics ("statystyki oracle", "który model najlepszy"), or to rate a past consultation.
+description: Statistics of consulted oracle models (gpt: astra/sol/terra, gemini flash, deepseek skills) — which were most useful. Use when the user asks for oracle/model statistics ("statystyki oracle", "który model najlepszy"), or to rate a past consultation.
 ---
 
 # Oracle statistics

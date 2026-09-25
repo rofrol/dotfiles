@@ -12,8 +12,8 @@ Models on the plan (as of 2026-09-25, check with `agy models`): **gemini-3.1-pro
 **gemini-3.8-flash-{high,medium,low}** (newest Flash). When a newer Pro/Flash appears there, update the `case` in ask_gemini.sh.
 
 ```bash
-~/.claude/skills/gemini/ask_gemini.sh "question"                   # pro = gemini-3.1-pro-high (default)
-~/.claude/skills/gemini/ask_gemini.sh -m flash "q"                 # gemini-3.8-flash-high: faster
+~/.claude/skills/gemini/ask_gemini.sh "question"                   # gemini-3.8-flash-high (default)
+~/.claude/skills/gemini/ask_gemini.sh -m pro "q"                   # gemini-3.1-pro-high: only for hard questions
 ~/.claude/skills/gemini/ask_gemini.sh -m flash -e low "q"          # flash effort: low|medium|high; pro: low|high
 ~/.claude/skills/gemini/ask_gemini.sh -f src/foo.py "Find bugs in this file"
 git diff | ~/.claude/skills/gemini/ask_gemini.sh -f - "Review this diff"   # stdin only via -f -
@@ -26,7 +26,9 @@ The prompt goes to agy via stdin (stream-json), so large diffs are fine.
 By default agy runs in an empty temp dir and sees only what you put in the prompt; it's told not to use tools.
 With `-r` it runs at the top of the current git repo (refuses `$HOME`) and can view, list and search files itself;
 everything it reads (including untracked files like `.env`) goes to Google, and agy loads the repo's AGENTS.md as rules.
-In `-r` the default model is **flash**: in agy, Pro has only `view_file` (no listing/grep) and guesses instead of searching.
+The default model is **flash**: Flash and Pro share one weekly quota consumed by token cost, so Pro drains it
+much faster (check with `agy -p /quota`). Use `-m pro` only when Flash's answer is not good enough. In `-r` stay
+on Flash anyway: in agy, Pro has only `view_file` (no listing/grep) and guesses instead of searching.
 
 Headless limits (agy 1.2.x):
 - Writes are auto-denied, and so are shell commands except those in `permissions.allow` of

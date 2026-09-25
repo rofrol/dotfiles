@@ -8,8 +8,9 @@ while getopts "m:e:f:r" o; do
   case $o in m) model=$OPTARG;; e) effort=$OPTARG;; f) files+=("$OPTARG");; r) repo=1;; *) exit 2;; esac
 done
 shift $((OPTIND-1))
-# In agy, Pro has only view_file (no list_dir/grep_search), so repo mode defaults to Flash.
-[ -n "$model" ] || { [ -n "$repo" ] && model=flash || model=pro; }
+# Flash by default: Pro costs far more of the shared weekly Gemini quota, and in agy it has
+# only view_file (no list_dir/grep_search), which also makes it weak in repo mode.
+[ -n "$model" ] || model=flash
 case $model in
   pro)   [ "$effort" = high ] && model=gemini-3.1-pro-high || model=gemini-3.1-pro-low;;  # Pro has only high/low
   flash) model="gemini-3.8-flash-$effort";;

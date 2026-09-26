@@ -75,14 +75,14 @@
                 default: (kind: Text("Unknown"))
             ),
             label_prop: (kind: Text("Title")),
-            width: "80%",
+            width: "60%",
         ),
         (
             prop: (kind: Property(Artist),
                 default: (kind: Text("Unknown"))
             ),
             label_prop: (kind: Text("Artist")),
-            width: "15%",
+            width: "35%",
         ),
         (
             prop: (kind: Property(Duration),

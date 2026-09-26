@@ -3,9 +3,14 @@ disableStartupPopups: true
 # https://github.com/nabekou29/dotfiles/blob/c0e463aceaa755f70ac002b51028d93ae8f31598/config/lazygit.yml#L6
 git:
   branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium --oneline {{branchName}} --"
-  pagers:
+  diffRenderers:
     - colorArg: always
-      pager: diff-so-fancy
+      command: diff-so-fancy
+    # Cycle renderers with | and \
+    - colorArg: always
+      command: delta --light --paging=never --line-numbers
+    - colorArg: always
+      command: cat # plain git diff
 gui:
   nerdFontsVersion: "3"
   sidePanelWidth: 0.25

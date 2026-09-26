@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- MPD -> ListenBrainz scrobbler. Token lives in ~/Library/Application Support/listenbrainz-mpd/config.toml (not in git).
+     Install: launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.rofrol.listenbrainz-mpd.plist
+     After cargo install: launchctl kickstart -k gui/$(id -u)/com.rofrol.listenbrainz-mpd -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.rofrol.listenbrainz-mpd</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/sh</string>
+		<string>-c</string>
+		<string>mkdir -p "$HOME/Library/Logs"; exec "$HOME/.cargo/bin/listenbrainz-mpd" &gt;&gt;"$HOME/Library/Logs/listenbrainz-mpd.log" 2&gt;&amp;1</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>30</integer>
+	<key>ProcessType</key>
+	<string>Background</string>
+</dict>
+</plist>

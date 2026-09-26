@@ -1,20 +1,5 @@
 {
-  "permissions": {
-    "deny": [
-      "Read(~/.ssh/**)",
-      "Read(~/.aws/**)",
-      "Read(~/.gnupg/**)",
-      "Read(~/.pi/agent/auth.json)",
-      "Read(~/.netrc)",
-      "Read(**/.env)",
-      "Read(**/.env.local)",
-      "Read(**/.env.*.local)",
-      "Read(**/.env.production)",
-      "Edit(~/.claude/settings.json)",
-      "Edit(~/.claude/hooks/**)",
-      "Edit(~/Library/LaunchAgents/**)"
-    ]
-  },
+  "permissions": {},
   "hooks": {
     "SessionStart": [
       {
@@ -26,6 +11,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/bin/herdr-peer-token",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "Stop": [
@@ -34,6 +28,15 @@
           {
             "type": "command",
             "command": "~/.local/bin/herdr-bg-badge",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/bin/herdr-peer-token",
             "timeout": 10
           }
         ]

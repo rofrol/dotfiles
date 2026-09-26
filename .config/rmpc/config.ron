@@ -120,6 +120,7 @@
             "<CR>":       Play,
             "C":          JumpToCurrent,
             "X":          Shuffle,
+            "P":          SortByColumn(3), // Plays column (musicdb stickers); press again to reverse
         },
     ),
     search: (

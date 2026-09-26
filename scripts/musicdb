@@ -1,0 +1,362 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = ["python-mpd2"]
+# ///
+"""Personal play history for the MPD library -> MPD stickers that rmpc can show and sort by.
+
+  musicdb import-mpdlog                 # MPD log "player: played" lines (skips < 30 s / half the song are dropped)
+  musicdb import-lb                     # ListenBrainz listens (listenbrainz-mpd already applies a play threshold)
+  musicdb import-takeout PATH           # Google Takeout zip/dir/watch-history.json (YouTube + YouTube Music)
+  musicdb import-spotify PATH           # Spotify export zip/dir (Streaming_History_Audio_*.json, YourLibrary.json)
+  musicdb import-favorites FILE         # text file, one "Artist - Title" per line (e.g. music.txt)
+  musicdb sync                          # match events to library files and write stickers
+  musicdb update                        # import-lb + sync + export (run hourly by the com.rofrol.musicdb LaunchAgent)
+  musicdb export                        # dump events/favorites as JSONL into the data repo and commit
+  musicdb top [-n 30]                   # most played library songs
+  musicdb missing [-n 50]               # played / liked songs that are not in the library (yt-mp3-mb candidates)
+
+Stickers: playCount (plain integer), plays (space-padded to 5 chars, because rmpc sorts sticker text
+lexicographically), lastPlayed (YYYY-MM-DD), favorite ("♥").
+MPD plays come from the MPD log before LB_CUTOFF and from ListenBrainz after it, so nothing is counted twice.
+Source of truth: JSONL in the private data repo $MUSICDB_DATA (default ~/personal_projects/music-data);
+plays.db ($MUSICDB or ~/.local/share/musicdb/plays.db) is a cache rebuilt from it when missing.
+Needs sticker_file in mpd.conf.
+"""
+import argparse, collections, datetime as dt, json, os, pathlib, re, sqlite3, subprocess, sys, time, zipfile
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import mbtag  # noqa: E402
+
+DB = pathlib.Path(os.environ.get("MUSICDB", pathlib.Path.home() / ".local/share/musicdb/plays.db"))
+DATA = pathlib.Path(os.environ.get("MUSICDB_DATA", pathlib.Path.home() / "personal_projects/music-data"))
+PUSH_EVERY_S = 20 * 3600
+MPD_LOG = pathlib.Path(os.environ.get("MPD_LOG", pathlib.Path.home() / ".config/mpd/log"))
+LB_USER = os.environ.get("LB_USER", "rofrol")
+LB_CUTOFF = os.environ.get("LB_CUTOFF", "2026-09-26T02:10:00")  # listenbrainz-mpd runs as a LaunchAgent since then
+YT_DEDUP_S = 300  # repeated Takeout entries of the same video within 5 min = one play
+YTID_IN_NAME = re.compile(r"--([\w-]{11})--\d{8}\.mp3$")
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS events (
+  source TEXT, ts TEXT, ytid TEXT, mbid TEXT, spotify_uri TEXT, artist TEXT, title TEXT, ms_played INTEGER, extra TEXT,
+  UNIQUE(source, ts, ytid, mbid, spotify_uri, artist, title));
+CREATE TABLE IF NOT EXISTS favorites (
+  source TEXT, artist TEXT, title TEXT, spotify_uri TEXT, ytid TEXT, UNIQUE(source, artist, title));
+"""
+
+
+EVENT_COLS = ["source", "ts", "ytid", "mbid", "spotify_uri", "artist", "title", "ms_played", "extra"]
+FAV_COLS = ["source", "artist", "title", "spotify_uri", "ytid"]
+
+
+def db():
+    DB.parent.mkdir(parents=True, exist_ok=True)
+    fresh = not DB.exists()
+    c = sqlite3.connect(DB)
+    c.executescript(SCHEMA)
+    if fresh:  # rebuild the cache from the data repo
+        for table, cols in (("events", EVENT_COLS), ("favorites", FAV_COLS)):
+            f = DATA / f"{table}.jsonl"
+            if f.exists():
+                rows = [tuple(json.loads(l).get(k, "") for k in cols) for l in f.read_text().splitlines() if l]
+                c.executemany(f"INSERT OR IGNORE INTO {table} VALUES ({','.join('?' * len(cols))})", rows)
+        c.commit()
+    return c
+
+
+def export(_a):
+    """Write sorted JSONL (diffable, one event per line), commit if it changed, push at most every PUSH_EVERY_S."""
+    if not (DATA / ".git").exists():
+        print(f"no data repo at {DATA}, skipping export"); return
+    c = db()
+    for table, cols in (("events", EVENT_COLS), ("favorites", FAV_COLS)):
+        rows = c.execute(f"SELECT {','.join(cols)} FROM {table} ORDER BY {','.join(cols)}").fetchall()
+        (DATA / f"{table}.jsonl").write_text("".join(
+            json.dumps({k: v for k, v in zip(cols, r) if v not in ("", None)}, ensure_ascii=False) + "\n" for r in rows))
+    git = lambda *a: subprocess.run(["git", "-C", str(DATA), *a], capture_output=True, text=True)
+    git("add", "events.jsonl", "favorites.jsonl")
+    if git("diff", "--cached", "--quiet").returncode:
+        n = git("diff", "--cached", "--numstat").stdout.split()[:1]
+        git("commit", "-q", "-m", f"musicdb: +{n[0] if n else '?'} lines")
+        print("committed")
+    stamp = DATA / ".git" / "musicdb-last-push"
+    ahead = git("rev-list", "--count", "@{u}..HEAD").stdout.strip()
+    if ahead not in ("", "0") and (not stamp.exists() or time.time() - stamp.stat().st_mtime > PUSH_EVERY_S):
+        if git("push", "-q").returncode == 0:
+            stamp.touch()
+            print("pushed")
+
+
+def mpd():
+    from mpd import MPDClient
+    c = MPDClient()
+    c.timeout = 60
+    host = os.environ.get("MPD_HOST", "localhost")
+    c.connect(host if host.startswith("/") else host, int(os.environ.get("MPD_PORT", 6600)))
+    return c
+
+
+def add_events(rows):
+    c = db()
+    before = c.total_changes
+    # '' instead of NULL: SQLite never treats NULLs as equal, so UNIQUE would not dedupe re-imports
+    c.executemany("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?,?)", [tuple("" if v is None else v for v in r) for r in rows])
+    c.commit()
+    print(f"{c.total_changes - before} new events ({len(rows)} read)")
+
+
+def one(x):
+    return x[0] if isinstance(x, list) else x
+
+
+# ---------------------------------------------------------------- importers
+
+def import_mpdlog(_a):
+    durs = {}
+    for s in mpd().listallinfo():
+        if "file" in s and (m := YTID_IN_NAME.search(s["file"])):
+            durs[m.group(1)] = float(one(s.get("duration", 0)) or 0)
+    lines = MPD_LOG.read_text(errors="replace").splitlines()
+    # (second, file) of decode failures: MPD logs "played" for files it could not open, too
+    failed = {(l[:19], re.search(r'Failed to decode "([^"]+)"', l).group(1).rsplit("/", 1)[-1]) for l in lines if "Failed to decode" in l}
+    rows, prev = [], None
+    for l in lines:
+        m = re.match(r'(\S+) player: played "(.+)"$', l)
+        if not m:
+            continue
+        ts, f = dt.datetime.fromisoformat(m.group(1)), m.group(2)
+        gap = (ts - prev).total_seconds() if prev else 1e9
+        prev = ts
+        if m.group(1) >= LB_CUTOFF or (m.group(1), f.rsplit("/", 1)[-1]) in failed:
+            continue
+        y = YTID_IN_NAME.search(f)
+        dur = durs.get(y.group(1), 0) if y else 0
+        # the line is logged when the song ends; the previous one marks (roughly) when it started
+        if gap < 30 or (dur and gap < min(dur / 2, 240)):
+            continue
+        rows.append(("mpd", m.group(1), y.group(1) if y else None, None, None, None, f, None, None))
+    add_events(rows)
+
+
+def import_lb(_a):
+    rows, max_ts = [], None
+    while True:
+        u = f"https://api.listenbrainz.org/1/user/{LB_USER}/listens?count=1000" + (f"&max_ts={max_ts}" if max_ts else "")
+        ls = (mbtag.http(u, host_interval=0.5) or {}).get("payload", {}).get("listens")
+        if not ls:
+            break
+        for l in ls:
+            ts = dt.datetime.fromtimestamp(l["listened_at"]).isoformat()
+            if ts < LB_CUTOFF:
+                continue
+            tm = l["track_metadata"]
+            ai = tm.get("additional_info") or {}
+            mbid = ai.get("recording_mbid") or (tm.get("mbid_mapping") or {}).get("recording_mbid")
+            rows.append(("lb", ts, None, mbid, None, tm.get("artist_name"), tm.get("track_name"), ai.get("duration_ms"), None))
+        max_ts = ls[-1]["listened_at"]
+    add_events(rows)
+
+
+def open_export(path, pattern):
+    """Yield (name, bytes) of files matching pattern inside a zip or a directory tree."""
+    p = pathlib.Path(path).expanduser()
+    if p.is_file() and p.suffix == ".zip":
+        with zipfile.ZipFile(p) as z:
+            for n in z.namelist():
+                if re.search(pattern, n):
+                    yield n, z.read(n)
+    elif p.is_file():
+        yield p.name, p.read_bytes()
+    else:
+        for f in sorted(p.rglob("*")):
+            if f.is_file() and re.search(pattern, str(f)):
+                yield str(f), f.read_bytes()
+        for z in sorted(p.rglob("*.zip")):
+            yield from open_export(z, pattern)
+
+
+def import_takeout(a):
+    rows, last = [], {}
+    items = []
+    for _, data in open_export(a.path, r"watch-history\.json$"):
+        items += json.loads(data)
+    items.sort(key=lambda x: x.get("time", ""))
+    for it in items:
+        m = re.search(r"[?&]v=([\w-]{11})", it.get("titleUrl", ""))
+        if not m:
+            continue
+        ytid, ts = m.group(1), dt.datetime.fromisoformat(it["time"].replace("Z", "+00:00")).astimezone().replace(tzinfo=None)
+        if ytid in last and (ts - last[ytid]).total_seconds() < YT_DEDUP_S:
+            continue
+        last[ytid] = ts
+        title = re.sub(r"^Watched |^Obejrzano: ", "", it.get("title", ""))
+        channel = (it.get("subtitles") or [{}])[0].get("name", "")
+        rows.append(("yt-music" if it.get("header") == "YouTube Music" else "yt", ts.isoformat(timespec="seconds"),
+                     ytid, None, None, channel, title, None, None))
+    add_events(rows)
+
+
+def import_spotify(a):
+    rows, favs = [], []
+    for _, data in open_export(a.path, r"(Streaming_History_Audio|StreamingHistory_music|StreamingHistory)\S*\.json$"):
+        for e in json.loads(data):
+            if "ts" in e:  # extended history
+                if not e.get("master_metadata_track_name") or (e.get("ms_played") or 0) < 30000:
+                    continue
+                ts = dt.datetime.fromisoformat(e["ts"].replace("Z", "+00:00")).astimezone().replace(tzinfo=None)
+                rows.append(("spotify", ts.isoformat(timespec="seconds"), None, None, e.get("spotify_track_uri"),
+                             e.get("master_metadata_album_artist_name"), e["master_metadata_track_name"], e["ms_played"], None))
+            elif e.get("msPlayed", 0) >= 30000:  # basic "StreamingHistory_music" export
+                rows.append(("spotify", e["endTime"].replace(" ", "T") + ":00", None, None, None, e["artistName"],
+                             e["trackName"], e["msPlayed"], None))
+    for _, data in open_export(a.path, r"YourLibrary\.json$"):
+        for t in json.loads(data).get("tracks", []):
+            favs.append(("spotify", t.get("artist"), t.get("track"), t.get("uri"), None))
+    add_events(rows)
+    if favs:
+        c = db()
+        c.executemany("INSERT OR IGNORE INTO favorites VALUES (?,?,?,?,?)", [tuple(v or "" for v in r) for r in favs])
+        c.commit()
+        print(f"{len(favs)} liked tracks")
+
+
+def import_favorites(a):
+    favs = []
+    for line in pathlib.Path(a.file).expanduser().read_text(errors="replace").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        y = re.search(r"(?:v=|youtu\.be/)([\w-]{11})", line)
+        parts = re.split(r"\s+[-–—]\s+", re.sub(r"https?://\S+", "", line).strip(), maxsplit=1)
+        artist, title = (parts + [""])[:2] if len(parts) == 2 else ("", parts[0])
+        favs.append((pathlib.Path(a.file).name, artist, title, None, y.group(1) if y else None))
+    c = db()
+    c.executemany("INSERT OR IGNORE INTO favorites VALUES (?,?,?,?,?)", [tuple(v or "" for v in r) for r in favs])
+    c.commit()
+    print(f"{len(favs)} favorites")
+
+
+# ---------------------------------------------------------------- matching
+
+def library():
+    by_yt, by_mbid, by_name = {}, {}, collections.defaultdict(set)
+    for s in mpd().listallinfo():
+        f = s.get("file")
+        if not f:
+            continue
+        if m := YTID_IN_NAME.search(f):
+            by_yt[m.group(1)] = f
+        if s.get("musicbrainz_trackid"):
+            by_mbid[one(s["musicbrainz_trackid"])] = f
+        a, t = one(s.get("artist", "")), one(s.get("title", ""))
+        if a and t:
+            by_name[name_key(a, t)].add(f)
+    return by_yt, by_mbid, by_name
+
+
+def name_key(artist, title):
+    title = re.sub(r"\s*[\(\[].*?[\)\]]", "", title or "")  # "(radio edit)", "[Remastered]" -> same song
+    artist = re.split(r"\s+(?:feat\.?|ft\.?|featuring|&|,|x|vs\.?)\s+", mbtag.norm(artist or ""))[0]
+    return f"{artist}|{mbtag.norm(title)}"
+
+
+def match(lib, ytid=None, mbid=None, artist=None, title=None):
+    by_yt, by_mbid, by_name = lib
+    if ytid and ytid in by_yt:
+        return by_yt[ytid], "ytid"
+    if mbid and mbid in by_mbid:
+        return by_mbid[mbid], "mbid"
+    if artist and title:
+        hits = by_name.get(name_key(artist, title), set())
+        if len(hits) == 1:  # ambiguous name matches stay unmatched
+            return next(iter(hits)), "name"
+    return None, None
+
+
+def counted(c, lib):
+    """{file: (count, last_ts)}, {file: favorite}, unmatched play keys, unmatched favorites."""
+    plays, last, unmatched = collections.Counter(), {}, collections.Counter()
+    for src, ts, ytid, mbid, uri, artist, title in c.execute("SELECT source, ts, ytid, mbid, spotify_uri, artist, title FROM events"):
+        f, _ = match(lib, ytid, mbid, artist, title)
+        if src == "yt" and not f:
+            continue  # plain YouTube watches that are not in the library are mostly not music
+        if f:
+            plays[f] += 1
+            last[f] = max(last.get(f, ""), ts)
+        else:
+            unmatched[(artist or "", title or "", ytid or "")] += 1
+    favs, fav_missing = set(), []
+    for src, artist, title, uri, ytid in c.execute("SELECT * FROM favorites"):
+        f, _ = match(lib, ytid, None, artist, title)
+        if f:
+            favs.add(f)
+        else:
+            fav_missing.append((src, artist, title, ytid))
+    return plays, last, favs, unmatched, fav_missing
+
+
+def sync(_a):
+    c, lib, m = db(), library(), mpd()
+    plays, last, favs, _, _ = counted(c, lib)
+    files = set(lib[0].values()) | set(lib[1].values()) | {f for fs in lib[2].values() for f in fs}
+    n = 0
+    for f in files:
+        k = plays.get(f, 0)
+        want = {"playCount": str(k), "plays": f"{k:5d}" if k else "", "lastPlayed": last.get(f, "")[:10],
+                "favorite": "♥" if f in favs else ""}
+        try:
+            have = m.sticker_list("song", f)
+        except Exception:  # MPD errors when a song has no stickers yet
+            have = {}
+        for key, val in want.items():
+            if have.get(key, "") == val:
+                continue
+            if val:
+                m.sticker_set("song", f, key, val)
+            elif key in have:
+                m.sticker_delete("song", f, key)
+            n += 1
+    print(f"{len(files)} songs, {sum(1 for f in files if plays.get(f))} with plays, {len(favs & files)} favorites, {n} sticker updates")
+
+
+def update(a):
+    import_lb(a)
+    sync(a)
+    export(a)
+
+
+def top(a):
+    plays, last, favs, _, _ = counted(db(), library())
+    for f, k in plays.most_common(a.n):
+        print(f"{k:5d}  {last[f][:10]}  {'♥' if f in favs else ' '}  {f}")
+
+
+def missing(a):
+    _, _, _, unmatched, fav_missing = counted(db(), library())
+    print("# played, not in library")
+    for (artist, title, ytid), k in unmatched.most_common(a.n):
+        print(f"{k:5d}  {artist} - {title}" + (f"  https://youtu.be/{ytid}" if ytid else ""))
+    print(f"\n# favorites not in library ({len(fav_missing)})")
+    for src, artist, title, ytid in fav_missing[: a.n]:
+        print(f"  [{src}] {artist} - {title}" + (f"  https://youtu.be/{ytid}" if ytid else ""))
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sp = ap.add_subparsers(dest="cmd", required=True)
+    sp.add_parser("import-mpdlog").set_defaults(fn=import_mpdlog)
+    sp.add_parser("import-lb").set_defaults(fn=import_lb)
+    p = sp.add_parser("import-takeout"); p.add_argument("path"); p.set_defaults(fn=import_takeout)
+    p = sp.add_parser("import-spotify"); p.add_argument("path"); p.set_defaults(fn=import_spotify)
+    p = sp.add_parser("import-favorites"); p.add_argument("file"); p.set_defaults(fn=import_favorites)
+    sp.add_parser("sync").set_defaults(fn=sync)
+    sp.add_parser("update").set_defaults(fn=update)
+    sp.add_parser("export").set_defaults(fn=export)
+    p = sp.add_parser("top"); p.add_argument("-n", type=int, default=30); p.set_defaults(fn=top)
+    p = sp.add_parser("missing"); p.add_argument("-n", type=int, default=50); p.set_defaults(fn=missing)
+    a = ap.parse_args()
+    a.fn(a)
+
+
+if __name__ == "__main__":
+    main()

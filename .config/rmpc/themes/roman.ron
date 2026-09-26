@@ -75,14 +75,26 @@
                 default: (kind: Text("Unknown"))
             ),
             label_prop: (kind: Text("Title")),
-            width: "60%",
+            width: "52%",
         ),
         (
             prop: (kind: Property(Artist),
                 default: (kind: Text("Unknown"))
             ),
             label_prop: (kind: Text("Artist")),
-            width: "35%",
+            width: "33%",
+        ),
+        // stickers written by ~/scripts/musicdb; "plays" is space-padded so SortByColumn orders it numerically
+        (
+            prop: (kind: Sticker("plays"), default: (kind: Text(""))),
+            label_prop: (kind: Text("Plays")),
+            width: "5%",
+            alignment: Right,
+        ),
+        (
+            prop: (kind: Sticker("favorite"), default: (kind: Text(""))),
+            label_prop: (kind: Text("♥")),
+            width: "2%",
         ),
         (
             prop: (kind: Property(Duration),

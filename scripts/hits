@@ -1,0 +1,274 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = ["python-mpd2"]
+# ///
+"""Top hits of a decade (Billboard Year-End Hot 100, 1959-), genre filter, MPD playlist of what you have.
+
+  hits 1980s                                  # top 100 of the decade, all genres
+  hits 1980s -n 10 -g "rock -country"         # include/exclude genres: a song matches "rock" if any of its
+                                              # MusicBrainz genres contains the word (hard rock, pop rock, ...)
+  hits 1990s -g "hip hop,r&b" --rank listens  # rank by ListenBrainz listen counts instead of chart points
+  hits 1980s -g rock --playlist               # write MPD playlist "Hits 1980s rock top100" (songs in the library)
+  hits 1980s -g rock --download               # yt-mp3-mb the missing ones into <music>/Hits/1980s
+  hits prefetch 1959-2025                     # warm the caches (charts + MusicBrainz, ~1 request/s)
+
+Ranking "chart" = sum of (101 - position) over the decade's year-end charts. Genres come from the recording's
+MusicBrainz genres/tags, falling back to the artist's. Library matching and play counts reuse musicdb.
+Caches: ~/.cache/hits/.
+"""
+import argparse, importlib.machinery, importlib.util, json, os, pathlib, re, subprocess, sys, urllib.parse, urllib.request
+
+HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import mbtag  # noqa: E402
+
+_spec = importlib.util.spec_from_file_location("musicdb", HERE / "musicdb",
+                                               loader=importlib.machinery.SourceFileLoader("musicdb", str(HERE / "musicdb")))
+musicdb = importlib.util.module_from_spec(_spec)  # extensionless script, so no plain import
+_spec.loader.exec_module(musicdb)
+
+CACHE = pathlib.Path(os.environ.get("XDG_CACHE_HOME", pathlib.Path.home() / ".cache")) / "hits"
+PLAYLISTS = pathlib.Path(os.environ.get("MPD_PLAYLISTS", pathlib.Path.home() / ".config/mpd/playlists"))
+FIRST_YEAR = 1959  # the Year-End Hot 100 starts with 1959
+
+
+# ---------------------------------------------------------------- charts
+
+def wiki_text(s):
+    s = re.sub(r"<ref[^>]*/>|<ref.*?</ref>", "", s, flags=re.S)
+    s = re.sub(r"\{\{(?:sort|sortname)\|[^|}]*\|([^}]*)\}\}", r"\1", s, flags=re.I)
+    s = re.sub(r"\{\{[^{}]*\}\}", "", s)
+    s = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", s)
+    s = re.sub(r"<[^>]+>|'''?|&nbsp;", " ", s)
+    return re.sub(r"\s+", " ", s).strip().strip('"').strip()
+
+
+def cells(row):
+    out = []
+    for line in row.split("\n"):
+        line = line.strip()
+        if not line or line[0] not in "|!" or line.startswith(("|+", "|}", "{|")):
+            continue
+        for c in re.split(r"\|\||!!", line[1:]):
+            # drop cell attributes: 'scope="row" style="..." | value'
+            if "|" in c and re.match(r'\s*(?:scope|style|rowspan|colspan|align|class|data-sort-value)\s*=', c):
+                c = c.split("|", 1)[1]
+            out.append(c)
+    return out
+
+
+def chart(year):
+    """[(position, title, artist)] of the Billboard Year-End Hot 100 for a year (cached)."""
+    CACHE.mkdir(parents=True, exist_ok=True)
+    f = CACHE / f"chart-{year}.json"
+    if f.exists():
+        return json.loads(f.read_text())
+    u = "https://en.wikipedia.org/w/api.php?" + urllib.parse.urlencode({
+        "action": "parse", "page": f"Billboard Year-End Hot 100 singles of {year}", "prop": "wikitext",
+        "format": "json", "formatversion": 2, "redirects": 1})
+    w = (mbtag.http(u, host_interval=0.2) or {}).get("parse", {}).get("wikitext", "")
+    table = w[w.find("{|"): w.find("|}", w.find("{|"))] if "{|" in w else ""
+    rows, pos = [], 0
+    for r in re.split(r"\n\|-[^\n]*", table):
+        c = [wiki_text(x) for x in cells(r)]
+        if len(c) >= 3 and re.fullmatch(r"\d+", c[0]):
+            pos = int(c[0])
+            rows.append((pos, c[1], c[2]))
+        elif len(c) == 2 and pos and not c[0].isdigit():  # tie: position cell spans several rows
+            rows.append((pos, c[0], c[1]))
+    if len(rows) >= 50:
+        f.write_text(json.dumps(rows, ensure_ascii=False))
+    else:
+        print(f"chart {year}: parsed only {len(rows)} rows", file=sys.stderr)
+    return rows
+
+
+# ---------------------------------------------------------------- MusicBrainz
+
+def cached(name, fn):
+    f = CACHE / "mb" / (re.sub(r"[^\w.-]", "_", name)[:180] + ".json")
+    if f.exists():
+        return json.loads(f.read_text())
+    f.parent.mkdir(parents=True, exist_ok=True)
+    r = fn()
+    f.write_text(json.dumps(r, ensure_ascii=False))
+    return r
+
+
+def main_artist(artist):
+    return re.split(r"\s+(?:featuring|feat\.?|ft\.?|with|and|&|x|vs\.?)\s+|,\s*", artist, flags=re.I)[0].strip()
+
+
+def mb_song(title, artist, year):
+    """Best MB recording for a chart entry: {mbid, artist_mbid, first, tags} or {}."""
+    def search():
+        q = f'recording:"{title}" AND artist:"{main_artist(artist)}"'
+        return mbtag.http("https://musicbrainz.org/ws/2/recording?" + urllib.parse.urlencode({"query": q, "limit": 25, "fmt": "json"})) or {}
+    names = [main_artist(artist)] + [main_artist(x) for x in re.findall(r"\(([^)]*)\)", artist)]
+    ok, early = None, None
+    for rec in cached(f"s-{artist}-{title}", search).get("recordings", []):
+        credit = main_artist("".join(a["name"] + a.get("joinphrase", "") for a in rec.get("artist-credit", [])))
+        if mbtag.sim(rec["title"], title) < 0.85 or max(mbtag.sim(credit, n) for n in names) < 0.7:
+            continue
+        if mbtag.versions(rec["title"]) - mbtag.versions(title) or rec.get("video"):
+            continue
+        first = rec.get("first-release-date") or "9999"
+        key = (-rec.get("score", 0) // 10, first)  # coarse score first, then the earliest release
+        if int(first[:4]) <= year + 1 and (ok is None or key < ok[0]):
+            ok = (key, rec)
+        if early is None or first < early[0][1]:
+            early = (key, rec)
+    # the original is often missing among 25 hits full of reissues: then take the earliest matching one
+    best = ok or early
+    if not best:
+        return {}
+    rec = best[1]
+    ac = rec.get("artist-credit") or [{}]
+    return {"mbid": rec["id"], "artist_mbid": (ac[0].get("artist") or {}).get("id"), "first": rec.get("first-release-date"),
+            "mb_title": rec["title"], "tags": top_tags(rec.get("tags", []))}
+
+
+def top_tags(tags, n=3):
+    """The n most voted tags; single-vote tags are noise ("rock" on a Madonna song) unless nothing else exists."""
+    tags = sorted((t for t in tags if t.get("count", 0) > 0), key=lambda t: -t["count"])
+    if tags and tags[0]["count"] >= 2:
+        tags = [t for t in tags if t["count"] >= 2]
+    return [t["name"] for t in tags[:n]]
+
+
+def artist_genres(mbid):
+    if not mbid:
+        return []
+    r = cached(f"a-{mbid}", lambda: mbtag.http(f"https://musicbrainz.org/ws/2/artist/{mbid}?inc=genres+tags&fmt=json") or {})
+    return top_tags(r.get("genres", [])) or top_tags(r.get("tags", []))
+
+
+def genres(song):
+    """Recording tags only when they are backed by several votes, else the artist's main genres."""
+    return song.get("tags") or artist_genres(song.get("artist_mbid"))
+
+
+def lb_popularity(mbids):
+    out = {}
+    mbids = [m for m in mbids if m]
+    for i in range(0, len(mbids), 100):
+        req = urllib.request.Request("https://api.listenbrainz.org/1/popularity/recording", method="POST",
+                                     data=json.dumps({"recording_mbids": mbids[i:i + 100]}).encode(),
+                                     headers={"Content-Type": "application/json", "User-Agent": mbtag.UA})
+        for r in json.load(urllib.request.urlopen(req, timeout=60)):
+            out[r["recording_mbid"]] = r.get("total_listen_count") or 0
+    return out
+
+
+# ---------------------------------------------------------------- genre filter
+
+def genre_filter(spec):
+    """'rock -country, pop' -> predicate over a list of genre names (word match, so 'rock' hits 'hard rock')."""
+    inc, exc = [], []
+    for tok in re.findall(r"-?[^,\s][^,]*?(?=\s+-|,|$)", spec or ""):
+        tok = tok.strip()
+        (exc if tok.startswith("-") else inc).append(tok.lstrip("-").strip().lower())
+    word = lambda g, t: re.search(rf"(?<![\w&]){re.escape(t)}(?![\w&])", g.lower())
+    def ok(gs):
+        if any(word(g, t) for g in gs for t in exc):
+            return False
+        return not inc or any(word(g, t) for g in gs for t in inc)
+    return ok
+
+
+# ---------------------------------------------------------------- main
+
+def decade_years(s):
+    m = re.fullmatch(r"(\d{4})s?", s) or re.fullmatch(r"(\d{2})s", s)
+    if not m:
+        sys.exit(f"decade like 1980s, not {s!r}")
+    y = int(m.group(1))
+    y = y + (1900 if y >= 50 else 2000) if y < 100 else y
+    return list(range(max(y - y % 10, FIRST_YEAR), y - y % 10 + 10))
+
+
+def entries(years):
+    """Songs of the given years merged across charts: {key: {title, artist, points, best, years}}."""
+    songs = {}
+    for y in years:
+        for pos, title, artist in chart(y):
+            k = musicdb.name_key(artist, title)
+            s = songs.setdefault(k, {"title": title, "artist": artist, "points": 0, "best": 101, "years": [], "year": y})
+            s["points"] += 101 - pos
+            s["best"] = min(s["best"], pos)
+            s["years"].append(y)
+    return songs
+
+
+def show(a):
+    years = decade_years(a.decade)
+    songs = list(entries(years).values())
+    ok = genre_filter(a.genre)
+    lib = musicdb.library()
+    plays, *_ = musicdb.counted(musicdb.db(), lib)
+    rows = []
+    for s in songs:
+        s.update(mb_song(s["title"], s["artist"], s["year"]))
+        if a.genre and not ok(genres(s)):
+            continue
+        s["file"], _ = musicdb.match(lib, None, s.get("mbid"), s["artist"], s["title"])
+        rows.append(s)
+    pop = lb_popularity([s.get("mbid") for s in rows])
+    for s in rows:
+        s["listens"] = pop.get(s.get("mbid"), 0)
+    # every year's #1 gets 100 points, so ties are common: break them by ListenBrainz listens
+    key = (lambda s: -s["listens"]) if a.rank == "listens" else (lambda s: (-s["points"], -s["listens"]))
+    rows = sorted(rows, key=key)[: a.n]
+    label = f"Hits {a.decade}" + (f" {a.genre}" if a.genre else "") + f" top{a.n}" + (" by listens" if a.rank == "listens" else "")
+    print(f"# {label}   ✓ = in library, plays = your play count")
+    for i, s in enumerate(rows, 1):
+        have = "✓" if s["file"] else " "
+        k = plays.get(s["file"], 0) if s["file"] else 0
+        score = f"{s['listens']:>9,}" if a.rank == "listens" else f"{s['points']:>4}"
+        g = ", ".join(genres(s)[:3])
+        print(f"{i:4d}. {have} {k or '':>4} {score}  {s['artist']} - {s['title']}  ({min(s['years'])}; {g})")
+    have = [s for s in rows if s["file"]]
+    print(f"\n{len(have)}/{len(rows)} in library")
+    if a.playlist:
+        PLAYLISTS.mkdir(parents=True, exist_ok=True)
+        p = PLAYLISTS / (re.sub(r'[/\\:*?"<>|]', "", label) + ".m3u")
+        p.write_text("".join(s["file"] + "\n" for s in have))
+        print(f"playlist: {p.stem} ({len(have)} songs)")
+    if a.download:
+        missing = [s for s in rows if not s["file"]]
+        target = f"Hits/{a.decade}"
+        for s in missing:
+            q = f"ytsearch1:{main_artist(s['artist'])} - {s['title']} official audio"
+            print(f"\n==> {s['artist']} - {s['title']}")
+            subprocess.run([str(HERE / "yt-mp3-mb"), "--yes", "-d", target, q, "--", "--no-playlist"])
+        if missing and a.playlist:
+            print("re-run with --playlist after the MPD update to include the new files")
+
+
+def prefetch(a):
+    lo, _, hi = a.years.partition("-")
+    years = range(max(int(lo), FIRST_YEAR), int(hi or lo) + 1)
+    for y in years:
+        es = entries([y]).values()
+        for s in es:
+            genres(s | mb_song(s["title"], s["artist"], y))
+        print(y, len(es), flush=True)
+
+
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "prefetch":
+        ap = argparse.ArgumentParser(prog="hits prefetch")
+        ap.add_argument("cmd"); ap.add_argument("years", nargs="?", default=f"{FIRST_YEAR}-2025")
+        return prefetch(ap.parse_args())
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("decade", help="e.g. 1980s, 80s, 2010s")
+    ap.add_argument("-n", type=int, default=100, help="how many (10/100/1000)")
+    ap.add_argument("-g", "--genre", default="", help='e.g. "rock -country" or "hip hop, r&b"')
+    ap.add_argument("--rank", choices=["chart", "listens"], default="chart")
+    ap.add_argument("--playlist", action="store_true", help="write an MPD playlist of the songs you have")
+    ap.add_argument("--download", action="store_true", help="download missing songs with yt-mp3-mb")
+    show(ap.parse_args())
+
+
+if __name__ == "__main__":
+    main()

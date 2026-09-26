@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Hourly: new ListenBrainz listens -> play-count stickers in MPD (~/scripts/musicdb update).
+     Install: launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.rofrol.musicdb.plist -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.rofrol.musicdb</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/sh</string>
+		<string>-c</string>
+		<string>PATH="$HOME/.local/bin:$HOME/.cargo/bin:/opt/homebrew/bin:$PATH"; exec "$HOME/scripts/musicdb" update &gt;&gt;"$HOME/Library/Logs/musicdb.log" 2&gt;&amp;1</string>
+	</array>
+	<key>StartInterval</key>
+	<integer>3600</integer>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>ProcessType</key>
+	<string>Background</string>
+</dict>
+</plist>

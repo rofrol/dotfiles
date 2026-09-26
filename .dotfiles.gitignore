@@ -177,6 +177,7 @@ __pycache__/
 !/Library/LaunchAgents/
 /Library/LaunchAgents/*
 !/Library/LaunchAgents/com.rofrol.listenbrainz-mpd.plist
+!/Library/LaunchAgents/com.rofrol.musicdb.plist
 
 !/.config/bat/
 /.config/bat/*

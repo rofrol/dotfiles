@@ -343,3 +343,89 @@ def write_tags(path, row, album=None):
         t.add(UFID(owner="http://musicbrainz.org", data=row["mbid"].encode("ascii")))
         t.add(TXXX(encoding=3, desc="MusicBrainz Artist Id", text=row["artist_mbids"]))
     t.save(path)
+
+
+# ---------------------------------------------------------------- cover art
+
+def fetch(url):
+    """GET raw bytes (follows redirects); None on 404 or when the server keeps failing."""
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=30) as r:
+                return r.read()
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                return None
+            if e.code not in (429, 500, 502, 503, 504):
+                raise
+        except (urllib.error.URLError, TimeoutError):
+            pass
+        time.sleep(3 * (attempt + 1))
+    return None
+
+
+def mb_releases(mbid):
+    """Official Album/Single/EP releases of a recording, earliest first (compilations and DJ mixes skipped)."""
+    CACHE.mkdir(exist_ok=True)
+    f = CACHE / f"rels-{mbid}.json"
+    if f.exists():
+        r = json.loads(f.read_text())
+    else:
+        r = http(f"https://musicbrainz.org/ws/2/recording/{mbid}?inc=releases+release-groups&fmt=json") or {}
+        f.write_text(json.dumps(r, ensure_ascii=False))
+    out = []
+    for rel in r.get("releases", []):
+        rg = rel.get("release-group") or {}
+        if rel.get("status") != "Official" or rg.get("primary-type") not in ("Album", "Single", "EP"):
+            continue
+        if {"Compilation", "DJ-mix", "Mixtape/Street"} & set(rg.get("secondary-types") or []):
+            continue
+        out.append(rel)
+    return sorted(out, key=lambda rel: rel.get("date") or "9999")
+
+
+def youtube_thumb(ytid):
+    """Video thumbnail cropped to a centred 600x600 square (hqdefault is letterboxed 4:3, so cut 16:9 first)."""
+    for name in ("maxresdefault", "hqdefault"):
+        img = fetch(f"https://i.ytimg.com/vi/{ytid}/{name}.jpg")
+        if img:
+            p = subprocess.run(["ffmpeg", "-v", "error", "-i", "pipe:0", "-vf", "crop=iw:iw*9/16,crop=ih:ih,scale=600:600",
+                                "-q:v", "3", "-f", "image2", "-c:v", "mjpeg", "pipe:1"], input=img, capture_output=True)
+            if p.returncode == 0 and p.stdout:
+                return p.stdout
+    return None
+
+
+def cover(ytid, mbid=None):
+    """Front cover for a track: Cover Art Archive of its earliest official release, else the YouTube thumbnail.
+    Returns {data, source, album, album_mbid} (album fields only for CAA) or None."""
+    CACHE.mkdir(exist_ok=True)
+    for rel in (mb_releases(mbid) if mbid else [])[:5]:
+        rg = rel["release-group"]["id"]
+        f = CACHE / f"caa-{rg}.jpg"
+        img = f.read_bytes() if f.exists() else fetch(f"https://coverartarchive.org/release-group/{rg}/front-500")
+        if img:
+            f.write_bytes(img)
+            return {"data": img, "source": "caa", "album": rel["title"], "album_mbid": rel["id"]}
+    f = CACHE / f"yt-{ytid}.jpg"
+    img = f.read_bytes() if f.exists() else youtube_thumb(ytid)
+    if img:
+        f.write_bytes(img)
+        return {"data": img, "source": "youtube", "album": None, "album_mbid": None}
+    return None
+
+
+def embed_cover(path, cov, title):
+    """Embed the cover as APIC front and make sure the file has an album tag.
+    MPD clients like M.A.L.P. cache art per album, so an empty album would give every such track the same cover:
+    fall back to the track title as a single-style album name."""
+    from mutagen.id3 import ID3, APIC, TALB, TXXX
+    t = ID3(path)
+    t.delall("APIC")
+    t.add(APIC(encoding=3, mime="image/jpeg", type=3, desc="Cover", data=cov["data"]))
+    if not t.get("TALB"):
+        t.add(TALB(encoding=3, text=[cov["album"] or title]))
+        if cov["album_mbid"]:
+            t.delall("TXXX:MusicBrainz Album Id")
+            t.add(TXXX(encoding=3, desc="MusicBrainz Album Id", text=[cov["album_mbid"]]))
+    t.save(path)

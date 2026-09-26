@@ -13,6 +13,7 @@
 Music dir: $YTMB_MUSIC_DIR or ~/personal_projects/music-mpd. Needs: uv, yt-dlp, ffmpeg; optional: fpcalc (AcoustID),
 mpc, listenbrainz-mpd config or $LISTENBRAINZ_TOKEN (better matching).
 File name: NNN--Artist--Title--youtubeID--uploaddate.mp3 (NNN = playlist index, omitted for singles).
+Cover: Cover Art Archive front of the earliest official release, else the YouTube thumbnail cropped to a square.
 Uncertain matches are asked about interactively; decisions are logged to ~/.cache/ytmb/log.jsonl.
 """
 import argparse, json, os, pathlib, re, shutil, subprocess, sys, tempfile
@@ -87,6 +88,12 @@ def process(path, info, target, yes):
         row = ask(row, d)
     album = d["provided"]["album"] if d["provided"] else None
     mbtag.write_tags(path, row, album=album)
+    try:
+        cov = mbtag.cover(info["id"], row["mbid"])
+        if cov:
+            mbtag.embed_cover(path, cov, row["title"])
+    except Exception as e:  # a missing cover must not lose the download
+        print(f"  cover failed: {e}", file=sys.stderr)
     idx = info.get("playlist_index")
     name = (f"{int(idx):03d}--" if idx else "") + f"{safe(row['artist'], 60)}--{safe(row['title'])}--{info['id']}--{info.get('upload_date') or ''}.mp3"
     target.mkdir(parents=True, exist_ok=True)

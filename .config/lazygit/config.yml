@@ -7,7 +7,7 @@ git:
     - colorArg: always
       pager: diff-so-fancy
 gui:
-  showIcons: true
+  nerdFontsVersion: "3"
   sidePanelWidth: 0.25
   language: "en"
   timeFormat: "2006-01-02T15:04:05Z07:00" # '02 Jan 06 15:04 MST' # https://pkg.go.dev/time#Time.Format

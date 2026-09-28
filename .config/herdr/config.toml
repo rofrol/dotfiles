@@ -20,5 +20,11 @@ rows = [
   ["agent", "$peer", "$jobs", "$bg"],
 ]
 
+[ui.sidebar]
+show_agents_panel = false
+
+[ui.sidebar.spaces]
+tabs = true
+
 [keys]
 close_pane = "cmd+w"

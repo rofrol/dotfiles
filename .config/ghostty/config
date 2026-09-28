@@ -20,6 +20,11 @@ keybind = command+seven=unbind
 keybind = command+eight=unbind
 keybind = command+nine=unbind
 
+# Cmd+W goes to herdr (close pane there); close a Ghostty split with Cmd+Ctrl+W.
+# Cmd+Opt+W still closes the Ghostty tab, Cmd+Shift+W the window.
+keybind = cmd+w=unbind
+keybind = cmd+ctrl+w=close_surface
+
 # https://github.com/ghostty-org/ghostty/discussions/2946
 #keybind = global:alt+grave_accent=toggle_quick_terminal
 keybind = global:f3=toggle_quick_terminal

@@ -27,4 +27,5 @@ show_agents_panel = false
 tabs = true
 
 [keys]
-close_pane = "cmd+w"
+close_pane = ["cmd+w", "ctrl+shift+w"]
+new_tab = ["prefix+c", "cmd+t", "ctrl+shift+t"]

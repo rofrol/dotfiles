@@ -6,6 +6,7 @@ auto_switch = false
 
 [ui]
 prompt_new_tab_name = false
+tab_label = "title"
 
 [ui.toast]
 delivery = "system"

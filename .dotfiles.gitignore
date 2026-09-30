@@ -216,6 +216,7 @@ __pycache__/
 !/.pi/agent/extensions
 /.pi/agent/extensions/*
 !/.pi/agent/extensions/remember-model.ts
+!/.pi/agent/extensions/README.md
 !/.pi/README.md
 !/.pi/agent/skills
 /.pi/agent/skills/*

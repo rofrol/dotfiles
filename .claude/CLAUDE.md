@@ -33,3 +33,11 @@ Where a repository allows agent commits, a session commits its own notes as
 soon as it writes them, with an explicit path (`git commit -- <paths>`), after
 checking that `git diff -- <paths>` shows only its own hunks; where agent
 commits are forbidden, say so instead of committing.
+
+# Claude settings.json
+
+`~/.claude/settings.json` mixes two owners: herdr's integration installer writes
+its awaiting-reply permission and its `UserPromptSubmit` reminder, and this
+repository tracks only the hand-written entries on top of them. Never commit the
+installer's entries; reinstalling the integration recreates them. The file
+therefore stays modified on purpose after that installer runs.

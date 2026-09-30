@@ -85,17 +85,48 @@ nvm install node
 nvm alias default node
 ```
 
+### XDG config on macOS
+
+`~/.zshenv` sets `XDG_CONFIG_HOME="$HOME/.config"` on macOS only, so tools that
+honour XDG keep their configuration in one place on both systems; on Linux the
+value is already the default and any explicit setting is left alone. Verified on
+2026-09-30: `gmailctl` (through `adrg/xdg`), `lazygit` and `superfile` use
+`~/.config/<tool>` with that variable set, which replaced most per-tool symlinks.
+
+A shell variable reaches only what the shell starts. GUI apps opened from
+Finder/Dock inherit launchd's environment, launchd and cron jobs get a minimal
+environment, `sudo` resets it, containers need `-e`, bash does not read
+`~/.zshenv`, and tmux keeps the environment from when its server started. I
+deliberately do not set it in launchd: the same app started from a terminal and
+from Finder would then use different configuration directories. When a tool ignores
+XDG, prefer its own override (`CONFIG_DIR` for lazygit, `--config` for gmailctl)
+and fall back to a symlink:
+
+```shell
+ln -s ~/.config/<tool>/config.toml "$HOME/Library/Application Support/<tool>/config.toml"
+```
+
 ### lazygit
 
 ```shell
-mkdir -p ~/Library/Application\ Support/lazygit
-ln -s ~/.config/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml
 brew install diff-so-fancy
 ```
 
+`lazygit` keeps `config.yml`, `state.yml` and its cached pull requests in
+`$XDG_CONFIG_HOME/lazygit` (`~/.config/lazygit`), so no symlink is needed.
+
+### superfile
+
+`superfile` also follows `XDG_CONFIG_HOME`, but the old link
+`~/Library/Application Support/superfile -> ~/.config/superfile` is kept as a
+fallback for contexts without the variable (bash, GUI launchers), so the tools
+cannot end up with two different configurations.
+
 ### nushell
 
-`ln -s ~/.config/nushell ~/Library/Application\ Support/`
+Nushell is not installed at the moment. When it comes back, it follows
+`XDG_CONFIG_HOME` like the tools above; the links below explain the macOS
+history and my earlier answer about changing its config location.
 
 - <https://github.com/nushell/nushell/issues/10746>
 - <https://github.com/nushell/nushell/issues/893>

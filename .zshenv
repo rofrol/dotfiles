@@ -70,4 +70,12 @@ export PATH="$(brew --prefix mpd)/bin:$PATH"
 export PATH="$(brew --prefix felinks)/bin":$PATH
 export PATH="$(brew --prefix)/share/google-cloud-sdk/bin":"$PATH"
 
-echo '~/.zshenv sourced.'
+# macOS: keep CLI tool configuration in ~/.config, the same rule as on Linux.
+# Linux already defaults to it, and an explicit value set elsewhere is kept.
+# GUI apps never see this (launchd has its own environment); tools that ignore
+# XDG get a symlink instead (see README.md).
+if [[ $OSTYPE == darwin* ]]; then
+  export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+fi
+
+# echo '~/.zshenv sourced.'  # prints on every zsh run; keep it off, scp/rsync must stay silent

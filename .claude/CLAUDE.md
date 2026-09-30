@@ -21,7 +21,10 @@ When the working repository is the dotfiles repo, i.e. the git root is HOME, rea
 `~/AGENTS.policy.md` and follow it. It is deliberately not named `AGENTS.md`,
 because Pi and Claude Code load `AGENTS.md` from the working directory and all
 parent directories, so a file of that name in HOME would apply to every
-unrelated repository below HOME.
+unrelated repository below HOME. Do not create ~/AGENTS.md, ~/CLAUDE.md or a
+`pi` wrapper/function for it: Pi loads the policy through
+~/.pi/agent/extensions/dotfiles-policy.ts (PATH-independent), and a second
+loader would append it twice.
 
 # Long-running work
 

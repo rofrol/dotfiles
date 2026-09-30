@@ -9,7 +9,15 @@ export DOTFILES_AUTO=1
 path=("$HOME/scripts/dotfiles-shim" ${path:#$HOME/scripts/dotfiles-shim})
 rehash
 
-# The dotfiles policy is appended by ~/scripts/dotfiles-shim/pi (first in PATH), so it
-# also reaches `command pi`, non-interactive runs and agents Herdr launches. Keep the
-# condition in that script, not in a shell function: a function would bypass the shim
-# and append the policy twice.
+# The policy is not loaded here: Pi gets it from the user extension
+# ~/.pi/agent/extensions/dotfiles-policy.ts, which checks the git root itself and
+# works regardless of PATH (Herdr launches Pi with ~/.pi/agent/bin first, so a shim
+# in this directory was bypassed). Do not add a pi() function or a pi shim here:
+# they would append the policy a second time.
+
+# This git shim only works while it is first in PATH: a later reorder (brew
+# shellenv, nvm) would silently run the real git instead. Warn, do not fix,
+# because reordering mid-startup could fight another tool.
+if [[ $(whence -p git) != "$HOME/scripts/dotfiles-shim/git" ]]; then
+	print -u2 "dotfiles-shim: 'git' resolves to $(whence -p git 2>/dev/null); expected $HOME/scripts/dotfiles-shim/git"
+fi

@@ -38,5 +38,7 @@ The dotfiles repository has HOME as its worktree, so its git root is HOME. When
 the git root is HOME, read `~/AGENTS.policy.md` and follow it. That file is not
 named `AGENTS.md` on purpose: Pi and Claude Code load `AGENTS.md` from the
 working directory and all parent directories, so a file of that name in HOME
-would apply to every unrelated repository below it. Pi gets the policy through
-`~/scripts/dotfiles-shim/pi`; no other agent loads it automatically.
+would apply to every unrelated repository below it. Pi loads the policy through the extension
+`~/.pi/agent/extensions/dotfiles-policy.ts`, which checks the git root itself,
+so it works in every launch mode; Claude Code has no such extension and only
+follows the pointer above.

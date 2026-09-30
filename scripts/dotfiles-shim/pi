@@ -1,0 +1,23 @@
+#!/bin/sh
+# First in PATH (see .zshrc_dotfiles_mode), so every pi invocation goes through here:
+# interactive shells, `command pi`, non-interactive runs and agents Herdr launches.
+# Appends the dotfiles policy only when the working repo is the dotfiles repo, i.e.
+# when the git root (through the git shim) is HOME.
+set -u
+
+real_pi=${PI_REAL_BIN:-$HOME/.local/bin/pi}
+
+# Subcommands must reach real pi unchanged; pi detects them only as argv[0].
+case ${1-} in
+	install|remove|uninstall|update|list|config|auth) exec "$real_pi" "$@" ;;
+esac
+
+policy=$HOME/AGENTS.policy.md
+root=$(git rev-parse --show-toplevel 2>/dev/null) || root=
+
+if [ -n "$root" ] && [ -r "$policy" ] &&
+	[ "$(cd "$root" && pwd -P)" = "$(cd "$HOME" && pwd -P)" ]; then
+	exec "$real_pi" --append-system-prompt "$policy" "$@"
+fi
+
+exec "$real_pi" "$@"

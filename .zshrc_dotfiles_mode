@@ -9,18 +9,7 @@ export DOTFILES_AUTO=1
 path=("$HOME/scripts/dotfiles-shim" ${path:#$HOME/scripts/dotfiles-shim})
 rehash
 
-pi() {
-	# pi detects subcommands only as argv[0] – do not prepend the flag
-	case ${1-} in
-		install|remove|uninstall|update|list|config|auth) command pi "$@"; return ;;
-	esac
-
-	local root policy="$HOME/AGENTS.policy.md"
-	# git root via the shim (or GIT_DIR in `don` mode), like lazygit sees it
-	root=$(git rev-parse --show-toplevel 2>/dev/null)
-	if [[ -n $root && $root -ef $HOME && -r $policy ]]; then
-		command pi --append-system-prompt "$policy" "$@"
-	else
-		command pi "$@"
-	fi
-}
+# The dotfiles policy is appended by ~/scripts/dotfiles-shim/pi (first in PATH), so it
+# also reaches `command pi`, non-interactive runs and agents Herdr launches. Keep the
+# condition in that script, not in a shell function: a function would bypass the shim
+# and append the policy twice.

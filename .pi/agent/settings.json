@@ -1,11 +1,14 @@
 {
-  "lastChangelogVersion": "0.85.1",
+  "lastChangelogVersion": "0.99.1",
   "theme": "light",
-  "defaultProvider": "openrouter",
-  "defaultModel": "anthropic/claude-opus-5.5",
-  "defaultThinkingLevel": "low",
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-flash",
+  "defaultThinkingLevel": "max",
   "showCacheMissNotices": true,
   "packages": [
     "npm:@narumitw/pi-usage"
-  ]
+  ],
+  "modelThinkingLevels": {
+    "deepseek/deepseek-flash": "max"
+  }
 }

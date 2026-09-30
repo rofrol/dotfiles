@@ -13,6 +13,7 @@
 __pycache__/
 
 !/.xdg.sh
+!/AGENTS.md
 
 # except some specific subdirectories of .config/
 !/.config/
@@ -215,7 +216,6 @@ __pycache__/
 !/.pi/agent/extensions
 /.pi/agent/extensions/*
 !/.pi/agent/extensions/remember-model.ts
-!/.pi/agent/extensions/dotfiles-policy.ts
 !/.pi/README.md
 !/.pi/agent/skills
 /.pi/agent/skills/*

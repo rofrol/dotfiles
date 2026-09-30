@@ -32,13 +32,9 @@ and applies to every repository. Put tool scratch directories and caches (for
 example `.playwright-mcp/`) in the global file, not in a repository's
 `.git/info/exclude`, which covers one checkout only.
 
-# Dotfiles repository policy
-
-The dotfiles repository has HOME as its worktree, so its git root is HOME. When
-the git root is HOME, read `~/AGENTS.policy.md` and follow it. That file is not
-named `AGENTS.md` on purpose: Pi and Claude Code load `AGENTS.md` from the
-working directory and all parent directories, so a file of that name in HOME
-would apply to every unrelated repository below it. Pi loads the policy through the extension
-`~/.pi/agent/extensions/dotfiles-policy.ts`, which checks the git root itself,
-so it works in every launch mode; Claude Code has no such extension and only
-follows the pointer above.
+The dotfiles repository keeps its development policy in `~/AGENTS.policy.md` and
+points to it from `~/AGENTS.md`, which every agent reads in that repository. The
+policy is not named `AGENTS.md` itself: Pi and Claude Code load `AGENTS.md` from
+the working directory and all parent directories, so the whole policy would
+apply to every unrelated repository below HOME. `~/scripts/dotfiles-shim/README.md`
+explains the setup.

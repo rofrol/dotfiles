@@ -1,3 +1,10 @@
+# This is the machine-global core.excludesFile: it applies to every repository.
+# Tool scratch directories and caches belong here (for example .playwright-mcp/),
+# not in a repository's .git/info/exclude, which covers one checkout only.
+# The dotfiles repository has its own ignore file (~/.dotfiles.gitignore, wired
+# through that repository's local core.excludesFile); it only applies where HOME
+# is the worktree root.
+
 TAGS
 .tmux_session
 .idea
@@ -8,3 +15,5 @@ rustfmt.toml
 debug.log
 .DS_Store
 .vsconfig
+
+.playwright-mcp/

@@ -256,7 +256,6 @@ alias cdi='__zoxide_zi'
 
 alias e='emacs -nw'
 
-eval "$(omp completions zsh)"
 
 # herdr: remember foreground commands per pane (local.relaunch plugin)
 [[ -n $HERDR_PANE_ID ]] && source ~/personal_projects/herdr/plugins/relaunch/relaunch.zsh

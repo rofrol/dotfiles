@@ -15,8 +15,9 @@
 # record appends the edited path to a per-session ledger. snapshot and compare
 # catch files a shell command changed (sed, echo >>, tee), which the edit tools
 # never see: the snapshot holds `git status --porcelain` from before the command,
-# and the difference afterwards names what that command made dirty. check looks
-# only at that ledger, so it never nags a session about another session's files.
+# and the difference afterwards names candidate changes, not proven ownership.
+# Concurrent sessions can change status during the same interval. check looks
+# only at that ledger; it can still include another session's files.
 # It blocks the stop once with a reminder; the model either commits, or says in
 # its final message that it left the files behind. No commit happens here:
 # committing on the model's behalf would misattribute hunks in shared files.
@@ -95,7 +96,7 @@ check)
 		rm -f "$ledger"
 		exit 0
 	fi
-	reason="You edited these files in this session and they are still uncommitted: ${dirty[*]}. Check 'git diff -- <path>' shows only your hunks, then commit them with an explicit path ('git commit -m \"...\" -- <path>'), or, if this repository forbids agent commits, name these files in your final message instead."
+	reason="Uncommitted files touched or observed during this session: ${dirty[*]}. This reminder grants no permission to commit, push, install, or continue work the user stopped. Respect explicit no-commit instructions and required commit-message approval. You may always finish by naming these files as dirty in your final message. Only if committing is already authorized, inspect staged and unstaged diffs and untracked file contents, verify hunk ownership, then stage and commit only your changes with explicit paths. Shell status changes are candidates, not proof of ownership; other sessions may have changed these files."
 	jq -n --arg reason "$reason" '{decision: "block", reason: $reason}'
 	;;
 esac

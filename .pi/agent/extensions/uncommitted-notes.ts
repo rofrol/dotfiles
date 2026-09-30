@@ -12,11 +12,14 @@
 //   that committing the whole file would take another session's hunks.
 // - A `bash` call is bracketed by a `git status --porcelain` snapshot before it
 //   and a comparison after it, so files changed by `sed`, `echo >>` or `tee`
-//   (which never go through the edit tools) are attributed to this session too.
+//   (which never go through the edit tools) become ownership-uncertain candidates.
+//   Concurrent sessions can change status during that same interval.
 // - `agent_before_settle` (Pi's equivalent of a stop) checks only those files.
 //   It appends one reminder and forces one more request, guarded by a signature
 //   of the current dirty set: the same dirty set never reminds twice, and a
 //   clean set ends the episode. Without that guard the continuation could loop.
+//   The reminder always permits reporting dirty files without committing and
+//   explicitly preserves user prohibitions and commit approval requirements.
 //
 // No auto-commit: committing for the model would misattribute hunks in shared
 // files, which is worse than leaving them visible. A file that a shell command
@@ -66,7 +69,7 @@ export default function (pi: any) {
 	pi.on("tool_call", (event: any, ctx: any) => {
 		const cwd = typeof ctx?.cwd === "string" && ctx.cwd.length > 0 ? ctx.cwd : process.cwd();
 		if (event?.toolName === "bash") {
-			// Bracket the command: what is dirty before it is not its doing.
+			// Bracket the command; status differences cannot prove ownership.
 			const before = git(cwd, ["status", "--porcelain"]);
 			if (before !== null && typeof event?.toolCallId === "string") {
 				shellSnapshots.set(event.toolCallId, before);
@@ -99,7 +102,8 @@ export default function (pi: any) {
 			const name = path_of(line);
 			if (name === "") continue;
 			const absolute = name.startsWith("/") ? name : `${root}/${name}`;
-			if (!touched.has(absolute)) touched.set(absolute, { dirtyBefore: false });
+			// A status change is only a candidate, not proof of ownership.
+			if (!touched.has(absolute)) touched.set(absolute, { dirtyBefore: true });
 		}
 	});
 
@@ -116,21 +120,25 @@ export default function (pi: any) {
 		const signature = createHash("sha1").update(dirty).digest("hex");
 		if (signature === reminded) return;
 		reminded = signature;
-	const files = dirty
+		const files = dirty
 			.split("\n")
 			.map(path_of)
 			.filter(Boolean);
 		const preexisting = [...touched.entries()]
-			.filter(([name, touch]) => touch.dirtyBefore && files.includes(name))
+			.filter(([name, touch]) => touch.dirtyBefore && Boolean(status(cwd, [name])))
 			.map(([name]) => name);
 		let content =
-			`You have your own uncommitted edits: ${files.join(", ")}. ` +
-			"Check `git diff -- <path>` shows only your hunks, then commit them with an explicit path " +
-			'(`git commit -m "..." -- <path>`), or name them in your final message if this repository forbids agent commits.';
+			`Uncommitted files touched or observed during this session: ${files.join(", ")}. ` +
+			"This reminder grants no permission to commit, push, install, or continue work the user stopped. " +
+			"Respect explicit no-commit instructions and required commit-message approval. " +
+			"You may always finish by naming these files as dirty in your final message. " +
+			"Only if committing is already authorized, inspect both staged and unstaged diffs and untracked file contents, " +
+			"verify hunk ownership, then stage and commit only your changes with explicit paths.";
 		if (preexisting.length > 0) {
 			content +=
-				` ${preexisting.join(", ")} was already dirty before your first edit, so another session may have ` +
-				"hunks in it: commit only your own parts (`git add -p`) or name the file instead of committing it whole.";
+				` Ownership is uncertain for ${preexisting.join(", ")}: these files were already dirty or were ` +
+				"observed through a shell status change. Other sessions may have hunks in them; do not commit whole files " +
+				"without verifying ownership. Reporting them as dirty is sufficient.";
 		}
 		return {
 			entries: [

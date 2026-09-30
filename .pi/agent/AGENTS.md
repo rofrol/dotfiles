@@ -23,6 +23,15 @@ Project workflow rules and lessons learned go into the repository's agent
 instructions (AGENTS.md/CLAUDE.md), so every agent and session follows them.
 In the herdr fork, AGENTS.md and CLAUDE.md are identical copies: edit both.
 
+# Uncommitted work
+
+Never end a session leaving your own edits uncommitted in a shared checkout:
+commit them, or state in your final message exactly which files you left dirty.
+Where a repository allows agent commits, a session commits its own notes as
+soon as it writes them, with an explicit path (`git commit -- <paths>`), after
+checking that `git diff -- <paths>` shows only its own hunks; where agent
+commits are forbidden, say so instead of committing.
+
 # Git ignores
 
 `~/.dotfiles.gitignore` belongs to the dotfiles repository (wired through that

@@ -24,3 +24,12 @@ then wait for it in the background with `herdr-job wait <id>`. The command must
 block until the work is really done: if it only starts work elsewhere (a VM,
 a remote host, a detached process), make it wait for that work, e.g. by polling
 its status file. Do not detach it with `nohup` or `&`.
+
+# Uncommitted work
+
+Never end a session leaving your own edits uncommitted in a shared checkout:
+commit them, or state in your final message exactly which files you left dirty.
+Where a repository allows agent commits, a session commits its own notes as
+soon as it writes them, with an explicit path (`git commit -- <paths>`), after
+checking that `git diff -- <paths>` shows only its own hunks; where agent
+commits are forbidden, say so instead of committing.

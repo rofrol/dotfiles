@@ -36,8 +36,12 @@ commits are forbidden, say so instead of committing.
 
 # Claude settings.json
 
-`~/.claude/settings.json` mixes two owners: herdr's integration installer writes
-its awaiting-reply permission and its `UserPromptSubmit` reminder, and this
-repository tracks only the hand-written entries on top of them. Never commit the
-installer's entries; reinstalling the integration recreates them. The file
-therefore stays modified on purpose after that installer runs.
+`~/.claude/settings.json` has two owners: herdr's integration installer writes
+its awaiting-reply permission and its `UserPromptSubmit` reminder, and the
+hand-written entries (for example the uncommitted-edits hooks) sit beside them.
+Both are tracked here, because every machine that runs the herdr fork installs
+the same integration with `herdr integration install claude`, which also writes
+the hook script those entries call. The installer merges into this file and
+removes only its own entries, so after installing or uninstalling the
+integration check `git diff` here and commit the change (`herdr integration
+status` lists what is installed).

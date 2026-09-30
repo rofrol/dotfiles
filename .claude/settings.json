@@ -1,5 +1,9 @@
 {
-  "permissions": {},
+  "permissions": {
+    "allow": [
+      "Bash(herdr agent awaiting-reply)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
@@ -57,6 +61,17 @@
           {
             "type": "command",
             "command": "~/.local/bin/herdr-bg-badge",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/romanfrolow/.claude/hooks/herdr-agent-state.sh' reminder",
             "timeout": 10
           }
         ]

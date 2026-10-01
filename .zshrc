@@ -245,9 +245,9 @@ source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 # . $HOME/.local/bin/env
 # . $HOME/.config/openai
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads 
+# Node and npm versions: mise (https://mise.jdx.dev), replaced nvm on 2026-10-01.
+# Global versions in ~/.config/mise/config.toml; projects pin with mise.toml or .nvmrc.
+eval "$(/opt/homebrew/bin/mise activate zsh)"
 
 alias nodem='node --input-type=module -e'
 

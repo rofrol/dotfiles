@@ -20,6 +20,8 @@
 # unless it is installed as dependency, like `brew uses --installed curl` shows php
 # in that case do `brew uninstall --ignore-dependencies curl && brew install curl`
 eval "$(/opt/homebrew/bin/brew shellenv)"
+# mise shims for login and non-interactive shells (GUI editors); .zshrc activates mise fully.
+eval "$(/opt/homebrew/bin/mise activate zsh --shims)"
 
 # https://apple.stackexchange.com/questions/337320/how-to-get-rid-of-application-downloaded-from-the-internet-message-when-instal/376476#376476
 export HOMEBREW_CASK_OPTS=--no-quarantine

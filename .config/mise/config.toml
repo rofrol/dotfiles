@@ -1,0 +1,10 @@
+[settings]
+idiomatic_version_file_enable_tools = ["node"]
+
+[tools]
+node = "24.4.0"
+"npm:@fsouza/prettierd" = "0.28.0"
+"npm:@olrtg/emmet-language-server" = "2.8.0"
+"npm:svgo" = "4.0.2"
+"npm:typescript" = "6.0.2"
+"npm:typescript-language-server" = "5.1.3"

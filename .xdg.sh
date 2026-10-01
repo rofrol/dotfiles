@@ -30,7 +30,6 @@ export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME"/npm/npmrc
 mkdir -p ${XDG_CACHE_HOME}/npm
 mkdir -p ${XDG_DATA_HOME}/npm/lib
 
-export NVM_DIR="$XDG_DATA_HOME"/nvm
 export INPUTRC="$XDG_CONFIG_HOME"/readline/inputrc
 
 # does not work

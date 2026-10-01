@@ -120,5 +120,10 @@
   "theme": "light",
   "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true,
-  "voiceEnabled": true
+  "voiceEnabled": true,
+  "model": "opus",
+  "statusLine": {
+    "type": "command",
+    "command": "jq -r '\"\\(.model.display_name) · \\(.workspace.current_dir | sub(env.HOME; \"~\"))\"'"
+  }
 }

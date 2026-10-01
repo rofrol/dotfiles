@@ -53,6 +53,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/romanfrolow/.claude/hooks/herdr-agent-state.sh' stop-check",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "SubagentStop": [

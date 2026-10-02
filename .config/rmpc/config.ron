@@ -120,7 +120,8 @@
             "<CR>":       Play,
             "C":          JumpToCurrent,
             "X":          Shuffle,
-            "P":          SortByColumn(3), // Plays column (musicdb stickers); press again to reverse
+            "Y":          SortByColumn(3), // Year column; press again to reverse
+            "P":          SortByColumn(4), // Plays column (musicdb stickers); press again to reverse
         },
     ),
     search: (

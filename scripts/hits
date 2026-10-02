@@ -10,13 +10,15 @@
   hits 1990s -g "hip hop,r&b" --rank listens  # rank by ListenBrainz listen counts instead of chart points
   hits 1980s -g rock --playlist               # write MPD playlist "Hits 1980s rock top100" (songs in the library)
   hits 1980s -g rock --download               # yt-mp3-mb the missing ones into <music>/Hits/1980s
+  hits all -n 10 -g "+rock -thrash metal" --playlist   # top 10 of every decade, one playlist ordered by decade
+  hits all -n 10 --owned --playlist           # the 10 biggest hits you have from each decade
   hits prefetch 1959-2025                     # warm the caches (charts + MusicBrainz, ~1 request/s)
 
 Ranking "chart" = sum of (101 - position) over the decade's year-end charts. Genres come from the recording's
 MusicBrainz genres/tags, falling back to the artist's. Library matching and play counts reuse musicdb.
 Caches: ~/.cache/hits/.
 """
-import argparse, importlib.machinery, importlib.util, json, os, pathlib, re, subprocess, sys, urllib.parse, urllib.request
+import argparse, datetime as dt, importlib.machinery, importlib.util, json, os, pathlib, re, subprocess, sys, urllib.parse, urllib.request
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -163,11 +165,12 @@ def lb_popularity(mbids):
 # ---------------------------------------------------------------- genre filter
 
 def genre_filter(spec):
-    """'rock -country, pop' -> predicate over a list of genre names (word match, so 'rock' hits 'hard rock')."""
+    """'+rock -thrash metal, pop' -> predicate over a list of genre names.
+    Included genres are ORed, excluded ones win; word match, so 'rock' hits 'hard rock'. '+' is optional."""
     inc, exc = [], []
-    for tok in re.findall(r"-?[^,\s][^,]*?(?=\s+-|,|$)", spec or ""):
+    for tok in re.findall(r"[-+]?[^,\s][^,]*?(?=\s+[-+]|,|$)", spec or ""):
         tok = tok.strip()
-        (exc if tok.startswith("-") else inc).append(tok.lstrip("-").strip().lower())
+        (exc if tok.startswith("-") else inc).append(tok.lstrip("-+").strip().lower())
     word = lambda g, t: re.search(rf"(?<![\w&]){re.escape(t)}(?![\w&])", g.lower())
     def ok(gs):
         if any(word(g, t) for g in gs for t in exc):
@@ -178,13 +181,17 @@ def genre_filter(spec):
 
 # ---------------------------------------------------------------- main
 
+DECADES = [f"{d}s" for d in range(1950, 2030, 10)]
+
+
 def decade_years(s):
     m = re.fullmatch(r"(\d{4})s?", s) or re.fullmatch(r"(\d{2})s", s)
     if not m:
         sys.exit(f"decade like 1980s, not {s!r}")
     y = int(m.group(1))
     y = y + (1900 if y >= 50 else 2000) if y < 100 else y
-    return list(range(max(y - y % 10, FIRST_YEAR), y - y % 10 + 10))
+    # a year-end chart exists only once the year is over
+    return list(range(max(y - y % 10, FIRST_YEAR), min(y - y % 10 + 10, dt.date.today().year)))
 
 
 def entries(years):
@@ -200,12 +207,15 @@ def entries(years):
     return songs
 
 
-def show(a):
-    years = decade_years(a.decade)
-    songs = list(entries(years).values())
+def coverage(decade):
+    ys = decade_years(decade)
+    return f"{ys[0]}" if len(ys) == 1 else f"{ys[0]}-{ys[-1]}"
+
+
+def ranked(decade, a, lib):
+    """Songs of a decade that pass the genre filter, best first (top a.n; with --owned, top a.n you have)."""
+    songs = list(entries(decade_years(decade)).values())
     ok = genre_filter(a.genre)
-    lib = musicdb.library()
-    plays, *_ = musicdb.counted(musicdb.db(), lib)
     rows = []
     for s in songs:
         s.update(mb_song(s["title"], s["artist"], s["year"]))
@@ -218,31 +228,49 @@ def show(a):
         s["listens"] = pop.get(s.get("mbid"), 0)
     # every year's #1 gets 100 points, so ties are common: break them by ListenBrainz listens
     key = (lambda s: -s["listens"]) if a.rank == "listens" else (lambda s: (-s["points"], -s["listens"]))
-    rows = sorted(rows, key=key)[: a.n]
-    label = f"Hits {a.decade}" + (f" {a.genre}" if a.genre else "") + f" top{a.n}" + (" by listens" if a.rank == "listens" else "")
+    rows = sorted(rows, key=key)
+    return [s for s in rows if s["file"]][: a.n] if a.owned else rows[: a.n]
+
+
+def show(a):
+    lib = musicdb.library()
+    plays, *_ = musicdb.counted(musicdb.db(), lib)
+    decades = DECADES if a.decade == "all" else [a.decade]
+    label = (f"Hits {a.decade}" + (f" {a.genre}" if a.genre else "") + f" top{a.n}"
+             + (" per decade" if a.decade == "all" else "") + (" owned" if a.owned else "")
+             + (" by listens" if a.rank == "listens" else ""))
     print(f"# {label}   ✓ = in library, plays = your play count")
+    rows = []
+    for d in decades:
+        part = ranked(d, a, lib)
+        if a.decade == "all":
+            print(f"\n## {d} (Billboard year-end {coverage(d)}): {sum(1 for s in part if s['file'])}/{len(part)} in library")
+        print_rows(part, plays, a)
+        rows += part
+    have = [s for s in rows if s["file"]]
+    print(f"\n{len(have)}/{len(rows)} in library")
+    if a.playlist:
+        PLAYLISTS.mkdir(parents=True, exist_ok=True)
+        p = PLAYLISTS / (re.sub(r'[/\\:*?"<>|]', "", label) + ".m3u")
+        p.write_text("".join(s["file"] + "\n" for s in have))  # ordered by decade, then rank
+        print(f"playlist: {p.stem} ({len(have)} songs)")
+    if a.download:
+        missing = [s for s in rows if not s["file"]]
+        for s in missing:
+            q = f"ytsearch1:{main_artist(s['artist'])} - {s['title']} official audio"
+            print(f"\n==> {s['artist']} - {s['title']}")
+            subprocess.run([str(HERE / "yt-mp3-mb"), "--yes", "-d", f"Hits/{s['year'] // 10 * 10}s", q, "--", "--no-playlist"])
+        if missing and a.playlist:
+            print("re-run with --playlist after the MPD update to include the new files")
+
+
+def print_rows(rows, plays, a):
     for i, s in enumerate(rows, 1):
         have = "✓" if s["file"] else " "
         k = plays.get(s["file"], 0) if s["file"] else 0
         score = f"{s['listens']:>9,}" if a.rank == "listens" else f"{s['points']:>4}"
         g = ", ".join(genres(s)[:3])
         print(f"{i:4d}. {have} {k or '':>4} {score}  {s['artist']} - {s['title']}  ({min(s['years'])}; {g})")
-    have = [s for s in rows if s["file"]]
-    print(f"\n{len(have)}/{len(rows)} in library")
-    if a.playlist:
-        PLAYLISTS.mkdir(parents=True, exist_ok=True)
-        p = PLAYLISTS / (re.sub(r'[/\\:*?"<>|]', "", label) + ".m3u")
-        p.write_text("".join(s["file"] + "\n" for s in have))
-        print(f"playlist: {p.stem} ({len(have)} songs)")
-    if a.download:
-        missing = [s for s in rows if not s["file"]]
-        target = f"Hits/{a.decade}"
-        for s in missing:
-            q = f"ytsearch1:{main_artist(s['artist'])} - {s['title']} official audio"
-            print(f"\n==> {s['artist']} - {s['title']}")
-            subprocess.run([str(HERE / "yt-mp3-mb"), "--yes", "-d", target, q, "--", "--no-playlist"])
-        if missing and a.playlist:
-            print("re-run with --playlist after the MPD update to include the new files")
 
 
 def prefetch(a):
@@ -261,10 +289,11 @@ def main():
         ap.add_argument("cmd"); ap.add_argument("years", nargs="?", default=f"{FIRST_YEAR}-2025")
         return prefetch(ap.parse_args())
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("decade", help="e.g. 1980s, 80s, 2010s")
+    ap.add_argument("decade", help='e.g. 1980s, 80s, 2010s, or "all" for top N of every decade')
     ap.add_argument("-n", type=int, default=100, help="how many (10/100/1000)")
     ap.add_argument("-g", "--genre", default="", help='e.g. "rock -country" or "hip hop, r&b"')
     ap.add_argument("--rank", choices=["chart", "listens"], default="chart")
+    ap.add_argument("--owned", action="store_true", help="top N among the songs you have, not the overall top N")
     ap.add_argument("--playlist", action="store_true", help="write an MPD playlist of the songs you have")
     ap.add_argument("--download", action="store_true", help="download missing songs with yt-mp3-mb")
     show(ap.parse_args())

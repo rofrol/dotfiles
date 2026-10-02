@@ -16,13 +16,15 @@
   musicdb missing [-n 50]               # played / liked songs that are not in the library (yt-mp3-mb candidates)
 
 Stickers: playCount (plain integer), plays (space-padded to 5 chars, because rmpc sorts sticker text
-lexicographically), lastPlayed (YYYY-MM-DD), favorite ("♥").
+lexicographically), lastPlayed (YYYY-MM-DD). Likes use rmpc's own "like" sticker (key r in rmpc: 2 like,
+1 neutral, 0 dislike); sync sends changes to ListenBrainz as love / clear / hate, and liked songs from
+favorites (Spotify library, music.txt) become like=2 when the song has no like yet.
 MPD plays come from the MPD log before LB_CUTOFF and from ListenBrainz after it, so nothing is counted twice.
 Source of truth: JSONL in the private data repo $MUSICDB_DATA (default ~/personal_projects/music-data);
 plays.db ($MUSICDB or ~/.local/share/musicdb/plays.db) is a cache rebuilt from it when missing.
 Needs sticker_file in mpd.conf.
 """
-import argparse, collections, datetime as dt, json, os, pathlib, re, sqlite3, subprocess, sys, time, zipfile
+import argparse, collections, datetime as dt, json, os, pathlib, re, sqlite3, subprocess, sys, time, urllib.request, zipfile
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import mbtag  # noqa: E402
@@ -42,6 +44,8 @@ CREATE TABLE IF NOT EXISTS events (
   UNIQUE(source, ts, ytid, mbid, spotify_uri, artist, title));
 CREATE TABLE IF NOT EXISTS favorites (
   source TEXT, artist TEXT, title TEXT, spotify_uri TEXT, ytid TEXT, UNIQUE(source, artist, title));
+-- what ListenBrainz was last told per recording, so likes are sent only when they change
+CREATE TABLE IF NOT EXISTS lb_feedback (mbid TEXT PRIMARY KEY, score INTEGER, ts TEXT);
 """
 
 
@@ -100,7 +104,11 @@ def add_events(rows):
     c = db()
     before = c.total_changes
     # '' instead of NULL: SQLite never treats NULLs as equal, so UNIQUE would not dedupe re-imports
-    c.executemany("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?,?)", [tuple("" if v is None else v for v in r) for r in rows])
+    # a re-import may fill `extra` (e.g. the ListenBrainz msid) of an event stored before it was recorded
+    c.executemany("INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?) "
+                  "ON CONFLICT(source, ts, ytid, mbid, spotify_uri, artist, title) DO UPDATE SET extra = excluded.extra "
+                  "WHERE events.extra = '' AND excluded.extra != ''",
+                  [tuple("" if v is None else v for v in r) for r in rows])
     c.commit()
     print(f"{c.total_changes - before} new events ({len(rows)} read)")
 
@@ -156,7 +164,9 @@ def import_lb(_a):
             ai = tm.get("additional_info") or {}
             mbid = ai.get("recording_mbid") or (tm.get("mbid_mapping") or {}).get("recording_mbid")
             ts = dt.datetime.fromtimestamp(l["listened_at"]).isoformat()
-            rows.append(("lb", ts, None, mbid, None, tm.get("artist_name"), tm.get("track_name"), ai.get("duration_ms"), None))
+            # recording_msid identifies the listen on LB: needed to map or delete it later
+            rows.append(("lb", ts, None, mbid, None, tm.get("artist_name"), tm.get("track_name"), ai.get("duration_ms"),
+                         json.dumps({"msid": l.get("recording_msid")})))
         oldest = min((l["listened_at"] for l in ls), default=None)
         if oldest is None or oldest < cutoff or (max_ts is not None and oldest >= max_ts):
             break  # end of history, reached the cutoff, or no progress (max_ts is exclusive)
@@ -302,19 +312,31 @@ def counted(c, lib):
     return plays, last, favs, unmatched, fav_missing
 
 
+LIKE_TO_LB = {"2": 1, "1": 0, "0": -1}  # rmpc like sticker -> LB feedback score (love / clear / hate)
+
+
 def sync(_a):
     c, lib, m = db(), library(), mpd()
     plays, last, favs, _, _ = counted(c, lib)
     files = set(lib[0].values()) | set(lib[1].values()) | {f for fs in lib[2].values() for f in fs}
-    n = 0
+    mbid_of = {f: mbid for mbid, f in lib[1].items()}
+    n, likes = 0, collections.defaultdict(list)
     for f in files:
         k = plays.get(f, 0)
-        want = {"playCount": str(k), "plays": f"{k:5d}" if k else "", "lastPlayed": last.get(f, "")[:10],
-                "favorite": "♥" if f in favs else ""}
+        want = {"playCount": str(k), "plays": f"{k:5d}" if k else "", "lastPlayed": last.get(f, "")[:10]}
         try:
             have = m.sticker_list("song", f)
         except Exception:  # MPD errors when a song has no stickers yet
             have = {}
+        if "favorite" in have:  # old musicdb sticker, replaced by rmpc's own like sticker
+            m.sticker_delete("song", f, "favorite")
+        like = have.get("like")
+        if like is None and (f in favs or have.get("favorite")):  # liked elsewhere: fills unrated songs only
+            like = "2"
+            m.sticker_set("song", f, "like", like)
+            n += 1
+        if like in LIKE_TO_LB and f in mbid_of:
+            likes[mbid_of[f]].append(LIKE_TO_LB[like])
         for key, val in want.items():
             if have.get(key, "") == val:
                 continue
@@ -323,7 +345,25 @@ def sync(_a):
             elif key in have:
                 m.sticker_delete("song", f, key)
             n += 1
-    print(f"{len(files)} songs, {sum(1 for f in files if plays.get(f))} with plays, {len(favs & files)} favorites, {n} sticker updates")
+    sent = push_feedback(c, {mbid: max(scores) for mbid, scores in likes.items()})  # duplicates: a like wins
+    print(f"{len(files)} songs, {sum(1 for f in files if plays.get(f))} with plays, "
+          f"{sum(1 for v in likes.values() if max(v) == 1)} liked, {n} sticker updates, {sent} LB feedback sent")
+
+
+def push_feedback(c, scores):
+    """Send changed likes to ListenBrainz. A song with no like sticker sends nothing (it never clears LB)."""
+    told = dict(c.execute("SELECT mbid, score FROM lb_feedback"))
+    todo = {mbid: s for mbid, s in scores.items() if told.get(mbid, 0 if s == 0 else None) != s}
+    token = mbtag.lb_token() if todo else None
+    for mbid, score in todo.items():
+        req = urllib.request.Request("https://api.listenbrainz.org/1/feedback/recording-feedback", method="POST",
+                                     data=json.dumps({"recording_mbid": mbid, "score": score}).encode(),
+                                     headers={"Authorization": "Token " + token, "Content-Type": "application/json",
+                                              "User-Agent": mbtag.UA})
+        urllib.request.urlopen(req, timeout=30).read()
+        c.execute("INSERT OR REPLACE INTO lb_feedback VALUES (?,?,?)", (mbid, score, dt.datetime.now().isoformat(timespec="seconds")))
+        c.commit()
+    return len(todo)
 
 
 def update(a):

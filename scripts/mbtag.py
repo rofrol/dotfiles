@@ -249,6 +249,7 @@ def from_recording(d, rec):
             "artist": "".join(a["name"] + a.get("joinphrase", "") for a in ac),
             "artist_mbids": [a["artist"]["id"] for a in ac],
             "mb_length": round((rec.get("length") or 0) / 1000),
+            "first_release": rec.get("first-release-date") or "",
             "check": round(score_candidate(d, rec["title"], [a["name"] for a in ac]), 2)}
 
 
@@ -350,7 +351,21 @@ def write_tags(path, row, album=None):
         # MPD maps this UFID to MUSICBRAINZ_TRACKID; listenbrainz-mpd sends it as recording_mbid
         t.add(UFID(owner="http://musicbrainz.org", data=row["mbid"].encode("ascii")))
         t.add(TXXX(encoding=3, desc="MusicBrainz Artist Id", text=row["artist_mbids"]))
+    write_year(t, row.get("first_release"))
     t.save(path)
+
+
+def write_year(t, first_release):
+    """TDRC/TDOR = the recording's first release date on MusicBrainz, so players sort and group by real year.
+    yt-dlp puts the YouTube upload date (YYYYMMDD) into TDRC; keep it in TXXX:YouTube Upload Date instead."""
+    from mutagen.id3 import TDRC, TDOR, TXXX
+    old = str(t.get("TDRC") or "")
+    if re.fullmatch(r"\d{8}", old) and not t.get("TXXX:YouTube Upload Date"):
+        t.add(TXXX(encoding=3, desc="YouTube Upload Date", text=[old]))
+    if re.fullmatch(r"\d{8}", old) or first_release:
+        t.delall("TDRC"); t.delall("TDOR")
+    if first_release:
+        t.add(TDRC(encoding=3, text=[first_release])); t.add(TDOR(encoding=3, text=[first_release]))
 
 
 # ---------------------------------------------------------------- cover art

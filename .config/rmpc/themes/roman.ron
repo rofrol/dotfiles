@@ -75,14 +75,20 @@
                 default: (kind: Text("Unknown"))
             ),
             label_prop: (kind: Text("Title")),
-            width: "52%",
+            width: "50%",
         ),
         (
             prop: (kind: Property(Artist),
                 default: (kind: Text("Unknown"))
             ),
             label_prop: (kind: Text("Artist")),
-            width: "33%",
+            width: "30%",
+        ),
+        // Date holds the MusicBrainz first release date (written by mbtag); show the year only
+        (
+            prop: (kind: Transform(Truncate(content: (kind: Property(Other("date"))), length: 4)), default: (kind: Text(""))),
+            label_prop: (kind: Text("Year")),
+            width: "5%",
         ),
         // stickers written by ~/scripts/musicdb; "plays" is space-padded so SortByColumn orders it numerically
         (
@@ -91,8 +97,13 @@
             width: "5%",
             alignment: Right,
         ),
+        // rmpc's own like sticker (key r): 2 like, 1 neutral, 0 dislike; musicdb sends it to ListenBrainz
         (
-            prop: (kind: Sticker("favorite"), default: (kind: Text(""))),
+            prop: (kind: Transform(Replace(content: (kind: Sticker("like")), replacements: [
+                (match: "2", replace: (kind: Text("♥"))),
+                (match: "0", replace: (kind: Text("✗"))),
+                (match: "1", replace: (kind: Text(""))),
+            ])), default: (kind: Text(""))),
             label_prop: (kind: Text("♥")),
             width: "2%",
         ),

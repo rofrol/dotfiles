@@ -64,3 +64,9 @@ Claude Code 2.1.288 renders a newline inside a description as U+FFFD (`�`),
 because it writes the replacement bytes to the terminal itself. Separate
 parts with ` — ` instead, and put multi-line text (a commit message body, a
 diff) in the option's `preview`, which is rendered as Markdown.
+
+# Asking other models
+
+"Pytaj modeli" ("ask the models") means: consult the default set of other
+models now, in this turn. Load the `consult` skill; it lists who joins a round
+and how to run, rate and score it.

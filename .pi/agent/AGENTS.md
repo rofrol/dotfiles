@@ -70,3 +70,9 @@ observed, publish files atomically. Lengthen time only for a real external
 deadline, rate limit, external polling, designed backoff or measured slow
 hardware, and say which next to the value. Canonical text: Rule 10 in
 ~/personal_projects/agents.md/AGENTS.md.
+
+# Asking other models
+
+"Pytaj modeli" ("ask the models") means: consult the default set of other
+models now, in this turn. Load the `consult` skill; it lists who joins a round
+and how to run, rate and score it.

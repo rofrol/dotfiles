@@ -45,3 +45,14 @@ the hook script those entries call. The installer merges into this file and
 removes only its own entries, so after installing or uninstalling the
 integration check `git diff` here and commit the change (`herdr integration
 status` lists what is installed).
+
+# Added delay is a bug signal
+
+Before you raise a timeout or add a sleep, retry or wait, treat the urge as a
+symptom of an asynchronous bug (a race, a lost event, a dropped input, a
+non-atomic write) and find the cause: reproduce it with a stress loop, wait for
+an observable condition instead of a duration, retry until the effect is
+observed, publish files atomically. Lengthen time only for a real external
+deadline, rate limit, external polling, designed backoff or measured slow
+hardware, and say which next to the value. Canonical text: Rule 10 in
+~/personal_projects/agents.md/AGENTS.md.

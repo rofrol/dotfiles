@@ -43,7 +43,7 @@ def http(url, data=None, host_interval=1.1, headers=None, strict=False):
     err = None
     for attempt in range(5):
         if attempt:
-            time.sleep(3 * attempt)
+            time.sleep(3 * attempt)  # designed backoff: external APIs (MB/LB/AcoustID) with rate limits and transient 5xx
         try:
             with urllib.request.urlopen(urllib.request.Request(url, data=data, headers=h), timeout=30) as r:
                 _last[host] = time.time()

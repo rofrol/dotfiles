@@ -471,9 +471,24 @@ def other_copies(mbid, rel):
     return [s["file"] for s in mpd().find("musicbrainz_trackid", mbid) if s.get("file") != rel] if mbid else []
 
 
+def youtube_remove(ytid):
+    """Remove the video from my chosen YouTube playlists (yt-playlist, official API). A failure is recorded,
+    not fatal: the LB and local parts are done and the video can be removed by hand."""
+    if not ytid:
+        return "no video id"
+    if not (DATA / "youtube-playlists.json").exists():
+        return "skipped (no playlists chosen: yt-playlist use ID...)"
+    p = subprocess.run([str(pathlib.Path(__file__).resolve().parent / "yt-playlist"), "remove", ytid],
+                       capture_output=True, text=True)
+    if p.returncode:
+        return f"failed: {(p.stderr or p.stdout).strip().splitlines()[-1:]} https://youtu.be/{ytid}"
+    return json.loads(p.stdout.strip().splitlines()[-1])["removed"]
+
+
 def deletions(a):
     """Phase 2: list queued deletions; --confirm deletes their ListenBrainz listens (irreversible, LB applies it
-    within about an hour) and turns their events into tombstones; --cancel ID puts the file back."""
+    within about an hour), removes the video from my chosen YouTube playlists and turns their events into
+    tombstones; --cancel ID puts the file back."""
     pending, done = jsonl(PENDING), jsonl(DATA / "deletions" / "done.jsonl")
     if a.cancel:
         keep = []
@@ -511,8 +526,9 @@ def deletions(a):
                       vals + [dt.datetime.now().isoformat(timespec="seconds")])
             c.execute(f"DELETE FROM events WHERE ({KEY}) = ({','.join('?' * 7)})", vals[:7])
         c.commit()
-        done.append(r | {"confirmed_at": dt.datetime.now().isoformat(timespec="seconds"), "lb_deleted": deleted})
-        print(f"{r['file']}: {deleted} ListenBrainz listens deleted, {len(r['events'])} plays tombstoned")
+        yt = youtube_remove(r["ytid"])
+        done.append(r | {"confirmed_at": dt.datetime.now().isoformat(timespec="seconds"), "lb_deleted": deleted, "youtube": yt})
+        print(f"{r['file']}: {deleted} ListenBrainz listens deleted, {len(r['events'])} plays tombstoned, YouTube: {yt}")
     write_jsonl(DATA / "deletions" / "done.jsonl", done)
     write_jsonl(PENDING, [])
     export(a)

@@ -1,21 +1,22 @@
 ---
 name: read-link
-description: Read a link the user drops (X/Twitter post, YouTube video, GitHub repo/issue/PR, any web page) with the right tool per host, without logins, cookies or new installs. Use when the user pastes a URL and asks what it says or "do we need anything from this?", and whenever WebFetch fails on a host (x.com answers 402).
+description: Read a link the user drops (X/Twitter post, YouTube video, GitHub repo/issue/PR, any web page) with the right tool per host, without logins, cookies or new installs. Use when the user pastes a URL and asks what it says or "do we need anything from this?", and whenever a web fetch fails on a host (x.com answers 402).
 ---
 
 # Reading a link
 
 Pick the tool by host. Everything here is read-only and public: no login, no
-cookie export, nothing to install. `read-x` lives next to this file
-(`~/.claude/skills/read-link/read-x`; pi sees the same directory through
-`~/.pi/agent/skills/read-link`).
+cookie export, nothing to install. `read-x` lives next to this file. The skill
+is shared: its one copy is `~/.agents/skills/read-link` (pi reads that
+directory itself), and `~/.claude/skills/read-link` links to it for Claude
+Code.
 
 | Host | Tool |
 | ---- | ---- |
 | `x.com`, `twitter.com` (status) | `read-x <URL>` |
 | `youtube.com`, `youtu.be` | `yt-dlp --ignore-config ...` (below) |
 | `github.com` | `gh` (below) |
-| anything else | WebFetch, then curl |
+| anything else | the agent's fetch tool, else curl |
 
 ## X / Twitter
 
@@ -32,7 +33,7 @@ Profiles, search and timelines are out of scope; say so instead of scraping.
 into `~/Downloads` with browser cookies.
 
 ```bash
-T=$(mktemp -d)   # in Claude Code use the session scratchpad instead
+T=$(mktemp -d)   # or the session scratchpad, if the agent has one
 yt-dlp --ignore-config --skip-download --no-playlist --write-subs --write-auto-subs \
   --sub-langs 'en,en-orig,pl' --convert-subs srt -o "$T/%(id)s.%(ext)s" --no-simulate \
   --print '%(title)s | %(channel)s | %(upload_date)s | %(duration_string)s' "<URL>"
@@ -56,10 +57,11 @@ commit history, and whether the README matches the code.
 
 ## Other pages
 
-WebFetch first. If it fails (403/402, empty JS shell), try
-`curl -sL <URL>` once. On a login wall or bot check, stop and tell the user;
-offer the user's logged-in Chrome (see the `chrome-browser` skill) only when
-the user agrees, and only to read.
+Use the agent's fetch tool (WebFetch in Claude Code; pi has none). If it
+is missing or fails (403/402, empty JS shell), try `curl -sL <URL>` once. On a
+login wall or bot check, stop and tell the user; offer the user's logged-in
+Chrome (Claude in Chrome, see the `chrome-browser` skill; Playwright MCP in
+pi) only when the user agrees, and only to read.
 
 ## Rules
 

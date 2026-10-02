@@ -13,6 +13,11 @@
 __pycache__/
 
 !/.xdg.sh
+
+# skills shared by all agents: pi reads ~/.agents/skills, ~/.claude/skills links here
+!/.agents/
+/.agents/*
+!/.agents/skills/
 !/AGENTS.md
 
 # except some specific subdirectories of .config/
@@ -221,7 +226,6 @@ __pycache__/
 !/.pi/agent/skills
 /.pi/agent/skills/*
 !/.pi/agent/skills/oracle
-!/.pi/agent/skills/read-link
 
 !/AGENTS.policy.md
 
@@ -238,5 +242,5 @@ __pycache__/
 !/.claude/skills/gpt/
 !/.claude/skills/gemini/
 !/.claude/skills/oracle-stats/
-!/.claude/skills/read-link/
+!/.claude/skills/read-link
 !/.claude/settings.json

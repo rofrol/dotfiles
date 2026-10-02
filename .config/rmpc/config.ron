@@ -67,6 +67,9 @@
             "u":      Update,
             "U":      Rescan,
             "R":          AddRandom,
+            // phase 1 only: trash + queue; the irreversible ListenBrainz deletion needs `musicdb deletions --confirm`
+            "<C-x>":      ExternalCommand(command: ["~/scripts/musicdb", "delete"],
+                                          description: "Trash selected song(s), queue their ListenBrainz listens for deletion"),
         },
         navigation: {
             "<C-c>":      Close,

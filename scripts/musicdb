@@ -12,6 +12,9 @@
   musicdb sync                          # match events to library files and write stickers
   musicdb update                        # import-lb + sync + export (run hourly by the com.rofrol.musicdb LaunchAgent)
   musicdb export                        # dump events/favorites as JSONL into the data repo and commit
+  musicdb lb-playlists [--download]     # ListenBrainz recommendation playlists -> MPD playlists "LB <kind>"
+  musicdb delete [FILE...]              # rmpc key: move songs to the Trash, queue their ListenBrainz listens
+  musicdb deletions [--confirm|--cancel ID]  # review the queue; --confirm deletes the LB listens (irreversible)
   musicdb top [-n 30]                   # most played library songs
   musicdb missing [-n 50]               # played / liked songs that are not in the library (yt-mp3-mb candidates)
 
@@ -32,6 +35,7 @@ import mbtag  # noqa: E402
 DB = pathlib.Path(os.environ.get("MUSICDB", pathlib.Path.home() / ".local/share/musicdb/plays.db"))
 DATA = pathlib.Path(os.environ.get("MUSICDB_DATA", pathlib.Path.home() / "personal_projects/music-data"))
 PUSH_EVERY_S = 20 * 3600
+PLAYLISTS = pathlib.Path(os.environ.get("MPD_PLAYLISTS", pathlib.Path.home() / ".config/mpd/playlists"))
 MPD_LOG = pathlib.Path(os.environ.get("MPD_LOG", pathlib.Path.home() / ".config/mpd/log"))
 LB_USER = os.environ.get("LB_USER", "rofrol")
 LB_CUTOFF = os.environ.get("LB_CUTOFF", "2026-09-26T02:10:00")  # listenbrainz-mpd runs as a LaunchAgent since then
@@ -44,6 +48,10 @@ CREATE TABLE IF NOT EXISTS events (
   UNIQUE(source, ts, ytid, mbid, spotify_uri, artist, title));
 CREATE TABLE IF NOT EXISTS favorites (
   source TEXT, artist TEXT, title TEXT, spotify_uri TEXT, ytid TEXT, UNIQUE(source, artist, title));
+-- events of deleted songs: removed from `events`, kept here so re-imports cannot bring them back
+CREATE TABLE IF NOT EXISTS tombstones (
+  source TEXT, ts TEXT, ytid TEXT, mbid TEXT, spotify_uri TEXT, artist TEXT, title TEXT, ms_played INTEGER, extra TEXT,
+  deleted_at TEXT, UNIQUE(source, ts, ytid, mbid, spotify_uri, artist, title));
 -- what ListenBrainz was last told per recording, so likes are sent only when they change
 CREATE TABLE IF NOT EXISTS lb_feedback (mbid TEXT PRIMARY KEY, score INTEGER, ts TEXT);
 """
@@ -51,6 +59,9 @@ CREATE TABLE IF NOT EXISTS lb_feedback (mbid TEXT PRIMARY KEY, score INTEGER, ts
 
 EVENT_COLS = ["source", "ts", "ytid", "mbid", "spotify_uri", "artist", "title", "ms_played", "extra"]
 FAV_COLS = ["source", "artist", "title", "spotify_uri", "ytid"]
+TOMB_COLS = EVENT_COLS + ["deleted_at"]
+TABLES = (("events", EVENT_COLS), ("favorites", FAV_COLS), ("tombstones", TOMB_COLS))
+KEY = "source, ts, ytid, mbid, spotify_uri, artist, title"
 
 
 def db():
@@ -59,7 +70,7 @@ def db():
     c = sqlite3.connect(DB)
     c.executescript(SCHEMA)
     if fresh:  # rebuild the cache from the data repo
-        for table, cols in (("events", EVENT_COLS), ("favorites", FAV_COLS)):
+        for table, cols in TABLES:
             f = DATA / f"{table}.jsonl"
             if f.exists():
                 rows = [tuple(json.loads(l).get(k, "") for k in cols) for l in f.read_text().splitlines() if l]
@@ -73,12 +84,12 @@ def export(_a):
     if not (DATA / ".git").exists():
         print(f"no data repo at {DATA}, skipping export"); return
     c = db()
-    for table, cols in (("events", EVENT_COLS), ("favorites", FAV_COLS)):
+    for table, cols in TABLES:
         rows = c.execute(f"SELECT {','.join(cols)} FROM {table} ORDER BY {','.join(cols)}").fetchall()
         (DATA / f"{table}.jsonl").write_text("".join(
             json.dumps({k: v for k, v in zip(cols, r) if v not in ("", None)}, ensure_ascii=False) + "\n" for r in rows))
     git = lambda *a: subprocess.run(["git", "-C", str(DATA), *a], capture_output=True, text=True)
-    git("add", "events.jsonl", "favorites.jsonl")
+    git("add", "events.jsonl", "favorites.jsonl", "tombstones.jsonl", "deletions")
     if git("diff", "--cached", "--quiet").returncode:
         n = git("diff", "--cached", "--numstat").stdout.split()[:1]
         git("commit", "-q", "-m", f"musicdb: +{n[0] if n else '?'} lines")
@@ -105,6 +116,8 @@ def add_events(rows):
     before = c.total_changes
     # '' instead of NULL: SQLite never treats NULLs as equal, so UNIQUE would not dedupe re-imports
     # a re-import may fill `extra` (e.g. the ListenBrainz msid) of an event stored before it was recorded
+    dead = set(c.execute(f"SELECT {KEY} FROM tombstones"))
+    rows = [r for r in rows if tuple("" if v is None else v for v in r[:7]) not in dead]
     c.executemany("INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?) "
                   "ON CONFLICT(source, ts, ytid, mbid, spotify_uri, artist, title) DO UPDATE SET extra = excluded.extra "
                   "WHERE events.extra = '' AND excluded.extra != ''",
@@ -369,6 +382,139 @@ def push_feedback(c, scores):
 def update(a):
     import_lb(a)
     sync(a)
+    lb_playlists(argparse.Namespace(user=None, n=0, download=False, all=False))
+    export(a)
+
+
+PERIODIC = {"daily-jams", "weekly-jams", "weekly-exploration"}
+
+
+def lb_playlists(a):
+    """Newest ListenBrainz recommendation playlist of each kind (Daily/Weekly Jams, Weekly Exploration, ...)
+    -> MPD playlist "LB <kind>" of the tracks in the library, plus the missing ones (optionally downloaded)."""
+    user = a.user or LB_USER
+    r = mbtag.http(f"https://api.listenbrainz.org/1/user/{user}/playlists/createdfor?count=50", host_interval=0.5, strict=True)
+    newest = {}
+    for p in r.get("playlists", []):
+        pl = p["playlist"]
+        kind = (pl.get("extension", {}).get("https://musicbrainz.org/doc/jspf#playlist", {})
+                .get("additional_metadata", {}).get("algorithm_metadata", {}).get("source_patch"))
+        if not kind or (kind not in PERIODIC and not a.all):  # yearly recaps would flood rmpc's playlist pane
+            continue
+        if kind not in newest or pl["date"] > newest[kind]["date"]:
+            newest[kind] = pl
+    if not newest:
+        print(f"ListenBrainz has no recommendation playlists for {user} yet"); return
+    lib = library()
+    for kind, pl in sorted(newest.items()):
+        full = mbtag.http(f"https://api.listenbrainz.org/1/playlist/{pl['identifier'].rsplit('/', 1)[-1]}",
+                          host_interval=0.5, strict=True)["playlist"]
+        have, missing = [], []
+        for t in full.get("track", []):
+            mbid = next((i.rsplit("/", 1)[-1] for i in t.get("identifier", []) if "/recording/" in i), None)
+            f, _ = match(lib, None, mbid, t.get("creator"), t.get("title"))
+            (have if f else missing).append(f or f"{t.get('creator')} - {t.get('title')}")
+        name = "LB " + kind.replace("-", " ").title()  # stable name: replaced each time, not one per week
+        PLAYLISTS.mkdir(parents=True, exist_ok=True)
+        (PLAYLISTS / f"{name}.m3u").write_text("".join(f + "\n" for f in have))
+        print(f"{name}: {len(have)}/{len(have) + len(missing)} in library ({pl['title']})")
+        for m in missing[: a.n]:
+            print(f"   missing: {m}")
+            if a.download:
+                subprocess.run([str(pathlib.Path(__file__).resolve().parent / "yt-mp3-mb"), "--yes", "-d", "LB",
+                                f"ytsearch1:{m} official audio", "--", "--no-playlist"])
+
+
+MUSIC = pathlib.Path(os.environ.get("YTMB_MUSIC_DIR", pathlib.Path.home() / "personal_projects/music-mpd"))
+PENDING = DATA / "deletions" / "pending.jsonl"
+
+
+def jsonl(path):
+    return [json.loads(l) for l in path.read_text().splitlines() if l] if path.exists() else []
+
+
+def write_jsonl(path, rows):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+
+
+def delete(a):
+    """Phase 1 (rmpc key): move songs to the Trash and queue them; nothing irreversible happens here.
+    Songs come from the arguments, else rmpc's $SELECTED_SONGS, else $FILE (the playing song)."""
+    files = a.files or [f for f in os.environ.get("SELECTED_SONGS", os.environ.get("FILE", "")).splitlines() if f]
+    if not files:
+        sys.exit("no song given")
+    c, lib = db(), library()
+    pending = jsonl(PENDING)
+    rows = c.execute(f"SELECT {', '.join(EVENT_COLS)} FROM events").fetchall()
+    for rel in files:
+        src = MUSIC / rel
+        if not src.exists():
+            print(f"not found: {src}"); continue
+        mine = [r for r in rows if match(lib, r[2], r[3], r[5], r[6])[0] == rel]
+        mbid = next((m for m, f in lib[1].items() if f == rel), None)
+        y = YTID_IN_NAME.search(rel)
+        trash = pathlib.Path.home() / ".Trash" / f"{dt.datetime.now():%Y%m%d-%H%M%S}-{src.name}"
+        src.rename(trash)
+        rec = {"id": trash.name, "file": rel, "trashed_to": str(trash), "ytid": y.group(1) if y else None, "mbid": mbid,
+               "queued_at": dt.datetime.now().isoformat(timespec="seconds"),
+               "events": [dict(zip(EVENT_COLS, r)) for r in mine]}
+        pending.append(rec)
+        print(f"trashed {rel}: {len(mine)} plays, {sum(1 for r in mine if r[0] == 'lb')} ListenBrainz listens queued")
+    write_jsonl(PENDING, pending)
+    subprocess.run(["mpc", "-q", "update"])
+    subprocess.run(["osascript", "-e", f'display notification "{len(files)} song(s) in the Trash; run musicdb deletions" with title "musicdb"'])
+
+
+def other_copies(mbid, rel):
+    """Library files other than rel with the same recording MBID: their listens must stay on ListenBrainz."""
+    return [s["file"] for s in mpd().find("musicbrainz_trackid", mbid) if s.get("file") != rel] if mbid else []
+
+
+def deletions(a):
+    """Phase 2: list queued deletions; --confirm deletes their ListenBrainz listens (irreversible, LB applies it
+    within about an hour) and turns their events into tombstones; --cancel ID puts the file back."""
+    pending, done = jsonl(PENDING), jsonl(DATA / "deletions" / "done.jsonl")
+    if a.cancel:
+        keep = []
+        for r in pending:
+            if r["id"] == a.cancel:
+                pathlib.Path(r["trashed_to"]).rename(MUSIC / r["file"]); print(f"restored {r['file']}")
+            else:
+                keep.append(r)
+        write_jsonl(PENDING, keep); subprocess.run(["mpc", "-q", "update"]); return
+    for r in pending:
+        lb = [e for e in r["events"] if e["source"] == "lb"]
+        shared = other_copies(r["mbid"], r["file"])
+        print(f"{r['id']}: {r['file']}\n   {len(r['events'])} plays to drop, {len(lb)} ListenBrainz listens to delete"
+              + ("  (kept: another file has the same recording)" if shared else ""))
+    if not a.confirm or not pending:
+        if pending and not a.confirm:
+            print("\nre-run with --confirm to delete the ListenBrainz listens (irreversible), --cancel ID to restore")
+        return
+    c, token = db(), mbtag.lb_token()
+    for r in pending:
+        shared = other_copies(r["mbid"], r["file"])
+        deleted = 0
+        for e in r["events"]:
+            msid = json.loads(e["extra"] or "{}").get("msid") if e["source"] == "lb" else None
+            if msid and not shared:
+                req = urllib.request.Request("https://api.listenbrainz.org/1/delete-listen", method="POST",
+                                             data=json.dumps({"listened_at": int(dt.datetime.fromisoformat(e["ts"]).timestamp()),
+                                                              "recording_msid": msid}).encode(),
+                                             headers={"Authorization": "Token " + token, "Content-Type": "application/json",
+                                                      "User-Agent": mbtag.UA})
+                urllib.request.urlopen(req, timeout=30).read()
+                deleted += 1
+            vals = [e[k] for k in EVENT_COLS]
+            c.execute(f"INSERT OR IGNORE INTO tombstones VALUES ({','.join('?' * len(TOMB_COLS))})",
+                      vals + [dt.datetime.now().isoformat(timespec="seconds")])
+            c.execute(f"DELETE FROM events WHERE ({KEY}) = ({','.join('?' * 7)})", vals[:7])
+        c.commit()
+        done.append(r | {"confirmed_at": dt.datetime.now().isoformat(timespec="seconds"), "lb_deleted": deleted})
+        print(f"{r['file']}: {deleted} ListenBrainz listens deleted, {len(r['events'])} plays tombstoned")
+    write_jsonl(DATA / "deletions" / "done.jsonl", done)
+    write_jsonl(PENDING, [])
     export(a)
 
 
@@ -399,6 +545,12 @@ def main():
     sp.add_parser("sync").set_defaults(fn=sync)
     sp.add_parser("update").set_defaults(fn=update)
     sp.add_parser("export").set_defaults(fn=export)
+    p = sp.add_parser("lb-playlists"); p.add_argument("--user"); p.add_argument("-n", type=int, default=10, help="missing tracks to list")
+    p.add_argument("--download", action="store_true", help="download the listed missing tracks with yt-mp3-mb")
+    p.add_argument("--all", action="store_true", help="also the yearly recap playlists"); p.set_defaults(fn=lb_playlists)
+    p = sp.add_parser("delete"); p.add_argument("files", nargs="*", help="paths relative to the music dir"); p.set_defaults(fn=delete)
+    p = sp.add_parser("deletions"); p.add_argument("--confirm", action="store_true"); p.add_argument("--cancel", metavar="ID")
+    p.set_defaults(fn=deletions)
     p = sp.add_parser("top"); p.add_argument("-n", type=int, default=30); p.set_defaults(fn=top)
     p = sp.add_parser("missing"); p.add_argument("-n", type=int, default=50); p.set_defaults(fn=missing)
     a = ap.parse_args()

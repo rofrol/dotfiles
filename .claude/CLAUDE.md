@@ -56,3 +56,11 @@ observed, publish files atomically. Lengthen time only for a real external
 deadline, rate limit, external polling, designed backoff or measured slow
 hardware, and say which next to the value. Canonical text: Rule 10 in
 ~/personal_projects/agents.md/AGENTS.md.
+
+# AskUserQuestion fields
+
+Keep every option `label` and `description` (and the `header`) on one line.
+Claude Code 2.1.288 renders a newline inside a description as U+FFFD (`�`),
+because it writes the replacement bytes to the terminal itself. Separate
+parts with ` — ` instead, and put multi-line text (a commit message body, a
+diff) in the option's `preview`, which is rendered as Markdown.

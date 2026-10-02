@@ -67,6 +67,6 @@ diff) in the option's `preview`, which is rendered as Markdown.
 
 # Asking other models
 
-"Pytaj modeli" ("ask the models") means: consult the default set of other
-models now, in this turn. Load the `consult` skill; it lists who joins a round
+A request to ask the models, in any language and without naming them, means:
+consult the default set of other models now, in this turn. Load the `consult` skill; it lists who joins a round
 and how to run, rate and score it.

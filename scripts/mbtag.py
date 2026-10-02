@@ -9,6 +9,7 @@ decide() ranks candidate recordings, resolve() turns the best one into canonical
 """
 import json, os, pathlib, re, subprocess, time, unicodedata, urllib.error, urllib.parse, urllib.request
 from difflib import SequenceMatcher
+from http.client import IncompleteRead  # not `import http.client`: http() below would shadow the module
 
 UA = "rofrol-ytmb/0.1 ( rofrol@gmail.com )"
 ACOUSTID_KEY = "1vOwZtEn"  # public client key embedded in beets' chroma plugin
@@ -29,15 +30,20 @@ def lb_token():
     return None
 
 
-def http(url, data=None, host_interval=1.1, headers=None):
-    """GET/POST JSON with a per-host rate limit; returns None on 404."""
+def http(url, data=None, host_interval=1.1, headers=None, strict=False):
+    """GET/POST JSON (read-only lookups) with a per-host rate limit and retries on transient errors.
+    Returns None on 404; when retries run out it returns None too, or raises with strict=True
+    (callers that must not mistake a failure for "no data", e.g. paginated imports)."""
     host = urllib.parse.urlparse(url).netloc
     wait = _last.get(host, 0) + host_interval - time.time()
     if wait > 0:
         time.sleep(wait)
     h = {"User-Agent": UA, "Accept": "application/json"}
     h.update(headers or {})
+    err = None
     for attempt in range(5):
+        if attempt:
+            time.sleep(3 * attempt)
         try:
             with urllib.request.urlopen(urllib.request.Request(url, data=data, headers=h), timeout=30) as r:
                 _last[host] = time.time()
@@ -46,12 +52,14 @@ def http(url, data=None, host_interval=1.1, headers=None):
             _last[host] = time.time()
             if e.code == 404:
                 return None
-            if e.code in (429, 502, 503):
-                time.sleep(3 * (attempt + 1))
-                continue
-            raise
-        except (urllib.error.URLError, TimeoutError):
-            time.sleep(3 * (attempt + 1))
+            if e.code not in (429, 500, 502, 503, 504):
+                raise
+            err = e
+        # ValueError: a 200 with an empty or non-JSON body (seen once from ListenBrainz)
+        except (urllib.error.URLError, TimeoutError, ConnectionResetError, IncompleteRead, ValueError) as e:
+            err = e
+    if strict:
+        raise RuntimeError(f"{url}: giving up after 5 attempts: {err}")
     return None
 
 

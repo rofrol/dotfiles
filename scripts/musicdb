@@ -139,21 +139,28 @@ def import_mpdlog(_a):
 
 
 def import_lb(_a):
+    """Listens since LB_CUTOFF (pages are newest first, so stop at the first older one).
+    Any failed or malformed page raises: a silent partial import would look like success."""
+    cutoff = dt.datetime.fromisoformat(LB_CUTOFF).timestamp()
     rows, max_ts = [], None
     while True:
         u = f"https://api.listenbrainz.org/1/user/{LB_USER}/listens?count=1000" + (f"&max_ts={max_ts}" if max_ts else "")
-        ls = (mbtag.http(u, host_interval=0.5) or {}).get("payload", {}).get("listens")
-        if not ls:
-            break
+        page = mbtag.http(u, host_interval=0.5, strict=True)
+        ls = (page or {}).get("payload", {}).get("listens")
+        if not isinstance(ls, list):
+            raise RuntimeError(f"unexpected ListenBrainz response for {u}")
         for l in ls:
-            ts = dt.datetime.fromtimestamp(l["listened_at"]).isoformat()
-            if ts < LB_CUTOFF:
-                continue
+            if l["listened_at"] < cutoff:
+                break
             tm = l["track_metadata"]
             ai = tm.get("additional_info") or {}
             mbid = ai.get("recording_mbid") or (tm.get("mbid_mapping") or {}).get("recording_mbid")
+            ts = dt.datetime.fromtimestamp(l["listened_at"]).isoformat()
             rows.append(("lb", ts, None, mbid, None, tm.get("artist_name"), tm.get("track_name"), ai.get("duration_ms"), None))
-        max_ts = ls[-1]["listened_at"]
+        oldest = min((l["listened_at"] for l in ls), default=None)
+        if oldest is None or oldest < cutoff or (max_ts is not None and oldest >= max_ts):
+            break  # end of history, reached the cutoff, or no progress (max_ts is exclusive)
+        max_ts = oldest
     add_events(rows)
 
 

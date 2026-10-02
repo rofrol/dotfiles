@@ -225,7 +225,6 @@ __pycache__/
 !/.pi/README.md
 !/.pi/agent/skills
 /.pi/agent/skills/*
-!/.pi/agent/skills/oracle
 
 !/AGENTS.policy.md
 
@@ -238,9 +237,5 @@ __pycache__/
 !/.pi/agent/extensions/uncommitted-notes.ts
 !/.claude/skills/
 /.claude/skills/*
-!/.claude/skills/deepseek/
-!/.claude/skills/gpt/
-!/.claude/skills/gemini/
-!/.claude/skills/oracle-stats/
 !/.claude/skills/read-link
 !/.claude/settings.json

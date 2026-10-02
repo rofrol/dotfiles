@@ -106,6 +106,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "TodoWrite",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/romanfrolow/.claude/hooks/herdr-agent-state.sh' plan",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PreToolUse": [

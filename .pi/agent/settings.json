@@ -6,7 +6,8 @@
   "defaultThinkingLevel": "max",
   "showCacheMissNotices": true,
   "packages": [
-    "npm:@narumitw/pi-usage"
+    "npm:@narumitw/pi-usage",
+    "npm:pi-web-search@1.6.0"
   ],
   "modelThinkingLevels": {
     "deepseek/deepseek-flash": "max"

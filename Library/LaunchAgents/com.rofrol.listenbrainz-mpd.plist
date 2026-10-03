@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!-- MPD -> ListenBrainz scrobbler. Token lives in ~/Library/Application Support/listenbrainz-mpd/config.toml (not in git).
      Install: launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.rofrol.listenbrainz-mpd.plist
-     Binary is my fork ~/personal_projects/listenbrainz-mpd, branch contiguous-listen (a listen = 90% of the song
+     Binary is my fork ~/personal_projects/listenbrainz-mpd (github.com/rofrol/listenbrainz-mpd), branch contiguous-listen (a listen = 90% of the song
      in one run without a seek or stop; pauses don't count): cargo install --locked --path ~/personal_projects/listenbrainz-mpd
      After cargo install: launchctl kickstart -k gui/$(id -u)/com.rofrol.listenbrainz-mpd -->
 <plist version="1.0">

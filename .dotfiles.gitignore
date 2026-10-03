@@ -188,7 +188,8 @@ __pycache__/
 !/Library/Services/
 !/Library/LaunchAgents/
 /Library/LaunchAgents/*
-!/Library/LaunchAgents/com.rofrol.listenbrainz-mpd.plist
+!/Library/LaunchAgents/com.rofrol.ro-listenbrainz-mpd.plist
+!/Library/LaunchAgents/com.rofrol.mpd-gap.plist
 !/Library/LaunchAgents/com.rofrol.musicdb.plist
 
 !/.config/bat/

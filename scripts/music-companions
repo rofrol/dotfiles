@@ -10,7 +10,7 @@ usage="usage: music-companions install [--local] | status
              remove upstream listenbrainz-mpd and its old agent, (re)start the agents below
   status     show installed versions, agents, token and the tools rormpc shells out to
 
-Agents: ${AGENTS:=com.rofrol.ro-listenbrainz-mpd com.rofrol.musicdb}"
+Agents: ${AGENTS:=com.rofrol.ro-listenbrainz-mpd com.rofrol.musicdb com.rofrol.mpd-gap}"
 
 RO_LB_REPO=https://github.com/rofrol/ro-listenbrainz-mpd
 RO_LB_TAG=v2.6.0-ro.2

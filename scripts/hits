@@ -12,13 +12,15 @@
   hits 1980s -g rock --download               # yt-mp3-mb the missing ones into <music>/Hits/1980s
   hits all -n 10 -g "+rock -thrash metal" --playlist   # top 10 of every decade, one playlist ordered by decade
   hits all -n 10 --owned --playlist           # the 10 biggest hits you have from each decade
+  hits --years 1985-1992 --top 11-20 -g "+rock +pop -country"   # ranks 11-20% of that cohort
+  hits 1980s --top 1-10 --json ~/.cache/rormpc/hits/current.json  # result file for rormpc's Hits pane
   hits prefetch 1959-2025                     # warm the caches (charts + MusicBrainz, ~1 request/s)
 
 Ranking "chart" = sum of (101 - position) over the decade's year-end charts. Genres come from the recording's
 MusicBrainz genres/tags, falling back to the artist's. Library matching and play counts reuse musicdb.
 Caches: ~/.cache/hits/.
 """
-import argparse, datetime as dt, importlib.machinery, importlib.util, json, os, pathlib, re, subprocess, sys, urllib.parse, urllib.request
+import argparse, datetime as dt, importlib.machinery, importlib.util, json, math, os, pathlib, re, subprocess, sys, urllib.parse, urllib.request
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -212,9 +214,25 @@ def coverage(decade):
     return f"{ys[0]}" if len(ys) == 1 else f"{ys[0]}-{ys[-1]}"
 
 
-def ranked(decade, a, lib):
-    """Songs of a decade that pass the genre filter, best first (top a.n; with --owned, top a.n you have)."""
-    songs = list(entries(decade_years(decade)).values())
+def parse_top(spec):
+    """'1-10,11-20' -> [(1, 10), (11, 20)] percent ranges of the rank."""
+    out = []
+    for part in filter(None, (x.strip() for x in (spec or "").split(","))):
+        lo, _, hi = part.partition("-")
+        out.append((int(lo), int(hi or lo)))
+    return out
+
+
+def in_top(i, n, ranges):
+    """Is rank i (1-based) of n inside one of the percent ranges? Top 10% = ranks 1..ceil(0.1 n)."""
+    return any(math.ceil((lo - 1) / 100 * n) < i <= math.ceil(hi / 100 * n) for lo, hi in ranges)
+
+
+def ranked(years, a, lib):
+    """Songs of the years that pass the genre filter, best first, each with rank and pct within that cohort.
+    Cut: --top percent ranges of the whole cohort (unowned songs count), else the top a.n; --owned keeps only
+    songs in the library, applied after the cut so owning a song never shifts the others' ranges."""
+    songs = list(entries(years).values())
     ok = genre_filter(a.genre)
     rows = []
     for s in songs:
@@ -229,26 +247,39 @@ def ranked(decade, a, lib):
     # every year's #1 gets 100 points, so ties are common: break them by ListenBrainz listens
     key = (lambda s: -s["listens"]) if a.rank == "listens" else (lambda s: (-s["points"], -s["listens"]))
     rows = sorted(rows, key=key)
+    for i, s in enumerate(rows, 1):
+        s["rank"], s["pct"], s["cohort"] = i, round(100 * i / len(rows), 1), len(rows)
+    top = parse_top(a.top)
+    if top:
+        rows = [s for s in rows if in_top(s["rank"], len(rows), top)]
+        return [s for s in rows if s["file"]] if a.owned else rows
     return [s for s in rows if s["file"]][: a.n] if a.owned else rows[: a.n]
 
 
 def show(a):
     lib = musicdb.library()
     plays, *_ = musicdb.counted(musicdb.db(), lib)
-    decades = DECADES if a.decade == "all" else [a.decade]
-    label = (f"Hits {a.decade}" + (f" {a.genre}" if a.genre else "") + f" top{a.n}"
-             + (" per decade" if a.decade == "all" else "") + (" owned" if a.owned else "")
+    if a.years:
+        lo, _, hi = a.years.partition("-")
+        groups = [(a.years, list(range(max(int(lo), FIRST_YEAR), min(int(hi or lo), dt.date.today().year - 1) + 1)))]
+    else:
+        groups = [(d, decade_years(d)) for d in (DECADES if a.decade == "all" else [a.decade or sys.exit("give a decade or --years")])]
+    period = a.years or a.decade
+    label = (f"Hits {period}" + (f" {a.genre}" if a.genre else "") + (f" top {a.top}%" if a.top else f" top{a.n}")
+             + (" per decade" if a.decade == "all" and not a.years else "") + (" owned" if a.owned else "")
              + (" by listens" if a.rank == "listens" else ""))
     print(f"# {label}   ✓ = in library, plays = your play count")
     rows = []
-    for d in decades:
-        part = ranked(d, a, lib)
-        if a.decade == "all":
+    for d, years in groups:
+        part = ranked(years, a, lib)
+        if len(groups) > 1:
             print(f"\n## {d} (Billboard year-end {coverage(d)}): {sum(1 for s in part if s['file'])}/{len(part)} in library")
         print_rows(part, plays, a)
         rows += part
     have = [s for s in rows if s["file"]]
     print(f"\n{len(have)}/{len(rows)} in library")
+    if a.json:
+        write_json(a, label, rows, plays)
     if a.playlist:
         PLAYLISTS.mkdir(parents=True, exist_ok=True)
         p = PLAYLISTS / (re.sub(r'[/\\:*?"<>|]', "", label) + ".m3u")
@@ -264,13 +295,29 @@ def show(a):
             print("re-run with --playlist after the MPD update to include the new files")
 
 
+def write_json(a, label, rows, plays):
+    """Versioned result file for rormpc's Hits pane, written atomically (the pane may read it any time)."""
+    out = {"version": 1, "generated_at": dt.datetime.now().isoformat(timespec="seconds"), "label": label,
+           "args": {"period": a.years or a.decade, "top": a.top, "genre": a.genre, "owned": a.owned, "rank": a.rank},
+           "rows": [{"rank": s["rank"], "pct": s["pct"], "cohort": s["cohort"], "artist": s["artist"], "title": s["title"],
+                     "year": min(s["years"]), "years": s["years"], "points": s["points"], "listens": s.get("listens", 0),
+                     "genres": genres(s)[:5], "mbid": s.get("mbid"), "file": s["file"],
+                     "plays": plays.get(s["file"], 0) if s["file"] else 0} for s in rows]}
+    path = pathlib.Path(a.json).expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(out, ensure_ascii=False, indent=1))
+    tmp.replace(path)
+    print(f"json: {path}")
+
+
 def print_rows(rows, plays, a):
     for i, s in enumerate(rows, 1):
         have = "✓" if s["file"] else " "
         k = plays.get(s["file"], 0) if s["file"] else 0
         score = f"{s['listens']:>9,}" if a.rank == "listens" else f"{s['points']:>4}"
         g = ", ".join(genres(s)[:3])
-        print(f"{i:4d}. {have} {k or '':>4} {score}  {s['artist']} - {s['title']}  ({min(s['years'])}; {g})")
+        print(f"{s.get('rank', i):4d}. {have} {k or '':>4} {score}  {s['artist']} - {s['title']}  ({min(s['years'])}; {g})")
 
 
 def prefetch(a):
@@ -289,7 +336,10 @@ def main():
         ap.add_argument("cmd"); ap.add_argument("years", nargs="?", default=f"{FIRST_YEAR}-2025")
         return prefetch(ap.parse_args())
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("decade", help='e.g. 1980s, 80s, 2010s, or "all" for top N of every decade')
+    ap.add_argument("decade", nargs="?", help='e.g. 1980s, 80s, 2010s, or "all" for top N of every decade')
+    ap.add_argument("--years", help="a year range instead of a decade, e.g. 1985-1992 (one ranking over all of it)")
+    ap.add_argument("--top", help='percent ranges of the ranking, e.g. "1-10" or "11-20,21-50" (instead of -n)')
+    ap.add_argument("--json", metavar="PATH", help="also write the result as JSON (for rormpc's Hits pane)")
     ap.add_argument("-n", type=int, default=100, help="how many (10/100/1000)")
     ap.add_argument("-g", "--genre", default="", help='e.g. "rock -country" or "hip hop, r&b"')
     ap.add_argument("--rank", choices=["chart", "listens"], default="chart")

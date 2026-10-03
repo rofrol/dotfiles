@@ -430,8 +430,8 @@ def push_feedback(c, scores):
 
 def update(a):
     deletions(argparse.Namespace(retry=True, json=False))
+    import_skips(a)  # local: before the network steps that can fail
     import_lb(a)
-    import_skips(a)
     sync(a)
     lb_playlists(argparse.Namespace(user=None, n=0, download=False, all=False))
     export(a)

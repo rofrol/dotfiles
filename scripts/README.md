@@ -12,8 +12,6 @@ How they fit together: https://github.com/kisswiki/kisswiki/blob/master/src/os/m
 | `mbtag.py` | shared library for the tools below (MusicBrainz/AcoustID/ListenBrainz lookups, tagging, covers) |
 | `musicdb` | play history → MPD stickers; run hourly by `~/Library/LaunchAgents/com.rofrol.musicdb.plist` |
 | `hits` | decade hits (Billboard year-end) with a genre filter → MPD playlists |
-| `mpd-gap` | N seconds of silence between songs (MPD 0.24 `single oneshot` pauses at the next song, this resumes it); `com.rofrol.mpd-gap` LaunchAgent |
-| `music-companions` | installs the ro-listenbrainz-mpd scrobbler (pinned tag) and (re)starts the music launchd agents; `status` checks them |
 | `yt-playlist` | my YouTube playlists via the official Data API (OAuth); used by `musicdb deletions --confirm` |
 
 Invariants to keep when changing them:

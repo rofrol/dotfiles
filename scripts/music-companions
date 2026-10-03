@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Install and check the background pieces of my MPD setup that rormpc's fork features rely on but that run
+# without the TUI: the ro-listenbrainz-mpd scrobbler and the launchd agents in ~/Library/LaunchAgents.
+# rormpc itself is installed by its own scripts/rormpc_install.sh.
+set -euo pipefail
+
+usage="usage: music-companions install [--local] | status
+
+  install    cargo install ro-listenbrainz-mpd at the pinned tag (--local: from \$RO_LB_DIR),
+             remove upstream listenbrainz-mpd and its old agent, (re)start the agents below
+  status     show installed versions, agents, token and the tools rormpc shells out to
+
+Agents: ${AGENTS:=com.rofrol.ro-listenbrainz-mpd com.rofrol.musicdb}"
+
+RO_LB_REPO=https://github.com/rofrol/ro-listenbrainz-mpd
+RO_LB_TAG=v2.6.0-ro.1
+RO_LB_DIR="${RO_LB_DIR:-$HOME/personal_projects/ro-listenbrainz-mpd}"
+LB_CONFIG="$HOME/Library/Application Support/listenbrainz-mpd/config.toml"
+LAUNCH_AGENTS="$HOME/Library/LaunchAgents"
+domain="gui/$(id -u)"
+
+loaded() { launchctl print "$domain/$1" >/dev/null 2>&1; }
+
+start_agent() { # load the agent if needed, then restart it so it runs the binary just installed
+  local plist="$LAUNCH_AGENTS/$1.plist"
+  [ -f "$plist" ] || { echo "skip $1: no $plist" >&2; return 0; }
+  loaded "$1" || launchctl bootstrap "$domain" "$plist"
+  launchctl kickstart -k "$domain/$1"
+  echo "started $1"
+}
+
+install() {
+  if [ "${1:-}" = --local ]; then
+    cargo install --locked --path "$RO_LB_DIR"
+  else
+    cargo install --locked --git "$RO_LB_REPO" --tag "$RO_LB_TAG"
+  fi
+  # upstream under its own name would scrobble every listen a second time
+  if cargo install --list | grep -q '^listenbrainz-mpd '; then cargo uninstall listenbrainz-mpd; fi
+  if loaded com.rofrol.listenbrainz-mpd; then launchctl bootout "$domain/com.rofrol.listenbrainz-mpd"; fi
+  for agent in $AGENTS; do start_agent "$agent"; done
+}
+
+status() {
+  cargo install --list | grep -E '^(ro-listenbrainz-mpd|listenbrainz-mpd|rmpc) ' || true
+  for agent in $AGENTS; do
+    if loaded "$agent"; then
+      echo "$agent: $(launchctl print "$domain/$agent" | sed -n 's/^\tstate = //p')"
+    else
+      echo "$agent: not loaded"
+    fi
+  done
+  grep -q '^[[:space:]]*token[[:space:]]*=' "$LB_CONFIG" 2>/dev/null && echo "ListenBrainz token: set" || echo "ListenBrainz token: missing in $LB_CONFIG"
+  for tool in rormpc musicdb hits mpc; do
+    printf '%s: %s\n' "$tool" "$(command -v "$tool" || echo 'not on PATH')"
+  done
+}
+
+case "${1:-}" in
+  install) shift; install "$@" ;;
+  status) status ;;
+  *) echo "$usage" >&2; exit 2 ;;
+esac

@@ -12,6 +12,7 @@ How they fit together: https://github.com/kisswiki/kisswiki/blob/master/src/os/m
 | `mbtag.py` | shared library for the tools below (MusicBrainz/AcoustID/ListenBrainz lookups, tagging, covers) |
 | `musicdb` | play history → MPD stickers; run hourly by `~/Library/LaunchAgents/com.rofrol.musicdb.plist` |
 | `hits` | decade hits (Billboard year-end) with a genre filter → MPD playlists |
+| `music-companions` | installs the ro-listenbrainz-mpd scrobbler (pinned tag) and (re)starts the music launchd agents; `status` checks them |
 | `yt-playlist` | my YouTube playlists via the official Data API (OAuth); used by `musicdb deletions --confirm` |
 
 Invariants to keep when changing them:
@@ -26,4 +27,4 @@ Invariants to keep when changing them:
   song without a like sticker never clears LB feedback.
 - Private data (play history, exports, backups) lives in a private repo (`$MUSICDB_DATA`, default
   `~/personal_projects/music-data`), never here: this repo is public. The ListenBrainz token stays in the
-  listenbrainz-mpd config, read at runtime.
+  listenbrainz-mpd config, read at runtime (upstream's directory; the fork ro-listenbrainz-mpd keeps using it).

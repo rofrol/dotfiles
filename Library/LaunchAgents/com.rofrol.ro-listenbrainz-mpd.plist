@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- MPD -> ListenBrainz scrobbler: my fork ro-listenbrainz-mpd (github.com/rofrol/ro-listenbrainz-mpd; a listen = 90%
+     of the song in one run without a seek or stop, pauses don't count). Installed and (re)started by
+     `music-companions install`. Token lives in ~/Library/Application Support/listenbrainz-mpd/config.toml (not in git). -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.rofrol.ro-listenbrainz-mpd</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/sh</string>
+		<string>-c</string>
+		<string>mkdir -p "$HOME/Library/Logs"; exec "$HOME/.cargo/bin/ro-listenbrainz-mpd" &gt;&gt;"$HOME/Library/Logs/ro-listenbrainz-mpd.log" 2&gt;&amp;1</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>30</integer>
+	<key>ProcessType</key>
+	<string>Background</string>
+</dict>
+</plist>

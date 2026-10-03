@@ -62,8 +62,10 @@ local function scan(dir, depth, out, seen)
 end
 
 -- Ranks matches of the query in name prefixes first, then at word starts,
--- then anywhere, keeping alphabetical order within each group. Case folding
--- is ASCII-only: Lua has no Unicode lowercase and hs.utf8 offers none.
+-- then anywhere, keeping alphabetical order within each group. Matching is
+-- byte-based: case folding and word starts are ASCII-only and non-ASCII bytes
+-- match literally. Hammerspoon 1.1.1 has no hs.text and no Unicode lowercase,
+-- and on 2026-10-03 no installed app name had a non-ASCII byte.
 local function rank(query)
   local q = query:match("^%s*(.-)%s*$"):lower()
   if q == "" then return L.all end
@@ -83,6 +85,8 @@ local function rank(query)
   for g = 2, 3 do table.move(groups[g], 1, #groups[g], #out + 1, out) end
   return out
 end
+
+L.rank = rank -- exposed for headless tests, see AGENTS.md
 
 local function showRanked(query)
   local choices = rank(query)

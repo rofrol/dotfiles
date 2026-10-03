@@ -81,6 +81,7 @@ __pycache__/
 !/.hammerspoon/
 /.hammerspoon/*
 !/.hammerspoon/init.lua
+!/.hammerspoon/AGENTS.md
 !/dotfiles.sh
 !/dotfiles.zsh
 !/.zshrc

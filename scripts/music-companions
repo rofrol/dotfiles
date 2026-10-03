@@ -13,7 +13,7 @@ usage="usage: music-companions install [--local] | status
 Agents: ${AGENTS:=com.rofrol.ro-listenbrainz-mpd com.rofrol.musicdb}"
 
 RO_LB_REPO=https://github.com/rofrol/ro-listenbrainz-mpd
-RO_LB_TAG=v2.6.0-ro.1
+RO_LB_TAG=v2.6.0-ro.2
 RO_LB_DIR="${RO_LB_DIR:-$HOME/personal_projects/ro-listenbrainz-mpd}"
 LB_CONFIG="$HOME/Library/Application Support/listenbrainz-mpd/config.toml"
 LAUNCH_AGENTS="$HOME/Library/LaunchAgents"

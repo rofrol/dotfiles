@@ -42,7 +42,6 @@
             "oo":         ShowOutputs,
             "op":         ShowDecoders,
             "od":         ShowDownloads,
-            "ox":         ShowDeletions, // rormpc: deletion queue (finish Ctrl-x deletions)
             "oP":         Partition(),
             "z":          ToggleRepeat,
             "x":          ToggleRandom,
@@ -71,9 +70,9 @@
             "u":      Update,
             "U":      Rescan,
             "R":          AddRandom,
-            // phase 1 only: trash + queue; the irreversible ListenBrainz deletion needs `musicdb deletions --confirm`
+            // rormpc opens its delete menu instead of running this: Trash or permanent, keep or delete the history
             "<C-x>":      ExternalCommand(command: ["~/scripts/musicdb", "delete"],
-                                          description: "Trash selected song(s), queue their ListenBrainz listens for deletion"),
+                                          description: "Delete selected song(s): Trash or permanent, optionally with their ListenBrainz history"),
             "<C-y>":      ExternalCommand(command: ["~/scripts/musicdb", "undo"], description: "Undo the last Ctrl-x (repeatable)"),
         },
         navigation: {

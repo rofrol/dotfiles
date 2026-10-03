@@ -81,6 +81,7 @@ __pycache__/
 !/.hammerspoon/
 /.hammerspoon/*
 !/.hammerspoon/init.lua
+!/.hammerspoon/esc-workaround.lua
 !/dotfiles.sh
 !/dotfiles.zsh
 !/.zshrc

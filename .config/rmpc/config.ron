@@ -250,11 +250,7 @@
             pane: Split(
                 size: "100%",
                 direction: Vertical,
-                panes: [(pane: Pane(Hits(format: [
-                    (kind: Property(Other("hits_rank"))), (kind: Text("  ")),
-                    (kind: Property(Artist)), (kind: Text(" - ")), (kind: Property(Title)),
-                    (kind: Text("  (")), (kind: Property(Other("hits_year"))), (kind: Text(")")),
-                ])), size: "100%", borders: "ALL", border_symbols: Rounded)],
+                panes: [(pane: Pane(Hits()), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
         (

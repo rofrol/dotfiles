@@ -7,7 +7,7 @@
   yt-playlist auth                     # one-time browser login; token in ~/.local/share/musicdb/youtube-token.json
   yt-playlist list                     # my playlists with ids and sizes
   yt-playlist use ID [ID ...]          # the music playlists musicdb deletions should clean up
-  yt-playlist find VIDEO_ID            # which of those playlists contain the video
+  yt-playlist find VIDEO_ID [--json]   # which of those playlists contain the video (--json: with titles)
   yt-playlist remove VIDEO_ID [--dry-run]   # remove the video from those playlists
 
 Setup (once): Google Cloud project with "YouTube Data API v3" enabled (mine: rofrol-musicdb), OAuth consent
@@ -67,6 +67,15 @@ def chosen():
     return json.loads(CHOSEN.read_text()) if CHOSEN.exists() else []
 
 
+def titles(yt):
+    """{playlist id: title} of the chosen playlists (one request)."""
+    ids = chosen()
+    if not ids:
+        return {}
+    r = yt.playlists().list(part="snippet", id=",".join(ids), maxResults=50).execute()
+    return {pl["id"]: pl["snippet"]["title"] for pl in r.get("items", [])}
+
+
 def items_with(yt, video_id):
     """[(playlist id, playlist item id)] of the chosen playlists that contain the video."""
     out = []
@@ -82,7 +91,7 @@ def main():
     sp.add_parser("auth")
     sp.add_parser("list")
     p = sp.add_parser("use"); p.add_argument("ids", nargs="+")
-    p = sp.add_parser("find"); p.add_argument("video")
+    p = sp.add_parser("find"); p.add_argument("video"); p.add_argument("--json", action="store_true")
     p = sp.add_parser("remove"); p.add_argument("video"); p.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     if a.cmd == "auth":
@@ -97,8 +106,15 @@ def main():
         CHOSEN.write_text(json.dumps(a.ids, indent=1) + "\n")
         print(f"{len(a.ids)} playlists saved to {CHOSEN}")
     elif a.cmd == "find":
-        for pid, item in items_with(api(), a.video):
-            print(pid, item)
+        yt = api()
+        hits = items_with(yt, a.video)
+        if a.json:
+            names = titles(yt)
+            print(json.dumps({"video": a.video, "playlists": [{"id": pid, "title": names.get(pid, pid), "item": item}
+                                                              for pid, item in hits]}, ensure_ascii=False))
+        else:
+            for pid, item in hits:
+                print(pid, item)
     elif a.cmd == "remove":
         yt = api()
         hits = items_with(yt, a.video)

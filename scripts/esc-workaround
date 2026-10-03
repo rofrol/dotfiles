@@ -1,0 +1,49 @@
+#!/bin/sh
+# esc-workaround on|off|status
+#
+# Forwards plain Escape straight to the frontmost app through Hammerspoon,
+# for when macOS swallows Escape in every app while other keys work (seen
+# on 2026-10-03; a logout should clear it). The binding lives only in the
+# running Hammerspoon: a Hammerspoon reload or a logout removes it.
+# Diagnosis and background:
+# https://github.com/kisswiki/kisswiki/blob/master/src/os/macos/escape_key_stops_working.md
+set -eu
+
+usage() {
+  echo "usage: esc-workaround on|off|status" >&2
+  exit 2
+}
+
+[ $# -eq 1 ] || usage
+command -v hs >/dev/null || { echo "esc-workaround: hs not found; enable hs.ipc in Hammerspoon" >&2; exit 1; }
+
+case "$1" in
+  on)
+    hs -c '
+if escFix then escFix.hk:delete() end
+escFix = {}
+local function send(down)
+  local app = escFix.target or hs.application.frontmostApplication()
+  -- Disabled while posting so the event cannot re-trigger this hotkey.
+  escFix.hk:disable()
+  hs.eventtap.event.newKeyEvent({}, "escape", down):post(app)
+  escFix.hk:enable()
+end
+-- Release and repeats go to the app that got the press, even if Escape
+-- moved the focus.
+escFix.hk = hs.hotkey.new({}, "escape",
+  function() escFix.target = hs.application.frontmostApplication(); send(true) end,
+  function() send(false); escFix.target = nil end,
+  function() send(true) end)
+escFix.hk:enable()
+return "esc-workaround: on"'
+    ;;
+  off)
+    hs -c 'if escFix then escFix.hk:delete(); escFix = nil end return "esc-workaround: off"'
+    ;;
+  status)
+    hs -c 'return "esc-workaround: " .. (escFix and "on" or "off")'
+    ;;
+  -h|--help) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) usage ;;
+esac

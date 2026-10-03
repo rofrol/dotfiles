@@ -19,7 +19,7 @@ Invariants to keep when changing them:
 - The `plays` sticker is space-padded on purpose: rmpc sorts sticker values as text. Do not "clean up" the padding.
 - `mbtag.http()` returns `None` on 404 and, by default, when retries run out; with `strict=True` it raises instead.
   `musicdb import-lb` uses `strict=True` so a failed page is never read as "end of history" (a silent partial import).
-- Deleting is two-phase: `musicdb delete` (rmpc Ctrl-x) only trashes and queues; ListenBrainz listens are deleted
+- Deleting is two-phase: `musicdb delete` (rmpc Ctrl-x) only trashes and queues (`musicdb undo`, Ctrl-y, restores); ListenBrainz listens are deleted
   by `musicdb deletions --confirm`, never by a key. Deleted events become tombstones (kept, and re-imports skip them).
   Listens of a recording that another library file still has are not deleted.
 - Likes: rmpc's `like` sticker is the source of truth; only changes go to ListenBrainz (ledger `lb_feedback`), and a

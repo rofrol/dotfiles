@@ -14,6 +14,7 @@
   musicdb export                        # dump events/favorites as JSONL into the data repo and commit
   musicdb lb-playlists [--download]     # ListenBrainz recommendation playlists -> MPD playlists "LB <kind>"
   musicdb delete [FILE...]              # rmpc key: move songs to the Trash, queue their ListenBrainz listens
+  musicdb undo                          # rmpc key: restore the most recently trashed song (repeatable)
   musicdb deletions [--confirm|--cancel ID]  # review the queue; --confirm deletes the LB listens (irreversible)
   musicdb top [-n 30]                   # most played library songs
   musicdb missing [-n 50]               # played / liked songs that are not in the library (yt-mp3-mb candidates)
@@ -444,26 +445,60 @@ def delete(a):
     files = a.files or [f for f in os.environ.get("SELECTED_SONGS", os.environ.get("FILE", "")).splitlines() if f]
     if not files:
         sys.exit("no song given")
-    c, lib = db(), library()
+    c, lib, m = db(), library(), mpd()
     pending = jsonl(PENDING)
     rows = c.execute(f"SELECT {', '.join(EVENT_COLS)} FROM events").fetchall()
+    names = []
     for rel in files:
         src = MUSIC / rel
         if not src.exists():
             print(f"not found: {src}"); continue
+        if (m.currentsong() or {}).get("file") == rel:
+            m.next()  # don't leave MPD playing a file that is gone
+        try:
+            stickers = m.sticker_list("song", rel)  # restored by `undo` in case MPD drops them
+        except Exception:
+            stickers = {}
+        info = (m.find("file", rel) or [{}])[0]
+        names.append(f"{one(info.get('artist', ''))} - {one(info.get('title', src.stem))}".strip(" -"))
         mine = [r for r in rows if match(lib, r[2], r[3], r[5], r[6])[0] == rel]
         mbid = next((m for m, f in lib[1].items() if f == rel), None)
         y = YTID_IN_NAME.search(rel)
         trash = pathlib.Path.home() / ".Trash" / f"{dt.datetime.now():%Y%m%d-%H%M%S}-{src.name}"
         src.rename(trash)
         rec = {"id": trash.name, "file": rel, "trashed_to": str(trash), "ytid": y.group(1) if y else None, "mbid": mbid,
-               "queued_at": dt.datetime.now().isoformat(timespec="seconds"),
+               "queued_at": dt.datetime.now().isoformat(timespec="seconds"), "stickers": stickers,
                "events": [dict(zip(EVENT_COLS, r)) for r in mine]}
         pending.append(rec)
         print(f"trashed {rel}: {len(mine)} plays, {sum(1 for r in mine if r[0] == 'lb')} ListenBrainz listens queued")
     write_jsonl(PENDING, pending)
     subprocess.run(["mpc", "-q", "update"])
-    subprocess.run(["osascript", "-e", f'display notification "{len(files)} song(s) in the Trash; run musicdb deletions" with title "musicdb"'])
+    notify(f"Trashed: {', '.join(names)[:150]}", "Ctrl-y in rmpc undoes; musicdb deletions to finish")
+
+
+def notify(text, subtitle=""):
+    """macOS notification: rmpc runs ExternalCommand in the background, so this is the only visible feedback."""
+    q = lambda x: x.replace("\\", "\\\\").replace('"', '\\"')
+    subprocess.run(["osascript", "-e", f'display notification "{q(text)}" with title "musicdb" subtitle "{q(subtitle)}"'])
+
+
+def undo(_a):
+    """Restore the most recently trashed song (repeat to go further back) with its stickers."""
+    pending = jsonl(PENDING)
+    if not pending:
+        notify("Nothing to undo"); print("nothing to undo"); return
+    r = max(pending, key=lambda r: r["queued_at"])
+    dst = MUSIC / r["file"]
+    if dst.exists():
+        notify(f"Not restored: {r['file']} exists again"); sys.exit(f"{dst} exists, not overwriting")
+    pathlib.Path(r["trashed_to"]).rename(dst)
+    write_jsonl(PENDING, [x for x in pending if x is not r])
+    subprocess.run(["mpc", "-q", "update", "--wait"])
+    m = mpd()
+    for k, v in (r.get("stickers") or {}).items():
+        m.sticker_set("song", r["file"], k, v)
+    notify(f"Restored: {r['file'].rsplit('/', 1)[-1]}")
+    print(f"restored {r['file']}")
 
 
 def other_copies(mbid, rel):
@@ -565,6 +600,7 @@ def main():
     p.add_argument("--download", action="store_true", help="download the listed missing tracks with yt-mp3-mb")
     p.add_argument("--all", action="store_true", help="also the yearly recap playlists"); p.set_defaults(fn=lb_playlists)
     p = sp.add_parser("delete"); p.add_argument("files", nargs="*", help="paths relative to the music dir"); p.set_defaults(fn=delete)
+    sp.add_parser("undo").set_defaults(fn=undo)
     p = sp.add_parser("deletions"); p.add_argument("--confirm", action="store_true"); p.add_argument("--cancel", metavar="ID")
     p.set_defaults(fn=deletions)
     p = sp.add_parser("top"); p.add_argument("-n", type=int, default=30); p.set_defaults(fn=top)

@@ -70,6 +70,7 @@
             // phase 1 only: trash + queue; the irreversible ListenBrainz deletion needs `musicdb deletions --confirm`
             "<C-x>":      ExternalCommand(command: ["~/scripts/musicdb", "delete"],
                                           description: "Trash selected song(s), queue their ListenBrainz listens for deletion"),
+            "<C-y>":      ExternalCommand(command: ["~/scripts/musicdb", "undo"], description: "Undo the last Ctrl-x (repeatable)"),
         },
         navigation: {
             "<C-c>":      Close,

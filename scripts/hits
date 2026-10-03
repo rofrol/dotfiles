@@ -15,6 +15,7 @@
   hits --years 1985-1992 --top 11-20 -g "+rock +pop -country"   # ranks 11-20% of that cohort
   hits 1980s --top 1-10 --json ~/.cache/rormpc/hits/current.json  # result file for rormpc's Hits pane
   hits prefetch 1959-2025                     # warm the caches (charts + MusicBrainz, ~1 request/s)
+  hits --source likes [--sort rediscover]     # your liked songs instead of a chart
   hits hide --artist A --title T [--mbid M]   # hide a song from every Hits result (log in the data repo)
   hits unhide --artist A --title T; hits hidden [--json]   # undo / review
 
@@ -281,6 +282,36 @@ def ranked(years, a, lib):
     return rows if top or not a.owned else rows[: a.n]
 
 
+def likes_rows(years, a, lib, plays, last):
+    """Source "likes": library songs with rmpc's like sticker = 2, not a chart. Ranked by own plays (--sort plays)
+    or by "rediscover" (liked, played a lot, not lately); decade/genre filters still apply, Top % is within the set."""
+    from mpd import MPDClient
+    c = MPDClient(); c.connect(os.environ.get("MPD_HOST", "localhost"), int(os.environ.get("MPD_PORT", 6600)))
+    liked = [x["file"] for x in c.sticker_find("song", "", "like") if x.get("sticker", "").endswith("=2")]
+    ok, wanted, rows = genre_filter(a.genre), set(years or []), []
+    now = dt.datetime.now()
+    for f in liked:
+        tags = (c.find("file", f) or [{}])[0]
+        one = lambda k: (tags.get(k)[0] if isinstance(tags.get(k), list) else tags.get(k)) or ""
+        year = int(one("date")[:4]) if one("date")[:4].isdigit() else None
+        if wanted and year not in wanted:
+            continue
+        artist_mbid = one("musicbrainz_artistid")
+        s = {"artist": one("artist") or f, "title": one("title") or pathlib.Path(f).stem, "file": f, "year": year or 0,
+             "years": [year] if year else [], "mbid": one("musicbrainz_trackid") or None, "artist_mbid": artist_mbid or None,
+             "tags": [], "points": plays.get(f, 0), "peak": plays.get(f, 0), "listens": 0, "hidden": False}
+        if a.genre and not ok(genres(s)):
+            continue
+        idle_days = (now - dt.datetime.fromisoformat(last[f])).days if last.get(f) else 3650
+        s["score"] = math.log1p(s["points"]) * min(idle_days, 365) if a.sort == "rediscover" else s["points"]
+        rows.append(s)
+    rows.sort(key=lambda s: (-s["score"], s["artist"], s["title"]))
+    for i, s in enumerate(rows, 1):
+        s["rank"], s["pct"], s["cohort"] = i, round(100 * i / len(rows), 1), len(rows)
+    top = parse_top(a.top)
+    return [s for s in rows if in_top(s["rank"], len(rows), top)] if top else rows[: a.n]
+
+
 def show(a):
     lib = musicdb.library()
     plays, *_ = musicdb.counted(musicdb.db(), lib)
@@ -288,16 +319,22 @@ def show(a):
         years = sorted({y for part in a.years.split(",") if part.strip()
                         for y in range_years(part.strip())})
         groups = [(a.years, years)]
+    elif a.source == "likes" and not a.decade:
+        groups = [("all years", [])]
     else:
         groups = [(d, decade_years(d)) for d in (DECADES if a.decade == "all" else [a.decade or sys.exit("give a decade or --years")])]
-    period = a.years or a.decade
+    period = a.years or a.decade or "all years"
     label = (f"Hits {period}" + (f" {a.genre}" if a.genre else "") + (f" top {a.top}%" if a.top else f" top{a.n}")
              + (" per decade" if a.decade == "all" and not a.years else "") + (" owned" if a.owned else "")
              + (" by listens" if a.rank == "listens" else ""))
-    print(f"# {label}   ✓ = in library, plays = your play count")
     rows = []
+    if a.source == "likes":
+        plays_last = musicdb.counted(musicdb.db(), lib)
+        plays, last = plays_last[0], plays_last[1]
+        label = label.replace("Hits ", "Likes ", 1) + (" · by plays" if a.sort == "plays" else " · rediscover")
+    print(f"# {label}   ✓ = in library, plays = your play count")
     for d, years in groups:
-        part = ranked(years, a, lib)
+        part = likes_rows(years, a, lib, plays, last) if a.source == "likes" else ranked(years, a, lib)
         if len(groups) > 1:
             print(f"\n## {d} (Billboard year-end {coverage(d)}): {sum(1 for s in part if s['file'])}/{len(part)} in library")
         print_rows(part, plays, a)
@@ -372,7 +409,10 @@ def write_json(a, label, rows, plays):
     """Versioned result file for rormpc's Hits pane, written atomically (the pane may read it any time)."""
     out = {"version": 1, "generated_at": dt.datetime.now().isoformat(timespec="seconds"), "label": label,
            "args": {"period": a.years or a.decade, "top": a.top, "genre": a.genre, "owned": a.owned, "rank": a.rank,
-                    "show_hidden": a.show_hidden},
+                    "show_hidden": a.show_hidden, "source": a.source, "sort": a.sort},
+           "rank_note": ("rank by your plays among liked songs" if a.source == "likes" and a.sort == "plays"
+                         else "liked, often played, not lately" if a.source == "likes"
+                         else "best year-end chart position within the chosen years and genres"),
            "rows": [{"rank": s["rank"], "pct": s["pct"], "cohort": s["cohort"], "artist": s["artist"], "title": s["title"],
                      "year": min(s["years"]), "years": s["years"], "points": s["points"], "peak": s["peak"],
                      "listens": s.get("listens", 0),
@@ -418,6 +458,9 @@ def main():
     ap.add_argument("--top", help='percent ranges of the ranking, e.g. "1-10" or "11-20,21-50" (instead of -n)')
     ap.add_argument("--json", metavar="PATH", help="also write the result as JSON (for rormpc's Hits pane)")
     ap.add_argument("--show-hidden", action="store_true", help="include songs hidden with `hits hide` (marked)")
+    ap.add_argument("--source", choices=["billboard", "likes"], default="billboard",
+                    help="billboard: US year-end charts; likes: your liked songs (rmpc like sticker)")
+    ap.add_argument("--sort", choices=["plays", "rediscover"], default="plays", help="order for --source likes")
     ap.add_argument("-n", type=int, default=100, help="how many (10/100/1000)")
     ap.add_argument("-g", "--genre", default="", help='e.g. "rock -country" or "hip hop, r&b"')
     ap.add_argument("--rank", choices=["chart", "listens"], default="chart")

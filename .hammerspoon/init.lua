@@ -37,7 +37,7 @@ local function addApp(path, out, seen)
   local name = path:match("([^/]+)%.app$")
   -- Without an image hs.chooser draws a generic arrow; ~0.2 s for 156 apps.
   out[#out + 1] = {
-    text = name, subText = path, path = path,
+    text = name, subText = path, path = path, key = name:lower(),
     image = hs.image.iconForFile(path),
   }
 end
@@ -61,14 +61,47 @@ local function scan(dir, depth, out, seen)
   end
 end
 
+-- Ranks matches of the query in name prefixes first, then at word starts,
+-- then anywhere, keeping alphabetical order within each group. Case folding
+-- is ASCII-only: Lua has no Unicode lowercase and hs.utf8 offers none.
+local function rank(query)
+  local q = query:match("^%s*(.-)%s*$"):lower()
+  if q == "" then return L.all end
+  local groups = { {}, {}, {} }
+  for _, choice in ipairs(L.all) do
+    local key, group = choice.key, nil
+    local i = key:find(q, 1, true)
+    while i do
+      if i == 1 then group = 1; break end
+      if not key:sub(i - 1, i - 1):match("%w") then group = 2 end
+      group = group or 3
+      i = key:find(q, i + 1, true)
+    end
+    if group then table.insert(groups[group], choice) end
+  end
+  local out = groups[1]
+  for g = 2, 3 do table.move(groups[g], 1, #groups[g], #out + 1, out) end
+  return out
+end
+
+local function showRanked(query)
+  local choices = rank(query)
+  L.chooser:choices(choices)
+  if #choices > 0 then L.chooser:selectedRow(1) end
+end
+
+-- With this callback set, hs.chooser does no filtering of its own.
+L.chooser:queryChangedCallback(showRanked)
+
 local function rebuild()
   local out, seen = {}, {}
   for _, dir in ipairs(appDirs) do scan(dir, 1, out, seen) end
   for _, path in ipairs(extraApps) do
     if hs.fs.attributes(path, "mode") == "directory" then addApp(path, out, seen) end
   end
-  table.sort(out, function(a, b) return a.text:lower() < b.text:lower() end)
-  L.chooser:choices(out)
+  table.sort(out, function(a, b) return a.key < b.key end)
+  L.all = out
+  showRanked(L.chooser:query())
 end
 
 L.rebuildTimer = hs.timer.delayed.new(1, rebuild)
@@ -92,7 +125,9 @@ hs.hotkey.bind({}, "f18", function()
   if L.chooser:isVisible() then
     L.chooser:hide()
   else
+    -- query() sets the text without calling queryChangedCallback.
     L.chooser:query("")
     L.chooser:show()
+    showRanked("")
   end
 end)

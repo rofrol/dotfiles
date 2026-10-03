@@ -12,6 +12,7 @@
   musicdb sync                          # match events to library files and write stickers
   musicdb update                        # import-lb + sync + export (run hourly by the com.rofrol.musicdb LaunchAgent)
   musicdb export                        # dump events/favorites as JSONL into the data repo and commit
+  musicdb lb-import-spotify [--dry-run]  # send the imported Spotify plays to ListenBrainz (once)
   musicdb lb-playlists [--download]     # ListenBrainz recommendation playlists -> MPD playlists "LB <kind>"
   musicdb delete [FILE...]              # rmpc key: move songs to the Trash, queue their ListenBrainz listens
   musicdb undo                          # rmpc key: restore the most recently trashed song (repeatable)
@@ -176,6 +177,8 @@ def import_lb(_a):
                 break
             tm = l["track_metadata"]
             ai = tm.get("additional_info") or {}
+            if ai.get("submission_client") == "musicdb-spotify-import":
+                continue  # already in the DB as source "spotify"
             mbid = ai.get("recording_mbid") or (tm.get("mbid_mapping") or {}).get("recording_mbid")
             ts = dt.datetime.fromtimestamp(l["listened_at"]).isoformat()
             # recording_msid identifies the listen on LB: needed to map or delete it later
@@ -392,6 +395,31 @@ def update(a):
 PERIODIC = {"daily-jams", "weekly-jams", "weekly-exploration"}
 
 
+def lb_import_spotify(a):
+    """Send the Spotify plays (>= 30 s, already in the DB) to ListenBrainz as an import, 500 per request.
+    Tagged submission_client "musicdb-spotify-import" so import-lb never reads them back as MPD plays."""
+    rows = db().execute("SELECT ts, artist, title, ms_played, spotify_uri FROM events WHERE source = 'spotify' ORDER BY ts").fetchall()
+    listens = []
+    for ts, artist, title, ms, uri in rows:
+        ai = {"music_service": "spotify.com", "submission_client": "musicdb-spotify-import", "ms_played": ms}
+        if uri and uri.startswith("spotify:track:"):
+            ai["spotify_id"] = "https://open.spotify.com/track/" + uri.rsplit(":", 1)[-1]
+        listens.append({"listened_at": int(dt.datetime.fromisoformat(ts).timestamp()),
+                        "track_metadata": {"artist_name": artist, "track_name": title, "additional_info": ai}})
+    print(f"{len(listens)} Spotify plays, {listens[0]['listened_at'] if listens else '-'} .. {listens[-1]['listened_at'] if listens else '-'}")
+    if a.dry_run:
+        print(json.dumps(listens[:2], ensure_ascii=False, indent=1)); return
+    token = mbtag.lb_token()
+    for i in range(0, len(listens), 500):
+        req = urllib.request.Request("https://api.listenbrainz.org/1/submit-listens", method="POST",
+                                     data=json.dumps({"listen_type": "import", "payload": listens[i:i + 500]}).encode(),
+                                     headers={"Authorization": "Token " + token, "Content-Type": "application/json",
+                                              "User-Agent": mbtag.UA})
+        urllib.request.urlopen(req, timeout=120).read()
+        print(f"sent {min(i + 500, len(listens))}/{len(listens)}", flush=True)
+        time.sleep(1)  # designed pacing: LB rate-limits submissions per user
+
+
 def lb_playlists(a):
     """Newest ListenBrainz recommendation playlist of each kind (Daily/Weekly Jams, Weekly Exploration, ...)
     -> MPD playlist "LB <kind>" of the tracks in the library, plus the missing ones (optionally downloaded)."""
@@ -598,6 +626,7 @@ def main():
     sp.add_parser("sync").set_defaults(fn=sync)
     sp.add_parser("update").set_defaults(fn=update)
     sp.add_parser("export").set_defaults(fn=export)
+    p = sp.add_parser("lb-import-spotify"); p.add_argument("--dry-run", action="store_true"); p.set_defaults(fn=lb_import_spotify)
     p = sp.add_parser("lb-playlists"); p.add_argument("--user"); p.add_argument("-n", type=int, default=10, help="missing tracks to list")
     p.add_argument("--download", action="store_true", help="download the listed missing tracks with yt-mp3-mb")
     p.add_argument("--all", action="store_true", help="also the yearly recap playlists"); p.set_defaults(fn=lb_playlists)

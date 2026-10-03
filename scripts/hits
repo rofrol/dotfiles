@@ -15,6 +15,8 @@
   hits --years 1985-1992 --top 11-20 -g "+rock +pop -country"   # ranks 11-20% of that cohort
   hits 1980s --top 1-10 --json ~/.cache/rormpc/hits/current.json  # result file for rormpc's Hits pane
   hits prefetch 1959-2025                     # warm the caches (charts + MusicBrainz, ~1 request/s)
+  hits hide --artist A --title T [--mbid M]   # hide a song from every Hits result (log in the data repo)
+  hits unhide --artist A --title T; hits hidden [--json]   # undo / review
 
 Ranking "chart" = sum of (101 - position) over the decade's year-end charts. Genres come from the recording's
 MusicBrainz genres/tags, falling back to the artist's. Library matching and play counts reuse musicdb.
@@ -260,11 +262,17 @@ def ranked(years, a, lib):
     rows = sorted(rows, key=key)
     for i, s in enumerate(rows, 1):
         s["rank"], s["pct"], s["cohort"] = i, round(100 * i / len(rows), 1), len(rows)
+    # hidden songs stay in the cohort (ranks and Top % of the others never move) and are removed after the cut
+    hidden = hidden_set()
+    for s in rows:
+        s["hidden"] = hide_key(s["artist"], s["title"]) in hidden
     top = parse_top(a.top)
     if top:
         rows = [s for s in rows if in_top(s["rank"], len(rows), top)]
-        return [s for s in rows if s["file"]] if a.owned else rows
-    return [s for s in rows if s["file"]][: a.n] if a.owned else rows[: a.n]
+    else:
+        rows = rows[: a.n] if not a.owned else rows
+    rows = [s for s in rows if (s["file"] or not a.owned) and (a.show_hidden or not s["hidden"])]
+    return rows if top or not a.owned else rows[: a.n]
 
 
 def show(a):
@@ -307,13 +315,61 @@ def show(a):
             print("re-run with --playlist after the MPD update to include the new files")
 
 
+HIDDEN = pathlib.Path(os.environ.get("MUSICDB_DATA", pathlib.Path.home() / "personal_projects/music-data")) / "hits-hidden.jsonl"
+
+
+def hide_key(artist, title):
+    """Chart-song identity for hiding: main artist + full title, normalised but keeping version notes
+    ("(remix)", "(live)") so hiding one version does not hide the others. Year and chart position are not
+    part of it, so a hide applies to every period."""
+    return f"{mbtag.norm(main_artist(artist))}|{mbtag.norm(title)}"
+
+
+def hidden_set():
+    """Fold the hide/unhide event log into {key: event}."""
+    state = {}
+    if HIDDEN.exists():
+        for line in HIDDEN.read_text().splitlines():
+            if line.strip():
+                e = json.loads(line)
+                if e["action"] == "hide":
+                    state[e["key"]] = e
+                else:
+                    state.pop(e["key"], None)
+    return state
+
+
+def hide_cmd(argv):
+    """hits hide|unhide --artist A --title T [--mbid M];  hits hidden [--json]"""
+    ap = argparse.ArgumentParser(prog=f"hits {argv[0]}")
+    ap.add_argument("cmd")
+    if argv[0] == "hidden":
+        ap.add_argument("--json", action="store_true")
+        a = ap.parse_args(argv)
+        rows = list(hidden_set().values())
+        if a.json:
+            print(json.dumps(rows, ensure_ascii=False))
+        for r in ([] if a.json else rows):
+            print(f"{r['artist']} - {r['title']}  (hidden {r['ts'][:10]})")
+        return
+    ap.add_argument("--artist", required=True); ap.add_argument("--title", required=True); ap.add_argument("--mbid")
+    a = ap.parse_args(argv)
+    e = {"ts": dt.datetime.now().isoformat(timespec="seconds"), "action": argv[0], "key": hide_key(a.artist, a.title),
+         "artist": a.artist, "title": a.title, "mbid": a.mbid}
+    HIDDEN.parent.mkdir(parents=True, exist_ok=True)
+    with HIDDEN.open("a") as fh:  # an append-only log: the history of decisions stays reviewable in git
+        fh.write(json.dumps(e, ensure_ascii=False) + "\n")
+    print(f"{argv[0]}: {a.artist} - {a.title}")
+
+
 def write_json(a, label, rows, plays):
     """Versioned result file for rormpc's Hits pane, written atomically (the pane may read it any time)."""
     out = {"version": 1, "generated_at": dt.datetime.now().isoformat(timespec="seconds"), "label": label,
-           "args": {"period": a.years or a.decade, "top": a.top, "genre": a.genre, "owned": a.owned, "rank": a.rank},
+           "args": {"period": a.years or a.decade, "top": a.top, "genre": a.genre, "owned": a.owned, "rank": a.rank,
+                    "show_hidden": a.show_hidden},
            "rows": [{"rank": s["rank"], "pct": s["pct"], "cohort": s["cohort"], "artist": s["artist"], "title": s["title"],
                      "year": min(s["years"]), "years": s["years"], "points": s["points"], "listens": s.get("listens", 0),
-                     "genres": genres(s)[:5], "mbid": s.get("mbid"), "file": s["file"],
+                     "genres": genres(s)[:5], "mbid": s.get("mbid"), "file": s["file"], "hidden": s.get("hidden", False),
                      "plays": plays.get(s["file"], 0) if s["file"] else 0} for s in rows]}
     path = pathlib.Path(a.json).expanduser()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -329,7 +385,7 @@ def print_rows(rows, plays, a):
         k = plays.get(s["file"], 0) if s["file"] else 0
         score = f"{s['listens']:>9,}" if a.rank == "listens" else f"{s['points']:>4}"
         g = ", ".join(genres(s)[:3])
-        print(f"{s.get('rank', i):4d}. {have} {k or '':>4} {score}  {s['artist']} - {s['title']}  ({min(s['years'])}; {g})")
+        print(f"{s.get('rank', i):4d}.{'h' if s.get('hidden') else ' '}{have} {k or '':>4} {score}  {s['artist']} - {s['title']}  ({min(s['years'])}; {g})")
 
 
 def prefetch(a):
@@ -343,6 +399,8 @@ def prefetch(a):
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("hide", "unhide", "hidden"):
+        return hide_cmd(sys.argv[1:])
     if len(sys.argv) > 1 and sys.argv[1] == "prefetch":
         ap = argparse.ArgumentParser(prog="hits prefetch")
         ap.add_argument("cmd"); ap.add_argument("years", nargs="?", default=f"{FIRST_YEAR}-2025")
@@ -352,6 +410,7 @@ def main():
     ap.add_argument("--years", help="year ranges instead of a decade, e.g. 1985-1992 or 1970-1979,1990-1999 (one pooled ranking)")
     ap.add_argument("--top", help='percent ranges of the ranking, e.g. "1-10" or "11-20,21-50" (instead of -n)')
     ap.add_argument("--json", metavar="PATH", help="also write the result as JSON (for rormpc's Hits pane)")
+    ap.add_argument("--show-hidden", action="store_true", help="include songs hidden with `hits hide` (marked)")
     ap.add_argument("-n", type=int, default=100, help="how many (10/100/1000)")
     ap.add_argument("-g", "--genre", default="", help='e.g. "rock -country" or "hip hop, r&b"')
     ap.add_argument("--rank", choices=["chart", "listens"], default="chart")

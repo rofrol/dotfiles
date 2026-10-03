@@ -1,0 +1,9 @@
+# rormpc-tools settings (see config.toml.sample in github.com/rofrol/rormpc-tools)
+music_dir = "~/personal_projects/music-mpd"
+# history in my private repo; the DB and YouTube secrets where they were before the tools left the dotfiles
+data_dir = "~/personal_projects/music-data"
+db_file = "~/.local/share/musicdb/plays.db"
+secrets_dir = "~/.local/share/musicdb"
+# listenbrainz-mpd runs as a LaunchAgent since then
+lb_since = "2026-09-26T02:10:00"
+contact = "rofrol@gmail.com"

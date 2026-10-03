@@ -71,9 +71,9 @@
             "U":      Rescan,
             "R":          AddRandom,
             // rormpc opens its delete menu instead of running this: Trash or permanent, keep or delete the history
-            "<C-x>":      ExternalCommand(command: ["~/scripts/musicdb", "delete"],
+            "<C-x>":      ExternalCommand(command: ["musicdb", "delete"],
                                           description: "Delete selected song(s): Trash or permanent, optionally with their ListenBrainz history"),
-            "<C-y>":      ExternalCommand(command: ["~/scripts/musicdb", "undo"], description: "Undo the last Ctrl-x (repeatable)"),
+            "<C-y>":      ExternalCommand(command: ["musicdb", "undo"], description: "Undo the last Ctrl-x (repeatable)"),
         },
         navigation: {
             "<C-c>":      Close,

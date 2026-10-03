@@ -188,7 +188,6 @@ __pycache__/
 !/Library/Services/
 !/Library/LaunchAgents/
 /Library/LaunchAgents/*
-!/Library/LaunchAgents/com.rofrol.musicdb.plist
 
 !/.config/bat/
 /.config/bat/*
@@ -200,6 +199,9 @@ __pycache__/
 
 !/.mpdconf
 
+!/.config/rormpc-tools/
+/.config/rormpc-tools/*
+!/.config/rormpc-tools/config.toml
 !/.config/rormpc/
 /.config/rormpc/*
 !/.config/rormpc/config.ron

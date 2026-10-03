@@ -90,7 +90,7 @@
             label_prop: (kind: Text("Year")),
             width: "5%",
         ),
-        // stickers written by ~/scripts/musicdb; "plays" is space-padded so SortByColumn orders it numerically
+        // stickers written by musicdb (rormpc-tools); "plays" is space-padded so SortByColumn orders it numerically
         (
             prop: (kind: Sticker("plays"), default: (kind: Text(""))),
             label_prop: (kind: Text("Plays")),

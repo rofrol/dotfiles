@@ -17,6 +17,7 @@ bottom_margin = 6
 
 [usage]
 enabled = true
+openai_api = true
 
 [ui.sidebar.agents]
 rows = [

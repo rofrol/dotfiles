@@ -291,7 +291,9 @@ def name_key(artist, title):
     return f"{artist}|{mbtag.norm(title)}"
 
 
-def match(lib, ytid=None, mbid=None, artist=None, title=None):
+def match(lib, ytid=None, mbid=None, artist=None, title=None, any_copy=False):
+    """Library file for an event or chart entry. A name shared by several files stays unmatched (a play must
+    not be credited to the wrong copy) unless any_copy: "do I have this song" is answered by any of them."""
     by_yt, by_mbid, by_name = lib
     if ytid and ytid in by_yt:
         return by_yt[ytid], "ytid"
@@ -299,8 +301,8 @@ def match(lib, ytid=None, mbid=None, artist=None, title=None):
         return by_mbid[mbid], "mbid"
     if artist and title:
         hits = by_name.get(name_key(artist, title), set())
-        if len(hits) == 1:  # ambiguous name matches stay unmatched
-            return next(iter(hits)), "name"
+        if len(hits) == 1 or (hits and any_copy):
+            return sorted(hits)[0], "name"
     return None, None
 
 

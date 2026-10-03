@@ -239,7 +239,7 @@ def ranked(years, a, lib):
         s.update(mb_song(s["title"], s["artist"], s["year"]))
         if a.genre and not ok(genres(s)):
             continue
-        s["file"], _ = musicdb.match(lib, None, s.get("mbid"), s["artist"], s["title"])
+        s["file"], _ = musicdb.match(lib, None, s.get("mbid"), s["artist"], s["title"], any_copy=True)
         rows.append(s)
     pop = lb_popularity([s.get("mbid") for s in rows])
     for s in rows:

@@ -153,14 +153,18 @@ def genres(song):
 
 
 def lb_popularity(mbids):
+    """ListenBrainz listen counts, only a tie-breaker: when LB is slow or down, warn and rank without it."""
     out = {}
     mbids = [m for m in mbids if m]
     for i in range(0, len(mbids), 100):
-        req = urllib.request.Request("https://api.listenbrainz.org/1/popularity/recording", method="POST",
-                                     data=json.dumps({"recording_mbids": mbids[i:i + 100]}).encode(),
-                                     headers={"Content-Type": "application/json", "User-Agent": mbtag.UA})
-        for r in json.load(urllib.request.urlopen(req, timeout=60)):
-            out[r["recording_mbid"]] = r.get("total_listen_count") or 0
+        r = mbtag.http("https://api.listenbrainz.org/1/popularity/recording", host_interval=0.5,
+                       data=json.dumps({"recording_mbids": mbids[i:i + 100]}).encode(),
+                       headers={"Content-Type": "application/json"})
+        if r is None:
+            print("warning: ListenBrainz popularity unavailable, ties broken by chart data only", file=sys.stderr)
+            return {}
+        for x in r:
+            out[x["recording_mbid"]] = x.get("total_listen_count") or 0
     return out
 
 
@@ -245,7 +249,8 @@ def ranked(years, a, lib):
     for s in rows:
         s["listens"] = pop.get(s.get("mbid"), 0)
     # every year's #1 gets 100 points, so ties are common: break them by ListenBrainz listens
-    key = (lambda s: -s["listens"]) if a.rank == "listens" else (lambda s: (-s["points"], -s["listens"]))
+    key = ((lambda s: (-s["listens"], s["best"], s["title"])) if a.rank == "listens"
+           else (lambda s: (-s["points"], -s["listens"], s["best"], s["title"])))
     rows = sorted(rows, key=key)
     for i, s in enumerate(rows, 1):
         s["rank"], s["pct"], s["cohort"] = i, round(100 * i / len(rows), 1), len(rows)

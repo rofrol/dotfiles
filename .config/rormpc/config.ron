@@ -40,6 +40,7 @@
             "oo":         ShowOutputs,
             "op":         ShowDecoders,
             "od":         ShowDownloads,
+            "ox":         ShowDeletions, // rormpc: deletion queue (finish Ctrl-x deletions)
             "oP":         Partition(),
             "z":          ToggleRepeat,
             "x":          ToggleRandom,

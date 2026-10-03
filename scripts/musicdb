@@ -16,7 +16,9 @@
   musicdb lb-playlists [--download]     # ListenBrainz recommendation playlists -> MPD playlists "LB <kind>"
   musicdb delete [FILE...]              # rmpc key: move songs to the Trash, queue their ListenBrainz listens
   musicdb undo                          # rmpc key: restore the most recently trashed song (repeatable)
-  musicdb deletions [--confirm|--cancel ID]  # review the queue; --confirm deletes the LB listens (irreversible)
+  musicdb deletions [--json]            # the deletion queue (rormpc: ox)
+  musicdb deletions --confirm [ID...] --[no-]youtube --[no-]listenbrainz  # finish; LB deletion is irreversible
+  musicdb deletions --cancel ID         # put a queued song back
   musicdb top [-n 30]                   # most played library songs
   musicdb missing [-n 50]               # played / liked songs that are not in the library (yt-mp3-mb candidates)
 
@@ -551,10 +553,22 @@ def youtube_remove(ytid):
     return json.loads(p.stdout.strip().splitlines()[-1])["removed"]
 
 
+def song_name(r):
+    """(artist, title) of a queued deletion: from its plays, else from the NNN--Artist--Title--ytid--date name."""
+    for e in r["events"]:
+        if e.get("artist") and e.get("title"):
+            return e["artist"], e["title"]
+    parts = pathlib.Path(r["file"]).stem.split("--")
+    parts = parts[1:] if parts and parts[0].isdigit() else parts
+    return (parts[0].replace("_", " "), parts[1].replace("_", " ")) if len(parts) > 1 else ("", parts[0] if parts else r["file"])
+
+
 def deletions(a):
-    """Phase 2: list queued deletions; --confirm deletes their ListenBrainz listens (irreversible, LB applies it
-    within about an hour), removes the video from my chosen YouTube playlists and turns their events into
-    tombstones; --cancel ID puts the file back."""
+    """Phase 2 of a deletion. Without options: list the queue (--json for rormpc). --confirm [ID...] finishes the
+    given (or all) queued songs and needs explicit choices for both remote steps: --youtube/--no-youtube (remove
+    the video from my YouTube playlists) and --listenbrainz/--no-listenbrainz (delete its listens: irreversible,
+    LB applies it within about an hour). Each step's outcome is recorded; a song with a failed step stays queued
+    and a retry skips the steps already done. --cancel ID puts the file back."""
     pending, done = jsonl(PENDING), jsonl(DATA / "deletions" / "done.jsonl")
     if a.cancel:
         keep = []
@@ -564,40 +578,81 @@ def deletions(a):
             else:
                 keep.append(r)
         write_jsonl(PENDING, keep); subprocess.run(["mpc", "-q", "update"]); return
-    for r in pending:
-        lb = [e for e in r["events"] if e["source"] == "lb"]
-        shared = other_copies(r["mbid"], r["file"])
-        print(f"{r['id']}: {r['file']}\n   {len(r['events'])} plays to drop, {len(lb)} ListenBrainz listens to delete"
-              + ("  (kept: another file has the same recording)" if shared else ""))
-    if not a.confirm or not pending:
-        if pending and not a.confirm:
-            print("\nre-run with --confirm to delete the ListenBrainz listens (irreversible), --cancel ID to restore")
+    if a.confirm is None:
+        rows = []
+        for r in pending:
+            artist, title = song_name(r)
+            rows.append({"id": r["id"], "file": r["file"], "artist": artist, "title": title, "queued_at": r["queued_at"],
+                         "ytid": r.get("ytid"), "plays": len(r["events"]),
+                         "lb_listens": sum(1 for e in r["events"] if e["source"] == "lb"),
+                         "shared": bool(other_copies(r.get("mbid"), r["file"])), "ops": r.get("ops", {}), "error": r.get("error")})
+        if a.json:
+            print(json.dumps(rows, ensure_ascii=False)); return
+        for x in rows:
+            print(f"{x['id']}: {x['artist']} - {x['title']}\n   {x['plays']} plays, {x['lb_listens']} ListenBrainz listens"
+                  + ("  (another file has the same recording: its listens stay)" if x["shared"] else "")
+                  + (f"  last error: {x['error']}" if x["error"] else ""))
+        if rows:
+            print("\nfinish with: musicdb deletions --confirm [ID...] --youtube|--no-youtube --listenbrainz|--no-listenbrainz")
         return
-    c, token = db(), mbtag.lb_token()
-    for r in pending:
-        shared = other_copies(r["mbid"], r["file"])
-        deleted = 0
-        for e in r["events"]:
-            msid = json.loads(e["extra"] or "{}").get("msid") if e["source"] == "lb" else None
-            if msid and not shared:
-                req = urllib.request.Request("https://api.listenbrainz.org/1/delete-listen", method="POST",
-                                             data=json.dumps({"listened_at": int(dt.datetime.fromisoformat(e["ts"]).timestamp()),
-                                                              "recording_msid": msid}).encode(),
-                                             headers={"Authorization": "Token " + token, "Content-Type": "application/json",
-                                                      "User-Agent": mbtag.UA})
-                urllib.request.urlopen(req, timeout=30).read()
-                deleted += 1
+    if a.youtube is None or a.listenbrainz is None:
+        sys.exit("say what to do remotely: --youtube or --no-youtube, and --listenbrainz or --no-listenbrainz")
+    targets = [r for r in pending if not a.confirm or r["id"] in a.confirm]
+    c, token, results = db(), mbtag.lb_token(), []
+    for r in targets:
+        ops = r.setdefault("ops", {})
+        errors = []
+        if a.listenbrainz and ops.get("listenbrainz") != "done":
+            if other_copies(r.get("mbid"), r["file"]):
+                ops["listenbrainz"] = "kept: another file has the same recording"
+            else:
+                gone = set(r.setdefault("lb_deleted", []))
+                try:
+                    for e in r["events"]:
+                        msid = json.loads(e["extra"] or "{}").get("msid") if e["source"] == "lb" else None
+                        if not msid or f"{e['ts']} {msid}" in gone:
+                            continue
+                        req = urllib.request.Request("https://api.listenbrainz.org/1/delete-listen", method="POST",
+                                                     data=json.dumps({"listened_at": int(dt.datetime.fromisoformat(e["ts"]).timestamp()),
+                                                                      "recording_msid": msid}).encode(),
+                                                     headers={"Authorization": "Token " + token, "Content-Type": "application/json",
+                                                              "User-Agent": mbtag.UA})
+                        urllib.request.urlopen(req, timeout=30).read()
+                        r["lb_deleted"].append(f"{e['ts']} {msid}")
+                    ops["listenbrainz"] = "done"
+                except Exception as err:  # keep what was deleted; a retry continues from there
+                    ops["listenbrainz"] = f"failed: {err}"
+                    errors.append(f"ListenBrainz: {err}")
+        elif not a.listenbrainz:
+            ops.setdefault("listenbrainz", "skipped")
+        if a.youtube and ops.get("youtube") != "done":
+            yt = youtube_remove(r.get("ytid"))
+            if isinstance(yt, str) and yt.startswith("failed"):
+                ops["youtube"] = yt
+                errors.append(f"YouTube: {yt}")
+            else:
+                ops["youtube"] = "done"
+                r["youtube_removed"] = yt
+        elif not a.youtube:
+            ops.setdefault("youtube", "skipped")
+        for e in r["events"]:  # local history: keep as tombstones, re-imports skip them
             vals = [e[k] for k in EVENT_COLS]
             c.execute(f"INSERT OR IGNORE INTO tombstones VALUES ({','.join('?' * len(TOMB_COLS))})",
                       vals + [dt.datetime.now().isoformat(timespec="seconds")])
             c.execute(f"DELETE FROM events WHERE ({KEY}) = ({','.join('?' * 7)})", vals[:7])
         c.commit()
-        yt = youtube_remove(r["ytid"])
-        done.append(r | {"confirmed_at": dt.datetime.now().isoformat(timespec="seconds"), "lb_deleted": deleted, "youtube": yt})
-        print(f"{r['file']}: {deleted} ListenBrainz listens deleted, {len(r['events'])} plays tombstoned, YouTube: {yt}")
+        r["error"] = "; ".join(errors) or None
+        if not errors:
+            done.append(r | {"confirmed_at": dt.datetime.now().isoformat(timespec="seconds")})
+        results.append({"id": r["id"], "file": r["file"], "ops": ops, "error": r["error"], "finished": not errors})
+        if not a.json:
+            print(f"{r['file']}: " + ", ".join(f"{k} {v}" for k, v in ops.items()) + (f"  ERROR {r['error']}" if errors else ""))
+    finished = {x["id"] for x in results if x["finished"]}
     write_jsonl(DATA / "deletions" / "done.jsonl", done)
-    write_jsonl(PENDING, [])
-    export(a)
+    write_jsonl(PENDING, [r for r in pending if r["id"] not in finished])
+    if a.json:
+        print(json.dumps(results, ensure_ascii=False))
+    export(argparse.Namespace())
 
 
 def top(a):
@@ -633,8 +688,10 @@ def main():
     p.add_argument("--all", action="store_true", help="also the yearly recap playlists"); p.set_defaults(fn=lb_playlists)
     p = sp.add_parser("delete"); p.add_argument("files", nargs="*", help="paths relative to the music dir"); p.set_defaults(fn=delete)
     sp.add_parser("undo").set_defaults(fn=undo)
-    p = sp.add_parser("deletions"); p.add_argument("--confirm", action="store_true"); p.add_argument("--cancel", metavar="ID")
-    p.set_defaults(fn=deletions)
+    p = sp.add_parser("deletions"); p.add_argument("--confirm", nargs="*", metavar="ID"); p.add_argument("--cancel", metavar="ID")
+    p.add_argument("--youtube", action=argparse.BooleanOptionalAction)
+    p.add_argument("--listenbrainz", action=argparse.BooleanOptionalAction)
+    p.add_argument("--json", action="store_true"); p.set_defaults(fn=deletions)
     p = sp.add_parser("top"); p.add_argument("-n", type=int, default=30); p.set_defaults(fn=top)
     p = sp.add_parser("missing"); p.add_argument("-n", type=int, default=50); p.set_defaults(fn=missing)
     a = ap.parse_args()

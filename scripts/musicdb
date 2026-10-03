@@ -167,7 +167,8 @@ def import_lb(_a):
     cutoff = dt.datetime.fromisoformat(LB_CUTOFF).timestamp()
     rows, max_ts = [], None
     while True:
-        u = f"https://api.listenbrainz.org/1/user/{LB_USER}/listens?count=1000" + (f"&max_ts={max_ts}" if max_ts else "")
+        # small pages: with years of imported history LB times out on count=1000
+        u = f"https://api.listenbrainz.org/1/user/{LB_USER}/listens?count=100" + (f"&max_ts={max_ts}" if max_ts else "")
         page = mbtag.http(u, host_interval=0.5, strict=True)
         ls = (page or {}).get("payload", {}).get("listens")
         if not isinstance(ls, list):

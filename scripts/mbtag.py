@@ -30,7 +30,7 @@ def lb_token():
     return None
 
 
-def http(url, data=None, host_interval=1.1, headers=None, strict=False):
+def http(url, data=None, host_interval=1.1, headers=None, strict=False, attempts=5, timeout=30):
     """GET/POST JSON (read-only lookups) with a per-host rate limit and retries on transient errors.
     Returns None on 404; when retries run out it returns None too, or raises with strict=True
     (callers that must not mistake a failure for "no data", e.g. paginated imports)."""
@@ -41,11 +41,11 @@ def http(url, data=None, host_interval=1.1, headers=None, strict=False):
     h = {"User-Agent": UA, "Accept": "application/json"}
     h.update(headers or {})
     err = None
-    for attempt in range(5):
+    for attempt in range(attempts):
         if attempt:
             time.sleep(3 * attempt)  # designed backoff: external APIs (MB/LB/AcoustID) with rate limits and transient 5xx
         try:
-            with urllib.request.urlopen(urllib.request.Request(url, data=data, headers=h), timeout=30) as r:
+            with urllib.request.urlopen(urllib.request.Request(url, data=data, headers=h), timeout=timeout) as r:
                 _last[host] = time.time()
                 return json.load(r)
         except urllib.error.HTTPError as e:
@@ -59,7 +59,7 @@ def http(url, data=None, host_interval=1.1, headers=None, strict=False):
         except (urllib.error.URLError, TimeoutError, ConnectionResetError, IncompleteRead, ValueError) as e:
             err = e
     if strict:
-        raise RuntimeError(f"{url}: giving up after 5 attempts: {err}")
+        raise RuntimeError(f"{url}: giving up after {attempts} attempts: {err}")
     return None
 
 

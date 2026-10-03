@@ -159,9 +159,10 @@ def lb_popularity(mbids):
     out = {}
     mbids = [m for m in mbids if m]
     for i in range(0, len(mbids), 100):
+        # optional tie-breaker: fail fast (2 tries x 8 s) instead of holding up the whole ranking
         r = mbtag.http("https://api.listenbrainz.org/1/popularity/recording", host_interval=0.5,
                        data=json.dumps({"recording_mbids": mbids[i:i + 100]}).encode(),
-                       headers={"Content-Type": "application/json"})
+                       headers={"Content-Type": "application/json"}, attempts=2, timeout=8)
         if r is None:
             print("warning: ListenBrainz popularity unavailable, ties broken by chart data only", file=sys.stderr)
             return {}

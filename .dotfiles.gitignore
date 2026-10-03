@@ -200,12 +200,12 @@ __pycache__/
 
 !/.mpdconf
 
-!/.config/rmpc/
-/.config/rmpc/*
-!/.config/rmpc/config.ron
-!/.config/rmpc/themes/
-/.config/rmpc/themes/*
-!/.config/rmpc/themes/roman.ron
+!/.config/rormpc/
+/.config/rormpc/*
+!/.config/rormpc/config.ron
+!/.config/rormpc/themes/
+/.config/rormpc/themes/*
+!/.config/rormpc/themes/roman.ron
 
 !/.omp/
 /.omp/*

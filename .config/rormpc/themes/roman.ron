@@ -170,8 +170,9 @@
                             size: "100%",
                             borders: "TOP | BOTTOM | RIGHT",
                             border_symbols: Rounded,
+                            // rormpc build (sha, + if dirty, commit subject) on the left, like roherdr's footer
                             border_title: [(kind: Text(" ")), (kind: Property(Status(BuildRevision)), style: (fg: "#7aa0cd")), (kind: Text(" · ")), (kind: Property(Status(QueueLength()))), (kind: Text(" songs / ")), (kind: Property(Status(QueueTimeTotal()))), (kind: Text(" total time "))],
-                            border_title_alignment: Right,
+                            border_title_alignment: Left,
                             pane: Component("progress_bar"),
                         ),
                     ]

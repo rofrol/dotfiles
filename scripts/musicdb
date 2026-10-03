@@ -9,8 +9,9 @@
   musicdb import-takeout PATH           # Google Takeout zip/dir/watch-history.json (YouTube + YouTube Music)
   musicdb import-spotify PATH           # Spotify export zip/dir (Streaming_History_Audio_*.json, YourLibrary.json)
   musicdb import-favorites FILE         # text file, one "Artist - Title" per line (e.g. music.txt)
-  musicdb sync                          # match events to library files and write stickers
-  musicdb update                        # deletion retries + import-lb + sync + export (run hourly by the com.rofrol.musicdb LaunchAgent)
+  musicdb import-skips                  # songs ro-listenbrainz-mpd saw left for another song before their end
+  musicdb sync                          # match events to library files and write stickers and the "Skipped" playlist
+  musicdb update                        # deletion retries + import-lb + import-skips + sync + export (hourly, com.rofrol.musicdb)
   musicdb export                        # dump events/favorites as JSONL into the data repo and commit
   musicdb lb-import-spotify [--dry-run]  # send the imported Spotify plays to ListenBrainz (once)
   musicdb lb-playlists [--download]     # ListenBrainz recommendation playlists -> MPD playlists "LB <kind>"
@@ -20,11 +21,13 @@
   musicdb undo                          # rmpc key: restore the most recently trashed song (repeatable)
   musicdb deletions [--json] [--retry]  # the deletion journal; --retry runs failed remote steps (update does it)
   musicdb top [-n 30]                   # most played library songs
+  musicdb skips [-n 30]                 # songs skipped most since their last play
   musicdb missing [-n 50]               # played / liked songs that are not in the library (yt-mp3-mb candidates)
 
 Stickers: playCount (plain integer), plays (space-padded to 5 chars, because rmpc sorts sticker text
 lexicographically), lastPlayed (YYYY-MM-DD). Likes use rmpc's own "like" sticker (key r in rmpc: 2 like,
-1 neutral, 0 dislike); sync sends changes to ListenBrainz as love / clear / hate, and liked songs from
+1 neutral, 0 dislike); skips (space-padded like plays) counts skips since the song's last play, and songs
+with SKIPPED_MIN or more are listed in the MPD playlist "Skipped" to review (Ctrl-x deletes); sync sends changes to ListenBrainz as love / clear / hate, and liked songs from
 favorites (Spotify library, music.txt) become like=2 when the song has no like yet.
 MPD plays come from the MPD log before LB_CUTOFF and from ListenBrainz after it, so nothing is counted twice.
 Source of truth: JSONL in the private data repo $MUSICDB_DATA (default ~/personal_projects/music-data);
@@ -43,6 +46,9 @@ PLAYLISTS = pathlib.Path(os.environ.get("MPD_PLAYLISTS", pathlib.Path.home() / "
 MPD_LOG = pathlib.Path(os.environ.get("MPD_LOG", pathlib.Path.home() / ".config/mpd/log"))
 LB_USER = os.environ.get("LB_USER", "rofrol")
 LB_CUTOFF = os.environ.get("LB_CUTOFF", "2026-09-26T02:10:00")  # listenbrainz-mpd runs as a LaunchAgent since then
+SKIPS_LOG = pathlib.Path(os.environ.get("MUSICDB_SKIPS", pathlib.Path.home() / (
+    "Library/Application Support" if sys.platform == "darwin" else ".local/share") / "listenbrainz-mpd/skips.jsonl"))
+SKIPPED_MIN = 2  # skips since the last play that put a song into the "Skipped" playlist
 YT_DEDUP_S = 300  # repeated Takeout entries of the same video within 5 min = one play
 YTID_IN_NAME = re.compile(r"--([\w-]{11})--\d{8}\.mp3$")
 
@@ -56,6 +62,8 @@ CREATE TABLE IF NOT EXISTS favorites (
 CREATE TABLE IF NOT EXISTS tombstones (
   source TEXT, ts TEXT, ytid TEXT, mbid TEXT, spotify_uri TEXT, artist TEXT, title TEXT, ms_played INTEGER, extra TEXT,
   deleted_at TEXT, UNIQUE(source, ts, ytid, mbid, spotify_uri, artist, title));
+-- songs left for another song before their end (ro-listenbrainz-mpd skips.jsonl); never sent anywhere
+CREATE TABLE IF NOT EXISTS skips (ts TEXT, file TEXT, mbid TEXT, position_s REAL, duration_s REAL, run_s REAL, UNIQUE(ts, file));
 -- what ListenBrainz was last told per recording, so likes are sent only when they change
 CREATE TABLE IF NOT EXISTS lb_feedback (mbid TEXT PRIMARY KEY, score INTEGER, ts TEXT);
 """
@@ -64,7 +72,8 @@ CREATE TABLE IF NOT EXISTS lb_feedback (mbid TEXT PRIMARY KEY, score INTEGER, ts
 EVENT_COLS = ["source", "ts", "ytid", "mbid", "spotify_uri", "artist", "title", "ms_played", "extra"]
 FAV_COLS = ["source", "artist", "title", "spotify_uri", "ytid"]
 TOMB_COLS = EVENT_COLS + ["deleted_at"]
-TABLES = (("events", EVENT_COLS), ("favorites", FAV_COLS), ("tombstones", TOMB_COLS))
+SKIP_COLS = ["ts", "file", "mbid", "position_s", "duration_s", "run_s"]
+TABLES = (("events", EVENT_COLS), ("favorites", FAV_COLS), ("tombstones", TOMB_COLS), ("skips", SKIP_COLS))
 KEY = "source, ts, ytid, mbid, spotify_uri, artist, title"
 
 
@@ -93,7 +102,7 @@ def export(_a):
         (DATA / f"{table}.jsonl").write_text("".join(
             json.dumps({k: v for k, v in zip(cols, r) if v not in ("", None)}, ensure_ascii=False) + "\n" for r in rows))
     git = lambda *a: subprocess.run(["git", "-C", str(DATA), *a], capture_output=True, text=True)
-    git("add", "events.jsonl", "favorites.jsonl", "tombstones.jsonl", "deletions")
+    git("add", "events.jsonl", "favorites.jsonl", "tombstones.jsonl", "skips.jsonl", "deletions")
     if git("diff", "--cached", "--quiet").returncode:
         n = git("diff", "--cached", "--numstat").stdout.split()[:1]
         git("commit", "-q", "-m", f"musicdb: +{n[0] if n else '?'} lines")
@@ -192,6 +201,34 @@ def import_lb(_a):
             break  # end of history, reached the cutoff, or no progress (max_ts is exclusive)
         max_ts = oldest
     add_events(rows)
+
+
+def import_skips(_a):
+    rows = [(dt.datetime.fromtimestamp(r["ts"]).isoformat(), r["file"], r.get("mbid") or "", r.get("position_s"),
+             r.get("duration_s"), r.get("run_s")) for r in jsonl(SKIPS_LOG)]
+    c = db()
+    before = c.total_changes
+    c.executemany("INSERT OR IGNORE INTO skips VALUES (?,?,?,?,?,?)", rows)
+    c.commit()
+    print(f"{c.total_changes - before} new skips ({len(rows)} read)")
+
+
+def skipped(c, last):
+    """{file: skips since the file's last play}, only songs skipped at least once since then."""
+    n = collections.Counter()
+    for ts, f in c.execute("SELECT ts, file FROM skips"):
+        if ts > last.get(f, ""):
+            n[f] += 1
+    return n
+
+
+def write_skipped_playlist(skips):
+    files = [f for f, k in skips.most_common() if k >= SKIPPED_MIN]
+    PLAYLISTS.mkdir(parents=True, exist_ok=True)
+    tmp = PLAYLISTS / ".Skipped.m3u.tmp"
+    tmp.write_text("".join(f + "\n" for f in files))
+    tmp.replace(PLAYLISTS / "Skipped.m3u")  # atomic: MPD never reads a half-written playlist
+    return len(files)
 
 
 def open_export(path, pattern):
@@ -341,11 +378,13 @@ def sync(_a):
     c, lib, m = db(), library(), mpd()
     plays, last, favs, _, _ = counted(c, lib)
     files = set(lib[0].values()) | set(lib[1].values()) | {f for fs in lib[2].values() for f in fs}
+    skips = skipped(c, last)
     mbid_of = {f: mbid for mbid, f in lib[1].items()}
     n, likes = 0, collections.defaultdict(list)
     for f in files:
         k = plays.get(f, 0)
-        want = {"playCount": str(k), "plays": f"{k:5d}" if k else "", "lastPlayed": last.get(f, "")[:10]}
+        want = {"playCount": str(k), "plays": f"{k:5d}" if k else "", "lastPlayed": last.get(f, "")[:10],
+                "skips": f"{skips[f]:5d}" if skips[f] else ""}
         try:
             have = m.sticker_list("song", f)
         except Exception:  # MPD errors when a song has no stickers yet
@@ -369,7 +408,8 @@ def sync(_a):
             n += 1
     sent = push_feedback(c, {mbid: max(scores) for mbid, scores in likes.items()})  # duplicates: a like wins
     print(f"{len(files)} songs, {sum(1 for f in files if plays.get(f))} with plays, "
-          f"{sum(1 for v in likes.values() if max(v) == 1)} liked, {n} sticker updates, {sent} LB feedback sent")
+          f"{sum(1 for v in likes.values() if max(v) == 1)} liked, {n} sticker updates, {sent} LB feedback sent, "
+          f"{write_skipped_playlist(collections.Counter({f: k for f, k in skips.items() if f in files}))} in playlist Skipped")
 
 
 def push_feedback(c, scores):
@@ -391,6 +431,7 @@ def push_feedback(c, scores):
 def update(a):
     deletions(argparse.Namespace(retry=True, json=False))
     import_lb(a)
+    import_skips(a)
     sync(a)
     lb_playlists(argparse.Namespace(user=None, n=0, download=False, all=False))
     export(a)
@@ -733,6 +774,13 @@ def top(a):
         print(f"{k:5d}  {last[f][:10]}  {'♥' if f in favs else ' '}  {f}")
 
 
+def skips_cmd(a):
+    c, lib = db(), library()
+    plays, last, _, _, _ = counted(c, lib)
+    for f, k in skipped(c, last).most_common(a.n):
+        print(f"{k:3d} skips  {plays.get(f, 0):4d} plays  {last.get(f, '')[:10] or '-':10}  {f}")
+
+
 def missing(a):
     _, _, _, unmatched, fav_missing = counted(db(), library())
     print("# played, not in library")
@@ -751,6 +799,7 @@ def main():
     p = sp.add_parser("import-takeout"); p.add_argument("path"); p.set_defaults(fn=import_takeout)
     p = sp.add_parser("import-spotify"); p.add_argument("path"); p.set_defaults(fn=import_spotify)
     p = sp.add_parser("import-favorites"); p.add_argument("file"); p.set_defaults(fn=import_favorites)
+    sp.add_parser("import-skips").set_defaults(fn=import_skips)
     sp.add_parser("sync").set_defaults(fn=sync)
     sp.add_parser("update").set_defaults(fn=update)
     sp.add_parser("export").set_defaults(fn=export)
@@ -768,6 +817,7 @@ def main():
     p = sp.add_parser("deletions"); p.add_argument("--retry", action="store_true")
     p.add_argument("--json", action="store_true"); p.set_defaults(fn=deletions)
     p = sp.add_parser("top"); p.add_argument("-n", type=int, default=30); p.set_defaults(fn=top)
+    p = sp.add_parser("skips"); p.add_argument("-n", type=int, default=30); p.set_defaults(fn=skips_cmd)
     p = sp.add_parser("missing"); p.add_argument("-n", type=int, default=50); p.set_defaults(fn=missing)
     a = ap.parse_args()
     a.fn(a)

@@ -5,6 +5,26 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "Cmd+Space sends F18 for the Hammerspoon app launcher, except in Emacs and the Try Roguix VM, which get Cmd+Space themselves. A workaround: macOS keeps Cmd+Space registered even with Spotlight's shortcuts off, so Hammerspoon cannot bind it (hs.hotkey.assignable is false). Remove it once Hammerspoon can bind cmd+space directly (see ~/.hammerspoon/init.lua).",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": ["^org\\.gnu\\.Emacs$"],
+                                        "file_paths": ["/Try Roguix\\.app/Contents/Resources/runtime/bin/Try Roguix$"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": { "mandatory": ["command"] }
+                                },
+                                "to": [{ "key_code": "f18" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "ctrl-1 does not work, so need to map it to ctrl+option+1 https://stackoverflow.com/questions/69582660/how-to-remap-key-combinations-in-karabiner-elements/69597847#69597847",
                         "enabled": false,
                         "manipulators": [

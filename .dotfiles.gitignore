@@ -76,6 +76,11 @@ __pycache__/
 !/README.md
 !/.global_gitignore
 !/.dotfiles.gitignore
+
+# Hammerspoon: only the config, not installed Spoons
+!/.hammerspoon/
+/.hammerspoon/*
+!/.hammerspoon/init.lua
 !/dotfiles.sh
 !/dotfiles.zsh
 !/.zshrc

@@ -64,6 +64,7 @@
             "5":          SwitchToTab("Albums"),
             "6":          SwitchToTab("Playlists"),
             "7":          SwitchToTab("Search"),
+            "8":          SwitchToTab("Hits"),
             "u":      Update,
             "U":      Rescan,
             "R":          AddRandom,
@@ -241,6 +242,19 @@
                 size: "100%",
                 direction: Vertical,
                 panes: [(pane: Pane(Playlists), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        // rormpc Hits pane: ranked chart hits written by `hits ... --json ~/.cache/rormpc/hits/current.json`
+        (
+            name: "Hits",
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Hits(format: [
+                    (kind: Property(Other("hits_rank"))), (kind: Text("  ")),
+                    (kind: Property(Artist)), (kind: Text(" - ")), (kind: Property(Title)),
+                    (kind: Text("  (")), (kind: Property(Other("hits_year"))), (kind: Text(")")),
+                ])), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
         (

@@ -213,6 +213,12 @@ def entries(years):
     return songs
 
 
+def range_years(part):
+    """'1985-1992' or '1987' -> years with a finished year-end chart."""
+    lo, _, hi = part.partition("-")
+    return range(max(int(lo), FIRST_YEAR), min(int(hi or lo), dt.date.today().year - 1) + 1)
+
+
 def coverage(decade):
     ys = decade_years(decade)
     return f"{ys[0]}" if len(ys) == 1 else f"{ys[0]}-{ys[-1]}"
@@ -265,8 +271,9 @@ def show(a):
     lib = musicdb.library()
     plays, *_ = musicdb.counted(musicdb.db(), lib)
     if a.years:
-        lo, _, hi = a.years.partition("-")
-        groups = [(a.years, list(range(max(int(lo), FIRST_YEAR), min(int(hi or lo), dt.date.today().year - 1) + 1)))]
+        years = sorted({y for part in a.years.split(",") if part.strip()
+                        for y in range_years(part.strip())})
+        groups = [(a.years, years)]
     else:
         groups = [(d, decade_years(d)) for d in (DECADES if a.decade == "all" else [a.decade or sys.exit("give a decade or --years")])]
     period = a.years or a.decade
@@ -342,7 +349,7 @@ def main():
         return prefetch(ap.parse_args())
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("decade", nargs="?", help='e.g. 1980s, 80s, 2010s, or "all" for top N of every decade')
-    ap.add_argument("--years", help="a year range instead of a decade, e.g. 1985-1992 (one ranking over all of it)")
+    ap.add_argument("--years", help="year ranges instead of a decade, e.g. 1985-1992 or 1970-1979,1990-1999 (one pooled ranking)")
     ap.add_argument("--top", help='percent ranges of the ranking, e.g. "1-10" or "11-20,21-50" (instead of -n)')
     ap.add_argument("--json", metavar="PATH", help="also write the result as JSON (for rormpc's Hits pane)")
     ap.add_argument("-n", type=int, default=100, help="how many (10/100/1000)")

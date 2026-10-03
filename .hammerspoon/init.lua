@@ -35,7 +35,11 @@ local function addApp(path, out, seen)
   if seen[id] then return end
   seen[id] = true
   local name = path:match("([^/]+)%.app$")
-  out[#out + 1] = { text = name, subText = path, path = path }
+  -- Without an image hs.chooser draws a generic arrow; ~0.2 s for 156 apps.
+  out[#out + 1] = {
+    text = name, subText = path, path = path,
+    image = hs.image.iconForFile(path),
+  }
 end
 
 local function scan(dir, depth, out, seen)

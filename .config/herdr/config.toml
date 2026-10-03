@@ -33,3 +33,4 @@ tabs = true
 [keys]
 close_pane = ["cmd+w", "ctrl+shift+w"]
 new_tab = ["prefix+c", "cmd+t", "ctrl+shift+t"]
+reopen_tab = ["prefix+u", "cmd+shift+t"]

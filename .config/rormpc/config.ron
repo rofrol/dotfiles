@@ -20,6 +20,8 @@
     keep_state_on_song_change: true,
     reflect_changes_to_playlist: false,
     select_current_song_on_change: true,
+    // jump to the playing song when the queue is first shown after start (and when the song changes)
+    center_current_song_on_change: true,
     ignore_leading_the: false,
     browser_song_sort: [Disc, Track, Artist, Title],
     directories_sort: SortFormat(group_by_type: true, reverse: false),

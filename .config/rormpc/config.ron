@@ -67,6 +67,7 @@
             "6":          SwitchToTab("Playlists"),
             "7":          SwitchToTab("Search"),
             "8":          SwitchToTab("Hits"),
+            "9":          SwitchToTab("Deleted"),
             "u":      Update,
             "U":      Rescan,
             "R":          AddRandom,
@@ -254,6 +255,15 @@
                 size: "100%",
                 direction: Vertical,
                 panes: [(pane: Pane(Hits()), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        // rormpc Deleted pane: songs deleted with Ctrl-x (`musicdb deletions --json --all`); Enter restores/retries
+        (
+            name: "Deleted",
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Deleted()), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
         (

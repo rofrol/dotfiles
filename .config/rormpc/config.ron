@@ -14,7 +14,9 @@
     enable_mouse: true,
     scroll_amount: 1,
     enable_config_hot_reload: true,
-    enable_lyrics_hot_reload: false,
+    // lyrics from `musicdb lyrics` (LRCLIB): .lrc synced, .txt plain (rormpc shows those too)
+    lyrics_dir: "~/.local/share/rormpc-tools/lyrics",
+    enable_lyrics_hot_reload: true,
     status_update_interval_ms: 1000,
     rewind_to_start_sec: None,
     keep_state_on_song_change: true,
@@ -68,6 +70,7 @@
             "7":          SwitchToTab("Search"),
             "8":          SwitchToTab("Hits"),
             "9":          SwitchToTab("Deleted"),
+            "0":          SwitchToTab("Lyrics"),
             "u":      Update,
             "U":      Rescan,
             "R":          AddRandom,
@@ -255,6 +258,15 @@
                 size: "100%",
                 direction: Vertical,
                 panes: [(pane: Pane(Hits()), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        // lyrics of the playing song: synced .lrc, plain .txt or a note (Queue menu: Choose lyrics…)
+        (
+            name: "Lyrics",
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Lyrics), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
         // rormpc Deleted pane: songs deleted with Ctrl-x (`musicdb deletions --json --all`); Enter restores/retries

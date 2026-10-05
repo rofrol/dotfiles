@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(herdr agent awaiting-reply)"
+      "Bash(herdr agent awaiting-reply)",
+      "Bash(herdr agent set-task:*)"
     ]
   },
   "hooks": {
@@ -125,6 +126,17 @@
           {
             "type": "command",
             "command": "bash '/Users/romanfrolow/.claude/hooks/uncommitted-notes.sh' snapshot",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/romanfrolow/.claude/hooks/herdr-agent-state.sh' session-end",
             "timeout": 10
           }
         ]

@@ -7,13 +7,20 @@ PATH_FILE="$(mktemp)"
 
 trap 'rm -f "$PATH_FILE"' EXIT
 
+# The user config embeds subtitles; in an .m4a the Metadata postprocessor then
+# fails with "Encoder not found" (yt-dlp#7288), and the transcriber needs only audio.
 yt-dlp \
 	--extract-audio \
+	--no-embed-subs --no-write-subs --no-write-auto-subs \
 	--format bestaudio \
 	--print-to-file after_move:filepath "$PATH_FILE" \
 	"$URL"
 
 AUDIO_FILE="$(tail -n 1 "$PATH_FILE")"
+if [[ ! -f "$AUDIO_FILE" ]]; then
+	echo "yt-wh: yt-dlp did not report a downloaded audio file" >&2
+	exit 1
+fi
 
 echo
 echo "Audio: $AUDIO_FILE"

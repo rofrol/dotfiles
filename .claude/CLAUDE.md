@@ -102,6 +102,12 @@ decision".
   verify it. Ask only real choices, as clickable options when you can.
 - Items you add go to "Proposed" and are not approved until I move them.
 - Only one session works through a repository's TODO at a time.
+- While a session works through the TODO, a new request from me is not
+  done on the spot: add it to `TODO.md` in my words, as approved work at the
+  end of "Next, in order", or right after the item in progress when I say
+  it comes next ("następne", "next"); commit that, confirm in one line, and
+  go on with the current item. Questions about the work are answered, not
+  queued.
 - Each question in "Needs a decision" is one line ending in `?`, then what you
   checked; herdr collects them from there, so keep to that shape.
 - Commit each item before starting the next, so the work can stop or pass to

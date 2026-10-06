@@ -65,14 +65,14 @@
             "gt":         NextTab,
             "<S-Tab>":    PreviousTab,
             "gT":         PreviousTab,
-            "1":          SwitchToTab("Queue"),
-            "2":          SwitchToTab("Directories"),
-            "3":          SwitchToTab("Artists"),
-            "4":          SwitchToTab("Album Artists"),
-            "5":          SwitchToTab("Albums"),
-            "6":          SwitchToTab("Playlists"),
-            "7":          SwitchToTab("Search"),
-            "8":          SwitchToTab("Hits"),
+            "1":          SwitchToTab("Hits"),
+            "2":          SwitchToTab("Queue"),
+            "3":          SwitchToTab("Directories"),
+            "4":          SwitchToTab("Artists"),
+            "5":          SwitchToTab("Album Artists"),
+            "6":          SwitchToTab("Albums"),
+            "7":          SwitchToTab("Playlists"),
+            "8":          SwitchToTab("Search"),
             "9":          SwitchToTab("Deleted"),
             "0":          SwitchToTab("Lyrics"),
             "gv":         SwitchToTab("Versions"),
@@ -164,6 +164,15 @@
         album_date_tags: [Date],
     ),
     tabs: [
+        // rormpc Hits pane: ranked chart hits written by `hits ... --json ~/.cache/rormpc/hits/current.json`
+        (
+            name: "Hits",
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Hits()), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
         (
             name: "Queue",
             pane: Split(
@@ -274,15 +283,6 @@
                 size: "100%",
                 direction: Vertical,
                 panes: [(pane: Pane(Playlists), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        // rormpc Hits pane: ranked chart hits written by `hits ... --json ~/.cache/rormpc/hits/current.json`
-        (
-            name: "Hits",
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(Hits()), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
         // lyrics of the playing song: synced .lrc, plain .txt or a note (Queue menu: Choose lyrics…)

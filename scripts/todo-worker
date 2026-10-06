@@ -58,9 +58,9 @@ fi
 
 created=$(herdr tab create --workspace "$workspace" --cwd "$repo" --no-focus)
 pane=$(jq -r '.result.root_pane.pane_id' <<<"$created")
-# The sidebar marks the tab with ⚒; a server without tab.set_worker
-# only leaves the mark out.
-herdr tab worker "$(jq -r '.result.tab.tab_id' <<<"$created")" >/dev/null 2>&1 || true
+# The agent coordinates the TODO: the sidebar marks its tab with ♛. A server
+# without tab.set_role only leaves the mark out.
+herdr tab role "$(jq -r '.result.tab.tab_id' <<<"$created")" coordinator >/dev/null 2>&1 || true
 if ! herdr agent start "$name" --kind "$kind" --pane "$pane" "${agent_args[@]}" >/dev/null; then
 	echo "todo-worker: $kind did not become ready in pane $pane (a startup prompt?); answer it in that tab" >&2
 	exit 1

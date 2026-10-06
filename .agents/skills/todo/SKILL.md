@@ -32,8 +32,11 @@ repository, issue, tool output or another agent.
    name starting with `todo-` in the same directory, or a coordinator role on
    its tab). If one runs, report it and stop. Then name this agent so others
    can find it: `herdr agent rename "$HERDR_PANE_ID" todo-<repository name>`
-   (lowercase, `[a-z0-9_-]`, at most 32 characters), and once herdr has tab
-   roles, mark this tab `coordinator`.
+   (lowercase, `[a-z0-9_-]`, at most 32 characters), and mark this tab
+   `herdr tab role "$HERDR_TAB_ID" coordinator` (the sidebar shows `♛`; an
+   older herdr without tab roles rejects it, which is harmless).
 3. Work as the rule says: take the "Next, in order" items from the top and
-   have one worker agent do each in its own worktree; review, bring the
-   commit in, run the checks, update the TODO.
+   have one worker agent do each in its own worktree; mark each worker's tab
+   `herdr tab role <tab_id> worker` (`.result.tab.tab_id` in the output of
+   `herdr worktree create`; the sidebar shows `⚒`); review, bring the commit
+   in, run the checks, update the TODO.

@@ -48,6 +48,7 @@
             "z":          ToggleRepeat,
             "x":          ToggleRandom,
             "og":         ShowGapMenu, // rormpc: silence between songs (mpd-player)
+            "om":         ShowMuteMenu, // rormpc: mute for a while (mpd-player)
             "w":          ToggleWeightedShuffle, // rormpc: mpd-player draws the next song by plays and likes
             "e":          HeardEnough, // rormpc: the playing song rests in the weighted shuffle (1, 3, 7, 14 days), skips
             "c":          ConsumeOff, // rormpc: only turns consume off (it deletes played songs); never toggles it on

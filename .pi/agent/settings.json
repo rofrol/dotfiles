@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.99.1",
   "theme": "light",
-  "defaultProvider": "deepseek",
-  "defaultModel": "deepseek-flash",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-6.1-sol",
   "defaultThinkingLevel": "max",
   "showCacheMissNotices": true,
   "packages": [

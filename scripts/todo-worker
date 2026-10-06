@@ -8,7 +8,8 @@
 # SPACE is a herdr space (workspace label). Claude starts with Remote Control
 # (visible in the Claude app); `pi` starts pi with GPT-6.1 Sol instead. An
 # agent already working that repository's TODO is reused, never doubled.
-# Used by the todo-worker skill and herdr's T button, so both behave the same.
+# Used by herdr's T button; in a session, the `todo` skill makes that session
+# the coordinator instead.
 set -euo pipefail
 
 space=${1:?usage: todo-worker SPACE [pi] [--dry-run]}
@@ -55,8 +56,11 @@ if [ -n "$dry" ]; then
 	exit 0
 fi
 
-pane=$(herdr tab create --workspace "$workspace" --cwd "$repo" --no-focus |
-	jq -r '.result.root_pane.pane_id')
+created=$(herdr tab create --workspace "$workspace" --cwd "$repo" --no-focus)
+pane=$(jq -r '.result.root_pane.pane_id' <<<"$created")
+# The sidebar marks the tab with ⚒; a server without tab.set_worker
+# only leaves the mark out.
+herdr tab worker "$(jq -r '.result.tab.tab_id' <<<"$created")" >/dev/null 2>&1 || true
 if ! herdr agent start "$name" --kind "$kind" --pane "$pane" "${agent_args[@]}" >/dev/null; then
 	echo "todo-worker: $kind did not become ready in pane $pane (a startup prompt?); answer it in that tab" >&2
 	exit 1

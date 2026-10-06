@@ -247,5 +247,5 @@ __pycache__/
 !/.claude/skills/
 /.claude/skills/*
 !/.claude/skills/read-link
-!/.claude/skills/todo-worker
+!/.claude/skills/todo
 !/.claude/settings.json

@@ -249,6 +249,11 @@ source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 # Global versions in ~/.config/mise/config.toml; projects pin with mise.toml or .nvmrc.
 eval "$(/opt/homebrew/bin/mise activate zsh)"
 
+# Claude Code's Up arrow recalls only its own session's prompts
+# (~/personal_projects/claude-own-history). The wrapper must come before
+# ~/.local/bin/claude; set after mise activation, which reorders PATH.
+path=($HOME/personal_projects/claude-own-history/bin $path)
+
 alias nodem='node --input-type=module -e'
 
 eval "$(zoxide init zsh --cmd cd)"

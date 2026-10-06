@@ -65,6 +65,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/agent-queue.py stop",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "SubagentStop": [
@@ -128,6 +137,16 @@
           {
             "type": "command",
             "command": "bash '/Users/romanfrolow/.claude/hooks/uncommitted-notes.sh' snapshot",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/agent-queue.py guard",
             "timeout": 10
           }
         ]

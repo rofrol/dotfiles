@@ -243,6 +243,7 @@ __pycache__/
 !/.claude/hooks/
 /.claude/hooks/*
 !/.claude/hooks/uncommitted-notes.sh
+!/.claude/hooks/agent-queue.py
 !/.pi/agent/extensions/uncommitted-notes.ts
 !/.claude/skills/
 /.claude/skills/*

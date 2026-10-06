@@ -72,6 +72,7 @@
             "9":          SwitchToTab("Deleted"),
             "0":          SwitchToTab("Lyrics"),
             "gv":         SwitchToTab("Versions"),
+            "gu":         SwitchToTab("Up next"),
             "u":      Update,
             "U":      Rescan,
             "R":          AddRandom,
@@ -201,6 +202,15 @@
                     ),
                 ],
             ),
+        ),
+        // rormpc Up next pane: the songs asked for with "Play next"; Enter plays now, K/J move, D removes
+        (
+            name: "Up next",
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(UpNext()), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
         ),
         (
             name: "Directories",

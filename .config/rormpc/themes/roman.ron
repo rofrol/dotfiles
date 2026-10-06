@@ -70,6 +70,12 @@
         ),
     ],
     song_table_format: [
+        // rormpc: the song's turn: ↑1 an Up next request, 1..10 the weighted shuffle's plan (MPD plays them in order)
+        (
+            prop: (kind: Property(ShuffleNext()), default: (kind: Text(""))),
+            label_prop: (kind: Text("Next")),
+            width: "4",
+        ),
         (
             prop: (kind: Property(Title),
                 default: (kind: Text("Unknown"))

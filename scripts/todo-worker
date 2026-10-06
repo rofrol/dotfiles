@@ -26,6 +26,13 @@ workspace= repo=
 read -r workspace repo < <(herdr workspace list | jq -r --arg s "$space" \
 	'.result.workspaces[] | select(.label == $s) | [.workspace_id, (.worktree.checkout_path // "")] | @tsv') || true
 [ -n "${workspace:-}" ] || { echo "todo-worker: no space named $space" >&2; exit 1; }
+# herdr records a space's repository only after a worktree was created or
+# opened from it; otherwise take the repository its first pane runs in.
+if [ -z "${repo:-}" ]; then
+	cwd=$(herdr pane list | jq -r --arg w "$workspace" \
+		'[.result.panes[] | select(.workspace_id == $w) | .cwd // empty][0] // ""')
+	[ -n "$cwd" ] && repo=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null) || true
+fi
 [ -n "${repo:-}" ] || { echo "todo-worker: space $space has no repository" >&2; exit 1; }
 
 # Agent names: [a-z][a-z0-9_-]{0,31}.

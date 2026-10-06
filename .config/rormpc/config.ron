@@ -47,6 +47,7 @@
             "oP":         Partition(),
             "z":          ToggleRepeat,
             "x":          ToggleRandom,
+            "og":         ShowGapMenu, // rormpc: silence between songs (mpd-player)
             "c":          ConsumeOff, // rormpc: only turns consume off (it deletes played songs); never toggles it on
             "v":          ToggleSingle,
             "p":          TogglePause,

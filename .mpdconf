@@ -388,6 +388,12 @@ audio_output {
 # This setting is off by default.
 #
 #replaygain			"album"
+# track: rsgain writes track gain only (the folders are not albums); -18 LUFS reference.
+# Files without tags (new downloads before rsgain ran) are mostly loud YouTube rips: -8 dB brings them close.
+replaygain			"track"
+replaygain_preamp		"0"
+replaygain_missing_preamp	"-8"
+replaygain_limit		"yes"
 #
 ###############################################################################
 

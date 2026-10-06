@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Opens a herdr tab in a space and starts an agent there that works through
-# that repository's TODO in order ("Rób TODO po kolei.", defined by the user's
-# global agent rule "Working through TODO.md").
+# Opens a herdr tab in a space and starts a TODO coordinator there: it has
+# worker agents do that repository's TODO items in order ("Rób TODO po
+# kolei.", defined by the user's global agent rule "Working through TODO.md").
 #
 #   todo-worker SPACE [pi] [--dry-run]
 #

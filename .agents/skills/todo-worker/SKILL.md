@@ -10,7 +10,7 @@ The user invoked this skill (`/todo-worker <space> [pi]` in Claude Code,
 `/skill:todo-worker <space> [pi]` in pi), which is the request the global
 rule "Working through TODO.md" requires before one agent starts another. The
 argument names a herdr space (workspace label), e.g. `herdr`; an optional
-`pi` starts pi instead of Claude. Without a space, ask which one; do not
+`pi` starts pi with GPT-6.1 Sol instead of Claude. Without a space, ask which one; do not
 guess. Do the steps below, report the result in a few lines, and stop: this
 session does not work through that TODO itself.
 
@@ -50,7 +50,7 @@ worker.
    ```bash
    herdr agent start "todo-$SPACE" --kind claude --pane "$PANE" -- --remote-control "TODO $SPACE"
    # with the pi argument instead:
-   herdr agent start "todo-$SPACE" --kind pi --pane "$PANE"
+   herdr agent start "todo-$SPACE" --kind pi --pane "$PANE" -- --model openai-codex/gpt-6.1-sol
    ```
 
    If it returns `agent_not_ready` (blocked at startup, e.g. a trust prompt),

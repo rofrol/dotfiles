@@ -7,3 +7,5 @@ secrets_dir = "~/.local/share/musicdb"
 # listenbrainz-mpd runs as a LaunchAgent since then
 lb_since = "2026-09-26T02:10:00"
 contact = "rofrol@gmail.com"
+# naive timestamps in the play history are in this zone (re-imports elsewhere must not double count)
+history_timezone = "Europe/Warsaw"

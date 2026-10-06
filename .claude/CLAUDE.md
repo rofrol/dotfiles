@@ -82,3 +82,23 @@ diff) in the option's `preview`, which is rendered as Markdown.
 A request to ask the models, in any language and without naming them, means:
 consult the default set of other models now, in this turn. Load the `consult` skill; it lists who joins a round
 and how to run, rate and score it.
+
+# Working through TODO.md
+
+When I tell a session to work through a repository's TODO (e.g. "rób TODO",
+"do the TODO"), the items in the "Next, in order" section of its `TODO.md` at
+that moment are approved together with their commits: take them from the top
+and commit each one without asking, also where the repository asks to align
+commit messages first. If the TODO has no such section yet, triage it first:
+items an agent can do alone go to "Next, in order", the rest to "Needs a
+decision".
+
+- Before an item, check it against the current code, the decision records and
+  the other items. One that is already done, outdated or contradictory, or that
+  needs my choice or action (a decision, a login, a permission, a live test
+  with my accounts), moves to "Needs a decision" at the end of `TODO.md` with
+  the question stated, together with the items that depend on it; then go on.
+- Do not ask me what the repository answers, such as whether an item is done:
+  verify it. Ask only real choices, as clickable options when you can.
+- Items you add go to "Proposed" and are not approved until I move them.
+- Only one session works through a repository's TODO at a time.

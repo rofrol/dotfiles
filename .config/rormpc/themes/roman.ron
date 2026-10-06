@@ -137,7 +137,7 @@
                             pane: Component("header_center")
                         ),
                         (
-                            size: "44",
+                            size: "52",
                             borders: "RIGHT | TOP | BOTTOM",
                             border_symbols: Inherited(parent: Rounded, bottom_right: "┤"),
                             pane: Component("header_right")
@@ -243,7 +243,7 @@
                 (
                     // mode badges with their keys; consume is shown, not toggled (c only turns it off), and gets its
                     // own warning style because it deletes played songs (breaks the source and Up next)
-                    size: "38",
+                    size: "46",
                     pane: Pane(Property(content: [
                         (kind: Property(Status(RepeatV2(
                             on_label: "z rep ",
@@ -255,6 +255,14 @@
                             on_label: "x rnd ",
                             off_label: "x rnd ",
                             on_style: (fg: "yellow", modifiers: "Bold"),
+                            off_style: (fg: "#7aa0cd", modifiers: "Dim"),
+                        )))),
+                        // mpd-player's weighted shuffle (w): bold when it picks, plain when on but waiting (random off)
+                        (kind: Property(Status(WeightedShuffle(
+                            on_label: "w shuf ",
+                            off_label: "w shuf ",
+                            on_style: (fg: "yellow", modifiers: "Bold"),
+                            waiting_style: (fg: "#7aa0cd"),
                             off_style: (fg: "#7aa0cd", modifiers: "Dim"),
                         )))),
                         (kind: Property(Status(SingleV2(

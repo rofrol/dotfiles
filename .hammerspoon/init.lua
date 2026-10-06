@@ -135,3 +135,69 @@ hs.hotkey.bind({}, "f18", function()
     showRanked("")
   end
 end)
+
+-- Keyboard media keys always control MPD, even when Chrome (or another app) is
+-- macOS's Now Playing app: Chrome takes Now Playing whenever a tab plays media,
+-- and then mpd-now-playable no longer gets the keys. Play/Next/Previous are
+-- consumed here and sent to MPD with mpc; with Shift held they pass through to
+-- whichever app macOS routes them to (that may still be MPD via
+-- mpd-now-playable). Volume, mute and fast-forward/rewind are left alone.
+-- AirPods/Bluetooth buttons do not arrive as these events; they still go to
+-- the Now Playing app. The menu bar "♪" item turns the override off and on and
+-- restarts the event tap (Accessibility permission is required).
+mediaKeys = { enabled = true, latched = {}, tasks = {} }
+local M = mediaKeys
+local mpc = "/opt/homebrew/bin/mpc"
+local mpcCommand = { PLAY = "toggle", NEXT = "next", PREVIOUS = "prev" }
+
+-- What one systemDefined event does: "mpc <cmd>", "consume" or "pass".
+-- The decision is taken on key-down and kept until key-up, so releasing Shift
+-- mid-press never splits one press between MPD and another app.
+function M.route(key, down, shift, isRepeat)
+  local cmd = mpcCommand[key]
+  if not cmd then return "pass" end
+  if down and not isRepeat then
+    M.latched[key] = M.enabled and not shift
+    return M.latched[key] and ("mpc " .. cmd) or "pass"
+  end
+  local mine = M.latched[key]
+  if not down then M.latched[key] = nil end
+  return mine and "consume" or "pass"
+end
+
+local function runMpc(cmd)
+  local task
+  task = hs.task.new(mpc, function(code, _, err)
+    M.tasks[task] = nil
+    if code ~= 0 then
+      print("mediaKeys: mpc " .. cmd .. " failed (" .. code .. "): " .. (err or ""))
+      hs.alert.show("MPD: mpc " .. cmd .. " failed")
+    end
+  end, { "--host=localhost", "--port=6600", cmd })
+  M.tasks[task] = true
+  task:start()
+end
+
+M.tap = hs.eventtap.new({ hs.eventtap.event.types.systemDefined }, function(ev)
+  local k = ev:systemKey()
+  if not k.key then return false end
+  local action = M.route(k.key, k.down, ev:getFlags().shift, k["repeat"])
+  if action:sub(1, 4) == "mpc " then runMpc(action:sub(5)) end
+  return action ~= "pass"
+end)
+
+M.menu = hs.menubar.new()
+local function showState()
+  local on = M.enabled and M.tap:isEnabled()
+  M.menu:setTitle(on and "♪" or "♪̸")
+  M.menu:setTooltip(on and "Media keys → MPD (click: off; Shift+key passes through)"
+    or "Media keys → Now Playing app (click: on)")
+end
+M.menu:setClickCallback(function()
+  M.enabled = not M.enabled
+  M.tap:stop()
+  if M.enabled then M.tap:start() end
+  showState()
+end)
+M.tap:start()
+showState()

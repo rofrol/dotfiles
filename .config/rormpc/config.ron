@@ -47,7 +47,7 @@
             "oP":         Partition(),
             "z":          ToggleRepeat,
             "x":          ToggleRandom,
-            "c":          ToggleConsume,
+            "c":          ConsumeOff, // rormpc: only turns consume off (it deletes played songs); never toggles it on
             "v":          ToggleSingle,
             "p":          TogglePause,
             "s":          Stop,

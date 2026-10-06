@@ -137,7 +137,7 @@
                             pane: Component("header_center")
                         ),
                         (
-                            size: "35",
+                            size: "44",
                             borders: "RIGHT | TOP | BOTTOM",
                             border_symbols: Inherited(parent: Rounded, bottom_right: "┤"),
                             pane: Component("header_right")
@@ -203,18 +203,23 @@
                 (size: "2", pane: Pane(Property(content: [(kind: Text("%"), style: (fg: "#7aa0cd"))]))),
             ]
         ),
+        // elapsed / total moved next to the progress bar (one now-playing bar); the header keeps the bitrate
         "elapsed_and_bitrate": Pane(Property(
             content: [
-                (kind: Property(Status(Elapsed))), 
-                (kind: Text(" / ")), 
-                (kind: Property(Status(Duration))), 
                 (kind: Group([
-                    (kind: Text(" (")), 
-                    (kind: Property(Status(Bitrate))), 
-                    (kind: Text(" kbps)")),
+                    (kind: Property(Status(Bitrate))),
+                    (kind: Text(" kbps")),
                 ])),
             ],
             align: Left,
+        )),
+        "elapsed_total": Pane(Property(
+            content: [
+                (kind: Property(Status(Elapsed))),
+                (kind: Text(" / ")),
+                (kind: Property(Status(Duration)), default: (kind: Text("--:--"))),
+            ],
+            align: Right,
         )),
         "artist_and_album": Pane(Property(
             content: [
@@ -236,38 +241,38 @@
                     pane: Pane(Property(content: [(kind: Property(Status(InputBuffer())), style: (fg: "#7aa0cd"), align: Left)]))
                 ),
                 (
-                    size: "6",
+                    // mode badges with their keys; consume is shown, not toggled (c only turns it off), and gets its
+                    // own warning style because it deletes played songs (breaks the source and Up next)
+                    size: "38",
                     pane: Pane(Property(content: [
-                        (kind: Text("["), style: (fg: "#7aa0cd", modifiers: "Bold")),
                         (kind: Property(Status(RepeatV2(
-                            on_label: "z",
-                            off_label: "z",
+                            on_label: "z rep ",
+                            off_label: "z rep ",
                             on_style: (fg: "yellow", modifiers: "Bold"),
                             off_style: (fg: "#7aa0cd", modifiers: "Dim"),
                         )))),
                         (kind: Property(Status(RandomV2(
-                            on_label: "x",
-                            off_label: "x",
+                            on_label: "x rnd ",
+                            off_label: "x rnd ",
                             on_style: (fg: "yellow", modifiers: "Bold"),
                             off_style: (fg: "#7aa0cd", modifiers: "Dim"),
-                        )))),
-                        (kind: Property(Status(ConsumeV2(
-                            on_label: "c",
-                            off_label: "c",
-                            oneshot_label: "c",
-                            on_style: (fg: "yellow", modifiers: "Bold"),
-                            off_style: (fg: "#7aa0cd", modifiers: "Dim"),
-                            oneshot_style: (fg: "red", modifiers: "Dim"),
                         )))),
                         (kind: Property(Status(SingleV2(
-                            on_label: "v",
-                            off_label: "v",
-                            oneshot_label: "v",
+                            on_label: "v single ",
+                            off_label: "v single ",
+                            oneshot_label: "gap ",
                             on_style: (fg: "yellow", modifiers: "Bold"),
                             off_style: (fg: "#7aa0cd", modifiers: "Dim"),
-                            oneshot_style: (fg: "red", modifiers: "Bold"),
+                            oneshot_style: (fg: "#7aa0cd"),
                         )))),
-                        (kind: Text("]"), style: (fg: "#7aa0cd", modifiers: "Bold")),
+                        (kind: Property(Status(ConsumeV2(
+                            on_label: " CONSUME c=off ",
+                            off_label: "consume off",
+                            oneshot_label: " CONSUME c=off ",
+                            on_style: (fg: "black", bg: "red", modifiers: "Bold"),
+                            off_style: (fg: "#7aa0cd", modifiers: "Dim"),
+                            oneshot_style: (fg: "black", bg: "red", modifiers: "Bold"),
+                        )))),
                         ],
                         align: Right
                     ))
@@ -313,6 +318,10 @@
                 (
                     size: "100%",
                     pane: Pane(ProgressBar)
+                ),
+                (
+                    size: "14",
+                    pane: Component("elapsed_total")
                 ),
                 (
                     size: "1",

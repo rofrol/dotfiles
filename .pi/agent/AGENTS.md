@@ -113,3 +113,6 @@ decision".
 - Commit each item before starting the next, so the work can stop or pass to
   another agent at any item boundary without losing anything.
 - Never start or hand over to another agent yourself; I or herdr do that.
+- A tool call that is blocked (a permission, the auto-mode classifier) is a
+  blocked item: record it in "Needs a decision" with what was blocked and go
+  on; never retry it to get around the block.

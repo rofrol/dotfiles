@@ -4,15 +4,16 @@
   Stop        -> agent-queue.py stop
   PreToolUse  -> agent-queue.py guard   (Bash|Edit|Write|MultiEdit|NotebookEdit)
 
-stop acts only in a worker session, one started with `aq worker`, which sets
+stop acts only in a worker session, one started by `aq worker`, which sets
 AQ_WORKER to the project; every other session stops as usual. A worker that
 still has an item in progress must report it before it may stop; a worker
 without one gets the next ready item with the instructions below. After three
 blocked stops on the same unreported item the stop is let through, so a stuck
 model cannot loop forever; the item stays in progress for the user to see.
 
-guard stops every session, worker or not, from adding queue items or editing
-the queue files: an item is the user's approval, so only the user writes it.
+guard stops every session, worker or not, from writing the queue files or
+working around aq's refusal to add items inside an agent session: an item is
+the user's approval, so only the user writes it.
 """
 
 import json
@@ -80,7 +81,11 @@ def stop(payload: dict) -> None:
         block(INSTRUCTIONS.format(project=project, id=item["id"], text=item["text"]))
 
 
-WRITES_QUEUE = re.compile(r"(^|[\s;&|(`])aq\s+add\b|agent-queue/[^\s]*\.(jsonl|lock)")
+QUEUE_FILE = re.compile(r"agent-queue/\S*\.(jsonl|lock)")
+WRITES = re.compile(r">|\btee\b|sed\s+-i|\b(rm|mv|cp|truncate|python3?|perl|ruby|node)\b")
+# aq add itself refuses inside an agent session (CLAUDECODE is set there);
+# this catches the deliberate way around that check.
+UNSETS_AGENT_MARK = re.compile(r"(unset|env\s+(-\S+\s+)*-u)\s+CLAUDECODE")
 
 
 def guard(payload: dict) -> None:
@@ -88,7 +93,8 @@ def guard(payload: dict) -> None:
     data = payload.get("tool_input") or {}
     if tool == "Bash":
         command = data.get("command", "")
-        denied = bool(WRITES_QUEUE.search(command)) and not re.match(r"\s*(cat|less|head|tail|jq|wc)\b", command)
+        denied = ((QUEUE_FILE.search(command) and WRITES.search(command))
+                  or (UNSETS_AGENT_MARK.search(command) and re.search(r"\baq\b", command)))
     else:
         path = data.get("file_path") or data.get("notebook_path") or ""
         denied = str(Path(path).expanduser()).startswith(str(STATE))

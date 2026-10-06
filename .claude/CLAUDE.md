@@ -102,3 +102,8 @@ decision".
   verify it. Ask only real choices, as clickable options when you can.
 - Items you add go to "Proposed" and are not approved until I move them.
 - Only one session works through a repository's TODO at a time.
+- Each question in "Needs a decision" is one line ending in `?`, then what you
+  checked; herdr collects them from there, so keep to that shape.
+- Commit each item before starting the next, so the work can stop or pass to
+  another agent at any item boundary without losing anything.
+- Never start or hand over to another agent yourself; I or herdr do that.

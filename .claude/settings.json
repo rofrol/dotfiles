@@ -5,6 +5,7 @@
       "Bash(herdr agent set-task:*)"
     ]
   },
+  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
@@ -143,18 +144,18 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "jq -r '\"\\(.model.display_name) · \\(.workspace.current_dir | sub(env.HOME; \"~\"))\"'"
+  },
   "language": "polish",
   "voice": {
     "enabled": true,
     "mode": "hold"
   },
   "theme": "light",
+  "switchModelsOnFlag": false,
   "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true,
-  "voiceEnabled": true,
-  "model": "opus",
-  "statusLine": {
-    "type": "command",
-    "command": "jq -r '\"\\(.model.display_name) · \\(.workspace.current_dir | sub(env.HOME; \"~\"))\"'"
-  }
+  "voiceEnabled": true
 }

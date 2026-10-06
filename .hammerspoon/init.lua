@@ -165,17 +165,39 @@ function M.route(key, down, shift, isRepeat)
   return mine and "consume" or "pass"
 end
 
-local function runMpc(cmd)
+-- Runs mpc with the given arguments; done(stdout) is called when it succeeds.
+local function mpcTask(args, done)
   local task
-  task = hs.task.new(mpc, function(code, _, err)
+  task = hs.task.new(mpc, function(code, out, err)
     M.tasks[task] = nil
+    local cmd = table.concat(args, " ")
     if code ~= 0 then
       print("mediaKeys: mpc " .. cmd .. " failed (" .. code .. "): " .. (err or ""))
       hs.alert.show("MPD: mpc " .. cmd .. " failed")
+    elseif done then
+      done(out)
     end
-  end, { "--host=localhost", "--port=6600", cmd })
+  end, { "--host=localhost", "--port=6600", table.unpack(args) })
   M.tasks[task] = true
   task:start()
+end
+
+-- Previous goes through mpd-player ("shuffle prev" on its channel "rormpc"):
+-- in the weighted shuffle MPD's own previous jumps to songs that never
+-- played and counts each change as a skip. Only a daemon that subscribes to
+-- the channel and writes "trail" into shuffle.json knows the command; with
+-- any other (or none) it stays plain "mpc prev".
+local shuffleState = (os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/state")) .. "/rormpc/shuffle.json"
+local function runMpc(cmd)
+  if cmd ~= "prev" then return mpcTask({ cmd }) end
+  mpcTask({ "channels" }, function(out)
+    local state = hs.json.read(shuffleState)
+    if ("\n" .. out):find("\nrormpc\n") and state and state.trail then
+      mpcTask({ "sendmessage", "rormpc", "shuffle prev" })
+    else
+      mpcTask({ "prev" })
+    end
+  end)
 end
 
 M.tap = hs.eventtap.new({ hs.eventtap.event.types.systemDefined }, function(ev)

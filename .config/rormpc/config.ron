@@ -76,6 +76,7 @@
             "0":          SwitchToTab("Lyrics"),
             "gv":         SwitchToTab("Versions"),
             "gu":         SwitchToTab("Up next"),
+            "gs":         SwitchToTab("Shuffle"),
             "u":      Update,
             "U":      Rescan,
             "R":          AddRandom,
@@ -213,6 +214,15 @@
                 size: "100%",
                 direction: Vertical,
                 panes: [(pane: Pane(UpNext()), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        // rormpc Shuffle pane: the weighted shuffle's pick and the candidates of its next draw (view only)
+        (
+            name: "Shuffle",
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Shuffle()), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
         (

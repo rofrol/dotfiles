@@ -30,6 +30,7 @@ show_agents_panel = false
 
 [ui.sidebar.spaces]
 tabs = true
+todo_command = "~/scripts/todo-worker {space}"
 
 [keys]
 close_pane = ["cmd+w", "ctrl+shift+w"]

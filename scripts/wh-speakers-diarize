@@ -32,6 +32,26 @@ WHISPER_MODEL = "mlx-community/whisper-large-v3-mlx"
 DIARIZATION_MODEL = "pyannote/speaker-diarization-community-1"
 SAMPLE_RATE = 16_000
 
+# Words with no overlapping turn are attributed to the nearest
+# turn only when it is this close; otherwise they stay unassigned.
+MAX_NEAREST_SPEAKER_GAP = 0.25
+
+# A different speaker's turn this much farther away than the nearest
+# one still competes with it, so the word stays unassigned.
+MIN_NEAREST_SPEAKER_MARGIN = 0.1
+
+# Overlap assignments covering less of the word are ambiguous.
+MIN_STRONG_OVERLAP_RATIO = 0.5
+
+# A turn counts as overlapping a word only when it shares at least
+# this long or this fraction of it, so boundary jitter between
+# Whisper and pyannote does not look like simultaneous speech.
+MIN_SPEAKER_OVERLAP = 0.05
+MIN_SPEAKER_OVERLAP_RATIO = 0.25
+
+# Same-speaker words further apart start a new utterance.
+UTTERANCE_MAX_GAP = 0.7
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -403,59 +423,269 @@ def overlap(
     )
 
 
+def interval_distance(
+    start_a: float,
+    end_a: float,
+    start_b: float,
+    end_b: float,
+) -> float:
+    """Edge-to-edge gap between two intervals (0 if they touch)."""
+
+    if end_a < start_b:
+        return start_b - end_a
+
+    if end_b < start_a:
+        return start_a - end_b
+
+    return 0.0
+
+
+def turns_to_dicts(
+    annotation,
+) -> list[dict]:
+    return [
+        {
+            "start": float(
+                turn.start
+            ),
+            "end": float(
+                turn.end
+            ),
+            "speaker": speaker,
+        }
+        for turn, _, speaker
+        in annotation.itertracks(
+            yield_label=True
+        )
+    ]
+
+
+def significant_overlap(
+    shared: float,
+    duration: float,
+) -> bool:
+    return shared >= min(
+        MIN_SPEAKER_OVERLAP,
+        MIN_SPEAKER_OVERLAP_RATIO
+        * duration,
+    ) and shared > 0
+
+
+def contains_point(
+    turn: dict,
+    time: float,
+) -> bool:
+    # Half-open, so a point on a shared boundary belongs
+    # only to the turn that starts there.
+    return (
+        turn["start"]
+        <= time
+        < turn["end"]
+    )
+
+
+def active_speakers(
+    start: float,
+    end: float,
+    diarization: list[dict],
+) -> list[str]:
+    """Speakers whose turns overlap the word (or contain it,
+    for zero-length words)."""
+
+    speakers = set()
+
+    for turn in diarization:
+        if end > start:
+            hit = significant_overlap(
+                overlap(
+                    start,
+                    end,
+                    turn["start"],
+                    turn["end"],
+                ),
+                end - start,
+            )
+        else:
+            hit = contains_point(
+                turn,
+                start,
+            )
+
+        if hit:
+            speakers.add(
+                turn["speaker"]
+            )
+
+    return sorted(speakers)
+
+
 def assign_speaker(
     start: float,
     end: float,
     diarization: list[dict],
-) -> str | None:
-    best_speaker = None
-    best_overlap = 0.0
+) -> dict:
+    """Pick the primary speaker from exclusive diarization and
+    describe how the choice was made."""
+
+    duration = end - start
+    per_speaker: dict[str, float] = {}
+    containing = set()
 
     for turn in diarization:
-        duration = overlap(
+        shared = overlap(
             start,
             end,
             turn["start"],
             turn["end"],
         )
 
-        if duration > best_overlap:
-            best_overlap = duration
-            best_speaker = turn[
-                "speaker"
-            ]
+        if shared > 0:
+            per_speaker[turn["speaker"]] = (
+                per_speaker.get(
+                    turn["speaker"],
+                    0.0,
+                )
+                + shared
+            )
+        elif (
+            duration <= 0
+            and contains_point(
+                turn,
+                start,
+            )
+        ):
+            containing.add(
+                turn["speaker"]
+            )
 
-    if best_speaker is not None:
-        return best_speaker
+    if per_speaker:
+        speaker, shared = max(
+            per_speaker.items(),
+            key=lambda item: item[1],
+        )
+        ratio = shared / duration
 
-    if not diarization:
-        return None
+        competing = [
+            other
+            for other, other_shared
+            in per_speaker.items()
+            if other != speaker
+            and significant_overlap(
+                other_shared,
+                duration,
+            )
+        ]
 
-    # Use the nearest speaker turn for tiny timestamp gaps.
-    midpoint = (
-        start + end
-    ) / 2
-
-    nearest = min(
-        diarization,
-        key=lambda turn: min(
-            abs(
-                midpoint
-                - turn["start"]
+        return {
+            "speaker": speaker,
+            "method": "overlap",
+            "overlap_duration": round(
+                shared, 3
             ),
-            abs(
-                midpoint
-                - turn["end"]
+            "overlap_ratio": round(
+                min(ratio, 1.0), 3
             ),
-        ),
+            "distance": 0.0,
+            "ambiguous": (
+                ratio
+                < MIN_STRONG_OVERLAP_RATIO
+                or bool(competing)
+            ),
+        }
+
+    if containing:
+        # Zero-length word inside a turn. Exclusive turns do not
+        # overlap, so at most one contains it. Whisper gives zero
+        # length when word alignment failed, so the timing is weak
+        # evidence.
+        speaker = min(containing)
+
+        return {
+            "speaker": speaker,
+            "method": "overlap",
+            "overlap_duration": 0.0,
+            "overlap_ratio": 1.0,
+            "distance": 0.0,
+            "ambiguous": True,
+        }
+
+    # Closest turn distance per speaker.
+    distances: dict[str, float] = {}
+
+    for turn in diarization:
+        distance = interval_distance(
+            start,
+            end,
+            turn["start"],
+            turn["end"],
+        )
+
+        if distance < distances.get(
+            turn["speaker"],
+            float("inf"),
+        ):
+            distances[
+                turn["speaker"]
+            ] = distance
+
+    ranked = sorted(
+        distances.items(),
+        key=lambda item: item[1],
     )
 
-    return nearest["speaker"]
+    nearest = (
+        {"speaker": ranked[0][0]}
+        if ranked
+        else None
+    )
+    nearest_distance = (
+        ranked[0][1]
+        if ranked
+        else None
+    )
+
+    contested = (
+        len(ranked) > 1
+        and ranked[1][1]
+        - nearest_distance
+        < MIN_NEAREST_SPEAKER_MARGIN
+    )
+
+    if (
+        nearest is not None
+        and nearest_distance
+        <= MAX_NEAREST_SPEAKER_GAP
+        and not contested
+    ):
+        return {
+            "speaker": nearest["speaker"],
+            "method": "nearest",
+            "overlap_duration": 0.0,
+            "overlap_ratio": 0.0,
+            "distance": round(
+                nearest_distance, 3
+            ),
+            "ambiguous": True,
+        }
+
+    return {
+        "speaker": None,
+        "method": "unassigned",
+        "overlap_duration": 0.0,
+        "overlap_ratio": 0.0,
+        "distance": (
+            round(nearest_distance, 3)
+            if nearest is not None
+            else None
+        ),
+        "ambiguous": True,
+    }
 
 
 def build_words(
     transcription: dict,
-    diarization: list[dict],
+    exclusive_diarization: list[dict],
+    speaker_diarization: list[dict],
 ) -> list[dict]:
     words = []
 
@@ -483,47 +713,89 @@ def build_words(
             start = float(start)
             end = float(end)
 
+            assignment = assign_speaker(
+                start,
+                end,
+                exclusive_diarization,
+            )
+
+            active = active_speakers(
+                start,
+                end,
+                speaker_diarization,
+            )
+
+            speaker = assignment[
+                "speaker"
+            ]
+
+            # Regular diarization does not back the
+            # exclusive choice.
+            if (
+                speaker is not None
+                and active
+                and speaker not in active
+            ):
+                assignment[
+                    "ambiguous"
+                ] = True
+
+            if len(active) > 1:
+                assignment[
+                    "ambiguous"
+                ] = True
+
             words.append(
                 {
                     "start": start,
                     "end": end,
-                    "speaker": assign_speaker(
-                        start,
-                        end,
-                        diarization,
-                    ),
+                    "speaker": speaker,
                     "word": word[
                         "word"
                     ],
+                    "overlap": (
+                        len(active) > 1
+                    ),
+                    "active_speakers": (
+                        active
+                    ),
+                    "speaker_assignment": (
+                        assignment
+                    ),
                 }
             )
 
     return words
 
 
+def new_utterance(
+    word: dict,
+) -> dict:
+    return {
+        "start": word["start"],
+        "end": word["end"],
+        "speaker": word["speaker"],
+        "text": word["word"],
+        "overlap": word["overlap"],
+        "ambiguous_word_count": int(
+            word[
+                "speaker_assignment"
+            ]["ambiguous"]
+        ),
+        "word_count": 1,
+    }
+
+
 def build_utterances(
     words: list[dict],
-    max_gap: float = 1.5,
+    max_gap: float = UTTERANCE_MAX_GAP,
 ) -> list[dict]:
     utterances = []
 
     for word in words:
         if not utterances:
             utterances.append(
-                {
-                    "start": word[
-                        "start"
-                    ],
-                    "end": word[
-                        "end"
-                    ],
-                    "speaker": word[
-                        "speaker"
-                    ],
-                    "text": word[
-                        "word"
-                    ],
-                }
+                new_utterance(word)
             )
             continue
 
@@ -547,22 +819,24 @@ def build_utterances(
                 word["word"]
             )
 
+            previous["overlap"] = (
+                previous["overlap"]
+                or word["overlap"]
+            )
+
+            previous[
+                "ambiguous_word_count"
+            ] += int(
+                word[
+                    "speaker_assignment"
+                ]["ambiguous"]
+            )
+
+            previous["word_count"] += 1
+
         else:
             utterances.append(
-                {
-                    "start": word[
-                        "start"
-                    ],
-                    "end": word[
-                        "end"
-                    ],
-                    "speaker": word[
-                        "speaker"
-                    ],
-                    "text": word[
-                        "word"
-                    ],
-                }
+                new_utterance(word)
             )
 
     for utterance in utterances:
@@ -572,6 +846,74 @@ def build_utterances(
         )
 
     return utterances
+
+
+def print_stats(
+    words: list[dict],
+    utterances: list[dict],
+) -> None:
+    methods = [
+        word["speaker_assignment"][
+            "method"
+        ]
+        for word in words
+    ]
+
+    rows = [
+        ("words", len(words)),
+        (
+            "  by overlap",
+            methods.count("overlap"),
+        ),
+        (
+            "  by nearest fallback",
+            methods.count("nearest"),
+        ),
+        (
+            "  unassigned",
+            methods.count("unassigned"),
+        ),
+        (
+            "  ambiguous",
+            sum(
+                word[
+                    "speaker_assignment"
+                ]["ambiguous"]
+                for word in words
+            ),
+        ),
+        (
+            "  during overlap",
+            sum(
+                word["overlap"]
+                for word in words
+            ),
+        ),
+        ("utterances", len(utterances)),
+        (
+            "  with overlap",
+            sum(
+                utterance["overlap"]
+                for utterance in utterances
+            ),
+        ),
+        (
+            "  with ambiguous words",
+            sum(
+                utterance[
+                    "ambiguous_word_count"
+                ]
+                > 0
+                for utterance in utterances
+            ),
+        ),
+    ]
+
+    for label, count in rows:
+        print(
+            f"{label:<24}{count}",
+            file=sys.stderr,
+        )
 
 
 def timestamp(
@@ -710,30 +1052,22 @@ def main() -> None:
             hook=hook,
         )
 
-    exclusive = (
+    # Exclusive diarization picks one primary speaker per word;
+    # regular diarization keeps simultaneous speakers.
+    exclusive_diarization = turns_to_dicts(
         diarization_output
         .exclusive_speaker_diarization
     )
 
-    diarization = [
-        {
-            "start": float(
-                turn.start
-            ),
-            "end": float(
-                turn.end
-            ),
-            "speaker": speaker,
-        }
-        for turn, _, speaker
-        in exclusive.itertracks(
-            yield_label=True
-        )
-    ]
+    speaker_diarization = turns_to_dicts(
+        diarization_output
+        .speaker_diarization
+    )
 
     words = build_words(
         transcription,
-        diarization,
+        exclusive_diarization,
+        speaker_diarization,
     )
 
     utterances = build_utterances(
@@ -764,7 +1098,14 @@ def main() -> None:
         "speakers": speakers,
         "utterances": utterances,
         "words": words,
-        "diarization": diarization,
+        # Kept as exclusive diarization for existing consumers.
+        "diarization": exclusive_diarization,
+        "exclusive_diarization": (
+            exclusive_diarization
+        ),
+        "speaker_diarization": (
+            speaker_diarization
+        ),
     }
 
     json_path = file.with_suffix(
@@ -807,6 +1148,11 @@ def main() -> None:
             else ""
         ),
         file=sys.stderr,
+    )
+
+    print_stats(
+        words,
+        utterances,
     )
 
     print(

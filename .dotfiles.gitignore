@@ -5,6 +5,7 @@
 
 # Since the worktree is HOME, by default ignore everything...
 /*
+!/TODO.md
 # disabling, because could not negate ignoring .elinks on Ubuntu 20.10
 # just /* was not ignoring /.idlerc. But when using /**, I could not negate ignoring /bin
 #/.**

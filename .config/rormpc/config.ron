@@ -134,7 +134,7 @@
             "X":          Shuffle,
             "Y":          SortByColumn(3), // Year column; press again to reverse
             "P":          SortByColumn(4), // Plays column (musicdb stickers); press again to reverse
-            "/":          Find, // rormpc: fzf-like find in queue (Enter plays); n/N search stays elsewhere
+            "/":          Find, // rormpc: live filter in the queue (Enter plays, Esc restores); n/N search stays elsewhere
         },
     ),
     search: (

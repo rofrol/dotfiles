@@ -92,7 +92,8 @@ and how to run, rate and score it.
 # Working through TODO.md
 
 When I tell a session to work through a repository's TODO ("rób TODO po
-kolei"; an order to do it, not a mention of the TODO or a question about it),
+kolei"; an order to do it, not a mention of the TODO or a question about it;
+usually sent by the `todo-worker` skill I run, which opens the session),
 the items in the "Next, in order" section of its `TODO.md` at
 that moment are approved together with their commits, also where the
 repository asks to align commit messages first. That session is the

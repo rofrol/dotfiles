@@ -1,0 +1,5 @@
+{
+  "provider": "openai-codex",
+  "model": "gpt-6-luna",
+  "thinking": "low"
+}

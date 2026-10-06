@@ -7,7 +7,7 @@
   "showCacheMissNotices": true,
   "packages": [
     "npm:@narumitw/pi-usage",
-    "npm:pi-web-search@1.6.0"
+    "git:github.com/rofrol/pi-web-search@31f2564a71f61c78142522b7bd781aa91fe935ab"
   ],
   "modelThinkingLevels": {
     "deepseek/deepseek-flash": "max"

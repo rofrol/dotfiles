@@ -225,6 +225,7 @@ __pycache__/
 !/.pi/agent/models.json
 !/.pi/agent/fabric.json
 !/.pi/agent/AGENTS.md
+!/.pi/agent/web-search.json
 !/.pi/agent/extensions
 /.pi/agent/extensions/*
 !/.pi/agent/extensions/remember-model.ts

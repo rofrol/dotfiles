@@ -141,6 +141,7 @@
             "Y":          SortByColumn(3), // Year column (0-based: Next, Title, Artist, Year); press again to reverse
             "P":          SortByColumn(4), // Plays column (musicdb stickers); press again to reverse
             "/":          Find, // rormpc: live filter in the queue (Enter plays, Esc restores); n/N search stays elsewhere
+            "V":          FindVersions, // rormpc: Versions on the song's group (Esc returns)
         },
     ),
     search: (

@@ -113,6 +113,13 @@
             label_prop: (kind: Text("♥")),
             width: "2%",
         ),
+        // rormpc: ≋ when other library files share the song's name (Versions; V or the menu opens the group). After
+        // the sorted columns, so SortByColumn(3)/(4) in config.ron still mean Year and Plays.
+        (
+            prop: (kind: Property(Versions()), default: (kind: Text(""))),
+            label_prop: (kind: Text("≋")),
+            width: "1",
+        ),
         (
             prop: (kind: Property(Duration),
                 default: (kind: Text("-"))

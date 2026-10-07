@@ -78,6 +78,7 @@
             "gv":         SwitchToTab("Versions"),
             "gu":         SwitchToTab("Up next"),
             "gs":         SwitchToTab("Shuffle"),
+            "gl":         SwitchToTab("Live playlists"),
             "u":      Update,
             "U":      Rescan,
             "R":          AddRandom,
@@ -284,6 +285,15 @@
                 size: "100%",
                 direction: Vertical,
                 panes: [(pane: Pane(Playlists), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        // rormpc: public YouTube playlists mirrored as MPD playlists (liveplaylist, rormpc-tools 0.2.34)
+        (
+            name: "Live playlists",
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(LivePlaylists()), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
         // lyrics of the playing song: synced .lrc, plain .txt or a note (Queue menu: Choose lyrics…)

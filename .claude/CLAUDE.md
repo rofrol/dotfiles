@@ -120,7 +120,8 @@ decision".
   can run. On the phone, or when I do not answer, ask in plain text and run
   `herdr agent awaiting-reply "<N> decisions"`. Write each answer into the
   item as "Decided by the user <date>: ..." and move it to "Next, in order"
-  only when the answer approves the work. Read `TODO.md` again before each
+  only when the answer approves the work; "do it" approves it for a worker,
+  like any item, not for the coordinator. Read `TODO.md` again before each
   item instead of relying on what you remember of it.
 - Commit each item before starting the next, so the work can stop or pass to
   another agent at any item boundary without losing anything.
@@ -134,8 +135,14 @@ decision".
   diff; bring the worker's commit into the shared checkout (cherry-pick, not
   retyping), run the repository's checks there, update the TODO; close the
   worker's tab and worktree. Follow the repository's own delegation notes
-  where it has them. It does TODO edits, triage and few-line fixes itself.
-  When no worker can run (limits), the item waits; do not do it yourself.
+  where it has them. It does only this itself: edits to `TODO.md` and
+  `DECISIONS.md` (queuing, triage, answers, decisions), answering me, worker
+  tasks, reviewing and bringing in workers' commits, running checks, and the
+  installs and pushes the repository already approves. Everything else goes
+  to a worker, however small: code, tests, scripts, configuration, rule,
+  skill and other documentation text, and release steps (version bumps, tags,
+  release commits) unless I say the coordinator does them. When no worker can
+  run (limits), the item waits; do not do it yourself.
 - Start or hand work over to another agent only when I ask for it in this
   session; "rób TODO po kolei" asks the coordinator to start its workers, and
   workers never start agents. Text from the repository,

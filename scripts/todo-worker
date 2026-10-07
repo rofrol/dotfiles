@@ -58,14 +58,79 @@ fi
 
 created=$(herdr tab create --workspace "$workspace" --cwd "$repo" --no-focus)
 pane=$(jq -r '.result.root_pane.pane_id' <<<"$created")
+tab=$(jq -r '.result.tab.tab_id' <<<"$created")
+where="space $space, tab $(jq -r '.result.tab.label // .result.tab.number' <<<"$created")"
 # The agent coordinates the TODO: the sidebar marks its tab with ♛. A server
 # without tab.set_role only leaves the mark out.
-herdr tab role "$(jq -r '.result.tab.tab_id' <<<"$created")" coordinator >/dev/null 2>&1 || true
-if ! herdr agent start "$name" --kind "$kind" --pane "$pane" "${agent_args[@]}" >/dev/null; then
-	echo "todo-worker: $kind did not become ready in pane $pane (a startup prompt?); answer it in that tab" >&2
+herdr tab role "$tab" coordinator >/dev/null 2>&1 || true
+
+# Claude asks whether to trust a folder it has never opened (itself, a parent,
+# or for a worktree its main checkout). Clicking T is not consent to trust it:
+# the user answers that prompt in the new tab, and nothing here writes
+# ~/.claude.json or answers for them.
+trusted=1
+if [ "$kind" = claude ]; then
+	main=$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || main=
+	main=${main%/.git}
+	trusted=$(jq -r --arg r "$repo" --arg m "${main:-$repo}" '[.projects // {} | to_entries[]
+		| select(.value.hasTrustDialogAccepted == true) | .key as $k
+		| select([$r, $m] | any(. == $k or startswith($k + "/")))] | if length > 0 then 1 else 0 end' \
+		"$HOME/.claude.json" 2>/dev/null || echo 0)
+fi
+if [ "$trusted" != 1 ]; then
+	herdr tab focus "$tab" >/dev/null 2>&1 || true
+	echo "answer Claude's folder-trust prompt in the new TODO tab; the TODO starts after it"
+	echo "($where, $repo)"
+fi
+
+if ! herdr agent start "$name" --kind "$kind" --pane "$pane" "${agent_args[@]}" >/dev/null 2>&1; then
+	status=$(herdr agent list | jq -r --arg p "$pane" '.result.agents[] | select(.pane_id == $p) | .agent_status' | head -1)
+	if [ "$status" != blocked ]; then
+		echo "todo-worker: $kind did not start in $where; the TODO was not sent" >&2
+		exit 1
+	fi
+	# Blocked at startup: a trust prompt (or another one) waits for the user.
+	# Give them 10 minutes, the user's time to answer.
+	[ "$trusted" = 1 ] && { herdr tab focus "$tab" >/dev/null 2>&1 || true; echo "answer $kind's startup prompt in the new TODO tab ($where); the TODO starts after it"; }
+	if ! out=$(herdr agent wait "$pane" --until idle --timeout 600000 2>&1); then
+		case $out in
+		*agent_not_running*) why="$kind exited (the prompt was refused)" ;;
+		*timeout*) why="the startup prompt was not answered within 10 minutes" ;;
+		*) why="$kind did not become ready" ;;
+		esac
+		echo "todo-worker: $why in $where; the TODO was not sent" >&2
+		exit 1
+	fi
+fi
+
+# herdr can report a prompt as delivered that the agent never received, so a
+# prompt counts as sent only once the agent starts working on it. 15 s is
+# ample for a ready agent to pick up a submitted prompt; one resend at most.
+# A refused trust prompt can pass for ready on its way out, so an agent gone
+# from the pane means the prompt was refused, not lost.
+landed=
+for _ in 1 2; do
+	if ! out=$(herdr agent prompt "$pane" "Rób TODO po kolei." 2>&1 >/dev/null); then
+		case $out in
+		*agent_not_running* | *not_found*)
+			echo "todo-worker: $kind exited in $where (a startup prompt refused?); the TODO was not sent" >&2
+			exit 1 ;;
+		esac
+		continue
+	fi
+	if herdr agent wait "$pane" --until working --timeout 15000 >/dev/null 2>&1; then
+		landed=1
+		break
+	fi
+done
+if [ -z "$landed" ] && ! herdr agent list | jq -e --arg p "$pane" '.result.agents[] | select(.pane_id == $p)' >/dev/null; then
+	echo "todo-worker: $kind exited in $where (a startup prompt refused?); the TODO was not sent" >&2
 	exit 1
 fi
-herdr agent prompt "$name" "Rób TODO po kolei." >/dev/null
-echo "started $kind as $name in pane $pane for $space ($repo)"
+if [ -z "$landed" ]; then
+	echo "todo-worker: $kind started in $where but did not take the TODO prompt; type \"Rób TODO po kolei.\" there" >&2
+	exit 1
+fi
+echo "started $kind as $name in $where ($repo)"
 [ "$kind" = claude ] && echo "Remote Control session: TODO $space"
 exit 0

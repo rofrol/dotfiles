@@ -66,7 +66,12 @@ non-atomic write) and find the cause: reproduce it with a stress loop, wait for
 an observable condition instead of a duration, retry until the effect is
 observed, publish files atomically. Lengthen time only for a real external
 deadline, rate limit, external polling, designed backoff or measured slow
-hardware, and say which next to the value. Canonical text: Rule 10 in
+hardware, and say which next to the value. This covers your own commands
+and scripts and the tasks you delegate; a label ("debounce", "tooling")
+does not qualify a delay. Every wait names the positive event or condition
+it waits for and what produces it, never a negative one ("idle for N", "no
+marker for N"). A retry needs an acknowledgement and an idempotent action,
+never a blind resend. Canonical text: Rule 10 in
 ~/personal_projects/agents.md/AGENTS.md.
 
 # AskUserQuestion fields
@@ -120,6 +125,11 @@ decision".
 - Each question in "Needs a decision" is one line ending in `?`, then
   `Options: <recommended> | <other> | ...` (the choices you would offer me),
   then what you checked.
+- Open points an agent or worker reports (thresholds, edge cases, "to be
+  settled") are, after a consult round, either decided and written into the
+  TODO item (the values and who decided) or moved to "Needs a decision" with
+  `Options:`; never left only in an agent's final message. When reviewing,
+  check each worker's final message for such points.
 - Read `TODO.md` again at the start and before each item instead of
   relying on what you remember of it. Every open "Needs a decision"
   question, old ones included, counts as unasked until asked in this

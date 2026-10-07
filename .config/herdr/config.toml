@@ -12,8 +12,7 @@ tab_label = "title"
 delivery = "system"
 
 [ui.toast.herdr]
-position = "bottom-right"
-bottom_margin = 6
+position = "top-right"
 
 [usage]
 enabled = true

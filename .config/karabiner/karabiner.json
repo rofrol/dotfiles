@@ -5,6 +5,26 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "F7/F8/F9 control MPD through ~/scripts/mpd-media-key (previous, play/pause, next), even when another app is macOS's Now Playing app. Without this rule fn_function_keys turns them into consumer keys from Karabiner's virtual keyboard, which go straight to the Now Playing app and never reach a Hammerspoon event tap. Only the bare keys match: Shift+F7/F8/F9 still send the media key to the Now Playing app, fn+F7/F8/F9 stay plain F-keys.",
+                        "manipulators": [
+                            {
+                                "from": { "key_code": "f7" },
+                                "to": [{ "shell_command": "~/scripts/mpd-media-key prev" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": { "key_code": "f8" },
+                                "to": [{ "shell_command": "~/scripts/mpd-media-key toggle" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": { "key_code": "f9" },
+                                "to": [{ "shell_command": "~/scripts/mpd-media-key next" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "Cmd+Space sends F18 for the Hammerspoon app launcher, except in Emacs and the Try Roguix VM, which get Cmd+Space themselves. A workaround: macOS keeps Cmd+Space registered even with Spotlight's shortcuts off, so Hammerspoon cannot bind it (hs.hotkey.assignable is false). Remove it once Hammerspoon can bind cmd+space directly (see ~/.hammerspoon/init.lua).",
                         "manipulators": [
                             {

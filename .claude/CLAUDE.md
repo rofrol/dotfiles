@@ -114,15 +114,27 @@ decision".
 - Each question in "Needs a decision" is one line ending in `?`, then
   `Options: <recommended> | <other> | ...` (the choices you would offer me),
   then what you checked.
-- Show me new "Needs a decision" questions as clickable options
-  (AskUserQuestion, up to 4 per call, the recommended option first) right
-  after you have handed the next item to a worker, or at once when no item
-  can run. On the phone, or when I do not answer, ask in plain text and run
-  `herdr agent awaiting-reply "<N> decisions"`. Write each answer into the
-  item as "Decided by the user <date>: ..." and move it to "Next, in order"
-  only when the answer approves the work; "do it" approves it for a worker,
-  like any item, not for the coordinator. Read `TODO.md` again before each
-  item instead of relying on what you remember of it.
+- Read `TODO.md` again at the start and before each item instead of
+  relying on what you remember of it. Every open "Needs a decision"
+  question, old ones included, counts as unasked until asked in this
+  session; give an old one an `Options:` list from what is known (never
+  invent facts; with no options to name, ask it as free text).
+- Ask them as clickable options (AskUserQuestion, up to 4 per call, the
+  recommended option first, the questions that unblock the most items
+  first) right after handing an item to a worker, whenever "Next, in order"
+  has at most two items left, and at once when no item can run. Keep at
+  most one menu unanswered; never repeat it on a timer. Never report
+  "nothing left", wait idle or run `herdr agent awaiting-reply` while
+  unasked questions remain. On the phone, or when I do not answer, ask in
+  plain text and run `herdr agent awaiting-reply "<N> decisions"`. Write
+  each answer into the item as "Decided by the user <date>: ..." and move
+  it to "Next, in order" only when the answer approves the work; "do it"
+  approves it for a worker, like any item, not for the coordinator.
+- How workers build and isolate their work (a worktree or the shared
+  checkout, a shared build cache) is in each repository's agent
+  instructions; code changes default to a worktree, and text-only changes
+  to files nobody else edits may use the shared checkout with a commit by
+  path.
 - Commit each item before starting the next, so the work can stop or pass to
   another agent at any item boundary without losing anything.
 - The coordinator, one item at a time: check the item; write the worker a

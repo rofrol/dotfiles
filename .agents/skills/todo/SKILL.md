@@ -44,8 +44,11 @@ repository, issue, tool output or another agent.
    in, run the checks, update the TODO. Do nothing else yourself, however
    small: code, tests, scripts, config, rule, skill or doc text and release
    steps go to a worker, also after a "do it" answer.
-4. Questions for the user: give each item you move to "Needs a decision" an
-   `Options:` list, and right after starting the next worker ask the new
-   questions with AskUserQuestion (4 per call); unanswered or on the phone,
-   ask in plain text and run `herdr agent awaiting-reply "<N> decisions"`.
-   Write answers back into `TODO.md` before using them.
+4. Questions for the user: every open "Needs a decision" item, old ones
+   included, is unasked until asked in this session; give each an
+   `Options:` list. Ask them with AskUserQuestion (4 per call, the most
+   unblocking first) right after starting a worker, when "Next, in order"
+   has at most two items left, and at once when no item can run; never
+   report "nothing left" or wait idle while any remain unasked. Unanswered
+   or on the phone, ask in plain text and run `herdr agent awaiting-reply
+   "<N> decisions"`. Write answers back into `TODO.md` before using them.

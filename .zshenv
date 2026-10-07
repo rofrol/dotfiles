@@ -79,3 +79,8 @@ if [[ $OSTYPE == darwin* ]]; then
 fi
 
 # echo '~/.zshenv sourced.'  # prints on every zsh run; keep it off, scp/rsync must stay silent
+
+# herdr builds its vendored libghostty-vt with Zig 0.16.0 and refuses a newer
+# Zig; Homebrew's zig moved to 0.17. Its build.rs reads ZIG (CI uses
+# setup-zig instead). Installed from ziglang.org into ~/.local/share/zig.
+export ZIG="$HOME/.local/share/zig/0.16.0/zig"

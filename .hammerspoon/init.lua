@@ -165,6 +165,39 @@ function M.route(key, down, shift, isRepeat)
   return mine and "consume" or "pass"
 end
 
+-- One timestamped line per media-key event that reaches MPD and per mpc
+-- command it sends, to trace a Previous that jumps forward. The file is cut
+-- to its newest half once it passes logMax lines.
+local logDir = (os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/state")) .. "/hammerspoon"
+local logPath = logDir .. "/media-keys.log"
+local logMax, logLines = 4000, nil
+local function logLine(text)
+  if not logLines then
+    hs.fs.mkdir(logDir)
+    logLines = 0
+    local f = io.open(logPath)
+    if f then
+      for _ in f:lines() do logLines = logLines + 1 end
+      f:close()
+    end
+  end
+  local f = io.open(logPath, "a")
+  if not f then return end
+  f:write(os.date("%Y-%m-%d %H:%M:%S"), string.format(".%03d ", math.floor(hs.timer.secondsSinceEpoch() * 1000) % 1000), text, "\n")
+  f:close()
+  logLines = logLines + 1
+  if logLines <= logMax then return end
+  local kept = {}
+  for line in io.lines(logPath) do kept[#kept + 1] = line end
+  local tmp = logPath .. ".tmp"
+  f = io.open(tmp, "w")
+  if not f then return end
+  f:write(table.concat(kept, "\n", #kept - logMax / 2 + 1), "\n")
+  f:close()
+  os.rename(tmp, logPath)
+  logLines = logMax / 2
+end
+
 -- Runs mpc with the given arguments; done(stdout) is called when it succeeds.
 local function mpcTask(args, done)
   local task
@@ -179,6 +212,7 @@ local function mpcTask(args, done)
     end
   end, { "--host=localhost", "--port=6600", table.unpack(args) })
   M.tasks[task] = true
+  logLine("mpc " .. table.concat(args, " "))
   task:start()
 end
 
@@ -204,6 +238,10 @@ M.tap = hs.eventtap.new({ hs.eventtap.event.types.systemDefined }, function(ev)
   local k = ev:systemKey()
   if not k.key then return false end
   local action = M.route(k.key, k.down, ev:getFlags().shift, k["repeat"])
+  if action ~= "pass" then
+    logLine(string.format("key %s %s -> %s", k.key,
+      k["repeat"] and "repeat" or (k.down and "down" or "up"), action))
+  end
   if action:sub(1, 4) == "mpc " then runMpc(action:sub(5)) end
   return action ~= "pass"
 end)

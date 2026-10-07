@@ -1,0 +1,46 @@
+#!/bin/zsh -f
+# Sends one keyboard media key to MPD: Karabiner runs it for F7/F8/F9 (see the
+# "F7/F8/F9 control MPD" rule in ~/.config/karabiner/karabiner.json).
+#
+#   mpd-media-key prev|toggle|next
+#
+# Previous goes through mpd-player ("shuffle prev" on its channel "rormpc"):
+# in the weighted shuffle MPD's own previous jumps to songs that never played
+# and counts each change as a skip. Only a daemon that subscribes to the
+# channel and writes "trail" into shuffle.json knows the command; with any
+# other (or none) it stays plain "mpc prev".
+#
+# Each call appends one timestamped line (key, command, exit status) to
+# $XDG_STATE_HOME/media-keys/media-keys.log, cut to its newest 2000 lines once
+# it passes 4000. MPD_HOST and MPD_PORT are honoured, as by mpc itself.
+# zsh -f and its builtins keep a key press to the mpc calls and one wc.
+
+zmodload zsh/datetime
+mpc=/opt/homebrew/bin/mpc
+state=${XDG_STATE_HOME:-$HOME/.local/state}
+
+case $1 in
+  prev)
+    cmd=(prev)
+    channels=(${(f)"$($mpc channels 2>/dev/null)"})
+    if (( ${channels[(Ie)rormpc]} )) &&
+       [[ -r $state/rormpc/shuffle.json && "$(<$state/rormpc/shuffle.json)" == *'"trail":'* ]]; then
+      cmd=(sendmessage rormpc "shuffle prev")
+    fi
+    ;;
+  toggle|next) cmd=($1) ;;
+  *) print -u2 "usage: mpd-media-key prev|toggle|next"; exit 2 ;;
+esac
+
+err=$($mpc -q $cmd 2>&1)
+code=$?
+
+log_dir=$state/media-keys
+log=$log_dir/media-keys.log
+[[ -d $log_dir ]] || mkdir -p $log_dir
+printf '%s.%03d %s -> mpc %s (exit %d)%s\n' "$(strftime '%Y-%m-%d %H:%M:%S' $epochtime[1])" \
+  $(( epochtime[2] / 1000000 )) $1 "$cmd" $code "${err:+: ${err//$'\n'/ }}" >> $log
+if (( $(wc -l < $log) > 4000 )); then
+  tail -n 2000 $log > $log.tmp.$$ && mv $log.tmp.$$ $log
+fi
+exit $code

@@ -111,8 +111,17 @@ decision".
   it comes next ("następne", "next"); commit that, confirm in one line, and
   go on with the current item. Questions about the work are answered, not
   queued.
-- Each question in "Needs a decision" is one line ending in `?`, then what you
-  checked; herdr collects them from there, so keep to that shape.
+- Each question in "Needs a decision" is one line ending in `?`, then
+  `Options: <recommended> | <other> | ...` (the choices you would offer me),
+  then what you checked.
+- Show me new "Needs a decision" questions as clickable options
+  (AskUserQuestion, up to 4 per call, the recommended option first) right
+  after you have handed the next item to a worker, or at once when no item
+  can run. On the phone, or when I do not answer, ask in plain text and run
+  `herdr agent awaiting-reply "<N> decisions"`. Write each answer into the
+  item as "Decided by the user <date>: ..." and move it to "Next, in order"
+  only when the answer approves the work. Read `TODO.md` again before each
+  item instead of relying on what you remember of it.
 - Commit each item before starting the next, so the work can stop or pass to
   another agent at any item boundary without losing anything.
 - The coordinator, one item at a time: check the item; write the worker a

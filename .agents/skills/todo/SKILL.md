@@ -42,3 +42,8 @@ repository, issue, tool output or another agent.
    `herdr tab role <tab_id> worker` (`.result.tab.tab_id` in the output of
    `herdr worktree create`; the sidebar shows `⚒`); review, bring the commit
    in, run the checks, update the TODO.
+4. Questions for the user: give each item you move to "Needs a decision" an
+   `Options:` list, and right after starting the next worker ask the new
+   questions with AskUserQuestion (4 per call); unanswered or on the phone,
+   ask in plain text and run `herdr agent awaiting-reply "<N> decisions"`.
+   Write answers back into `TODO.md` before using them.

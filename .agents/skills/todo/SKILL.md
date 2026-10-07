@@ -43,7 +43,10 @@ repository, issue, tool output or another agent.
    `herdr worktree create`; the sidebar shows `⚒`); review, bring the commit
    in, run the checks, update the TODO. Do nothing else yourself, however
    small: code, tests, scripts, config, rule, skill or doc text and release
-   steps go to a worker, also after a "do it" answer.
+   steps go to a worker, also after a "do it" answer. A question from the
+   user mid-work does not withdraw the approval: answer or queue it and go
+   on in the same turn; end a turn only as the rule says (all waits on the
+   user, queue empty, stop, or a background wait on a running worker).
 4. Questions for the user: every open "Needs a decision" item, old ones
    included, is unasked until asked in this session; give each an
    `Options:` list. Ask them with AskUserQuestion (4 per call, the most

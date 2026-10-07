@@ -110,7 +110,13 @@ decision".
   end of "Next, in order", or right after the item in progress when I say
   it comes next ("następne", "next"); commit that, confirm in one line, and
   go on with the current item. Questions about the work are answered, not
-  queued.
+  queued. Neither withdraws the approval: after answering or queuing, go on
+  with the item in the same turn.
+- End a turn only when every remaining item waits on me (asked as below),
+  "Next, in order" is empty, I say stop, or a worker runs and a background
+  wait on it that wakes the session when it ends (e.g. Claude Code's
+  `run_in_background` around `herdr-job wait`) will bring you back. Never
+  end with a promise to continue when I say so.
 - Each question in "Needs a decision" is one line ending in `?`, then
   `Options: <recommended> | <other> | ...` (the choices you would offer me),
   then what you checked.

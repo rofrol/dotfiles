@@ -147,6 +147,7 @@
             "P":          SortByColumn(4), // Plays column (musicdb stickers); press again to reverse
             "/":          Find, // rormpc: live filter in the queue (Enter plays, Esc restores); n/N search stays elsewhere
             "V":          FindVersions, // rormpc: Versions on the song's group (Esc returns)
+            "o":          TogglePlanView, // rormpc: the weighted shuffle's plan as a timeline (never reorders MPD)
         },
     ),
     search: (

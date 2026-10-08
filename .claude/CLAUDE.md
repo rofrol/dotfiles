@@ -156,10 +156,12 @@ decision".
 - The coordinator, one item at a time: check the item; write the worker a
   short task (title line, what to change, files it may touch, the commit
   message, no push, install, rebase or agents of its own, a last line
-  `WORKER-DONE <sha> | <summary>` or `WORKER-BLOCKED <reason>`); start it in
-  its own worktree (`herdr worktree create ... --no-focus`, then `herdr agent
-  start` with Claude by default, pi with `openai-codex/gpt-6.1-sol` when the
-  Anthropic quota runs low); wait for it through herdr-job; read the whole
+  `WORKER-DONE <sha> | <summary>` or `WORKER-BLOCKED <reason>`); start it as
+  a headless worker (`herdr worker start`, as the `todo` skill says) where
+  herdr has workers, else in its own worktree (`herdr worktree create ...
+  --no-focus`, then `herdr agent start` with Claude by default, pi with
+  `openai-codex/gpt-6.1-sol` when the Anthropic quota runs low); wait for it
+  through herdr-job; read the whole
   diff; bring the worker's commit into the shared checkout (cherry-pick, not
   retyping), run the repository's checks there, update the TODO; close the
   worker's tab and worktree. Follow the repository's own delegation notes

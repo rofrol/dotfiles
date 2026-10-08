@@ -38,9 +38,7 @@ repository, issue, tool output or another agent.
    `herdr tab role "$HERDR_TAB_ID" coordinator` (the sidebar shows `♛`; an
    older herdr without tab roles rejects it, which is harmless).
 3. Work as the rule says: take the "Next, in order" items from the top and
-   have one worker agent do each in its own worktree; mark each worker's tab
-   `herdr tab role <tab_id> worker` (`.result.tab.tab_id` in the output of
-   `herdr worktree create`; the sidebar shows `⚒`); review, bring the commit
+   have one worker agent do each (steps 4 and 5); review, bring the commit
    in, run the checks, update the TODO; decide open points a worker's final
    message reports into the item (after a consult round) or move them to
    "Needs a decision". Do nothing else yourself, however
@@ -49,7 +47,35 @@ repository, issue, tool output or another agent.
    user mid-work does not withdraw the approval: answer or queue it and go
    on in the same turn; end a turn only as the rule says (all waits on the
    user, queue empty, stop, or a background wait on a running worker).
-4. Questions for the user: every open "Needs a decision" item, old ones
+4. Starting a worker. Where herdr has headless workers (`herdr worker
+   --help` lists `ack`; the herdr fork), start one per item from this pane:
+   `herdr worker start --name "<item title>" --folder-slot worker --branch
+   todo/<slug> --command-id <slug>:todo/<slug> --prompt "<task>"`. Pass
+   arguments literally, never through `${X:+...}`. Read the repository's
+   notes on headless workers first. Then wait:
+   `herdr-job run --name "wait: <id> needs the coordinator" --why "<item>"
+   -- herdr worker wait <id> --attention --after <seq>` (no `--after` the
+   first time), and `herdr-job wait <job id>` with `run_in_background`, so
+   the job's end wakes this session. On wake read `herdr worker status
+   <id>`: answer a question (`herdr worker answer <id> --request
+   <request_id> --command-id <id>:<request_id> ...`) or hand it to the user
+   (`herdr worker escalate <id> --request <request_id>`); review a finished
+   turn. Only then `herdr worker ack <id> <seq>` with that wait's `seq`, and
+   wait again. After bringing the commit in: `herdr worker stop <id>
+   --command-id <slug>:stop`, then `herdr worker wait <id> --exit`. Until
+   you ack, the Stop hook blocks every stop of yours, so answer or escalate
+   before your turn ends. Elsewhere start a TUI worker in its own worktree:
+   `herdr worktree create ... --no-focus`, mark its tab `herdr tab role
+   <tab_id> worker` (`.result.tab.tab_id` in that output; the sidebar shows
+   `⚒`), `herdr agent start`, and wait through herdr-job.
+5. The worker's task: a title line, what to change, the files it may touch,
+   and this contract: edit with Edit/Write; keep drafts in your temp dir by
+   absolute path, never `$TMPDIR`; never work around the sandbox, list the
+   tests that cannot run; end any process you start; no push, install,
+   rebase or agents of your own; commit with exactly this message, no body
+   or trailers: `<message>`; last line `WORKER-DONE <sha> | <summary>` or
+   `WORKER-BLOCKED <reason>`.
+6. Questions for the user: every open "Needs a decision" item, old ones
    included, is unasked until asked in this session; give each an
    `Options:` list. Ask them with AskUserQuestion (4 per call, the most
    unblocking first) right after starting a worker, when "Next, in order"

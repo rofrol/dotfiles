@@ -48,11 +48,13 @@ repository, issue, tool output or another agent.
    on in the same turn; end a turn only as the rule says (all waits on the
    user, queue empty, stop, or a background wait on a running worker).
 4. Starting a worker. Where herdr has headless workers (`herdr worker
-   --help` lists `ack`; the herdr fork), start one per item from this pane:
-   `herdr worker start --name "<item title>" --folder-slot worker --branch
-   todo/<slug> --command-id <slug>:todo/<slug> --prompt "<task>"`. Pass
-   arguments literally, never through `${X:+...}`. Read the repository's
-   notes on headless workers first. Then wait:
+   --help` lists `verify`; the herdr fork), start one per item from this
+   pane. Record the base first, `git rev-parse master`, then `herdr worker
+   start --name "<item title>" --item <t-id> --folder-slot worker --branch
+   todo/<slug> --base <base sha> --command-id <t-id>:todo/<slug> --prompt
+   "<task>"`, where `<t-id>` is the item's id (`[t-xxxxxxxx]` on its first
+   line). Pass arguments literally, never through `${X:+...}`. Read the
+   repository's notes on headless workers first. Then wait:
    `herdr-job run --name "wait: <id> needs the coordinator" --why "<item>"
    -- herdr worker wait <id> --attention --after <seq>` (no `--after` the
    first time), and `herdr-job wait <job id>` with `run_in_background`, so
@@ -60,11 +62,18 @@ repository, issue, tool output or another agent.
    <id>`: answer a question (`herdr worker answer <id> --request
    <request_id> --command-id <id>:<request_id> ...`) or hand it to the user
    (`herdr worker escalate <id> --request <request_id>`); review a finished
-   turn. Only then `herdr worker ack <id> <seq>` with that wait's `seq`, and
-   wait again. After bringing the commit in: `herdr worker stop <id>
-   --command-id <slug>:stop`, then `herdr worker wait <id> --exit`. Until
-   you ack, the Stop hook blocks every stop of yours, so answer or escalate
-   before your turn ends. Elsewhere start a TUI worker in its own worktree:
+   turn (`herdr worker log <id>`, the whole diff). Its `WORKER-DONE` line is
+   a summary, not a verdict. When the turn is done: `herdr worker stop <id>
+   --command-id <slug>:stop`, `herdr worker wait <id> --exit`, then
+   `herdr worker verify <id> --base <base sha> --message "<exact subject>"
+   --paths <allowed globs> [--cmd "<the item's relevant tests>"]`.
+   Cherry-pick only on `verified`. On `failed`, start a new attempt (new
+   branch and command id) whose task adds the failed check's evidence; on
+   `unavailable`, run that check yourself or ask the user. Only then
+   `herdr worker ack <id> <seq>` with that wait's `seq`, and wait again if
+   the worker still runs. Until you ack, the Stop hook blocks every stop of
+   yours, so answer or escalate before your turn ends. Elsewhere start a
+   TUI worker in its own worktree:
    `herdr worktree create ... --no-focus`, mark its tab `herdr tab role
    <tab_id> worker` (`.result.tab.tab_id` in that output; the sidebar shows
    `⚒`), `herdr agent start`, and wait through herdr-job.

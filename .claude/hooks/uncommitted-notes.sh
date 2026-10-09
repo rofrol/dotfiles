@@ -18,9 +18,14 @@
 # and the difference afterwards names candidate changes, not proven ownership.
 # Concurrent sessions can change status during the same interval. check looks
 # only at that ledger; it can still include another session's files.
-# It blocks the stop once with a reminder; the model either commits, or says in
-# its final message that it left the files behind. No commit happens here:
-# committing on the model's behalf would misattribute hunks in shared files.
+# It blocks the stop with a one-line reminder; the model either commits, or says
+# in its final message that it left the files behind. It stays quiet when the
+# final message (the Stop input's last_assistant_message, else the transcript's
+# last assistant text) names every dirty file by repo-relative path or basename,
+# and it blocks at most once per dirty set: the set and each file's content hash
+# go to <ledger>.acked, and only a new dirty path or changed content blocks
+# again. No commit happens here: committing on the model's behalf would
+# misattribute hunks in shared files.
 #
 # Known limits: a command that changes a file which was already dirty cannot be
 # attributed (the difference does not move), and a session killed without a Stop
@@ -35,6 +40,43 @@ payload=$(cat)
 mode=${1:-}
 
 json() { printf '%s' "$payload" | jq -r "$1" 2>/dev/null || true; }
+
+# Content hash of a file, of a directory's files, or "gone" for a deleted path.
+content_hash() {
+	if [ -f "$1" ]; then
+		git hash-object -- "$1" 2>/dev/null || echo unreadable
+	elif [ -d "$1" ]; then
+		find "$1" -type f 2>/dev/null | LC_ALL=C sort | while IFS= read -r f; do
+			printf '%s %s\n' "$(git hash-object -- "$f" 2>/dev/null)" "$f"
+		done | git hash-object --stdin
+	else
+		echo gone
+	fi
+}
+
+# Text of the last main-chain assistant message in a JSONL transcript. One
+# message can span several entries (one per content block) sharing message.id.
+last_assistant_text() {
+	jq -c 'select(.type == "assistant" and ((.isSidechain // false) | not))
+		| {id: (.message.id // ""),
+		   text: ([.message.content | if type == "string" then . else (.[]? | select(.type == "text") | .text) end] | join("\n"))}' \
+		"$1" 2>/dev/null |
+		jq -rs 'if length == 0 then "" else (last.id) as $id | map(select(.id == $id) | .text) | join("\n") end' 2>/dev/null || true
+}
+
+# Whether text $1 mentions $2 as a whole name, not inside a longer word.
+names() {
+	local rest=$1 needle=$2 before after
+	[ -n "$needle" ] || return 1
+	while [[ $rest == *"$needle"* ]]; do
+		before=${rest%%"$needle"*}
+		rest=${rest#*"$needle"}
+		after=${rest:0:1}
+		before=${before: -1}
+		[[ $before == [A-Za-z0-9_-] || $after == [A-Za-z0-9_-] ]] || return 0
+	done
+	return 1
+}
 
 session_id=$(json '.session_id // ""')
 [ -n "$session_id" ] || exit 0
@@ -85,6 +127,7 @@ check)
 	[ "$(json '.stop_hook_active // false')" = "true" ] && exit 0
 	[ -f "$ledger" ] || exit 0
 	cwd=$(json '.cwd // ""')
+	root=$(git -C "${cwd:-$PWD}" rev-parse --show-toplevel 2>/dev/null) || root=""
 	dirty=()
 	while IFS= read -r path; do
 		[ -n "$path" ] || continue
@@ -93,10 +136,48 @@ check)
 		fi
 	done < <(sort -u "$ledger")
 	if [ ${#dirty[@]} -eq 0 ]; then
-		rm -f "$ledger"
+		rm -f "$ledger" "$ledger.acked"
 		exit 0
 	fi
-	reason="Uncommitted files touched or observed during this session: ${dirty[*]}. This reminder grants no permission to commit, push, install, or continue work the user stopped. Respect explicit no-commit instructions and required commit-message approval. You may always finish by naming these files as dirty in your final message. Only if committing is already authorized, inspect staged and unstaged diffs and untracked file contents, verify hunk ownership, then stage and commit only your changes with explicit paths. Shell status changes are candidates, not proof of ownership; other sessions may have changed these files."
+
+	# The dirty set with each file's content hash, one "hash<TAB>path" per line.
+	current=""
+	for path in "${dirty[@]}"; do
+		current="$current$(content_hash "$path")	$path
+"
+	done
+
+	# Paths not in the acknowledged set, or whose content changed since then.
+	changed=0
+	if [ -f "$ledger.acked" ]; then
+		while IFS= read -r line; do
+			[ -n "$line" ] || continue
+			grep -qxF -- "$line" "$ledger.acked" || changed=1
+		done <<<"$current"
+	else
+		changed=1
+	fi
+	printf '%s' "$current" >"$ledger.acked.tmp" && mv -f "$ledger.acked.tmp" "$ledger.acked"
+	[ $changed -eq 1 ] || exit 0
+
+	# The final message already names every dirty file: nothing to remind.
+	message=$(json '.last_assistant_message // ""')
+	if [ -z "$message" ]; then
+		transcript=$(json '.transcript_path // ""')
+		[ -f "$transcript" ] && message=$(last_assistant_text "$transcript")
+	fi
+	shown=()
+	unnamed=0
+	for path in "${dirty[@]}"; do
+		rel=$path
+		[ -n "$root" ] && case $path in "$root"/*) rel=${path#"$root"/} ;; esac
+		shown+=("$rel")
+		names "$message" "$rel" || names "$message" "${path##*/}" || unnamed=1
+	done
+	[ $unnamed -eq 1 ] || exit 0
+
+	# Shell-observed files are candidates; other sessions may own some hunks.
+	reason="Uncommitted (possibly other sessions' edits too): ${shown[*]} - name them as dirty in your final message; this grants no permission to commit, push or continue stopped work, so commit them by path only if committing is authorized."
 	jq -n --arg reason "$reason" '{decision: "block", reason: $reason}'
 	;;
 esac

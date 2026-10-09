@@ -80,7 +80,14 @@ non-atomic write) and find the cause: reproduce it with a stress loop, wait for
 an observable condition instead of a duration, retry until the effect is
 observed, publish files atomically. Lengthen time only for a real external
 deadline, rate limit, external polling, designed backoff or measured slow
-hardware, and say which next to the value. Canonical text: Rule 10 in
+hardware, and say which next to the value.
+It also covers fixes and the options any report or question offers: never
+offer a longer timeout, sleep, blind retry or debounce as a fix or option for
+an asynchronous bug. A `delay:` label on a constant inside a fix (not a test
+harness or tooling) needs the user's or the coordinating agent's agreement,
+with the evidence, before it is added; it never serves to get past the delay
+check. Whoever passes on another agent's report checks every option in it
+against this rule first. Canonical text: Rule 10 in
 ~/personal_projects/agents.md/AGENTS.md.
 
 # Asking other models

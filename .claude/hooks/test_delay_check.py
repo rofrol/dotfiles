@@ -200,6 +200,62 @@ class Unrelated(unittest.TestCase):
         self.assertFalse(delay_check.check({"tool_name": "Read", "tool_input": {"file_path": "x"}}))
 
 
+class ZeroLength(unittest.TestCase):
+    """A zero length does not wait (the coordinator's `sleep 0`, 2026-10-08)."""
+
+    def test_sleep_0(self):
+        for value in ("0", "0.0", "0s", "00", "0."):
+            self.assertFalse(bash("sleep " + value), value)
+        self.assertFalse(bash("cargo build && sleep 0 && herdr agent read p1"))
+        self.assertFalse(bash("bash -c 'sleep 0; make'"))
+        self.assertFalse(write("/x/run.sh", "make\nsleep 0\n"))
+        self.assertFalse(write("/x/run.sh", "make; sleep 0.0; ls\n"))
+
+    def test_timeout_0(self):
+        self.assertFalse(bash("timeout 0 cargo test"))
+        self.assertFalse(bash("gtimeout 0s cargo test"))
+        self.assertFalse(bash("herdr agent wait p1 --timeout 0.0"))
+        self.assertFalse(bash("herdr agent wait p1 --timeout=0"))
+        self.assertFalse(write("/x/run.sh", "timeout 0 cargo test\n"))
+        self.assertFalse(write("/x/a.py", 'args = ["--timeout", "0"]\n'))
+        self.assertFalse(write("/x/a.py", "TIMEOUT = 0.0\n"))
+
+    def test_command_after_timeout_0_is_still_checked(self):
+        self.assertTrue(bash("timeout 0 sleep 5"))
+
+    def test_rust_zero_durations(self):
+        self.assertFalse(write("/x/a.rs", "let d = Duration::from_millis(0);\n"))
+        self.assertFalse(write("/x/a.rs", "let d = Duration::from_secs_f64(0.0);\n"))
+        self.assertFalse(write("/x/a.rs", "std::thread::sleep(Duration::from_secs(0));\n"))
+        self.assertFalse(write("/x/a.rs", "thread::sleep(std::time::Duration::ZERO);\n"))
+        self.assertFalse(write("/x/a.rs", "rx.recv_timeout(Duration::from_secs(0))?;\n"))
+
+    def test_js_and_python_yields(self):
+        self.assertFalse(write("/x/a.js", "setTimeout(() => render(), 0);\n"))
+        self.assertFalse(write("/x/a.js", "setTimeout(render, 0.0);\n"))
+        self.assertFalse(write("/x/a.py", "await asyncio.sleep(0)\n"))
+        self.assertFalse(write("/x/a.py", "time.sleep(0.0)\n"))
+        self.assertFalse(bash("python3 -c 'import time; time.sleep(0)'"))
+
+    def test_non_zero_still_flagged(self):
+        for value in ("0.5", "0.01", "1", "10", "0.5s", "infinity"):
+            self.assertTrue(bash("sleep " + value), value)
+        self.assertTrue(bash("sleep 0 5"))
+        self.assertTrue(bash("timeout 0.5 cargo test"))
+        self.assertTrue(bash("herdr agent wait p1 --timeout=0.5"))
+        self.assertTrue(write("/x/run.sh", "sleep 0.5\n"))
+        self.assertTrue(write("/x/run.sh", "timeout 05 make\n"))
+        self.assertTrue(write("/x/a.py", 'args = ["--timeout", "0.5"]\n'))
+        self.assertTrue(write("/x/a.py", "TIMEOUT = 0.5\n"))
+        self.assertTrue(write("/x/a.py", "time.sleep(0.5)\n"))
+        self.assertTrue(write("/x/a.py", "await asyncio.sleep(0.01)\n"))
+        self.assertTrue(write("/x/a.rs", "let d = Duration::from_millis(10);\n"))
+        self.assertTrue(write("/x/a.rs", "let d = Duration::from_secs_f64(0.5);\n"))
+        self.assertTrue(write("/x/a.rs", "std::thread::sleep(Duration::from_millis(1));\n"))
+        self.assertTrue(write("/x/a.js", "setTimeout(render, 0.5);\n"))
+        self.assertTrue(write("/x/a.js", "setTimeout(render, 10);\n"))
+
+
 class Process(unittest.TestCase):
     def run_hook(self, stdin):
         return subprocess.run(

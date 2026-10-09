@@ -58,6 +58,12 @@ KEY = (
     r"|sleep\w*|idle|grace|settl\w*|back-?off|heartbeat\w*)"
 )
 SHELL_START = r"(?:^|[;&|(`{]|\$\(|\b(?:do|then|else|time|nohup|exec|command)\b)\s*"
+# A zero length (`0`, `0.0`, `0s`) does not wait: `sleep 0` is a no-op,
+# `timeout 0` disables the limit, `setTimeout(fn, 0)` only yields.
+ZERO = r"0+(?:\.0*)?"
+ZERO_VALUE = re.compile(r"^" + ZERO + r"[smhd]?$")
+NOT_ZERO = r"(?!" + ZERO + r"[smhd]?(?![^\s;&|)]))"
+NOT_ZERO_CALL = r"(?!\s*" + ZERO + r"\s*\))"
 TIME_NAME = (
     r"(?:timeout|deadline|debounce|interval|grace|retry_after|backoff|delay"
     r"|wait_(?:ms|millis|secs?|seconds)|poll_(?:ms|millis|secs?|seconds|every))"
@@ -65,24 +71,41 @@ TIME_NAME = (
 
 # (label, regex, unless): a match is ignored when `unless` matches its line.
 CODE_PATTERNS = [
-    ("sleep command", re.compile(SHELL_START + r"(sleep\s+[^\s;&|)]+)"), None),
+    ("sleep command", re.compile(SHELL_START + r"(sleep\s+" + NOT_ZERO + r"[^\s;&|)]+)"), None),
     (
         "timeout command",
-        re.compile(SHELL_START + r"(g?timeout\s+(?:-\S+\s+)*\d[\d.]*[smhd]?)(?!\S)"),
+        re.compile(
+            SHELL_START + r"(g?timeout\s+(?:-\S+\s+)*" + NOT_ZERO + r"\d[\d.]*[smhd]?)(?!\S)"
+        ),
         None,
     ),
     (
         "timeout option",
-        re.compile(r"(--[\w-]*timeout[\w-]*(?:=|\s+|[\"'],\s*[\"'])[\"']?\d[\d_.]*)"),
+        re.compile(
+            r"(--[\w-]*timeout[\w-]*(?:=|\s+|[\"'],\s*[\"'])[\"']?(?!" + ZERO + r"(?![\d_.]))"
+            r"\d[\d_.]*)"
+        ),
         None,
     ),
-    ("sleep call", re.compile(r"((?:\btime|\basyncio|\btrio|\bgevent)\.sleep\s*\()"), None),
-    ("sleep call", re.compile(r"(\b(?:thread|time)::sleep\s*\()"), None),
+    (
+        "sleep call",
+        re.compile(r"((?:\btime|\basyncio|\btrio|\bgevent)\.sleep\s*\(" + NOT_ZERO_CALL + r")"),
+        None,
+    ),
+    (
+        "sleep call",
+        re.compile(
+            r"(\b(?:thread|time)::sleep\s*\((?!\s*(?:[\w:]*::)?Duration::(?:ZERO\b|from_\w+\("
+            + ZERO
+            + r"\s*\))))"
+        ),
+        None,
+    ),
     (
         "duration literal",
         re.compile(
             r"(Duration::from_(?:secs|millis|micros|nanos|secs_f32|secs_f64|mins|hours)"
-            r"\(\s*(?!0+(?:\.0+)?\s*\))\d[\d_.]*\s*\))"
+            r"\(" + NOT_ZERO_CALL + r"\s*\d[\d_.]*\s*\))"
         ),
         None,
     ),
@@ -95,13 +118,14 @@ CODE_PATTERNS = [
     (
         "timer",
         re.compile(r"(\bset(?:Timeout|Interval)\s*\()"),
-        re.compile(r",\s*0\s*\)"),
+        re.compile(r",\s*" + ZERO + r"\s*\)"),
     ),
-    ("timeout call", re.compile(r"(\b\w*_timeout(?:_ms)?\s*\([^)\n]*\d)"), None),
+    ("timeout call", re.compile(r"(\b\w*_timeout(?:_ms)?\s*\([^)\n]*[1-9])"), None),
     (
         "time constant",
         re.compile(
-            r"(\b\w*" + TIME_NAME + r"\w*[\"']?\s*[:=]\s*[\"']?(?!0\b)\d[\d_.]*)",
+            r"(\b\w*" + TIME_NAME + r"\w*[\"']?\s*[:=]\s*[\"']?(?!" + ZERO + r"(?![\d_.]))"
+            r"\d[\d_.]*)",
             re.IGNORECASE,
         ),
         None,
@@ -342,11 +366,12 @@ def check_segment(words, command, findings, depth=0):
         return
     command_word = os.path.basename(words[0])
     args = words[1:]
-    if command_word == "sleep" and args:
+    if command_word == "sleep" and args and not all(ZERO_VALUE.match(arg) for arg in args):
         findings.append(Finding("sleep command", "sleep " + args[0], "Bash command"))
     if command_word in ("timeout", "gtimeout"):
         duration = next((arg for arg in args if not arg.startswith("-")), "")
-        findings.append(Finding("timeout command", command_word + " " + duration, "Bash command"))
+        if not ZERO_VALUE.match(duration):
+            findings.append(Finding("timeout command", command_word + " " + duration, "Bash command"))
         tail = args[args.index(duration) + 1:] if duration in args else []
         check_segment(tail, command, findings, depth + 1)
         return
@@ -359,7 +384,7 @@ def check_segment(words, command, findings, depth=0):
         value = option.group(2)
         if value is None and index + 1 < len(args):
             value = args[index + 1]
-        if value and re.match(r"^\d", value) and not re.match(r"^0+$", value):
+        if value and re.match(r"^\d", value) and not ZERO_VALUE.match(value):
             findings.append(Finding("timeout option", option.group(1) + " " + value, "Bash command"))
     if command_word == "herdr-job" and "--" in args:
         check_segment(args[args.index("--") + 1:], command, findings, depth + 1)

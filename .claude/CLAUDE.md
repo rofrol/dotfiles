@@ -76,7 +76,14 @@ and scripts and the tasks you delegate; a label ("debounce", "tooling")
 does not qualify a delay. Every wait names the positive event or condition
 it waits for and what produces it, never a negative one ("idle for N", "no
 marker for N"). A retry needs an acknowledgement and an idempotent action,
-never a blind resend. Canonical text: Rule 10 in
+never a blind resend.
+It also covers fixes and the options any report or question offers: never
+offer a longer timeout, sleep, blind retry or debounce as a fix or option for
+an asynchronous bug. A `delay:` label on a constant inside a fix (not a test
+harness or tooling) needs the user's or the coordinating agent's agreement,
+with the evidence, before it is added; it never serves to get past the delay
+check. Whoever passes on another agent's report checks every option in it
+against this rule first. Canonical text: Rule 10 in
 ~/personal_projects/agents.md/AGENTS.md.
 
 # AskUserQuestion fields

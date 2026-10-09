@@ -482,7 +482,10 @@ def reason(findings):
         "an acknowledgement, a state change). If it is a real external "
         "deadline, rate limit, external polling, designed backoff or measured "
         "slow hardware, add `delay: <which>` next to it (a code comment, "
-        "`# delay: ...` in a shell command, a line in a task text). A constant "
+        "`# delay: ...` in a shell command, a line in a task text). In a fix "
+        "(not a test harness or tooling), get the user's or the coordinating "
+        "agent's agreement, with the evidence, before adding the label; never "
+        "add one just to get past this check (Rule 10). A constant "
         "that does not wait at all takes `delay: not a wait, <what it is>`."
     )
 

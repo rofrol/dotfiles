@@ -32,6 +32,11 @@ for one with `herdr-job watch --pid <pid> --why "<what you do after it>"`, then
 shows in the user's sidebar; your own background shell does not. `watch` only
 sees the process end, not its exit status: check its result yourself.
 
+One wait command per wait: never retry `herdr-job run` in a loop, each run
+opens a tab (a runaway retry once used up the Mac's PTYs with ~400 tabs).
+When the wait itself fails, check the status once and report instead of
+retrying. Bound every loop you write in iterations.
+
 When `git status` shows changes that are not yours (another session works in
 the same checkout), build and test your change in a clean tree:
 `herdr-job clean-tree <your paths> -- <build or test command>` runs it on

@@ -226,6 +226,10 @@
             ],
             align: Left,
         )),
+        "scrobble": Pane(Property(
+            content: [(kind: Property(Status(Scrobble)), style: (fg: "#7aa0cd"))],
+            align: Right,
+        )),
         "elapsed_total": Pane(Property(
             content: [
                 (kind: Property(Status(Elapsed))),
@@ -339,6 +343,11 @@
                 (
                     size: "100%",
                     pane: Pane(ProgressBar)
+                ),
+                // the scrobbler's view of the playing song, before the time
+                (
+                    size: "40",
+                    pane: Component("scrobble")
                 ),
                 (
                     size: "14",

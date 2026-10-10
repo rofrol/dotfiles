@@ -66,16 +66,16 @@
             "<S-Tab>":    PreviousTab,
             "gT":         PreviousTab,
             // digits follow the tab order; the later tabs by name (gv, gu, gs, gl)
-            "1":          SwitchToTab("Hits"),
-            "2":          SwitchToTab("Queue"),
-            "3":          SwitchToTab("Up next"),
-            "4":          SwitchToTab("Shuffle"),
-            "5":          SwitchToTab("Directories"),
-            "6":          SwitchToTab("Artists"),
-            "7":          SwitchToTab("Album Artists"),
-            "8":          SwitchToTab("Albums"),
-            "9":          SwitchToTab("Playlists"),
-            "0":          SwitchToTab("Live playlists"),
+            "1":          SwitchToTab("Play"),
+            "2":          SwitchToTab("Hits"),
+            "3":          SwitchToTab("Queue"),
+            "4":          SwitchToTab("Up next"),
+            "5":          SwitchToTab("Shuffle"),
+            "6":          SwitchToTab("Directories"),
+            "7":          SwitchToTab("Artists"),
+            "8":          SwitchToTab("Album Artists"),
+            "9":          SwitchToTab("Albums"),
+            "0":          SwitchToTab("Playlists"),
             "gv":         SwitchToTab("Versions"),
             "gu":         SwitchToTab("Up next"),
             "gs":         SwitchToTab("Shuffle"),
@@ -171,6 +171,16 @@
         album_date_tags: [Date],
     ),
     tabs: [
+        // rormpc Play pane: Queue, Hits and Shuffle in one (the queue or the weighted plan, the Hits filters,
+        // preview + Apply, smart lists)
+        (
+            name: "Play",
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Play()), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
         // rormpc Hits pane: ranked chart hits written by `hits ... --json ~/.cache/rormpc/hits/current.json`
         (
             name: "Hits",

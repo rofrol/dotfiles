@@ -117,6 +117,13 @@ decision".
 - Do not ask me what the repository answers, such as whether an item is done:
   verify it. Ask only real choices, as clickable options when you can.
 - Items you add go to "Proposed" and are not approved until I move them.
+  An item may go straight to "Next, in order" only when all hold: it follows
+  directly from an approved item (e.g. a gap found while doing it), it needs
+  no guest/image build or other costly run, it changes no user-visible
+  behavior, and one `git revert` undoes it. Ask the Proposed items an
+  approved item produced as one multi-select menu, each with its cost and
+  whether it needs a build, not as a list left awaiting approval. Silence
+  is never approval.
 - Only one session works through a repository's TODO at a time.
 - While a session works through the TODO, a new request from me is not
   done on the spot: add it to `TODO.md` in my words, as approved work at the

@@ -5,21 +5,21 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "F7/F8/F9 control MPD through ~/scripts/mpd-media-key (previous, play/pause, next), even when another app is macOS's Now Playing app. Without this rule fn_function_keys turns them into consumer keys from Karabiner's virtual keyboard, which go straight to the Now Playing app and never reach a Hammerspoon event tap. Only the bare keys match: Shift+F7/F8/F9 still send the media key to the Now Playing app, fn+F7/F8/F9 stay plain F-keys.",
+                        "description": "F7/F8/F9 control MPD through mpd-player's command socket (previous through its history, play/pause, next), even when another app is macOS's Now Playing app: send_user_command sends one datagram per press, no shell or mpc. The endpoint is the path `mpd-player socket-path` prints for the launchd agent. When mpd-player is not running the keys do nothing. Without this rule fn_function_keys turns them into consumer keys from Karabiner's virtual keyboard, which go straight to the Now Playing app and never reach a Hammerspoon event tap. Only the bare keys match: Shift+F7/F8/F9 still send the media key to the Now Playing app, fn+F7/F8/F9 stay plain F-keys.",
                         "manipulators": [
                             {
                                 "from": { "key_code": "f7" },
-                                "to": [{ "shell_command": "~/scripts/mpd-media-key prev" }],
+                                "to": [{ "send_user_command": { "endpoint": "/Users/romanfrolow/.local/state/rormpc/player.sock", "payload": { "command": "prev" } } }],
                                 "type": "basic"
                             },
                             {
                                 "from": { "key_code": "f8" },
-                                "to": [{ "shell_command": "~/scripts/mpd-media-key toggle" }],
+                                "to": [{ "send_user_command": { "endpoint": "/Users/romanfrolow/.local/state/rormpc/player.sock", "payload": { "command": "toggle" } } }],
                                 "type": "basic"
                             },
                             {
                                 "from": { "key_code": "f9" },
-                                "to": [{ "shell_command": "~/scripts/mpd-media-key next" }],
+                                "to": [{ "send_user_command": { "endpoint": "/Users/romanfrolow/.local/state/rormpc/player.sock", "payload": { "command": "next" } } }],
                                 "type": "basic"
                             }
                         ]

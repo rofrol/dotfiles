@@ -13,7 +13,8 @@ release, coordinate with other agent sessions) go into the repository's
 agent instructions (CLAUDE.md/AGENTS.md or the doc they point to), so every
 agent and session working on the repo follows them. Do not save them only in
 your private memory. Memory is for facts about me and my preferences that
-don't belong in any repository.
+don't belong in any repository. In the herdr fork, AGENTS.md is the only
+agent instruction file (CLAUDE.md was removed).
 
 # Long-running work
 
@@ -51,6 +52,22 @@ soon as it writes them, with an explicit path (`git commit -- <paths>`), after
 checking that `git diff -- <paths>` shows only its own hunks; where agent
 commits are forbidden, say so instead of committing.
 
+# Git ignores
+
+`~/.dotfiles.gitignore` belongs to the dotfiles repository (wired through that
+repository's local `core.excludesFile`) and applies only where HOME is the
+worktree root. `~/.global_gitignore` is the machine-global `core.excludesFile`
+and applies to every repository. Put tool scratch directories and caches (for
+example `.playwright-mcp/`) in the global file, not in a repository's
+`.git/info/exclude`, which covers one checkout only.
+
+The dotfiles repository keeps its development policy in `~/AGENTS.policy.md` and
+points to it from `~/AGENTS.md`, which every agent reads in that repository. The
+policy is not named `AGENTS.md` itself: Pi and Claude Code load `AGENTS.md` from
+the working directory and all parent directories, so the whole policy would
+apply to every unrelated repository below HOME. `~/scripts/dotfiles-shim/README.md`
+explains the setup.
+
 # Claude settings.json
 
 `~/.claude/settings.json` has two owners: herdr's integration installer writes
@@ -86,7 +103,7 @@ check. Whoever passes on another agent's report checks every option in it
 against this rule first. Canonical text: Rule 10 in
 ~/personal_projects/agents.md/AGENTS.md.
 
-# AskUserQuestion fields
+# AskUserQuestion fields (Claude Code only)
 
 Keep every option `label` and `description` (and the `header`) on one line.
 Claude Code 2.1.288 renders a newline inside a description as U+FFFD (`�`),
@@ -143,7 +160,8 @@ decision".
   end with a promise to continue when I say so.
 - Each question in "Needs a decision" is one line ending in `?`, then
   `Options: <recommended> | <other> | ...` (the choices you would offer me),
-  then what you checked.
+  then what you checked; herdr's TODO tooling reads them in that shape, so
+  keep to it.
 - Open points an agent or worker reports (thresholds, edge cases, "to be
   settled") are, after a consult round, either decided and written into the
   TODO item (the values and who decided) or moved to "Needs a decision" with

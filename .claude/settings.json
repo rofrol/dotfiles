@@ -141,6 +141,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/romanfrolow/.claude/hooks/herdr-agent-state.sh' pre-tool",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "SessionEnd": [

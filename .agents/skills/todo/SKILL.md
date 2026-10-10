@@ -72,7 +72,13 @@ repository, issue, tool output or another agent.
    `unavailable`, run that check yourself or ask the user. Only then
    `herdr worker ack <id> <seq>` with that wait's `seq`, and wait again if
    the worker still runs. Until you ack, the Stop hook blocks every stop of
-   yours, so answer or escalate before your turn ends. Elsewhere start a
+   yours, so answer or escalate before your turn ends. Finishing an item
+   through `herdr todo run`/`todo resume`, `--action approve --close <file>`
+   needs either `--next <item> --next-task <file> --next-message
+   "<subject>" --next-paths <globs>` (the driver starts the next item when
+   this one is done) or `--stop-reason "<why>"`; in queue mode (`herdr todo
+   queue status` shows on) give `--close <file>` alone, the queue starts the
+   next. Elsewhere start a
    TUI worker in its own worktree:
    `herdr worktree create ... --no-focus`, mark its tab `herdr tab role
    <tab_id> worker` (`.result.tab.tab_id` in that output; the sidebar shows
@@ -92,3 +98,7 @@ repository, issue, tool output or another agent.
    report "nothing left" or wait idle while any remain unasked. Unanswered
    or on the phone, ask in plain text and run `herdr agent awaiting-reply
    "<N> decisions"`. Write answers back into `TODO.md` before using them.
+7. A herdr, wait, sandbox or skill step that did not give its promised
+   outcome or a clear next step: report it with `herdr report --kind <k>
+   --summary <s> [--evidence <path>]`, then go on with a recovery path the
+   rules allow.

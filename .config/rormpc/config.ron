@@ -73,7 +73,7 @@
             "gv":         SwitchToTab("Versions"),
             "gu":         SwitchToTab("Up next"),
             "gy":         SwitchToTab("Lyrics"),
-            "gd":         SwitchToTab("Deleted"),
+            "gd":         ShowPlay(Deleted), // the deletion journal, a panel over Music
             "gf":         SwitchToTab("Search"),
             "u":      Update,
             "U":      Rescan,
@@ -201,15 +201,6 @@
                 size: "100%",
                 direction: Vertical,
                 panes: [(pane: Pane(Versions()), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        // rormpc Deleted pane: songs deleted with Ctrl-x (`musicdb deletions --json --all`); Enter restores/retries
-        (
-            name: "Deleted",
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(Deleted()), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
         // lyrics of the playing song: synced .lrc, plain .txt or a note (Queue menu: Choose lyrics…)

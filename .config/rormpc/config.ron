@@ -65,9 +65,9 @@
             "gt":         NextTab,
             "<S-Tab>":    PreviousTab,
             "gT":         PreviousTab,
-            // the tabs: 1 Play, 2 Up next, 3 Search (as the built-in keys); 4-9 and 0 are left to the built-in
-            // keys (Play's Browse groupings and the Live overlay); the later tabs by name (gv, gu, gy, gd, gf)
-            "1":          SwitchToTab("Play"),
+            // the tabs: 1 Music, 2 Up next, 3 Search (as the built-in keys); 4-9 and 0 are left to the built-in
+            // keys (Music's Browse groupings and the Live overlay); the later tabs by name (gv, gu, gy, gd, gf)
+            "1":          SwitchToTab("Music"),
             "2":          SwitchToTab("Up next"),
             "3":          SwitchToTab("Search"),
             "gv":         SwitchToTab("Versions"),
@@ -84,7 +84,7 @@
             "<C-y>":      ExternalCommand(command: ["musicdb", "undo"], description: "Undo the last Ctrl-x (repeatable)"),
         },
         navigation: {
-            // Play's Browse: play the row replacing the queue (the queue map's "P" sorts by plays and hides the built-in one)
+            // Music's Browse: play the row replacing the queue (the queue map's "P" sorts by plays and hides the built-in one)
             "P":          PlayReplace,
             "<C-c>":      Close,
             "<Esc>":      Close,
@@ -165,10 +165,10 @@
         album_date_tags: [Date],
     ),
     tabs: [
-        // rormpc Play pane: Queue, Hits and Shuffle in one (the queue or the weighted plan, the Hits filters,
-        // preview + Apply, smart lists)
+        // rormpc Music tab (the Play pane): Queue, Hits and Shuffle in one (the queue or the weighted plan, the Hits
+        // filters, preview + Apply, smart lists)
         (
-            name: "Play",
+            name: "Music",
             pane: Split(
                 size: "100%",
                 direction: Vertical,

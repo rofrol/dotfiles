@@ -67,7 +67,7 @@
             "gT":         PreviousTab,
             // the tabs: 1 Music, 3 Search (as the built-in keys); 2 and gu put the cursor on Music's Up next row;
             // 4-9 and 0 are left to the built-in keys (Music's Browse groupings and the Live overlay); the later
-            // tabs by name (gv, gy, gd, gf)
+            // tabs by name (gv, gy, gd, gY, gf)
             "1":          SwitchToTab("Music"),
             "2":          ShowPlay(UpNext), // Music with the cursor on its "Up next · N" row
             "3":          SwitchToTab("Search"),
@@ -75,6 +75,7 @@
             "gu":         ShowPlay(UpNext),
             "gy":         SwitchToTab("Lyrics"),
             "gd":         ShowPlay(Deleted), // the deletion journal, a panel over Music
+            "gY":         ShowPlay(Years), // the release years to review (musicdb years), a panel over Music
             "gf":         SwitchToTab("Search"),
             "u":      Update,
             "U":      Rescan,
@@ -163,7 +164,7 @@
     artists: (
         album_display_mode: SplitByDate,
         album_sort_by: Date,
-        album_date_tags: [Date],
+        album_date_tags: [OriginalDate, Date], // the song's original release (TDOR), else this recording's
     ),
     tabs: [
         // rormpc Music tab (the Play pane): Queue, Hits and Shuffle in one (the queue or the weighted plan, the Hits

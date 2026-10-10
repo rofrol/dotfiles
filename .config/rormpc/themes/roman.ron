@@ -90,9 +90,9 @@
             label_prop: (kind: Text("Artist")),
             width: "30%",
         ),
-        // Date holds the MusicBrainz first release date (written by mbtag); show the year only
+        // the song's original release (OriginalDate, TDOR), else this recording's (Date, TDRC); the year only
         (
-            prop: (kind: Transform(Truncate(content: (kind: Property(Other("date"))), length: 4)), default: (kind: Text(""))),
+            prop: (kind: Transform(Truncate(content: (kind: Property(Other("originaldate")), default: (kind: Property(Other("date")))), length: 4)), default: (kind: Text(""))),
             label_prop: (kind: Text("Year")),
             width: "5%",
         ),

@@ -65,21 +65,13 @@
             "gt":         NextTab,
             "<S-Tab>":    PreviousTab,
             "gT":         PreviousTab,
-            // digits follow the tab order; the later tabs by name (gv, gu, gs, gl)
+            // the tabs: 1 Play, 2 Up next, 3 Search (as the built-in keys); 4-9 and 0 are left to the built-in
+            // keys (Play's Browse groupings and the Live overlay); the later tabs by name (gv, gu, gy, gd, gf)
             "1":          SwitchToTab("Play"),
-            "2":          SwitchToTab("Hits"),
-            "3":          SwitchToTab("Queue"),
-            "4":          SwitchToTab("Up next"),
-            "5":          SwitchToTab("Shuffle"),
-            "6":          SwitchToTab("Directories"),
-            "7":          SwitchToTab("Artists"),
-            "8":          SwitchToTab("Album Artists"),
-            "9":          SwitchToTab("Albums"),
-            "0":          SwitchToTab("Playlists"),
+            "2":          SwitchToTab("Up next"),
+            "3":          SwitchToTab("Search"),
             "gv":         SwitchToTab("Versions"),
             "gu":         SwitchToTab("Up next"),
-            "gs":         SwitchToTab("Shuffle"),
-            "gl":         SwitchToTab("Live playlists"),
             "gy":         SwitchToTab("Lyrics"),
             "gd":         SwitchToTab("Deleted"),
             "gf":         SwitchToTab("Search"),
@@ -92,6 +84,8 @@
             "<C-y>":      ExternalCommand(command: ["musicdb", "undo"], description: "Undo the last Ctrl-x (repeatable)"),
         },
         navigation: {
+            // Play's Browse: play the row replacing the queue (the queue map's "P" sorts by plays and hides the built-in one)
+            "P":          PlayReplace,
             "<C-c>":      Close,
             "<Esc>":      Close,
             "<CR>":       Confirm,
@@ -181,59 +175,6 @@
                 panes: [(pane: Pane(Play()), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
-        // rormpc Hits pane: ranked chart hits written by `hits ... --json ~/.cache/rormpc/hits/current.json`
-        (
-            name: "Hits",
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(Hits()), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        (
-            name: "Queue",
-            pane: Split(
-                direction: Vertical,
-                panes: [
-                    (
-                        size: "3",
-                        borders: "ALL",
-                        border_symbols: Inherited(parent: Rounded, bottom_left: "├", bottom_right: "┤",),
-                        pane: Split(
-                            direction: Horizontal,
-                            panes: [
-                                (
-                                    size: "1",
-                                    pane: Pane(Empty())
-                                ),
-                                (
-                                    size: "100%",
-                                    pane: Pane(QueueHeader())
-                                ),
-                            ]
-                        )
-                    ),
-                    (
-                        size: "100%",
-                        borders: "LEFT | RIGHT | BOTTOM",
-                        border_symbols: Rounded,
-                        pane: Split(
-                            direction: Horizontal,
-                            panes: [
-                                (
-                                    size: "1",
-                                    pane: Pane(Empty())
-                                ),
-                                (
-                                    size: "100%",
-                                    pane: Pane(Queue)
-                                ),
-                            ]
-                        )
-                    ),
-                ],
-            ),
-        ),
         // rormpc Up next pane: the songs asked for with "Play next"; Enter plays now, K/J move, D removes
         (
             name: "Up next",
@@ -243,90 +184,14 @@
                 panes: [(pane: Pane(UpNext()), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
-        // rormpc Shuffle pane: the weighted shuffle's pick and the candidates of its next draw (view only)
         (
-            name: "Shuffle",
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(Shuffle()), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        (
-            name: "Directories",
+            name: "Search",
             borders: "ALL",
             border_symbols: Rounded,
             pane: Split(
                 size: "100%",
                 direction: Vertical,
-                panes: [(pane: Pane(Directories), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        (
-            name: "Artists",
-            borders: "ALL",
-            border_symbols: Rounded,
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(Artists), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        (
-            name: "Album Artists",
-            borders: "ALL",
-            border_symbols: Rounded,
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(AlbumArtists), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        (
-            name: "Albums",
-            borders: "ALL",
-            border_symbols: Rounded,
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(Albums), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        (
-            name: "Playlists",
-            borders: "ALL",
-            border_symbols: Rounded,
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(Playlists), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        // rormpc: public YouTube playlists mirrored as MPD playlists (liveplaylist, rormpc-tools 0.2.34)
-        (
-            name: "Live playlists",
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(LivePlaylists()), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        // lyrics of the playing song: synced .lrc, plain .txt or a note (Queue menu: Choose lyrics…)
-        (
-            name: "Lyrics",
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(Lyrics), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        // rormpc Deleted pane: songs deleted with Ctrl-x (`musicdb deletions --json --all`); Enter restores/retries
-        (
-            name: "Deleted",
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(Deleted()), size: "100%", borders: "ALL", border_symbols: Rounded)],
+                panes: [(pane: Pane(Search), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
         // rormpc Versions pane: names shared by several files (`musicdb versions --json`); Enter decides
@@ -338,14 +203,22 @@
                 panes: [(pane: Pane(Versions()), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
+        // rormpc Deleted pane: songs deleted with Ctrl-x (`musicdb deletions --json --all`); Enter restores/retries
         (
-            name: "Search",
-            borders: "ALL",
-            border_symbols: Rounded,
+            name: "Deleted",
             pane: Split(
                 size: "100%",
                 direction: Vertical,
-                panes: [(pane: Pane(Search), size: "100%", borders: "ALL", border_symbols: Rounded)],
+                panes: [(pane: Pane(Deleted()), size: "100%", borders: "ALL", border_symbols: Rounded)],
+            )
+        ),
+        // lyrics of the playing song: synced .lrc, plain .txt or a note (Queue menu: Choose lyrics…)
+        (
+            name: "Lyrics",
+            pane: Split(
+                size: "100%",
+                direction: Vertical,
+                panes: [(pane: Pane(Lyrics), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
     ],

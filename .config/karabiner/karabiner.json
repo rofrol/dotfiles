@@ -31,7 +31,7 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": ["^org\\.gnu\\.Emacs$"],
-                                        "file_paths": ["/Try Roguix\\.app/Contents/Resources/runtime/bin/Try Roguix$"],
+                                        "file_paths": ["/Try Roguix( Dev)?\\.app/Contents/Resources/runtime/bin/Try Roguix$"],
                                         "type": "frontmost_application_unless"
                                     }
                                 ],

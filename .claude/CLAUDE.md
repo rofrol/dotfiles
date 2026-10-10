@@ -16,6 +16,14 @@ your private memory. Memory is for facts about me and my preferences that
 don't belong in any repository. In the herdr fork, AGENTS.md is the only
 agent instruction file (CLAUDE.md was removed).
 
+Host configuration in my dotfiles that exists for a project (key-remapper
+exemptions, launcher or window rules matching its app or process) is that
+project's TODO coordinator's responsibility: when a change alters what such a
+rule matches (an app or process path, bundle name or identity), the
+coordinator updates the rule in the dotfiles repo (commit by path, with the
+area prefix) and checks the behavior it protects; if it cannot, it says what
+is left. The project's repository keeps only generic docs, never my paths.
+
 # Long-running work
 
 Run work that takes more than a minute (builds, exports, VM or remote jobs,

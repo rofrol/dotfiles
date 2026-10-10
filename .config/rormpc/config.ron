@@ -65,13 +65,14 @@
             "gt":         NextTab,
             "<S-Tab>":    PreviousTab,
             "gT":         PreviousTab,
-            // the tabs: 1 Music, 2 Up next, 3 Search (as the built-in keys); 4-9 and 0 are left to the built-in
-            // keys (Music's Browse groupings and the Live overlay); the later tabs by name (gv, gu, gy, gd, gf)
+            // the tabs: 1 Music, 3 Search (as the built-in keys); 2 and gu put the cursor on Music's Up next row;
+            // 4-9 and 0 are left to the built-in keys (Music's Browse groupings and the Live overlay); the later
+            // tabs by name (gv, gy, gd, gf)
             "1":          SwitchToTab("Music"),
-            "2":          SwitchToTab("Up next"),
+            "2":          ShowPlay(UpNext), // Music with the cursor on its "Up next · N" row
             "3":          SwitchToTab("Search"),
             "gv":         SwitchToTab("Versions"),
-            "gu":         SwitchToTab("Up next"),
+            "gu":         ShowPlay(UpNext),
             "gy":         SwitchToTab("Lyrics"),
             "gd":         ShowPlay(Deleted), // the deletion journal, a panel over Music
             "gf":         SwitchToTab("Search"),
@@ -173,15 +174,6 @@
                 size: "100%",
                 direction: Vertical,
                 panes: [(pane: Pane(Play()), size: "100%", borders: "ALL", border_symbols: Rounded)],
-            )
-        ),
-        // rormpc Up next pane: the songs asked for with "Play next"; Enter plays now, K/J move, D removes
-        (
-            name: "Up next",
-            pane: Split(
-                size: "100%",
-                direction: Vertical,
-                panes: [(pane: Pane(UpNext()), size: "100%", borders: "ALL", border_symbols: Rounded)],
             )
         ),
         (

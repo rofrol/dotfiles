@@ -16,13 +16,16 @@ your private memory. Memory is for facts about me and my preferences that
 don't belong in any repository. In the herdr fork, AGENTS.md is the only
 agent instruction file (CLAUDE.md was removed).
 
-Host configuration in my dotfiles that exists for a project (key-remapper
-exemptions, launcher or window rules matching its app or process) is that
-project's TODO coordinator's responsibility: when a change alters what such a
-rule matches (an app or process path, bundle name or identity), the
-coordinator updates the rule in the dotfiles repo (commit by path, with the
-area prefix) and checks the behavior it protects; if it cannot, it says what
-is left. The project's repository keeps only generic docs, never my paths.
+Host configuration that targets a project's app or process (key-remapper
+exemptions, launcher or window rules) is that project's TODO coordinator's
+responsibility: when a change alters what such configuration matches (an app or
+process path, bundle name or identity), the coordinator updates it, through the
+owning app's settings where the app manages the file, and checks the behavior
+it protects. If the file is tracked in the home repository, commit it by path
+with an area prefix; otherwise (untracked, set with defaults, or rewritten by
+its app) do not commit, but say what changed and the exact way to redo it; say
+what was left undone. The project's repository keeps only generic docs, never
+my paths.
 
 # Long-running work
 

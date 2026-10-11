@@ -35,6 +35,16 @@ todo_command = "~/scripts/todo-worker {space}"
 close_pane = ["cmd+w", "ctrl+shift+w"]
 new_tab = ["prefix+c", "cmd+t", "ctrl+shift+t"]
 reopen_tab = ["prefix+u", "cmd+shift+t"]
+move_space_previous = "alt+shift+up"
+move_space_next = "alt+shift+down"
+
+[[keys.command]]
+key = "prefix+alt+g"
+type = "popup"
+command = "lazygit"
+description = "lazygit: review agent commits"
+width = "90%"
+height = "90%"
 
 [workers]
 pre_tool_checks = [["python3", "~/.claude/hooks/delay-check.py"]]

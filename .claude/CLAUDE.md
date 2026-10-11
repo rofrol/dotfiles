@@ -198,6 +198,16 @@ decision".
   wait on it that wakes the session when it ends (e.g. Claude Code's
   `run_in_background` around `herdr-job wait`) will bring you back. Never
   end with a promise to continue when I say so.
+- A coordinator's or model's statement that work will continue (it waits
+  in the background, a worker is on it, it resumes when notified) is a
+  claim, not evidence; so are a worker's "build running" and another
+  model's judgment. herdr's supervisor checks it on events (each worker
+  verdict or question, each coordinator turn end with outstanding
+  assignments, each waiter exit and server handoff) against its own
+  registry of assignments and the waits bound to them, and when nothing
+  will deliver a result it wakes the coordinator with that result or
+  alerts me. So a coordinator reports only what it has started and can
+  name (the job, the run, the wait), never "it will continue".
 - Each question in "Needs a decision" is one line ending in `?`, then
   `Options: <recommended> | <other> | ...` (the choices you would offer me),
   then what you checked; herdr's TODO tooling reads them in that shape, so

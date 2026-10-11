@@ -15,7 +15,8 @@
       "Bash(herdr todo status:*)",
       "Bash(herdr todo resume:*)",
       "Bash(herdr-job wait:*)",
-      "Bash(herdr agent wait:*)"
+      "Bash(herdr agent wait:*)",
+      "Bash(/Users/romanfrolow/personal_projects/guix/roguix-vps/scripts/mac/porkbun-create-a-record:*)"
     ]
   },
   "model": "opus",

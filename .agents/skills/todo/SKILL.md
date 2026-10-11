@@ -82,7 +82,12 @@ repository, issue, tool output or another agent.
    TUI worker in its own worktree:
    `herdr worktree create ... --no-focus`, mark its tab `herdr tab role
    <tab_id> worker` (`.result.tab.tab_id` in that output; the sidebar shows
-   `⚒`), `herdr agent start`, send the task with `herdr agent prompt` (it
+   `⚒`), `herdr agent start`. A worker that needs no worktree (SSH, a
+   browser) still gets its own tab: `herdr tab create --workspace
+   <your workspace_id> --no-focus`, `herdr tab role <tab_id> worker`, then
+   `herdr agent start --pane <its pane>`. Never split your own pane or
+   start a worker in your own tab (on 2026-10-11 a coordinator split its
+   pane and the owner asked why). Send the task with `herdr agent prompt` (it
    prints the request id), then wait for its verdict, never for a pane
    state: `herdr-job run -- herdr-job wait-agent <pane> --request <id>
    --until verdict`. It ends only on that assignment's `WORKER-DONE` or

@@ -215,7 +215,10 @@ decision".
   worker's tab and worktree. Follow the repository's own delegation notes
   where it has them. It does only this itself: edits to `TODO.md` and
   `DECISIONS.md` (queuing, triage, answers, decisions), answering me, worker
-  tasks, reviewing and bringing in workers' commits, running checks, and the
+  tasks, reviewing and bringing in workers' commits, running checks, consult
+  rounds (when I ask to ask the models, it queues the request first, then
+  runs the round in the same turn, since a consult is a decision step, not
+  implementation, and records the outcome in the item), and the
   installs and pushes the repository already approves. Everything else goes
   to a worker, however small: code, tests, scripts, configuration, rule,
   skill and other documentation text, and release steps (version bumps, tags,

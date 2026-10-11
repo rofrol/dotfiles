@@ -82,7 +82,14 @@ repository, issue, tool output or another agent.
    TUI worker in its own worktree:
    `herdr worktree create ... --no-focus`, mark its tab `herdr tab role
    <tab_id> worker` (`.result.tab.tab_id` in that output; the sidebar shows
-   `⚒`), `herdr agent start`, and wait through herdr-job.
+   `⚒`), `herdr agent start`, send the task with `herdr agent prompt` (it
+   prints the request id), then wait for its verdict, never for a pane
+   state: `herdr-job run -- herdr-job wait-agent <pane> --request <id>
+   --until verdict`. It ends only on that assignment's `WORKER-DONE` or
+   `WORKER-BLOCKED` line or a question, never on a bare turn end; exit 0
+   is done, blocked and question exit as herdr's `plugins/job/README.md`
+   says, 3 the agent exited without a verdict, 7 `WORKER-DONE` names a
+   missing commit.
 5. The worker's task: a title line, what to change, the files it may touch,
    and this contract: edit with Edit/Write; keep drafts in your temp dir by
    absolute path, never `$TMPDIR`; never work around the sandbox, list the

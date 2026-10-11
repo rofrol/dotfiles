@@ -149,13 +149,34 @@ decision".
 - Do not ask me what the repository answers, such as whether an item is done:
   verify it. Ask only real choices, as clickable options when you can.
 - Items you add go to "Proposed" and are not approved until I move them.
-  An item may go straight to "Next, in order" only when all hold: it follows
-  directly from an approved item (e.g. a gap found while doing it), it needs
-  no guest/image build or other costly run, it changes no user-visible
-  behavior, and one `git revert` undoes it. Ask the Proposed items an
-  approved item produced as one multi-select menu, each with its cost and
-  whether it needs a build, not as a list left awaiting approval. Silence
-  is never approval.
+  A follow-up found while doing an approved item goes straight to "Next, in
+  order" when it names its parent item, is small, tested, undone by one
+  revert, needs no guest/image build, adds no dependency and touches no
+  interface, security, trust or data boundary, and is not itself the parent
+  of another such follow-up; it is listed in the next report. Otherwise it
+  goes to "Proposed". Ask the Proposed items an approved item produced as
+  one multi-select menu, each with its cost and whether it needs a build,
+  not as a list left awaiting approval. Silence is never approval.
+- Standing approvals while working through an approved TODO, recorded in
+  the decision ledger where the repository has one (`herdr decision`):
+  - push the default branch only as a fast-forward, with the repository's
+    checks passing on that exact head, every outgoing commit belonging to
+    approved items, the outgoing diff reviewed for secrets, and nothing
+    that starts a release, deployment or paid action; never force-push or
+    bypass branch protection without my go;
+  - open an upstream issue or PR (from a fork) only when an approved item
+    says to report or offer that change upstream, limited to that item;
+    never comment on unrelated threads or close others' issues;
+  - to unblock an approved costly run, delete only verified regenerable
+    artifacts inside the project's own build/test directories (resolved
+    paths checked) and images this session's workers pulled that nothing
+    else uses; never user data, VM disks or anything uncertain; if the
+    space is still short, ask.
+- Ask me only real choices: irreversible loss of my data, money, access or
+  credentials, outward actions no approved item covers, product or
+  architecture decisions, or what only I can do; batch them into one menu
+  and go on with authorized work. Technical uncertainty goes to the models,
+  not to me.
 - Only one session works through a repository's TODO at a time.
 - While a session works through the TODO, a new request from me is not
   done on the spot: add it to `TODO.md` in my words, as approved work at the

@@ -5,6 +5,10 @@
 - Everything written to files is in English: code, comments, commit messages,
   and Markdown (READMEs, TODO.md, notes), even when we talk in Polish.
   Translate what I dictate in Polish.
+- In messages to me, refer to issues, pull requests, comments and commits on
+  GitHub (or another forge) with full links, e.g.
+  https://github.com/omacom/omarchy/issues/14639, not shorthand such as
+  `omacom/omarchy#14639`, so I can open them with a click.
 
 # Where lessons go
 

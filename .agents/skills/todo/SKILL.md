@@ -99,8 +99,16 @@ repository, issue, tool output or another agent.
    tests that cannot run; end any process you start; no push, install,
    rebase or agents of your own; commit with exactly this message, no body
    or trailers: `<message>`; last line `WORKER-DONE <sha> | <summary>` or
-   `WORKER-BLOCKED <reason>`.
-6. Questions for the user: every open "Needs a decision" item, old ones
+   `WORKER-BLOCKED <reason>`. Take every concrete fact the task gives
+   (host, port, user, path, version, command) from the repository, never
+   from memory, and name its source (`file:line`); tell the worker to check
+   each against that source before using it and to stop with
+   `WORKER-BLOCKED` when they disagree. In review, check the diff's facts
+   against the same sources (on 2026-10-11 a coordinator wrote `ssh
+   root@frolow.dev` without the documented port 1027 and asked the owner
+   instead of reading the repository).
+6. Questions for the user: search the repository before asking a factual
+   question; ask only what it does not answer. Every open "Needs a decision" item, old ones
    included, is unasked until asked in this session; give each an
    `Options:` list. Ask them with AskUserQuestion (4 per call, the most
    unblocking first) right after starting a worker, when "Next, in order"

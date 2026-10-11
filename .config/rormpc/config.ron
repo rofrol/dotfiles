@@ -45,7 +45,9 @@
             "op":         ShowDecoders,
             "od":         ShowDownloads,
             "oP":         Partition(),
-            "z":          ToggleRepeat,
+            "z":          FilterUndo, // rormpc: undo the last change of Music's filters (the queue follows), from any tab
+            "Z":          FilterRedo,
+            "r":          ToggleRepeat,
             "x":          ToggleRandom,
             "og":         ShowGapMenu, // rormpc: silence between songs (mpd-player)
             "om":         ShowPauseMenu, // rormpc: pause for a while (mpd-player)
@@ -131,7 +133,7 @@
             "<C-z>":      ContextMenu(),
             "<C-s>s":     Save(kind: Modal(all: false, duplicates_strategy: Ask)),
             "<C-s>a":     Save(kind: Modal(all: true, duplicates_strategy: Ask)),
-            "r":          Rate(),
+            "y":          Rate(), // rormpc: on y, so r reaches the global ToggleRepeat in every pane
         },
         queue: {
             "d":          Delete,

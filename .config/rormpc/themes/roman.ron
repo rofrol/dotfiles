@@ -263,8 +263,8 @@
                     size: "46",
                     pane: Pane(Property(content: [
                         (kind: Property(Status(RepeatV2(
-                            on_label: "z rep ",
-                            off_label: "z rep ",
+                            on_label: "r rep ",
+                            off_label: "r rep ",
                             on_style: (fg: "yellow", modifiers: "Bold"),
                             off_style: (fg: "#7aa0cd", modifiers: "Dim"),
                         )))),

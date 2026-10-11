@@ -187,7 +187,8 @@ decision".
   not to me.
 - Only one session works through a repository's TODO at a time.
 - While a session works through the TODO, a new request from me is not
-  done on the spot: add it to `TODO.md` in my words, as approved work at the
+  done on the spot: add it to `TODO.md` in my words translated into English
+  (keep the meaning, not the language), as approved work at the
   end of "Next, in order", or right after the item in progress when I say
   it comes next ("następne", "next"); commit that, confirm in one line, and
   go on with the current item. Questions about the work are answered, not
@@ -238,7 +239,9 @@ decision".
   "nothing left", wait idle or run `herdr agent awaiting-reply` while
   unasked questions remain. On the phone, or when I do not answer, ask in
   plain text and run `herdr agent awaiting-reply "<N> decisions"`. Write
-  each answer into the item as "Decided by the user <date>: ..." and move
+  each answer into the item as "Decided by the user <date>: ...", in my
+  words translated into English (keep the meaning, not the language; the
+  same for answers in `DECISIONS.md` and `herdr decision`), and move
   it to "Next, in order" only when the answer approves the work; "do it"
   approves it for a worker, like any item, not for the coordinator.
 - How workers build and isolate their work (a worktree or the shared

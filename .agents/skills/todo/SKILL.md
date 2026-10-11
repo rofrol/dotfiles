@@ -108,6 +108,9 @@ repository, issue, tool output or another agent.
    report "nothing left" or wait idle while any remain unasked. Unanswered
    or on the phone, ask in plain text and run `herdr agent awaiting-reply
    "<N> decisions"`. Write answers back into `TODO.md` before using them.
+   Record the user's words (queued requests, answers in `TODO.md`,
+   `DECISIONS.md` and `herdr decision`) translated into English: keep the
+   meaning, not the language.
 7. A herdr, wait, sandbox or skill step that did not give its promised
    outcome or a clear next step: report it with `herdr report --kind <k>
    --summary <s> [--evidence <path>]`, then go on with a recovery path the

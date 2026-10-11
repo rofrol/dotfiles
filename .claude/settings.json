@@ -4,7 +4,8 @@
       "Bash(herdr agent awaiting-reply)",
       "Bash(herdr agent set-task:*)",
       "Bash(herdr agent awaiting-reply:*)",
-      "Bash(/Users/romanfrolow/personal_projects/guix/roguix-vps/scripts/mac/porkbun-move-a-records:*)"
+      "Bash(/Users/romanfrolow/personal_projects/guix/roguix-vps/scripts/mac/porkbun-move-a-records:*)",
+      "Bash(/Users/romanfrolow/personal_projects/guix/roguix-vps/scripts/mac/vps-after-move-check)"
     ]
   },
   "model": "opus",

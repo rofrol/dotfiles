@@ -77,6 +77,7 @@
             "gu":         ShowPlay(UpNext),
             "gy":         SwitchToTab("Lyrics"),
             "gd":         ShowPlay(Deleted), // the deletion journal, a panel over Music
+            "gB":         ShowPlay(Banned), // the songs a removal from the queue banned, a panel over Music
             "gY":         ShowPlay(Years), // the release years to review (musicdb years), a panel over Music
             "gf":         SwitchToTab("Search"),
             "u":      Update,

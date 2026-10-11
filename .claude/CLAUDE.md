@@ -198,16 +198,24 @@ decision".
   wait on it that wakes the session when it ends (e.g. Claude Code's
   `run_in_background` around `herdr-job wait`) will bring you back. Never
   end with a promise to continue when I say so.
-- A coordinator's or model's statement that work will continue (it waits
-  in the background, a worker is on it, it resumes when notified) is a
-  claim, not evidence; so are a worker's "build running" and another
-  model's judgment. herdr's supervisor checks it on events (each worker
-  verdict or question, each coordinator turn end with outstanding
-  assignments, each waiter exit and server handoff) against its own
-  registry of assignments and the waits bound to them, and when nothing
-  will deliver a result it wakes the coordinator with that result or
-  alerts me. So a coordinator reports only what it has started and can
-  name (the job, the run, the wait), never "it will continue".
+- Limited trust applies to agents' and models' claims about continuation and
+  progress, not to resource access or permissions.
+  - "Waiting in the background", "a worker is on it", "it resumes when
+    notified", a worker's "build running" and another model's assurance are
+    claims, not evidence.
+  - Evidence is only a handle herdr has registered (a herdr-job job, a
+    `herdr todo run` run, a worker, a wait bound to an assignment) or a
+    recorded supervisor finding, never the agent's own assertion.
+  - Before ending a turn with outstanding work, a coordinator binds each
+    assignment to such a handle with a wake path herdr tracks; if it cannot,
+    it says so plainly and does not end the turn claiming continuation.
+  - herdr's supervisor is a deterministic loop in the server, not an agent
+    or a model: it checks the registered assignments and waits on events
+    (each worker verdict or question, each coordinator turn end with
+    outstanding assignments, each waiter exit, a handoff) and in a read-only
+    5-minute sweep, records findings, wakes the coordinator with the result
+    or the finding, or alerts me; it never kills or restarts, and its
+    finding outranks any earlier claim.
 - Each question in "Needs a decision" is one line ending in `?`, then
   `Options: <recommended> | <other> | ...` (the choices you would offer me),
   then what you checked; herdr's TODO tooling reads them in that shape, so

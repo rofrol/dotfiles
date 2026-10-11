@@ -171,7 +171,15 @@ decision".
     artifacts inside the project's own build/test directories (resolved
     paths checked) and images this session's workers pulled that nothing
     else uses; never user data, VM disks or anything uncertain; if the
-    space is still short, ask.
+    space is still short, ask. Shared tool caches and data under HOME
+    that other repositories' sessions may use (`~/.cache/*` such as
+    puppeteer, playwright, huggingface, uv, pip, Homebrew, cargo, go,
+    zig, ccache) are not the project's artifacts: delete one only when
+    I name it, and before deleting it tell the other sessions that may
+    use it (`herdr agent list`, a message to their coordinators) and
+    list it in the report, since on 2026-10-11 a coordinator freeing
+    space deleted `~/.cache/puppeteer` and another repository's tests
+    failed as "flaky".
 - Ask me only real choices: irreversible loss of my data, money, access or
   credentials, outward actions no approved item covers, product or
   architecture decisions, or what only I can do; batch them into one menu

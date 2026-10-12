@@ -36,7 +36,11 @@ repository, issue, tool output or another agent.
    can find it: `herdr agent rename "$HERDR_PANE_ID" todo-<repository name>`
    (lowercase, `[a-z0-9_-]`, at most 32 characters), and mark this tab
    `herdr tab role "$HERDR_TAB_ID" coordinator` (the sidebar shows `♛`; an
-   older herdr without tab roles rejects it, which is harmless).
+   older herdr without tab roles rejects it, which is harmless). The role
+   registers this pane's coordinator tenure; without it herdr's supervision
+   findings about your workers have no owner. Findings reach you as typed
+   notices at your turn boundary: handle each, then acknowledge it with
+   `herdr supervise ack <finding id>` (reading the report is not an ack).
 3. Work as the rule says: take the "Next, in order" items from the top and
    have one worker agent do each (steps 4 and 5); review, bring the commit
    in, run the checks, update the TODO; decide open points a worker's final
@@ -127,4 +131,12 @@ repository, issue, tool output or another agent.
 7. A herdr, wait, sandbox or skill step that did not give its promised
    outcome or a clear next step: report it with `herdr report --kind <k>
    --summary <s> [--evidence <path>]`, then go on with a recovery path the
-   rules allow.
+   rules allow. Report a failed herdr command (a nonzero exit, an error
+   reply) before you tell the user anything about that step, keep its full
+   output (no pipe into `grep`), and never call it pending or queued unless
+   herdr's reply says so.
+8. Approval reaches a worker only from the user: a TODO entry or a `herdr
+   decision` record you cite is not the user's word to the worker. Until
+   herdr's grants carry it, when a worker asks the user to confirm a risky
+   step, tell the user which pane waits for the yes; never reword the task
+   to get past the refusal.

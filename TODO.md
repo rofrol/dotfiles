@@ -20,3 +20,22 @@ Follow-ups for the tools configured in this dotfiles repository.
   results are needed: try Serper (https://serper.dev, Google results,
   $1 per 1000 queries, 2,500 free, $50 minimum purchase) as pi's search
   backend instead of Luna. Not a task before then.
+
+## scripts
+
+- [ ] wh-speakers-diarize: detect the language automatically (the user,
+  2026-10-12, via todo-rormpc-tools: "it needs to be added to
+  ~/scripts/wh-speakers-diarize"). Today `--language` defaults to `en`
+  (wh-speakers-diarize:98-102) and goes straight to mlx_whisper.transcribe,
+  so non-English audio is transcribed as English (Whisper may translate).
+  Make `--language auto` the default (an explicit code still wins): Silero
+  VAD finds speech regions; Whisper's language detection runs on 5 windows
+  of 30 s starting at speech regions; majority vote, ties broken by summed
+  probability (Whisper alone reads only the first 30 s and fails on a long
+  silent intro). No demucs for speech recordings. Print the detected code,
+  the votes and probabilities, store them in the .diarized.json, and key the
+  cached .whisper.json by language so a cached English run is not reused.
+  Reference: rormpc's transcription backend (`speech_regions`,
+  `window_starts`, the ASR class's `detect` and `vote`; its plan doc,
+  "Language detection is the biggest failure"), which picked pl, fr and en
+  correctly on library songs.

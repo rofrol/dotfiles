@@ -47,4 +47,5 @@ width = "90%"
 height = "90%"
 
 [workers]
+default_agent = "pi-anthropic"
 pre_tool_checks = [["python3", "~/.claude/hooks/delay-check.py"]]

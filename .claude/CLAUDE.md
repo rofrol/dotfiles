@@ -115,7 +115,21 @@ an asynchronous bug. A `delay:` label on a constant inside a fix (not a test
 harness or tooling) needs the user's or the coordinating agent's agreement,
 with the evidence, before it is added; it never serves to get past the delay
 check. Whoever passes on another agent's report checks every option in it
-against this rule first. Canonical text: Rule 10 in
+against this rule first.
+Periodic catch-up of your own events is a violation, whatever it is called
+(sweep, safety net, watchdog, catch-up, reconcile loop): a timer that
+re-scans, resends or repairs events your own system produced or lost is
+never a fix. Idiom: durable state is the source of truth; persist the
+cursor or progress before acknowledging; reconcile at named producing
+events, startup or handoff; a notification only wakes the consumer. A lost
+internal event needs the producer, consumer or acknowledgement path
+corrected, never periodic repair. Polling or reconciling external state
+names the external producer and does not claim to recover internal lost
+events. Whoever synthesizes models' advice classifies every time-based
+element before recording it as: event-driven | external deadline, rate
+limit, polling, designed backoff or measured hardware, with evidence | no
+timing. No timer exception is invented and no delay is a workaround.
+Canonical text: Rule 10 in
 ~/personal_projects/agents.md/AGENTS.md.
 
 # AskUserQuestion fields (Claude Code only)
@@ -218,7 +232,8 @@ decision".
     or a model: it checks the registered assignments and waits on events
     (each worker verdict or question, each coordinator turn end with
     outstanding assignments, each waiter exit, a handoff) and in a read-only
-    5-minute sweep, records findings, wakes the coordinator with the result
+    5-minute sweep that may reconcile only external state (not recover its
+    own lost events, until t-ybzw6mhn lands), records findings, wakes the coordinator with the result
     or the finding, or alerts me; it never kills or restarts, and its
     finding outranks any earlier claim.
 - Each question in "Needs a decision" is one line ending in `?`, then

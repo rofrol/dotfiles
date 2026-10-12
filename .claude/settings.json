@@ -4,8 +4,6 @@
       "Bash(herdr agent awaiting-reply)",
       "Bash(herdr agent set-task:*)",
       "Bash(herdr agent awaiting-reply:*)",
-      "Bash(/Users/romanfrolow/personal_projects/guix/roguix-vps/scripts/mac/porkbun-move-a-records:*)",
-      "Bash(/Users/romanfrolow/personal_projects/guix/roguix-vps/scripts/mac/vps-after-move-check)",
       "Bash(herdr worker ack:*)",
       "Bash(herdr worker answer:*)",
       "Bash(herdr worker escalate:*)",
@@ -15,8 +13,7 @@
       "Bash(herdr todo status:*)",
       "Bash(herdr todo resume:*)",
       "Bash(herdr-job wait:*)",
-      "Bash(herdr agent wait:*)",
-      "Bash(/Users/romanfrolow/personal_projects/guix/roguix-vps/scripts/mac/porkbun-create-a-record:*)"
+      "Bash(herdr agent wait:*)"
     ]
   },
   "model": "opus",

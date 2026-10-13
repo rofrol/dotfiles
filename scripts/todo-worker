@@ -43,14 +43,17 @@ name=$(printf 'todo-%s' "$space" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_-'
 # `todo` skill); a live holder means no second coordinator. The started agent
 # takes the lock itself; this check only avoids opening a tab that would be
 # refused.
-if holder=$("$HOME/scripts/todo-lock" status "$repo") && [[ $holder != *stale* ]]; then
+# A pending handoff note is taken over first, through the skill's handoff
+# mode; the skill checks the note and takes the lock with the note's token.
+pending=
+head -5 "$repo/HANDOFF.md" 2>/dev/null | grep -qx 'Status: pending' && pending=1
+# A lock being handed over (its holder ran `todo-lock handover`) waits for
+# the successor this starts.
+if holder=$("$HOME/scripts/todo-lock" status "$repo") && [[ $holder != *stale* ]] &&
+	! { [ -n "$pending" ] && [[ $holder == *"handing over"* ]]; }; then
 	echo "the TODO of $space is already coordinated: $holder"
 	exit 0
 fi
-# A pending handoff note is taken over first, through the skill's handoff
-# mode; the skill checks the note and takes the lock before acting on it.
-pending=
-[ "$(head -1 "$repo/HANDOFF.md" 2>/dev/null)" = "Status: pending" ] && pending=1
 existing=$(herdr agent list | jq -r --arg n "$name" --arg r "$repo" \
 	'.result.agents[] | select(.name == $n or ((.name // "") | startswith("todo-")) and .cwd == $r) | .pane_id' | head -1)
 if [ -n "$existing" ]; then

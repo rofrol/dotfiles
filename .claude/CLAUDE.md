@@ -93,17 +93,21 @@ Keep a session's context small, and hand off before it grows too large
   - links to the decisions, the TODO and the results, by path, not copied.
   Starting the new agent is a hand-over the user asked for, which this rule
   is; register it with herdr and never claim continuation without a handle.
-- The note starts with `Status: pending` and is written atomically and
-  committed. The writer releases its `todo-lock` (herdr's tenure first,
-  where it has one), then starts the taker with the first prompt
+- The writer hands its lease over with `todo-lock handover`, which prints a
+  one-time token; the lease stays held, so it is never free in between.
+  The note has `Status: pending` in its first five lines (a title may come
+  first), then `Lease token: <token>`, and
+  is written atomically and committed. The writer then starts the taker
+  with the first prompt
   `/todo --handoff <note>` (`/skill:todo --handoff <note>` in pi): in herdr
   `herdr coordinator handoff --successor`; elsewhere a detached start where
   the agent allows it, otherwise it gives the user that command.
   `~/scripts/todo-worker SPACE [pi]` (herdr's T button) sends it by itself
   when the note is pending.
-- The taker runs `todo-lock acquire` first; the lease is the claim, nothing
-  is committed to claim the note, and a held lease means someone else took
-  it. It reconciles the note against git and herdr, acts on it, and deletes
+- The taker first runs `todo-lock acquire --token <token>` (plain
+  `acquire` when that fails, which succeeds only once the writer is gone);
+  the lease is the claim, nothing is committed to claim the note, and a
+  lease it cannot get means someone else took it. It reconciles the note against git and herdr, acts on it, and deletes
   the note in a commit once everything in it is done; the state lives on in
   the TODO and the decision records. Any `/todo` start that gets the lease
   also takes over a pending note whose taker never came.
@@ -274,10 +278,12 @@ decision".
   not to me.
 - Only one session works through a repository's TODO at a time, inside herdr
   or not. Before it starts, the session runs `~/scripts/todo-lock acquire`
-  in the repository. The lock covers the whole git repository with all its
+  in the repository (`acquire --token <token>` with the token of a pending
+  handoff note, as "Context size and handoff" says). The lock covers the whole git repository with all its
   worktrees, and names the agent's process. If the lock is held, report who
-  holds it and do not coordinate. Run `todo-lock release` when you stop or
-  hand off. A lock whose agent process is gone is taken over by the next
+  holds it and do not coordinate. Run `todo-lock release` when you stop,
+  and `todo-lock handover` when you hand off ("Context size and
+  handoff"). A lock whose agent process is gone is taken over by the next
   `acquire`; nothing expires on a timer.
 - While a session works through the TODO, a new request from me is not
   done on the spot: add it to `TODO.md` in my words translated into English

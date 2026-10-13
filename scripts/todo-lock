@@ -6,6 +6,10 @@ dir, shared by all its worktrees.
                                print who holds it and exit 1
     todo-lock release [REPO]   drop it, only if this pane's agent holds it
     todo-lock status  [REPO]   print the holder (exit 0) or "free" (exit 3)
+    todo-lock handover [REPO]  mark this agent's lock as handed over and print
+                               a one-time token for the successor
+    todo-lock acquire --token TOKEN [REPO]
+                               take over a lock handed over with that token
 
 REPO defaults to the current directory. The boundary is the git repository:
 the lock is $(git rev-parse --git-common-dir)/todo-coordinator.lock, shared
@@ -19,9 +23,24 @@ No agent process found means no lock.
 
 It is taken atomically (link of a temp file; EEXIST means held). A lock is
 stale only when its holder is gone: that process no longer runs with that
-start time. That is
-checked when someone tries to acquire, never by age or on a timer. A stale lock is moved aside with rename (atomic: one contender wins)
-and the acquire is tried again. A lock from another host is never taken over.
+start time. That is checked when someone tries to acquire, never by age or
+on a timer. Every change to an existing lock (a stale takeover, a handover,
+a release) first creates `<lock>.claim.<its nonce>` with O_EXCL, so one
+session wins, re-reads the lock, and replaces it by rename (never leaving
+the path empty) or removes it. A claim left by a crash blocks only that
+lock; status shows it and a person removes it. A lock from another host is
+never taken over.
+
+A handover passes the lock with no moment when it is free: the holder
+writes a random token into its lock (atomic rename over it) and puts the
+token in its handoff note; the lock stays held by the predecessor, so a
+plain acquire still fails, and only `acquire --token` with that token takes
+it over, through the same claim as any other change. If the
+predecessor exits before a successor comes, the lock is stale as usual and
+the next acquire takes it (and the note with it); if the successor cannot
+be started, the predecessor releases or keeps the lock. Consult round
+20261013-150634-b1a5; the user approved it on 2026-10-13.
+
 Consult rounds 20261013-134450-4852 (MiMo, DeepSeek); the user's global rules,
 "Working through TODO.md" and "Context size and handoff"."""
 import json, os, platform, secrets, socket, subprocess, sys, time
@@ -110,18 +129,90 @@ def describe(h):
     if h.get("unreadable"):
         return "an unreadable lock file"
     who = f"pid {h.get('pid')}" + (f", herdr pane {h['pane']}" if h.get("pane") else "")
-    return f"{who} ({h.get('agent', '?')}) on {h.get('host')} since {h.get('started')}, cwd {h.get('cwd')}"
+    text = f"{who} ({h.get('agent', '?')}) on {h.get('host')} since {h.get('started')}, cwd {h.get('cwd')}"
+    if h.get("handover"):
+        text += f", handing over since {h.get('handover_since')}"
+    return text
+
+
+def write_tmp(lock, data):
+    tmp = f"{lock}.{os.getpid()}.tmp"
+    with open(tmp, "w") as f:
+        f.write(json.dumps(data) + "\n")
+        f.flush()
+        os.fsync(f.fileno())
+    return tmp
+
+
+def new_holder():
+    return {"v": 3, **me(), "cwd": os.getcwd(), "host": socket.gethostname(),
+            "started": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "nonce": secrets.token_hex(8)}
+
+
+def replace(lock, seen, new):
+    """Replace the lock we read as `seen` with `new` (None removes it), or
+    return False if anyone else changed or is changing it. The claim file
+    `lock.claim.<nonce>` (created with O_EXCL) lets exactly one session
+    replace a given lock; nonces are never reused, so a late contender sees
+    a different nonce and backs off. The lock path is never empty except
+    after a removal, so a plain link never slips in during a takeover."""
+    nonce = seen.get("nonce")
+    if not nonce:
+        return False
+    claim = f"{lock}.claim.{nonce}"
+    try:
+        fd = os.open(claim, os.O_WRONLY | os.O_CREAT | os.O_EXCL)
+    except FileExistsError:
+        return False
+    try:
+        os.write(fd, json.dumps(me()).encode())
+        os.close(fd)
+        if (read(lock) or {}).get("nonce") != nonce:
+            return False
+        if new is None:
+            os.unlink(lock)
+        else:
+            os.rename(write_tmp(lock, new), lock)
+        return True
+    finally:
+        os.unlink(claim)
+
+
+def take_handover(lock, token):
+    """Take over a lock handed over with this token, atomically."""
+    holder = read(lock)
+    if holder is None or holder.get("unreadable") or holder.get("handover") != token:
+        print(f"no handover with that token: {'free' if holder is None else 'held by ' + describe(holder)}")
+        return 1
+    mine = new_holder()
+    if not replace(lock, holder, mine):
+        print(f"the handover was taken by another session: {describe(read(lock) or {})}")
+        return 1
+    print(f"acquired by handover: {describe(mine)}")
+    return 0
+
+
+def handover(lock):
+    holder = read(lock)
+    if holder is None or holder.get("unreadable") or not same_holder(holder, me()):
+        print(f"not handed over: {'free' if holder is None else 'held by ' + describe(holder)}")
+        return 1
+    if holder.get("handover"):
+        print(holder["handover"])
+        return 0
+    token = secrets.token_hex(16)
+    if not replace(lock, holder, {**holder, "nonce": secrets.token_hex(8), "handover": token,
+                                  "handover_since": time.strftime("%Y-%m-%dT%H:%M:%S%z")}):
+        print("not handed over: the lock changed; run status")
+        return 1
+    print(token)
+    return 0
 
 
 def acquire(lock):
-    mine = {"v": 3, **me(), "cwd": os.getcwd(), "host": socket.gethostname(),
-            "started": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "nonce": secrets.token_hex(8)}
+    mine = new_holder()
     for _ in range(MAX_TAKEOVERS):
-        tmp = f"{lock}.{os.getpid()}.tmp"
-        with open(tmp, "w") as f:
-            f.write(json.dumps(mine) + "\n")
-            f.flush()
-            os.fsync(f.fileno())
+        tmp = write_tmp(lock, mine)
         try:
             os.link(tmp, lock)
             os.unlink(tmp)
@@ -138,11 +229,11 @@ def acquire(lock):
         if holder.get("unreadable") or alive(holder):
             print(f"held by {describe(holder)}")
             return 1
-        try:
-            os.rename(lock, f"{lock}.stale-{int(time.time())}-{os.getpid()}")
+        if replace(lock, holder, mine):
             print(f"took over a stale lock: {describe(holder)} (that agent is gone)", file=sys.stderr)
-        except FileNotFoundError:
-            pass  # another contender moved it first; re-evaluate
+            print(f"acquired: {describe(mine)}")
+            return 0
+        # another contender is replacing it; re-evaluate
     print("todo-lock: gave up after repeated takeovers; check the lock by hand", file=sys.stderr)
     return 1
 
@@ -155,7 +246,9 @@ def release(lock):
     if holder.get("unreadable") or not same_holder(holder, me()):
         print(f"not released: held by {describe(holder)}")
         return 1
-    os.unlink(lock)
+    if not replace(lock, holder, None):
+        print(f"not released: the lock changed: {describe(read(lock) or {})}")
+        return 1
     print("released")
     return 0
 
@@ -166,16 +259,30 @@ def status(lock):
         print("free")
         return 3
     state = "" if holder.get("unreadable") or alive(holder) else " (stale: that agent is gone)"
+    claim = f"{lock}.claim.{holder.get('nonce')}"
+    try:
+        with open(claim) as f:
+            state += f"; being changed by {f.read()} (if that agent is gone, remove {claim})"
+    except OSError:
+        pass
     print(f"held by {describe(holder)}{state}")
     return 0
 
 
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in ("acquire", "release", "status"):
+    args = sys.argv[1:]
+    token = None
+    if "--token" in args:
+        at = args.index("--token")
+        token = args[at + 1] if at + 1 < len(args) else ""
+        del args[at:at + 2]
+    if not args or args[0] not in ("acquire", "release", "status", "handover") or (token is not None and (args[0] != "acquire" or not token)):
         sys.exit(__doc__)
-    repo = sys.argv[2] if len(sys.argv) > 2 else "."
+    repo = args[1] if len(args) > 1 else "."
     lock = os.path.join(git_common_dir(repo), "todo-coordinator.lock")
-    sys.exit({"acquire": acquire, "release": release, "status": status}[sys.argv[1]](lock))
+    if token is not None:
+        sys.exit(take_handover(lock, token))
+    sys.exit({"acquire": acquire, "release": release, "status": status, "handover": handover}[args[0]](lock))
 
 
 if __name__ == "__main__":

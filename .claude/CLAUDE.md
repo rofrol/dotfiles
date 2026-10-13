@@ -92,6 +92,19 @@ Keep a session's context small, and hand off before it grows too large
   - links to the decisions, the TODO and the results, by path, not copied.
   Starting the new agent is a hand-over the user asked for, which this rule
   is; register it with herdr and never claim continuation without a handle.
+- The note starts with `Status: pending`. The writer releases its
+  `todo-lock`, then starts the taker with a first prompt that tells it to
+  take over the note: `~/scripts/todo-worker SPACE [pi]` (herdr's T button)
+  sends that prompt by itself when the note is pending. Otherwise use
+  `herdr agent start ... --prompt`, or give the user the prompt to paste.
+- The taker runs `todo-lock acquire` first. Where agents may commit, it then
+  commits `Status: taken by <agent and pane or pid>, <date>`. It reconciles
+  the note against git and herdr, acts on it, and deletes the note in a
+  commit once everything in it is done; the state lives on in the TODO and
+  the decision records.
+- A session not started to take over a pending note (a quick question, for
+  example) does not act on it. It mentions the note to the user and does
+  what it was asked.
 
 # Uncommitted work
 
@@ -238,7 +251,13 @@ decision".
   architecture decisions, or what only I can do; batch them into one menu
   and go on with authorized work. Technical uncertainty goes to the models,
   not to me.
-- Only one session works through a repository's TODO at a time.
+- Only one session works through a repository's TODO at a time, inside herdr
+  or not. Before it starts, the session runs `~/scripts/todo-lock acquire`
+  in the repository. The lock covers the whole git repository with all its
+  worktrees, and names the agent's process. If the lock is held, report who
+  holds it and do not coordinate. Run `todo-lock release` when you stop or
+  hand off. A lock whose agent process is gone is taken over by the next
+  `acquire`; nothing expires on a timer.
 - While a session works through the TODO, a new request from me is not
   done on the spot: add it to `TODO.md` in my words translated into English
   (keep the meaning, not the language), as approved work at the

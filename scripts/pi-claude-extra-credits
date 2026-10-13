@@ -1,4 +1,12 @@
-# this uses macos keychain
-# to store api key in macos keychain
+#!/usr/bin/env bash
+# Store the API key in macOS Keychain with:
 # security add-generic-password -a "$USER" -s anthropic-api-credits -w
-pi --model anthropic/claude-opus-5-5 --api-key "$(security find-generic-password -a "$USER" -s anthropic-api-credits -w)" "$@"
+# This selects API billing, not subscription extra usage. It never tops up.
+# Pi's explicit runtime override is required to avoid stored OAuth taking over.
+set -euo pipefail
+set +x  # Never trace the key or the expanded API-key argument.
+if ! key=$(security find-generic-password -a "$USER" -s anthropic-api-credits -w 2>/dev/null) || [ -z "$key" ]; then
+  echo 'pi-claude-extra-credits: API key unavailable in Keychain; pi was not started' >&2
+  exit 1
+fi
+exec pi --model anthropic/claude-opus-5-5 --api-key "$key" "$@"

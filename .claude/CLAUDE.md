@@ -194,6 +194,22 @@ A request to ask the models, in any language and without naming them, means:
 consult the default set of other models now, in this turn. Load the `consult` skill; it lists who joins a round
 and how to run, rate and score it.
 
+Ask them without being told, too (user, 2026-10-13; consult round
+`20261013-135916-2d06`), on these triggers, not on every step:
+
+- before a non-trivial decision: a design or architecture choice, a fix for
+  a bug, a choice between options, anything you would otherwise ask me;
+- after a non-trivial implementation, before it is committed or brought in:
+  the models review the diff.
+
+Not for routine steps (running tests, reading, committing) or for
+re-deciding something already settled. The brief carries the artifact (the
+diff, `file:line`, the failing output), not a summary. Every claim is checked
+against the source (run it, read the line) before it changes anything, and
+the round is rated. A coordinator may have a worker run the round and return
+a rated digest, but still checks the claims it acts on. A failed or late
+round never blocks the work: go on, and reconcile when it lands.
+
 # Working through TODO.md
 
 When I tell a session to work through a repository's TODO ("rób TODO po

@@ -42,13 +42,6 @@ Follow-ups for the tools configured in this dotfiles repository.
 
 ## Next, in order
 
-- **todo skill: default to the agent this session runs in.** The space and
-  agent question offers Claude as the default even when `/todo` runs in pi;
-  picking Claude there opens a new Claude tab instead of making the pi
-  session the coordinator (seen in herdr-tov, 2026-10-13). Default to the
-  running agent. Cost: a few lines in `.agents/skills/todo/SKILL.md`; no build.
-  Decided by the user 2026-10-13: approved.
-
 ## Proposed
 
 - **pi: answer while working (plan, awaiting the user's choices).** The user

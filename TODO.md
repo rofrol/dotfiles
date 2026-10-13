@@ -40,7 +40,7 @@ Follow-ups for the tools configured in this dotfiles repository.
   "Language detection is the biggest failure"), which picked pl, fr and en
   correctly on library songs.
 
-## Proposed
+## Next, in order
 
 - **todo: coordination that works outside the herdr fork** (the user,
   2026-10-13: "shouldn't /todo be a mechanism outside herdr?", since agents
@@ -73,3 +73,4 @@ Follow-ups for the tools configured in this dotfiles repository.
     and the global "Context size and handoff" rule (the percent replaces 600
     KB; claim by lease). Rejected: `flock`, because its holder would have to
     be a long-lived process, while agents run short commands.
+  - Decided by the user 2026-10-13: approved ("yes").

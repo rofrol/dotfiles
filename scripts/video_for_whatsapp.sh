@@ -64,11 +64,11 @@
 #   -o OUT         Output path; only with a single input.
 #
 # Without -o the script writes "<input_basename>_wa.mp4" next to each input.
-# While converting, it writes "<output>.temp" in the same directory, then
-# atomically replaces the output after ffmpeg succeeds (including faststart).
-# Failures leave an existing output intact. A "<output>.temp.lock" directory
-# prevents simultaneous conversions to the same output. After an uncatchable
-# kill, inspect leftover .temp/.temp.lock paths before removing them manually.
+# While converting, it writes "<output>.<timestamp>.<pid>.temp" beside the
+# output, then atomically replaces it after ffmpeg succeeds (with faststart).
+# Each run owns its temporary file; concurrent conversions are allowed and
+# the last successful publication wins. Failures leave an existing output
+# intact. After an uncatchable kill, inspect leftover .temp files manually.
 # Several inputs (e.g. a Finder selection passed by Automator) are processed
 # one by one; a failure is reported and the rest still run.
 #
@@ -164,7 +164,7 @@ DIR="$(dirname "$INPUT")"
 BASE="$(basename "${INPUT%.*}")"
 
 prepare_output() {
-    # Keep option-like relative paths safe for mkdir, rm, rmdir and mv.
+    # Keep option-like relative paths safe for rm and mv.
     case "$OUTPUT" in
         /*|./*|../*) ;;
         *) OUTPUT="./$OUTPUT" ;;
@@ -174,12 +174,9 @@ prepare_output() {
         exit 1
     fi
 
-    TEMP_OUTPUT="${OUTPUT}.temp"
-    OUTPUT_LOCK="${TEMP_OUTPUT}.lock"
-    if ! mkdir "$OUTPUT_LOCK"; then
-        echo "Error: cannot claim output (another conversion or leftover lock): $OUTPUT_LOCK" >&2
-        exit 1
-    fi
+    # Seconds are enough: the PID separates concurrent runs. Exclusive
+    # creation below rejects a collision or leftover without overwriting it.
+    TEMP_OUTPUT="${OUTPUT}.$(date +%Y%m%d-%H%M%S).$$.temp"
     TEMP_CREATED=false
     trap cleanup_output EXIT
     trap 'exit 129' HUP
@@ -201,13 +198,12 @@ cleanup_output() {
     if [[ "$TEMP_CREATED" == true ]]; then
         rm -f "$TEMP_OUTPUT" || true
     fi
-    rmdir "$OUTPUT_LOCK" || true
     exit "$status"
 }
 
 publish_output() {
-    # Same-directory rename publishes only the finalized MP4. Keep the lock
-    # until cleanup, so another run cannot create a temp file we might remove.
+    # Same-directory rename publishes only the finalized MP4. Cleanup only
+    # targets this run's unique path, never another conversion's temporary file.
     mv -f "$TEMP_OUTPUT" "$OUTPUT"
     TEMP_CREATED=false
 }

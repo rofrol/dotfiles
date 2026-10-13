@@ -40,20 +40,22 @@ assert sys.argv[-3:-1] == ["-f", "mp4"], sys.argv
 assert sys.argv[-1].endswith(".temp"), sys.argv
 output = Path(sys.argv[-1])
 output.write_text("partial")
-print("ENCODER_READY", flush=True)
+print("ENCODER_READY " + str(output), flush=True)
 sys.stdin.readline()
 if os.environ.get("TEST_FAIL") == "1":
     sys.exit(23)
 output.write_text("complete")
 ''')
+        # Pin the second so concurrent tests prove PID-based separation.
+        clock = mocks / "date"
+        clock.write_text('#!/bin/sh\nprintf "%s\\n" "20261013-120000"\n')
+        clock.chmod(0o755)
         probe.chmod(0o755)
         encoder.chmod(0o755)
         env = dict(os.environ, PATH=f"{mocks}:{os.environ['PATH']}")
         source = root / "input with spaces.mkv"
         source.write_text("source")
         output = root / "output with spaces.mp4"
-        stage = Path(f"{output}.temp")
-        lock = Path(f"{stage}.lock")
 
         def launch(options=(), **changes):
             process = subprocess.Popen(
@@ -64,7 +66,11 @@ output.write_text("complete")
             )
             for _ in range(100):
                 line = process.stdout.readline()
-                if line.strip() == "ENCODER_READY":
+                if line.startswith("ENCODER_READY "):
+                    process.stage = Path(line.strip().split(" ", 1)[1])
+                    assert process.stage.parent == output.parent
+                    assert process.stage.name.startswith(output.name + ".")
+                    assert process.stage.name.endswith(f".{process.pid}.temp")
                     return process
                 assert line, process.communicate()
             raise AssertionError("Encoder handshake was not produced")
@@ -72,12 +78,13 @@ output.write_text("complete")
         def finish(process, expected=0):
             stdout, stderr = process.communicate("publish\n")
             assert process.returncode == expected, (stdout, stderr)
-            assert not stage.exists() and not lock.exists()
+            assert not process.stage.exists()
+            assert not list(root.glob("*.lock"))
 
         # All modes keep the final path absent until FFmpeg reports completion.
         for options, codec in [((), "h264"), ((), "vp9"), (("--30fps",), "h264")]:
             process = launch(options, TEST_CODEC=codec)
-            assert stage.read_text() == "partial" and not output.exists()
+            assert process.stage.read_text() == "partial" and not output.exists()
             finish(process)
             assert output.read_text() == "complete"
             output.unlink()
@@ -89,15 +96,26 @@ output.write_text("complete")
         finish(process, 23)
         assert output.read_text() == "old"
 
-        # A competing run must not touch the first run's temporary file or lock.
+        # Concurrent runs have private files; publishing one leaves the other
+        # untouched, and cleanup of a failed run preserves the published output.
         process = launch()
-        competitor = subprocess.run(
-            ["/bin/bash", str(SCRIPT), "-o", str(output), str(source)],
-            env=env, capture_output=True, text=True,
-        )
-        assert competitor.returncode != 0
-        assert stage.read_text() == "partial" and lock.is_dir()
+        competitor = launch(TEST_FAIL="1")
+        assert process.stage != competitor.stage
+        assert process.stage.read_text() == competitor.stage.read_text() == "partial"
         assert output.read_text() == "old"
+        finish(process)
+        assert competitor.stage.read_text() == "partial"
+        assert output.read_text() == "complete"
+        finish(competitor, 23)
+        assert output.read_text() == "complete"
+
+        # Either successful run may publish last, without sharing its stage.
+        process = launch()
+        competitor = launch()
+        finish(competitor)
+        assert process.stage.read_text() == "partial"
+        process.stage.write_text("still private")
+        assert output.read_text() == "complete"
         finish(process)
         assert output.read_text() == "complete"
 
@@ -108,26 +126,40 @@ output.write_text("complete")
         process.communicate()
         assert process.returncode == 143
         assert output.read_text() == "old"
-        assert not stage.exists() and not lock.exists()
+        assert not process.stage.exists()
 
-        # Refuse stale temporary files and source aliases without deleting them.
-        stage.write_text("leftover")
-        rejected = subprocess.run(
-            ["/bin/bash", str(SCRIPT), "-o", str(output), str(source)],
-            env=env, capture_output=True, text=True,
-        )
-        assert rejected.returncode != 0 and stage.read_text() == "leftover"
-        assert not lock.exists()
-        stage.unlink()
+        # Other runs' leftovers are not deleted or mistaken for our own stage.
+        leftover = Path(f"{output}.20000101-000000.1.temp")
+        leftover.write_text("leftover")
+        dangling = Path(f"{output}.20000101-000000.2.temp")
         missing = root / "missing-symlink-target"
-        stage.symlink_to(missing)
-        rejected = subprocess.run(
-            ["/bin/bash", str(SCRIPT), "-o", str(output), str(source)],
-            env=env, capture_output=True, text=True,
-        )
-        assert rejected.returncode != 0 and stage.is_symlink()
-        assert not missing.exists() and not lock.exists()
-        stage.unlink()
+        dangling.symlink_to(missing)
+        process = launch()
+        finish(process)
+        assert leftover.read_text() == "leftover"
+        assert dangling.is_symlink() and not missing.exists()
+        leftover.unlink()
+        dangling.unlink()
+
+        # Even an exact timestamp/PID collision must not overwrite a leftover
+        # or follow a dangling symlink. exec preserves the wrapper shell's PID.
+        for creation in ['printf leftover > "$stage"', 'ln -s "$4" "$stage"']:
+            rejected = subprocess.run(
+                ["/bin/bash", "-c",
+                 'stage="$1.20261013-120000.$$.temp"; ' + creation
+                 + '; printf "%s\\n" "$stage"; exec /bin/bash "$2" -o "$1" "$3"',
+                 "bash", str(output), str(SCRIPT), str(source), str(missing)],
+                env=env, capture_output=True, text=True,
+            )
+            assert rejected.returncode != 0
+            collision = Path(rejected.stdout.splitlines()[0])
+            if collision.is_symlink():
+                assert not missing.exists()
+            else:
+                assert collision.read_text() == "leftover"
+            collision.unlink()
+
+        # Source aliases are still rejected without modifying the input.
         alias = root / "source-alias.mp4"
         alias.symlink_to(source)
         rejected = subprocess.run(
@@ -155,8 +187,8 @@ output.write_text("complete")
                     atoms.append(kind)
                     file.seek(size - 8, 1)
             assert atoms.index(b"moov") < atoms.index(b"mdat")
-            assert not Path(f"{target}.temp").exists()
-            assert not Path(f"{target}.temp.lock").exists()
+            assert not list(root.glob(f"{target.name}.*.temp"))
+            assert not list(root.glob("*.lock"))
         run(["/bin/bash", str(SCRIPT), str(h264), str(vp9)])
         assert (root / "h264_wa.mp4").exists() and (root / "vp9_wa.mp4").exists()
     print("PASS: publication, failure, cancellation, concurrency, aliases, all modes and batch")

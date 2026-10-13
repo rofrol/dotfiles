@@ -149,7 +149,7 @@ class Justified(unittest.TestCase):
         self.assertFalse(
             write("/x/a.py", "# delay: external polling, the API has no push\ntime.sleep(30)\n")
         )
-        self.assertFalse(write("/x/a.rs", "let t = Duration::from_secs(5); // delay: measured slow CI\n"))
+        self.assertFalse(write("/x/a.rs", "let t = Duration::from_secs(5); // delay: measured slow hardware, CI measurements show this duration\n"))
 
     def test_marker_far_away_does_not_count(self):
         content = "# delay: rate limit\n" + "x = 1\n" * 5 + "time.sleep(30)\n"
@@ -254,6 +254,177 @@ class ZeroLength(unittest.TestCase):
         self.assertTrue(write("/x/a.rs", "std::thread::sleep(Duration::from_millis(1));\n"))
         self.assertTrue(write("/x/a.js", "setTimeout(render, 0.5);\n"))
         self.assertTrue(write("/x/a.js", "setTimeout(render, 10);\n"))
+
+
+class Rule10Safeguards(unittest.TestCase):
+    def test_periodic_internal_recovery(self):
+        prescriptions = [
+            "Add a 5-minute sweep to recover herdr's missed own events.",
+            "Use a safety net to recover dropped internal notifications.",
+            "Implement a watchdog to resend lost internal prompts.",
+            "Add periodic catch-up for missed events.",
+            "Periodically reconcile internal events that were lost.",
+            "Run a regular repair of dropped signals.",
+            "Use a periodic sweep to recover events missed by herdr.",
+            "Add a sweep for lost events. delay: external polling, the API",
+        ]
+        for text in prescriptions:
+            for path in ("/x/TODO.md", "/x/DECISIONS.md", "/x/AGENTS.md"):
+                with self.subTest(text=text, path=path):
+                    self.assertTrue(write(path, text))
+            self.assertTrue(bash("herdr worker start --prompt " + json.dumps(text)))
+
+    def test_sweep_at_lifecycle_events_is_allowed(self):
+        text = "Sweep missed internal events at startup and handoff, triggered by those lifecycle events."
+        self.assertFalse(write("/x/TODO.md", text))
+        self.assertFalse(bash("herdr worker start --prompt " + json.dumps(text)))
+
+    def test_watchdog_at_producer_commit_is_allowed(self):
+        text = "Use an event-driven watchdog to repair lost internal events when the producer commits progress."
+        self.assertFalse(write("/x/TODO.md", text))
+        self.assertFalse(bash("herdr worker start --prompt " + json.dumps(text)))
+
+    def test_mechanism_names_do_not_make_event_contracts_periodic(self):
+        for mechanism in ("sweep", "watchdog", "catch-up", "safety net"):
+            for trigger in ("at startup", "at handoff", "at producing events",
+                            "when the producer commits durable progress"):
+                text = "Use a " + mechanism + " to recover lost internal events " + trigger + "."
+                with self.subTest(text=text):
+                    self.assertFalse(write("/x/TODO.md", text))
+
+    def test_event_contract_does_not_excuse_recurring_recovery(self):
+        for text in (
+            "Sweep missed internal events at startup and handoff and every 5 minutes.",
+            "Use an event-driven watchdog to repair lost internal events when the producer commits progress and every 5 minutes.",
+            "Use a periodic watchdog rescan for lost internal events when the producer commits progress.",
+            "Run a timer-driven sweep of missed internal events at startup and handoff.",
+            "Use recurring catch-up for lost internal events at producing events.",
+            "Use a safety net to recover lost internal events when the producer commits progress and every 5 minutes. delay: external polling, the API",
+            "Use an event-driven safety net to recover lost internal events.",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(write("/x/TODO.md", text))
+                self.assertTrue(bash("herdr worker start --prompt " + json.dumps(text)))
+
+    def test_positive_event_and_external_cases(self):
+        for text in (
+            "Use durable state as the source of truth for missed internal events.",
+            "Persist the cursor before acknowledging internal events.",
+            "Reconcile missed internal events at producing events, startup or handoff.",
+            "Reconcile internal events when the producer commits durable progress.",
+            "The external watchdog reports the provider's health.",
+            "The external watchdog checks the provider every 5 minutes.",
+            "Run cargo sweep to reclaim build artifacts.",
+            "Poll every 5 s. delay: external polling, GitHub produces the remote status",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(write("/x/TODO.md", text))
+        self.assertFalse(bash("cargo sweep"))
+
+    def test_historical_removed_and_rejected_prose(self):
+        for text in (
+            "Removed the 5-minute sweep for missed own events.",
+            "Rejected a safety net to recover dropped notifications.",
+            "Previously we used periodic catch-up for lost internal events.",
+            "Historically the supervisor ran a 5-minute sweep for lost events.",
+            "Remove the 30 s retry and use the acknowledgement instead.",
+            "Removed `sleep 5` from the plan.",
+            "Reject `time.sleep(5)` as a repair.",
+            "Do not poll every 5 s for internal events.",
+            "The coordinator polled a transcript every 5 s.",
+        ):
+            for path in ("/x/TODO.md", "/x/DECISIONS.md"):
+                with self.subTest(text=text, path=path):
+                    self.assertFalse(write(path, text))
+        self.assertTrue(write("/x/TODO.md", "Removed a sweep, but add a 30 s retry."))
+        self.assertTrue(write("/x/DECISIONS.md", "Use a 30 s retry."))
+        self.assertTrue(write("/x/TODO.md", "Rejected a sweep. Add periodic repair for lost events."))
+        self.assertTrue(write("/x/a.py", "# Removed old timing\ntime.sleep(30)"))
+
+    def test_plan_added_only_and_heredoc(self):
+        old = "Add a sweep for missed internal events.\nOther work."
+        self.assertFalse(edit("/x/TODO.md", old, old + "\nEvent-driven handoff."))
+        self.assertFalse(edit("/x/DECISIONS.md", old, "Other work."))
+        self.assertTrue(edit("/x/TODO.md", "Other work.", old))
+        with tempfile.TemporaryDirectory(dir=HERE) as tmp:
+            path = os.path.join(tmp, "TODO.md")
+            with open(path, "w") as handle:
+                handle.write(old)
+            self.assertFalse(write(path, old + "\nPersist the cursor."))
+        self.assertTrue(bash("cat > /x/TODO.md <<'EOF'\nAdd periodic repair of lost events.\nEOF"))
+        self.assertFalse(bash("cat > /x/DECISIONS.md <<'EOF'\nRejected a 5 s retry.\nEOF"))
+        self.assertFalse(bash("rg 'periodic repair of lost events' TODO.md"))
+
+    def test_invalid_markers_in_all_paths(self):
+        for marker in ("sweep", "tooling", "safety net", "generic reason",
+                       "self-event polling", "not a wait, display setting",
+                       "external polling", "external polling, generic reason",
+                       "external polling, missed own events"):
+            with self.subTest(marker=marker):
+                self.assertTrue(bash("sleep 5 # delay: " + marker))
+                self.assertTrue(write("/x/a.py", "time.sleep(5) # delay: " + marker))
+                self.assertTrue(edit("/x/a.py", "go()", "time.sleep(5) # delay: " + marker))
+                self.assertTrue(bash("python3 -c " + json.dumps("time.sleep(5) # delay: " + marker)))
+                self.assertTrue(bash("herdr worker prompt w " + json.dumps("Wait 5 s. delay: " + marker)))
+                self.assertTrue(bash("cat > /x/a.py <<'EOF'\ntime.sleep(5) # delay: " + marker + "\nEOF"))
+
+    def test_multiedit_marker_scope(self):
+        for marker, blocked in (("tooling", True), ("rate limit, API policy", False)):
+            result = delay_check.check({
+                "tool_name": "MultiEdit",
+                "tool_input": {"file_path": "/x/a.py", "edits": [
+                    {"old_string": "go()", "new_string": "time.sleep(5) # delay: " + marker},
+                ]},
+            })
+            self.assertEqual(bool(result), blocked)
+        result = delay_check.check({
+            "tool_name": "MultiEdit",
+            "tool_input": {"file_path": "/x/a.py", "edits": [
+                {"old_string": "go()", "new_string": "time.sleep(5) # delay: rate limit"},
+                {"old_string": "next()", "new_string": "time.sleep(8)"},
+            ]},
+        })
+        self.assertEqual(len(result), 1)
+
+    def test_allowed_categories(self):
+        for marker in ("real external deadline, provider expires the request",
+                       "rate limit, API permits one call per minute",
+                       "external polling, the remote builder publishes status",
+                       "designed backoff, documented connection policy",
+                       "measured slow hardware, measured disk latency"):
+            with self.subTest(marker=marker):
+                code = "time.sleep(5) # delay: " + marker
+                self.assertFalse(write("/x/a.py", code))
+                self.assertFalse(edit("/x/a.py", "go()", code))
+                self.assertFalse(bash("sleep 5 # delay: " + marker))
+                self.assertFalse(bash("python3 -c " + json.dumps(code)))
+                self.assertFalse(bash("cat > /x/a.py <<'EOF'\n" + code + "\nEOF"))
+                self.assertFalse(bash("herdr agent prompt w " + json.dumps("Wait 5 s. delay: " + marker)))
+
+    def test_markers_do_not_excuse_unrelated_commands_or_tasks(self):
+        for command in (
+            "echo 'delay: rate limit'; sleep 5",
+            "sleep 5 # delay: rate limit\nsleep 8",
+            "sleep 8; sleep 5 # delay: rate limit",
+            "python3 -c 'time.sleep(5) # delay: rate limit'; sleep 8",
+            "herdr worker prompt w 'Wait 5 s. delay: rate limit'; sleep 8",
+            "herdr worker prompt w 'delay: rate limit\nDone.\nDone.\nDone.\nWait 8 s.'",
+            "herdr worker prompt w 'Wait 5 s. delay: rate limit; Wait 8 s.'",
+            "herdr worker prompt w 'Wait 5 s. delay: rate limit\nWait 8 s.'",
+            "herdr worker prompt w 'delay: rate limit\nWait 5 s.\nWait 8 s.'",
+            "cat > /x/a.py <<'EOF'\n# delay: rate limit\ntime.sleep(5)\nEOF\nsleep 8",
+        ):
+            with self.subTest(command=command):
+                self.assertTrue(bash(command))
+
+    def test_code_is_not_exempted_by_prose_removal_wording(self):
+        self.assertTrue(write("/x/a.py", "remove(timeout=30)"))
+        self.assertTrue(bash("python3 -c 'remove(timeout=30)'"))
+
+    def test_numeric_non_wait_settings(self):
+        for content in ("max_fps = 60", "retry_count = 5", "batch_size = 30",
+                        "window_width = 120", "stress_iterations = 40"):
+            self.assertFalse(write("/x/config.py", content))
 
 
 class Process(unittest.TestCase):

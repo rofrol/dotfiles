@@ -7,8 +7,9 @@ call as JSON on stdin. It looks only at what the call adds: the Bash command
 `herdr worker start`, `herdr worker prompt` or `herdr agent prompt`), Write's
 content and Edit's new_string, minus lines that were already there. When it
 finds a sleep, a timeout, a deadline, a debounce, a poll or a resend interval
-without a `delay: <reason>` marker next to it, it denies the call and tells
-the agent to wait for the positive event instead.
+without an allowed-category `delay: <reason>` marker next to it, it denies
+the call and tells the agent to wait for the positive event instead. It also
+checks prescribed periodic repair of internal events, even without a duration.
 
 It never blocks read-only commands and fails open: any error of its own
 allows the call and says why on stderr.
@@ -22,7 +23,51 @@ import re
 import shlex
 import sys
 
-MARKER = re.compile(r"\bdelay:\s*\S", re.IGNORECASE)
+MARKER = re.compile(r"\bdelay:\s*([^\n;]+)", re.IGNORECASE)
+ALLOWED_REASON = re.compile(
+    r"^(?:real external deadline|external deadline|rate limit|external polling"
+    r"|designed backoff|measured slow hardware)\b", re.IGNORECASE
+)
+INTERNAL_EVENTS = re.compile(
+    r"\b(?:own|internal|self[- ]?event|missed|lost|dropped)\b.*"
+    r"\b(?:events?|notifications?|signals?|prompts?)\b|\bself[- ]event"
+    r"|\b(?:events?|notifications?|signals?|prompts?)\b.*\b(?:missed|lost|dropped|own|internal)\b",
+    re.IGNORECASE
+)
+REPAIR = re.compile(
+    r"\b(?:recover\w*|repair\w*|rescan\w*|re-scan\w*|resend\w*|re-send\w*"
+    r"|reconcil\w*|catch[- ]?up|sweep\w*|safety[- ]net|watchdog\w*)\b", re.IGNORECASE
+)
+PERIODIC = re.compile(
+    r"\b(?:periodic\w*|regular\w*|recurring|timer\w*|scheduled|every)\b", re.IGNORECASE
+)
+RECOVERY_MECHANISM = re.compile(
+    r"\b(?:sweep\w*|safety[- ]net|watchdog\w*|catch[- ]?up)\b", re.IGNORECASE
+)
+# Same-line, bounded vocabulary: mechanism names alone do not prove timing.
+# Keep vague recovery prescriptions blocked unless they name a lifecycle or
+# producing-event contract. An 'event-driven' label alone is not a contract;
+# explicit recurrence always wins, and ordinary timing checks still run.
+# This is lexical recognition, not validation of the implemented contract.
+EVENT_TRIGGER = re.compile(
+    r"\bat\s+(?:producing events?|startup|handoff)\b|"
+    r"\bwhen\s+(?:the\s+)?producer\s+(?:commits|publishes|acknowledges)\b",
+    re.IGNORECASE
+)
+# Deliberately narrow prose exemptions, not a natural-language policy parser.
+DESCRIPTIVE = re.compile(
+    r"^\s*(?:[-*]\s*(?:\[[ xX]\]\s*)?)?(?:"
+    r"(?:historically|previously|formerly|in the past|historical)\b|"
+    r"(?:removed|rejected|disabled|deleted)\b|"
+    r"(?:remove|reject|disable|delete|drop|do not|never|avoid|must not)\b|"
+    r"(?:the coordinator|the supervisor|the old \w+|the previous \w+)\s+"
+    r"(?:polled|waited|slept|used|ran|added)\b|"
+    r"the external watchdog\s+(?:runs|checks|reports|uses)\b)", re.IGNORECASE
+)
+NEW_PRESCRIPTION = re.compile(
+    r"(?:\b(?:then|but|instead|now)\s+|[.!]\s+)(?:add|use|run|implement|introduce)\b",
+    re.IGNORECASE
+)
 
 # The marker may sit on the flagged line, up to this many lines above it, or
 # on the line below it.
@@ -43,9 +88,10 @@ SKIPPED_SUFFIXES = {
 }
 
 DOC_SUFFIXES = {".md", ".markdown", ".txt", ".rst"}
-# Prose files are checked only when they instruct agents (skills, rules,
-# commands); notes such as TODO.md describe past delays without adding them.
-AGENT_DOC_NAMES = {"AGENTS.md", "CLAUDE.md", "SKILL.md", "AGENTS.policy.md"}
+# Plans and decision records can prescribe delays too; descriptions of
+# historical/rejected timing are filtered separately from new prescriptions.
+AGENT_DOC_NAMES = {"AGENTS.md", "CLAUDE.md", "SKILL.md", "AGENTS.policy.md",
+                   "TODO.md", "DECISIONS.md"}
 AGENT_DOC_DIRS = {"skills", "commands", "agents", "rules", "output-styles"}
 
 QTY = (
@@ -55,7 +101,8 @@ QTY = (
 KEY = (
     r"(?:debounc\w*|deadlines?|time[- ]?outs?|timed[- ]out|give up|giving up"
     r"|wait\w*|poll\w*|retr(?:y|ies|ied|ying)|resen[dt]\w*|re-?send\w*"
-    r"|sleep\w*|idle|grace|settl\w*|back-?off|heartbeat\w*)"
+    r"|sleep\w*|idle|grace|settl\w*|back-?off|heartbeat\w*"
+    r"|sweep\w*|safety[- ]net|watchdog\w*|periodic\w*|catch[- ]?up)"
 )
 SHELL_START = r"(?:^|[;&|(`{]|\$\(|\b(?:do|then|else|time|nohup|exec|command)\b)\s*"
 # A zero length (`0`, `0.0`, `0s`) does not wait: `sleep 0` is a no-op,
@@ -188,29 +235,84 @@ class Finding:
         self.where = where
 
 
-def scan_lines(text, patterns, where, added=None, marker_scope=None):
-    """Return findings in `text` without a nearby marker.
+def allowed_marker(line):
+    for marker in MARKER.finditer(line):
+        reason = marker.group(1).strip()
+        if not ALLOWED_REASON.match(reason) or INTERNAL_EVENTS.search(reason):
+            continue
+        if reason.lower().startswith("external polling"):
+            # Require recognizable external-producer wording, not just a category.
+            # This bounded vocabulary is a safeguard, not semantic validation.
+            detail = re.split(r"[,:(-]", reason, maxsplit=1)
+            if len(detail) < 2 or not re.search(
+                r"\b(?:API|remote|external|provider|service|server|GitHub|GitLab|"
+                r"device|OS|kernel|filesystem|hardware)\b", detail[1], re.IGNORECASE
+            ):
+                continue
+        return True
+    return False
 
-    `added` is the set of stripped lines the call adds (None: all of them).
-    `marker_scope` is a text in which any marker counts (Bash commands and
-    task texts are one added text); otherwise the marker must be near the line.
+
+def descriptive(line):
+    return bool(DESCRIPTIVE.search(line) and not NEW_PRESCRIPTION.search(line))
+
+
+def marker_for_line(lines, index, patterns):
+    """An inline marker owns its line; a standalone marker owns one wait."""
+    def timing(line):
+        return any(regex.search(line) and not (unless and unless.search(line))
+                   for _, regex, unless in patterns)
+
+    low = max(0, index - MARKER_LINES_ABOVE)
+    high = min(len(lines), index + MARKER_LINES_BELOW + 1)
+    for position in range(low, high):
+        if not allowed_marker(lines[position]):
+            continue
+        if position == index:
+            return True
+        if timing(lines[position]):
+            continue
+        following = range(position + 1, min(len(lines), position + MARKER_LINES_ABOVE + 1))
+        preceding = range(position - 1, max(-1, position - MARKER_LINES_BELOW - 1), -1)
+        owner = next((i for i in list(following) + list(preceding) if timing(lines[i])), None)
+        if owner == index:
+            return True
+    return False
+
+
+def scan_lines(text, patterns, where, added=None):
+    """Check added lines; category markers excuse only nearby actual timing.
+
+    Periodic repair of internal events cannot be excused by a timing marker.
+    Prose exclusions do not suppress executable code patterns.
     """
-    if marker_scope is not None and MARKER.search(marker_scope):
-        return []
-    lines = text.split("\n")
+    # A semicolon starts another statement, not another marker's scope.
+    lines = []
+    eligible = set()
+    for original in text.split("\n"):
+        for part in original.split(";"):
+            if added is None or original.strip() in added:
+                eligible.add(len(lines))
+            lines.append(part)
     findings = []
     for index, line in enumerate(lines):
-        if added is not None and line.strip() not in added:
+        if index not in eligible:
+            continue
+        prose = patterns is ALL_PATTERNS
+        prose_context = where == "agent task text" or os.path.splitext(where)[1].lower() in DOC_SUFFIXES
+        if prose_context and descriptive(line):
+            continue
+        if (prose and INTERNAL_EVENTS.search(line) and REPAIR.search(line)
+                and (PERIODIC.search(line)
+                     or (RECOVERY_MECHANISM.search(line) and not EVENT_TRIGGER.search(line)))):
+            findings.append(Finding("periodic internal-event recovery", line.strip(), where))
             continue
         for label, regex, unless in patterns:
             match = regex.search(line)
             if not match or (unless is not None and unless.search(line)):
                 continue
-            if marker_scope is None:
-                low = max(0, index - MARKER_LINES_ABOVE)
-                high = min(len(lines), index + MARKER_LINES_BELOW + 1)
-                if any(MARKER.search(near) for near in lines[low:high]):
-                    break
+            if marker_for_line(lines, index, patterns):
+                break
             findings.append(Finding(label, match.group(1).strip(), where))
             break
     return findings
@@ -361,22 +463,30 @@ def task_text(words, command):
 
 
 def check_segment(words, command, findings, depth=0):
-    words = strip_prefix(words)
+    # Only an actual shell comment in this segment excuses its shell timing.
+    # Quoted code/task markers are checked inside their own text instead.
+    comment = next((i for i, word in enumerate(words) if word == "#"), len(words))
+    justified = allowed_marker(" ".join(words[comment:]))
+    words = strip_prefix(words[:comment])
+
+    def shell_finding(label, text):
+        if not justified:
+            findings.append(Finding(label, text, "Bash command"))
     if not words or depth > 3:
         return
     command_word = os.path.basename(words[0])
     args = words[1:]
     if command_word == "sleep" and args and not all(ZERO_VALUE.match(arg) for arg in args):
-        findings.append(Finding("sleep command", "sleep " + args[0], "Bash command"))
+        shell_finding("sleep command", "sleep " + args[0])
     if command_word in ("timeout", "gtimeout"):
         duration = next((arg for arg in args if not arg.startswith("-")), "")
         if not ZERO_VALUE.match(duration):
-            findings.append(Finding("timeout command", command_word + " " + duration, "Bash command"))
+            shell_finding("timeout command", command_word + " " + duration)
         tail = args[args.index(duration) + 1:] if duration in args else []
         check_segment(tail, command, findings, depth + 1)
         return
     if command_word == "watch" and "-n" in args:
-        findings.append(Finding("polling command", "watch -n", "Bash command"))
+        shell_finding("polling command", "watch -n")
     for index, word in enumerate(args):
         option = re.match(r"^(--[\w-]*timeout[\w-]*)(?:=(.*))?$", word)
         if not option:
@@ -385,7 +495,7 @@ def check_segment(words, command, findings, depth=0):
         if value is None and index + 1 < len(args):
             value = args[index + 1]
         if value and re.match(r"^\d", value) and not ZERO_VALUE.match(value):
-            findings.append(Finding("timeout option", option.group(1) + " " + value, "Bash command"))
+            shell_finding("timeout option", option.group(1) + " " + value)
     if command_word == "herdr-job" and "--" in args:
         check_segment(args[args.index("--") + 1:], command, findings, depth + 1)
     code_flag = {"-c"} if command_word in SHELLS else {"-c", "-e"}
@@ -396,11 +506,11 @@ def check_segment(words, command, findings, depth=0):
                 if command_word in SHELLS:
                     check_bash_text(code, findings, depth + 1)
                 else:
-                    findings += scan_lines(code, CODE_PATTERNS, "inline code", marker_scope=code)
+                    findings += scan_lines(code, CODE_PATTERNS, "inline code")
                 break
     task = task_text(words, command)
     if task is not None:
-        findings += scan_lines(task, ALL_PATTERNS, "agent task text", marker_scope=task)
+        findings += scan_lines(task, ALL_PATTERNS, "agent task text")
 
 
 def heredoc_patterns(intro, command):
@@ -429,7 +539,7 @@ def check_bash_text(command, findings, depth=0):
     try:
         tokens = tokenize(outer)
     except ValueError:
-        findings += scan_lines(outer, CODE_PATTERNS, "Bash command", marker_scope=command)
+        findings += scan_lines(outer, CODE_PATTERNS, "Bash command")
         tokens = None
     if tokens is not None:
         parts = list(segments(tokens))
@@ -440,13 +550,11 @@ def check_bash_text(command, findings, depth=0):
     for intro, body in bodies:
         patterns, where = heredoc_patterns(intro, command)
         if patterns is not None:
-            findings += scan_lines(body, patterns, where, marker_scope=body + "\n" + intro)
+            findings += scan_lines(body, patterns, where)
 
 
 def check_bash(tool_input):
     command = tool_input.get("command") or ""
-    if MARKER.search(command):
-        return []
     findings = []
     check_bash_text(command, findings)
     return findings
@@ -474,7 +582,7 @@ def reason(findings):
     if more > 0:
         shown += "; and {} more".format(more)
     return (
-        "delay-check: this call adds a time constant used to wait or give up: "
+        "delay-check: this call adds timing or periodic internal-event recovery: "
         + shown
         + ". Added delay is a bug signal (~/.claude/CLAUDE.md): find the race, "
         "lost event or non-atomic write instead, wait for the positive event "
@@ -485,8 +593,10 @@ def reason(findings):
         "`# delay: ...` in a shell command, a line in a task text). In a fix "
         "(not a test harness or tooling), get the user's or the coordinating "
         "agent's agreement, with the evidence, before adding the label; never "
-        "add one just to get past this check (Rule 10). A constant "
-        "that does not wait at all takes `delay: not a wait, <what it is>`."
+        "add one just to get past this check (Rule 10). Periodic repair of "
+        "your own events is never an exception: persist durable progress "
+        "before acknowledgement and reconcile at producing events, startup "
+        "or handoff. Non-wait numeric settings need no timer exception."
     )
 
 

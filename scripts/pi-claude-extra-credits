@@ -1,0 +1,4 @@
+# this uses macos keychain
+# to store api key in macos keychain
+# security add-generic-password -a "$USER" -s anthropic-api-credits -w
+pi --model anthropic/claude-opus-5-5 --api-key "$(security find-generic-password -a "$USER" -s anthropic-api-credits -w)" "$@"

@@ -42,8 +42,6 @@ Follow-ups for the tools configured in this dotfiles repository.
 
 ## Next, in order
 
-## Proposed
-
 - **todo: hand off without a lease gap.** The automatic handoff releases
   `todo-lock` before the successor starts (so the successor's `acquire`
   never races a live predecessor); in that gap another `/todo` session can
@@ -53,3 +51,4 @@ Follow-ups for the tools configured in this dotfiles repository.
   presents it to take the lock over atomically (consult round
   `20261013-150634-b1a5`, Sol and DeepSeek). Cost: a `todo-lock handover`
   mode and the token in the note; no build.
+  Decided by the user 2026-10-13: approved ("yes").

@@ -64,6 +64,11 @@
 #   -o OUT         Output path; only with a single input.
 #
 # Without -o the script writes "<input_basename>_wa.mp4" next to each input.
+# While converting, it writes "<output>.temp" in the same directory, then
+# atomically replaces the output after ffmpeg succeeds (including faststart).
+# Failures leave an existing output intact. A "<output>.temp.lock" directory
+# prevents simultaneous conversions to the same output. After an uncatchable
+# kill, inspect leftover .temp/.temp.lock paths before removing them manually.
 # Several inputs (e.g. a Finder selection passed by Automator) are processed
 # one by one; a failure is reported and the rest still run.
 #
@@ -158,10 +163,60 @@ fi
 DIR="$(dirname "$INPUT")"
 BASE="$(basename "${INPUT%.*}")"
 
+prepare_output() {
+    # Keep option-like relative paths safe for mkdir, rm, rmdir and mv.
+    case "$OUTPUT" in
+        /*|./*|../*) ;;
+        *) OUTPUT="./$OUTPUT" ;;
+    esac
+    if [[ -d "$OUTPUT" || "$INPUT" -ef "$OUTPUT" ]]; then
+        echo "Error: output must be a file distinct from the input: $OUTPUT" >&2
+        exit 1
+    fi
+
+    TEMP_OUTPUT="${OUTPUT}.temp"
+    OUTPUT_LOCK="${TEMP_OUTPUT}.lock"
+    if ! mkdir "$OUTPUT_LOCK"; then
+        echo "Error: cannot claim output (another conversion or leftover lock): $OUTPUT_LOCK" >&2
+        exit 1
+    fi
+    TEMP_CREATED=false
+    trap cleanup_output EXIT
+    trap 'exit 129' HUP
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+
+    # Never overwrite a leftover temporary file or follow a temporary symlink.
+    if ! (set -o noclobber; : > "$TEMP_OUTPUT"); then
+        echo "Error: cannot create temporary output; inspect it before removing: $TEMP_OUTPUT" >&2
+        exit 1
+    fi
+    TEMP_CREATED=true
+    echo "Working file: $TEMP_OUTPUT (not ready to send yet)"
+}
+
+cleanup_output() {
+    local status=$?
+    trap - EXIT
+    if [[ "$TEMP_CREATED" == true ]]; then
+        rm -f "$TEMP_OUTPUT" || true
+    fi
+    rmdir "$OUTPUT_LOCK" || true
+    exit "$status"
+}
+
+publish_output() {
+    # Same-directory rename publishes only the finalized MP4. Keep the lock
+    # until cleanup, so another run cannot create a temp file we might remove.
+    mv -f "$TEMP_OUTPUT" "$OUTPUT"
+    TEMP_CREATED=false
+}
+
 if [[ "$FPS30" == true ]]; then
     CRF="${CRF:-23}"
     PRESET="${PRESET:-veryfast}"
     OUTPUT="${OUTPUT:-${DIR}/${BASE}.whatsapp.30fps.mp4}"
+    prepare_output
     echo "Encoding $INPUT -> $OUTPUT (30 fps, 1280 px, CRF ${CRF}, preset ${PRESET})"
 
     # -loglevel error -stats: in Automator's output show only errors and progress.
@@ -171,9 +226,10 @@ if [[ "$FPS30" == true ]]; then
         -c:v libx264 -profile:v high -preset "${PRESET}" -crf "${CRF}" \
         -pix_fmt yuv420p \
         -c:a aac -b:a 128k \
-        -movflags +faststart \
-        "$OUTPUT"
+        -movflags +faststart -f mp4 \
+        "$TEMP_OUTPUT"
 
+    publish_output
     echo "Done. Output written to: $OUTPUT"
     exit 0
 fi
@@ -181,6 +237,7 @@ fi
 CRF="${CRF:-18}"
 PRESET="${PRESET:-slow}"
 OUTPUT="${OUTPUT:-${DIR}/${BASE}_wa.mp4}"
+prepare_output
 
 echo "Analyzing source file: $INPUT"
 
@@ -245,8 +302,8 @@ if [[ "$COMPATIBLE_VIDEO" == true && "$COMPATIBLE_AUDIO" == true ]]; then
     echo "Remuxing only (no quality loss, no re-encode)..."
     ffmpeg -y -i "$INPUT" \
         -c copy \
-        -movflags +faststart \
-        "$OUTPUT"
+        -movflags +faststart -f mp4 \
+        "$TEMP_OUTPUT"
 else
     echo ""
     echo "Source needs re-encoding for compatibility."
@@ -292,10 +349,11 @@ else
         -maxrate "${MAXRATE}" -bufsize "${BUFSIZE}" \
         -pix_fmt yuv420p \
         "${AUDIO_ARGS[@]}" \
-        -movflags +faststart \
-        "$OUTPUT"
+        -movflags +faststart -f mp4 \
+        "$TEMP_OUTPUT"
 fi
 
+publish_output
 echo ""
 echo "Done. Output written to: $OUTPUT"
 echo "Tip: if Finder still shows a stale/gray thumbnail, run:"

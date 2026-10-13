@@ -42,7 +42,7 @@ show_agents_panel = false
 
 [ui.sidebar.spaces]
 tabs = true
-todo_command = "roagent todo start {space}"
+todo_command = "DOTFILES_AUTO=1 PATH=$HOME/scripts/dotfiles-shim:$PATH roagent todo start {space}"
 
 [keys]
 close_pane = ["cmd+w", "ctrl+shift+w"]

@@ -236,6 +236,7 @@ __pycache__/
 !/.pi/agent/tests/
 /.pi/agent/tests/*
 !/.pi/agent/tests/shell-path-completion.test.mjs
+!/.pi/agent/tests/bg-bash.e2e.py
 !/.pi/README.md
 !/.pi/agent/skills
 /.pi/agent/skills/*

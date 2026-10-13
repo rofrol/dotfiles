@@ -39,3 +39,37 @@ Follow-ups for the tools configured in this dotfiles repository.
   `window_starts`, the ASR class's `detect` and `vote`; its plan doc,
   "Language detection is the biggest failure"), which picked pl, fr and en
   correctly on library songs.
+
+## Proposed
+
+- **todo: coordination that works outside the herdr fork** (the user,
+  2026-10-13: "shouldn't /todo be a mechanism outside herdr?", since agents
+  will also run in herdr-tov, plain terminals, tmux and ssh). Design agreed
+  in consult rounds `20261013-135756-a0d1` and `20261013-141203-4fe6`
+  (MiMo, DeepSeek):
+  - **Authority.** The per-repository lease `~/scripts/todo-lock` in the git
+    common dir is the only source of truth for who coordinates. herdr's
+    `herdr coordinator` tenure, where present, is a mirror for supervision,
+    the snapshot and `handoff --successor`. Take the git lease first, then
+    register with herdr; release herdr first, then the git lease. On any
+    disagreement git wins and herdr is repaired, at `/todo` start, at a
+    handoff and at each item boundary.
+  - **Who takes a note over.** Only a session started with
+    `/todo --handoff <note>` (as the skill already says: never infer handoff
+    mode from a note file existing). Agents that only answer questions never
+    run `/todo`, so they never take the lease or a note. The claim is the
+    lease, not a commit, and the "claim by commit" rule goes.
+  - **Automatic handoff.** At each item boundary (the item committed and
+    `TODO.md` updated), the coordinator checks its context usage: pi via
+    `getContextUsage().percent`, Claude Code via the token usage of the last
+    turn in its session `.jsonl`, not the file size. Over about 70%, it:
+    writes the note atomically, commits it, starts the successor with
+    `/todo --handoff <note>` (herdr: `coordinator handoff --successor`;
+    elsewhere a detached start if the agent allows it, otherwise it prints
+    the command for the user), and then releases the lease. Every `/todo`
+    start also finishes a pending handoff whose successor never came.
+  - **What changes.** The `todo` skill, `todo-worker` (send
+    `/todo --handoff HANDOFF.md` instead of the free-text take-over prompt),
+    and the global "Context size and handoff" rule (the percent replaces 600
+    KB; claim by lease). Rejected: `flock`, because its holder would have to
+    be a long-lived process, while agents run short commands.

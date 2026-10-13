@@ -44,6 +44,22 @@ Follow-ups for the tools configured in this dotfiles repository.
 
 ## Proposed
 
+- **pi bg-bash: race stress test.** `.pi/agent/extensions/bg-bash.ts`
+  (commit 2d025f3) detaches running bash commands on a steering message.
+  Consult round `20261013-155214-a3cd` (sol, deepseek) asked for a test
+  driven by events, not elapsed time: a child prints READY and blocks on a
+  pipe; steer after READY, release the pipe, assert one answer and exactly
+  one bg-job-done; also a steer landing as the command exits and two
+  commands exiting together. Cost: a test script plus a few cents of model
+  calls; no build.
+- **pi bg-bash: durable completion records.** Today a detached command's
+  completion lives only in memory and a `$TMPDIR/pi-bg/<id>.status` file;
+  if pi crashes the wake is lost, and quitting pi kills detached commands
+  (as Claude Code does). Proposed by mimo and deepseek in the same round:
+  persist records with an announced marker, reconcile at `session_start`.
+  Cost: moderate extension code; no build. Only worth it if wakes go missing
+  in practice.
+
 - **todo skill: default to the agent this session runs in.** The space and
   agent question offers Claude as the default even when `/todo` runs in pi;
   picking Claude there opens a new Claude tab instead of making the pi

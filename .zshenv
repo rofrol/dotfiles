@@ -29,6 +29,9 @@ export PATH="$(brew --prefix keydb)/bin":$PATH
 
 export PATH=$HOME/.bun/bin:$PATH
 
+# todo-coordination: todo-lock, todo-worker, todo-handoff, todo-context-usage
+[[ -d $HOME/personal_projects/todo-coordination/bin ]] && export PATH=$HOME/personal_projects/todo-coordination/bin:$PATH
+
 # Odin
 
 export PATH=$HOME/personal_projects/odin/vendor/ols:$PATH

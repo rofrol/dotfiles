@@ -73,7 +73,8 @@ Keep a session's context small, and hand off before it grows too large
 - Hand implementation to workers where the repository allows it; read only
   their summary and diff.
 - At every committed milestone, check how full your context window is:
-  `~/personal_projects/todo-coordination/bin/context-usage` (the last turn's token usage from your own
+  `todo-context-usage` (on PATH from `~/personal_projects/todo-coordination/bin`;
+  the last turn's token usage from your own
   transcript against the model's window; pi and Claude Code). Once it is
   over 70% (the user's value, 2026-10-13, replacing a transcript size of
   600 KB), finish the current item and hand off. Do the same at a phase
@@ -85,7 +86,7 @@ Keep a session's context small, and hand off before it grows too large
   else is left; otherwise start the agent with a prompt naming the note.
 - Each session has its own note, outside every repository, because several
   sessions share a repository and one session may span several:
-  `~/personal_projects/todo-coordination/bin/handoff path` prints it
+  `todo-handoff path` prints it
   (`~/.local/state/agent-handoffs/sessions/<agent>/<session id>.md`). The
   `handoff` skill (`/handoff`) says how to write it, start the successor
   with `/handoff --take <note>`, and take a note over. The note starts with
@@ -99,20 +100,20 @@ Keep a session's context small, and hand off before it grows too large
   - links to the decisions, the TODO and the results, by path, not copied.
   Starting the new agent is a hand-over the user asked for, which this rule
   is; register it with herdr and never claim continuation without a handle.
-- The taker claims the note first (`handoff claim <note>`; exactly one
+- The taker claims the note first (`todo-handoff claim <note>`; exactly one
   session wins; a coordinator's note only after its lease, below), reconciles it against git and herdr, acts on it, and runs
-  `handoff done <note>` once everything in it is done; the state lives on
+  `todo-handoff done <note>` once everything in it is done; the state lives on
   in the TODO and the decision records.
 - A TODO coordinator also hands its lease over: `todo-lock handover --note
   <note>` keeps the lease held, so it is never free in between, and the
   successor started with `/todo --handoff <note>` takes it with
   `todo-lock acquire --note <note>` (the `todo` skill). Any `/todo` start
   finishes a pending coordinator handoff whose successor never came
-  (`todo-lock note` names its note), and `~/personal_projects/todo-coordination/bin/todo-worker SPACE [pi]`
+  (`todo-lock note` names its note), and `todo-worker SPACE [pi]`
   (herdr's T button) starts that successor by itself.
 - Only a session started with that note's path takes a note over. One that
   was not (a quick question, for example) does not act on it, even one it
-  sees in `handoff show`; it mentions the note to the user and does what it
+  sees in `todo-handoff show`; it mentions the note to the user and does what it
   was asked.
 
 # Uncommitted work
@@ -277,7 +278,7 @@ decision".
   and go on with authorized work. Technical uncertainty goes to the models,
   not to me.
 - Only one session works through a repository's TODO at a time, inside herdr
-  or not. Before it starts, the session runs `~/personal_projects/todo-coordination/bin/todo-lock acquire`
+  or not. Before it starts, the session runs `todo-lock acquire`
   in the repository (`acquire --note <note>` when taking over a pending
   handoff, as "Context size and handoff" says). The lock covers the whole git repository with all its
   worktrees, and names the agent's process. If the lock is held, report who

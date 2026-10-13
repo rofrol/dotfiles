@@ -57,7 +57,10 @@ export default function (pi: ExtensionAPI) {
 	const runs = new Map<string, Run>();
 	let seq = 0;
 	let shuttingDown = false;
-	const local = createLocalBashOperations();
+	// Rebuilt when the shell path setting changes; read at execution, since
+	// action APIs are unavailable while the factory loads.
+	let local = createLocalBashOperations();
+	let localShell: string | undefined;
 
 	function wake(run: Run, status: string) {
 		run.done = true;
@@ -167,20 +170,21 @@ export default function (pi: ExtensionAPI) {
 		},
 	};
 
-	const definitions = new Map<string, ReturnType<typeof createBashToolDefinition>>();
-	const definitionFor = (cwd: string) => {
-		let def = definitions.get(cwd);
-		if (!def) {
-			def = createBashToolDefinition(cwd, { operations });
-			definitions.set(cwd, def);
-		}
-		return def;
-	};
-	const base = definitionFor(process.cwd());
+	const base = createBashToolDefinition(process.cwd(), { operations });
 	pi.registerTool({
 		...base,
-		execute: (toolCallId, params, signal, onUpdate, ctx) =>
-			definitionFor(ctx.cwd).execute(toolCallId, params, signal, onUpdate, ctx),
+		execute: (toolCallId, params, signal, onUpdate, ctx) => {
+			const settings = pi.getSettings();
+			if (settings.shellPath !== localShell) {
+				localShell = settings.shellPath;
+				local = createLocalBashOperations({ shellPath: localShell });
+			}
+			return createBashToolDefinition(ctx.cwd, {
+				operations,
+				shellPath: settings.shellPath,
+				commandPrefix: settings.shellCommandPrefix,
+			}).execute(toolCallId, params, signal, onUpdate, ctx);
+		},
 	});
 
 	pi.on("input", (event) => {

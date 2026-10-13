@@ -18,9 +18,18 @@ position = "top-right"
 enabled = true
 openai_api = true
 anthropic_api = true
-anthropic_credit_usd = 200
-anthropic_credit_since = "2026-10-12"
-anthropic_credit_expires = "2026-11-09"
+
+# Grants as the Console's Settings > Billing lists them (UTC days).
+[[usage.anthropic_credits]]
+usd = 200
+granted = "2026-10-11"
+expires = "2026-11-09"
+included = true
+
+[[usage.anthropic_credits]]
+usd = 10
+granted = "2026-09-27"
+expires = "2027-09-28"
 
 [ui.sidebar.agents]
 rows = [

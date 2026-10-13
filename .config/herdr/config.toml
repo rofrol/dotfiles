@@ -17,6 +17,10 @@ position = "top-right"
 [usage]
 enabled = true
 openai_api = true
+anthropic_api = true
+anthropic_credit_usd = 200
+anthropic_credit_since = "2026-10-12"
+anthropic_credit_expires = "2026-11-09"
 
 [ui.sidebar.agents]
 rows = [

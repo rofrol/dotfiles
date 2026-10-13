@@ -41,3 +41,17 @@ Follow-ups for the tools configured in this dotfiles repository.
   correctly on library songs.
 
 ## Next, in order
+
+## Proposed
+
+- **todo skill: default to the agent this session runs in.** The space and
+  agent question offers Claude as the default even when `/todo` runs in pi;
+  picking Claude there opens a new Claude tab instead of making the pi
+  session the coordinator (seen in herdr-tov, 2026-10-13). Default to the
+  running agent. Cost: a few lines in `.agents/skills/todo/SKILL.md`; no build.
+- **todo-coordination: tests for context-usage and todo-worker.** Only
+  `todo-lock` has tests (`tests/test_todo_lock.py` in
+  `~/personal_projects/todo-coordination`). Add fixture transcripts for
+  `context-usage` (pi and Claude Code, a compaction, an unknown window) and a
+  `--dry-run` test of `todo-worker`'s prompt choice (pending note with a
+  title line, lease handing over). Cost: tests only; no build.

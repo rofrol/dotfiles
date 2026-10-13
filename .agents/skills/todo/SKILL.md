@@ -121,12 +121,14 @@ Otherwise ask instead, in one question round with clickable options:
 - **Space**: this session's space first, marked as the default, then the
   other spaces with a repository, most recently active first (`herdr
   workspace list`; "Other" takes a typed name).
-- **Agent**: Claude (default), or pi with GPT-6.1 Sol.
+- **Agent**: the one this session runs in, marked as the default (Claude
+  in Claude Code, pi in pi), then the other: Claude, or pi with GPT-6.1
+  Sol.
 
 Then:
 
-- this session's space with Claude: this session is the coordinator; go on
-  with step 1.
+- this session's space with this session's agent: this session is the
+  coordinator; go on with step 1.
 - any other choice: run `roagent todo start "<space>"` (add `pi` as its
   second argument for pi), report its output in a few lines, and stop; this
   session does not coordinate. An unknown space is an error; never create

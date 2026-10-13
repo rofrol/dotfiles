@@ -229,6 +229,7 @@ __pycache__/
 !/.pi/agent/web-search.json
 !/.pi/agent/extensions
 /.pi/agent/extensions/*
+!/.pi/agent/extensions/bg-bash.ts
 !/.pi/agent/extensions/remember-model.ts
 !/.pi/agent/extensions/shell-path-completion.ts
 !/.pi/agent/extensions/README.md

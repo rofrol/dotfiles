@@ -72,12 +72,13 @@ Keep a session's context small, and hand off before it grows too large
   only points to them.
 - Hand implementation to workers where the repository allows it; read only
   their summary and diff.
-- At every committed milestone, check the size of your own transcript
-  (pi: `$PI_SESSION_FILE`; Claude Code: the session's `.jsonl` under
-  `~/.claude/projects/`). Once it is over 600 KB (the user's value, about a
-  quarter to a third of the window, since a long transcript costs more on
-  every turn), finish the current item and hand off. Do the same at a phase
-  boundary, and when the user asks.
+- At every committed milestone, check how full your context window is:
+  `~/scripts/context-usage` (the last turn's token usage from your own
+  transcript against the model's window; pi and Claude Code). Once it is
+  over 70% (the user's value, 2026-10-13, replacing a transcript size of
+  600 KB), finish the current item and hand off. Do the same at a phase
+  boundary, and when the user asks. A TODO coordinator does this at each
+  item boundary by itself (the `todo` skill's "Automatic handoff").
 - A handoff starts a fresh agent that reads a short handoff note and the
   files it names, never the old transcript. `herdr agent handoff` points the
   new agent at the transcript, so use it only after a limit, when nothing
@@ -92,19 +93,23 @@ Keep a session's context small, and hand off before it grows too large
   - links to the decisions, the TODO and the results, by path, not copied.
   Starting the new agent is a hand-over the user asked for, which this rule
   is; register it with herdr and never claim continuation without a handle.
-- The note starts with `Status: pending`. The writer releases its
-  `todo-lock`, then starts the taker with a first prompt that tells it to
-  take over the note: `~/scripts/todo-worker SPACE [pi]` (herdr's T button)
-  sends that prompt by itself when the note is pending. Otherwise use
-  `herdr agent start ... --prompt`, or give the user the prompt to paste.
-- The taker runs `todo-lock acquire` first. Where agents may commit, it then
-  commits `Status: taken by <agent and pane or pid>, <date>`. It reconciles
-  the note against git and herdr, acts on it, and deletes the note in a
-  commit once everything in it is done; the state lives on in the TODO and
-  the decision records.
-- A session not started to take over a pending note (a quick question, for
-  example) does not act on it. It mentions the note to the user and does
-  what it was asked.
+- The note starts with `Status: pending` and is written atomically and
+  committed. The writer releases its `todo-lock` (herdr's tenure first,
+  where it has one), then starts the taker with the first prompt
+  `/todo --handoff <note>` (`/skill:todo --handoff <note>` in pi): in herdr
+  `herdr coordinator handoff --successor`; elsewhere a detached start where
+  the agent allows it, otherwise it gives the user that command.
+  `~/scripts/todo-worker SPACE [pi]` (herdr's T button) sends it by itself
+  when the note is pending.
+- The taker runs `todo-lock acquire` first; the lease is the claim, nothing
+  is committed to claim the note, and a held lease means someone else took
+  it. It reconciles the note against git and herdr, acts on it, and deletes
+  the note in a commit once everything in it is done; the state lives on in
+  the TODO and the decision records. Any `/todo` start that gets the lease
+  also takes over a pending note whose taker never came.
+- Only a session running `/todo` takes a note over. One that was not (a
+  quick question, for example) does not act on it. It mentions the note to
+  the user and does what it was asked.
 
 # Uncommitted work
 

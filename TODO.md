@@ -44,6 +44,42 @@ Follow-ups for the tools configured in this dotfiles repository.
 
 ## Proposed
 
+- **pi: answer while working (plan, awaiting the user's choices).** The user
+  (2026-10-13): pi should answer a message typed while it works fairly
+  quickly, as Claude Code does, not when the model finishes; inside herdr or
+  herdr-tov maybe in a separate tab; herdr jobs must keep working, and
+  herdr-tov must support it too. Facts: pi delivers a steer only after the
+  current turn's tool calls all finish; Claude Code does the same, and adds
+  Ctrl+B (move a running Bash to the background by hand), run_in_background,
+  exit notifications and `/btw` (a side answer with the conversation as
+  context, no tools, not added to the conversation). bg-bash is disabled
+  (renamed to `.bak` by the user): pi 1.2.0 counts a second `registerTool("bash")`
+  (herdr-activity also registers it) as an extension load error. Consult
+  round `20261013-170505-9b5f` (sol, mimo, deepseek). Plan:
+  1. One bash owner: herdr-activity stops registering `bash` and draws rows
+     with `registerToolRenderer` (composes through `next()`); bg-bash
+     publishes versioned `pi.events` (detach, exit with id, pid, log, exit
+     code). Lands in the herdr fork first, through its TODO coordinator;
+     bg-bash is re-enabled only after that.
+  2. Detach only the tool call blocking the current turn (by toolCallId),
+     not every running command; the result says the command still runs and
+     may still write files; completion carries the exit code and log tail.
+     Codemode: a nested bash detaches back into the script, which still
+     blocks; documented as a gap.
+  3. `/btw <question>` extension: one `ctx.modelRegistry.streamSimple()`
+     call on a snapshot of the conversation at the last finished turn, no
+     tools, answer in a widget labelled with that turn, nothing written to
+     the session.
+  4. Durable job records (see "durable completion records" below), with
+     reconciliation at session_start, detach, exit and `/bg`.
+  5. Inside herdr with herdr-job: `herdr-job watch --pid` on detach (sidebar
+     entry). Elsewhere, herdr-tov included: one shared, reused "bg jobs" tab
+     (tab.create + pane.run, no focus) showing the logs, or only `/bg`.
+  6. Tests driven by events (child blocks on a FIFO): steer mid-bash, exit
+     racing detach, both extensions loaded, `/btw` leaves the session file
+     unchanged, restart reconciles.
+  Also: report upstream to pi that a duplicate tool name blocks startup and
+  ask to separate implementation from renderer registration.
 - **pi bg-bash: race stress test.** `.pi/agent/extensions/bg-bash.ts`
   (commit 2d025f3) detaches running bash commands on a steering message.
   Consult round `20261013-155214-a3cd` (sol, deepseek) asked for a test

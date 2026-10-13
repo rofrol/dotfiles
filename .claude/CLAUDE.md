@@ -58,6 +58,41 @@ the same checkout), build and test your change in a clean tree:
 `herdr-job clean-tree <your paths> -- <build or test command>` runs it on
 `HEAD` plus only those paths.
 
+# Context size and handoff
+
+Keep a session's context small, and hand off before it grows too large
+(user, 2026-10-13; consult round `20261013-133453-319c`).
+
+- Keep big outputs out of the conversation. Send logs, test output and file
+  dumps to a file (a herdr-job log already is one) and read only what you need
+  with `grep`, `tail` or `read` with a limit. Turn a consult round into a
+  verdict and a decision record; do not keep whole answers around.
+- Write the state down when it changes, not at the end: decisions in the
+  repository's decision records, open work in its `TODO.md`. A handoff then
+  only points to them.
+- Hand implementation to workers where the repository allows it; read only
+  their summary and diff.
+- At every committed milestone, check the size of your own transcript
+  (pi: `$PI_SESSION_FILE`; Claude Code: the session's `.jsonl` under
+  `~/.claude/projects/`). Once it is over 600 KB (the user's value, about a
+  quarter to a third of the window, since a long transcript costs more on
+  every turn), finish the current item and hand off. Do the same at a phase
+  boundary, and when the user asks.
+- A handoff starts a fresh agent that reads a short handoff note and the
+  files it names, never the old transcript. `herdr agent handoff` points the
+  new agent at the transcript, so use it only after a limit, when nothing
+  else is left; otherwise start the agent with a prompt naming the note.
+- The note (the repository says where; default `HANDOFF.md`, committed) has
+  these sections:
+  - first, the commands to reconcile with git and herdr before acting;
+  - the open questions to the user, verbatim, with their options;
+  - work in flight (jobs, workers, runs) with ids and how to check each one;
+  - what not to repeat;
+  - the next action and its check;
+  - links to the decisions, the TODO and the results, by path, not copied.
+  Starting the new agent is a hand-over the user asked for, which this rule
+  is; register it with herdr and never claim continuation without a handle.
+
 # Uncommitted work
 
 Never end a session leaving your own edits uncommitted in a shared checkout:

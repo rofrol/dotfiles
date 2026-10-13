@@ -42,7 +42,7 @@ show_agents_panel = false
 
 [ui.sidebar.spaces]
 tabs = true
-todo_command = "todo-worker {space}"
+todo_command = "roagent todo start {space}"
 
 [keys]
 close_pane = ["cmd+w", "ctrl+shift+w"]

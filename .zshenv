@@ -29,8 +29,8 @@ export PATH="$(brew --prefix keydb)/bin":$PATH
 
 export PATH=$HOME/.bun/bin:$PATH
 
-# todo-coordination: todo-lock, todo-worker, todo-handoff, todo-context-usage
-[[ -d $HOME/personal_projects/todo-coordination/bin ]] && export PATH=$HOME/personal_projects/todo-coordination/bin:$PATH
+# roagent: coordination commands for AI coding agents
+[[ -d $HOME/personal_projects/roagent/bin ]] && export PATH=$HOME/personal_projects/roagent/bin:$PATH
 
 # Odin
 

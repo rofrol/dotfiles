@@ -8,6 +8,7 @@ with the same permissions as Pi, so only keep code here that you trust.
 |---|---|
 | `herdr-agent-state.ts` | Installed and overwritten by Herdr. Reports pane and agent state to Herdr and adds the Herdr runtime context. Do not edit it; add custom code in a file beside it. |
 | `remember-model.ts` | Personal model and reasoning defaults. `/m` picks a model plus its reasoning level and remembers both; interactive `/model` choices are saved as the default model. |
+| `shell-path-completion.ts` | Shell-style paths: Tab inserts the common prefix or sole match; when no further prefix is shared, Tab opens a menu and the next Tab accepts the selection. Ordinary paths no longer open automatic menus; `/` commands and `@` search are unchanged. |
 
 Usage details for the personal commands live in the kisswiki page
 `src/artificial_intelligence/pi.md`. This file stays an index with one line per

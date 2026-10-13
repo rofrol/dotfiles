@@ -230,7 +230,11 @@ __pycache__/
 !/.pi/agent/extensions
 /.pi/agent/extensions/*
 !/.pi/agent/extensions/remember-model.ts
+!/.pi/agent/extensions/shell-path-completion.ts
 !/.pi/agent/extensions/README.md
+!/.pi/agent/tests/
+/.pi/agent/tests/*
+!/.pi/agent/tests/shell-path-completion.test.mjs
 !/.pi/README.md
 !/.pi/agent/skills
 /.pi/agent/skills/*

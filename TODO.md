@@ -42,22 +42,12 @@ Follow-ups for the tools configured in this dotfiles repository.
 
 ## Next, in order
 
-- **handoff skill: pathless take.** Decided by the user 2026-10-13: option
-  A of roagent's item "handoff: take a note without its path" (do this one
-  after that item lands in roagent). Change the `handoff` skill
-  (`.agents/skills/handoff/SKILL.md`): `/handoff --take` with no path runs
-  `roagent handoff take`; on several candidates the agent offers them as a
-  choice (Claude: AskUserQuestion, one option per note with its first
-  lines as a Markdown `preview`; pi: a numbered list in plain text), then
-  claims the chosen one; a claim held by a gone session is taken only with
-  the user's choice through `roagent handoff claim --break`. The global
-  rule "Context size and handoff" (`.pi/agent/AGENTS.md` and
-  `.claude/CLAUDE.md`, same text): a session started with `/handoff
-  --take`, with or without a path, takes a note over. Startup notice, read
-  only: a Claude SessionStart hook in `.claude/settings.json` and a pi
-  extension in `.pi/agent/extensions/` print one line when notes are
-  pending for the cwd repository (`roagent handoff show --repo .`), naming
-  `/handoff --take`; they never claim.
+- **pi extensions: list handoff-notice.ts.** Follow-up of "handoff skill:
+  pathless take" (de77de0): `.pi/agent/extensions/handoff-notice.ts` is
+  tracked but still matched by `/.pi/agent/extensions/*` in
+  `.dotfiles.gitignore`; add `!/.pi/agent/extensions/handoff-notice.ts`
+  beside the other extensions' lines, and its row in
+  `.pi/agent/extensions/README.md`.
 
 ## Proposed
 

@@ -20,6 +20,14 @@
   "hooks": {
     "SessionStart": [
       {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PATH=\"$HOME/personal_projects/roagent/bin:$PATH\"; notes=$(roagent handoff show --repo . 2>/dev/null) && if printf '%s\\n' \"$notes\" | grep -q '^  pending; unclaimed; owner '; then printf 'Pending handoff notes for this repository: use /handoff --take.\\n'; fi; exit 0"
+          }
+        ]
+      },
+      {
         "matcher": "^(startup|resume|clear|compact|fork)$",
         "hooks": [
           {

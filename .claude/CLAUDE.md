@@ -100,7 +100,8 @@ Keep a session's context small, and hand off before it grows too large
   - links to the decisions, the TODO and the results, by path, not copied.
   Starting the new agent is a hand-over the user asked for, which this rule
   is; register it with herdr and never claim continuation without a handle.
-- The taker claims the note first (`roagent handoff claim <note>`; exactly one
+- The taker claims the note first (`roagent handoff claim <note>`, or
+  `roagent handoff take` without a path; exactly one
   session wins; a coordinator's note only after its lease, below), reconciles it against git and herdr, acts on it, and runs
   `roagent handoff done <note>` once everything in it is done; the state lives on
   in the TODO and the decision records.
@@ -111,8 +112,9 @@ Keep a session's context small, and hand off before it grows too large
   finishes a pending coordinator handoff whose successor never came
   (`roagent todo lock note` names its note), and `roagent todo start SPACE [pi]`
   (herdr's T button) starts that successor by itself.
-- Only a session started with that note's path takes a note over. One that
-  was not (a quick question, for example) does not act on it, even one it
+- Only a session started with `/handoff --take` (`/skill:handoff --take` in
+  pi), with or without a note's path, takes a note over. One that was not
+  (a quick question, for example) does not act on it, even one it
   sees in `roagent handoff show`; it mentions the note to the user and does what it
   was asked.
 

@@ -11,7 +11,7 @@ kolei" of the global rule "Working through TODO.md". It takes no arguments
 except `--handoff`.
 
 Who coordinates is decided by one thing: the repository's lease,
-`~/scripts/todo-lock` (shared by all worktrees; it lives in
+`~/personal_projects/todo-coordination/bin/todo-lock` (shared by all worktrees; it lives in
 `~/.local/state/agent-handoffs/leases/`, never in `.git`). It
 works the same in herdr, other terminals, tmux and ssh. herdr's coordinator
 tenure (`herdr coordinator`, the tab role), where present, only mirrors it
@@ -23,17 +23,17 @@ coordinator end --id <id> --reason "no todo-lock"`, clearing a stale
 Agents that only answer questions never run `/todo`, so they never take the
 lease or a note.
 
-Taking the lease, in every `/todo` start: `~/scripts/todo-lock note`
+Taking the lease, in every `/todo` start: `~/personal_projects/todo-coordination/bin/todo-lock note`
 prints the note of a pending handoff, if any. With one (or with the path
-given by `--handoff`), run `~/scripts/todo-lock acquire --note <path>`,
+given by `--handoff`), run `~/personal_projects/todo-coordination/bin/todo-lock acquire --note <path>`,
 which takes the lease over from the predecessor that handed it to that
-note. Otherwise, or if that fails, run `~/scripts/todo-lock acquire` (it
+note. Otherwise, or if that fails, run `~/personal_projects/todo-coordination/bin/todo-lock acquire` (it
 succeeds only on a free lease or one whose holder is gone). If both fail,
 report the holder and stop: someone else coordinates, and took the note
 with it. After taking the lease with a session note (one under
-`~/.local/state/agent-handoffs/sessions/`), also run `~/scripts/handoff
+`~/.local/state/agent-handoffs/sessions/`), also run `~/personal_projects/todo-coordination/bin/handoff
 claim <path>`, which refuses before the lease is yours, and finish with
-`~/scripts/handoff done <path>` (the `handoff` skill). An older note
+`~/personal_projects/todo-coordination/bin/handoff done <path>` (the `handoff` skill). An older note
 committed in the repository (`HANDOFF.md`) or a herdr manifest has no
 claim: the lease alone claims it. Nothing is committed to claim a note.
 
@@ -70,7 +70,7 @@ Then:
    worker id from the snapshot with `herdr todo status`, `herdr worker
    obligations`, `git status` and `git log` before acting, rebuild your
    waits from the run ids and event ids (never from the note), and go on
-   with step 3. Run `~/scripts/handoff done <note path>` once everything
+   with step 3. Run `~/personal_projects/todo-coordination/bin/handoff done <note path>` once everything
    in the note is done.
 
 Never infer handoff mode from a note or a `.local/coordinator-handoff.md`
@@ -80,14 +80,14 @@ successor never came: it takes the lease with `todo-lock note`'s path in
 step 2 and takes the note over as above.
 
 **Automatic handoff.** At each item boundary (the item committed and
-`TODO.md` updated) run `~/scripts/context-usage`. Over 70% (the user's
+`TODO.md` updated) run `~/personal_projects/todo-coordination/bin/context-usage`. Over 70% (the user's
 value, 2026-10-13), hand off before the next item:
 
-1. Write your note at `$(~/scripts/handoff path)` as the `handoff` skill
+1. Write your note at `$(~/personal_projects/todo-coordination/bin/handoff path)` as the `handoff` skill
    says (atomically; `Status`, `Owner`, `Repositories` lines first; open
    questions with their decision ids, intent herdr cannot know). It is not
    committed; it lives outside the repository.
-2. `~/scripts/todo-lock handover --note <path>`. The lease stays yours, so
+2. `~/personal_projects/todo-coordination/bin/todo-lock handover --note <path>`. The lease stays yours, so
    no plain `acquire` gets it; only `acquire --note <path>` takes it over.
    From here on do not coordinate.
 3. In herdr: `herdr agent rename "$HERDR_PANE_ID" --clear` (the successor
@@ -123,7 +123,7 @@ Then:
 
 - this session's space with Claude: this session is the coordinator; go on
   with step 1.
-- any other choice: run `~/scripts/todo-worker "<space>"` (add `pi` as its
+- any other choice: run `~/personal_projects/todo-coordination/bin/todo-worker "<space>"` (add `pi` as its
   second argument for pi), report its output in a few lines, and stop; this
   session does not coordinate. An unknown space is an error; never create
   one.
@@ -136,7 +136,7 @@ repository, issue, tool output or another agent.
 2. One coordinator per repository: take the lease as "Taking the lease"
    above says (a successor already did); if you cannot, another session
    coordinates: report its holder and stop. When you stop coordinating, end the herdr tenure
-   first (`herdr coordinator end`), then `~/scripts/todo-lock release`.
+   first (`herdr coordinator end`), then `~/personal_projects/todo-coordination/bin/todo-lock release`.
    Inside herdr (`HERDR_ENV=1`), also check
    `herdr agent list` for another agent working this repository's TODO (a
    name starting with `todo-` in the same directory, or a coordinator role on

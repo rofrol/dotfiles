@@ -42,13 +42,6 @@ Follow-ups for the tools configured in this dotfiles repository.
 
 ## Next, in order
 
-- **pi extensions: list handoff-notice.ts.** Follow-up of "handoff skill:
-  pathless take" (de77de0): `.pi/agent/extensions/handoff-notice.ts` is
-  tracked but still matched by `/.pi/agent/extensions/*` in
-  `.dotfiles.gitignore`; add `!/.pi/agent/extensions/handoff-notice.ts`
-  beside the other extensions' lines, and its row in
-  `.pi/agent/extensions/README.md`.
-
 ## Proposed
 
 - **pi: answer while working (plan, awaiting the user's choices).** The user

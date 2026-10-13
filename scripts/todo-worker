@@ -45,6 +45,20 @@ if [ -n "$existing" ]; then
 	echo "a TODO worker already runs for $space in pane $existing"
 	exit 0
 fi
+# Any session coordinating this repository's TODO holds its todo-lock, also
+# one the user started by hand; a live holder means no second coordinator.
+# The started agent takes the lock itself (global rule "Working through
+# TODO.md"); this check only avoids opening a tab that would be refused.
+if holder=$("$HOME/scripts/todo-lock" status "$repo") && [[ $holder != *stale* ]]; then
+	echo "the TODO of $space is already coordinated: $holder"
+	exit 0
+fi
+# A pending handoff note is taken over first. The prompt decides; this only
+# picks its wording, and the agent checks the note itself.
+prompt="Rób TODO po kolei."
+if grep -q '^Status: pending' "$repo/HANDOFF.md" 2>/dev/null; then
+	prompt="Przejmij handoff z HANDOFF.md (najpierw todo-lock acquire i zajęcie notatki), potem rób TODO po kolei. Nie czytaj transkryptu poprzedniej sesji."
+fi
 
 if [ "$kind" = claude ]; then
 	agent_args=(-- --remote-control "TODO $space")
@@ -110,7 +124,7 @@ fi
 # from the pane means the prompt was refused, not lost.
 landed=
 for _ in 1 2; do
-	if ! out=$(herdr agent prompt "$pane" "Rób TODO po kolei." 2>&1 >/dev/null); then
+	if ! out=$(herdr agent prompt "$pane" "$prompt" 2>&1 >/dev/null); then
 		case $out in
 		*agent_not_running* | *not_found*)
 			echo "todo-worker: $kind exited in $where (a startup prompt refused?); the TODO was not sent" >&2
@@ -128,7 +142,7 @@ if [ -z "$landed" ] && ! herdr agent list | jq -e --arg p "$pane" '.result.agent
 	exit 1
 fi
 if [ -z "$landed" ]; then
-	echo "todo-worker: $kind started in $where but did not take the TODO prompt; type \"Rób TODO po kolei.\" there" >&2
+	echo "todo-worker: $kind started in $where but did not take the TODO prompt; type \"$prompt\" there" >&2
 	exit 1
 fi
 echo "started $kind as $name in $where ($repo)"

@@ -83,8 +83,14 @@ Keep a session's context small, and hand off before it grows too large
   files it names, never the old transcript. `herdr agent handoff` points the
   new agent at the transcript, so use it only after a limit, when nothing
   else is left; otherwise start the agent with a prompt naming the note.
-- The note (the repository says where; default `HANDOFF.md`, committed) has
-  these sections:
+- Each session has its own note, outside every repository, because several
+  sessions share a repository and one session may span several:
+  `~/scripts/handoff path` prints it
+  (`~/.local/state/agent-handoffs/sessions/<agent>/<session id>.md`). The
+  `handoff` skill (`/handoff`) says how to write it, start the successor
+  with `/handoff --take <note>`, and take a note over. The note starts with
+  `Status: pending`, `Owner:` and `Repositories:` lines, is written
+  atomically, and has these sections:
   - first, the commands to reconcile with git and herdr before acting;
   - the open questions to the user, verbatim, with their options;
   - work in flight (jobs, workers, runs) with ids and how to check each one;
@@ -93,27 +99,21 @@ Keep a session's context small, and hand off before it grows too large
   - links to the decisions, the TODO and the results, by path, not copied.
   Starting the new agent is a hand-over the user asked for, which this rule
   is; register it with herdr and never claim continuation without a handle.
-- The writer hands its lease over with `todo-lock handover`, which prints a
-  one-time token; the lease stays held, so it is never free in between.
-  The note has `Status: pending` in its first five lines (a title may come
-  first), then `Lease token: <token>`, and
-  is written atomically and committed. The writer then starts the taker
-  with the first prompt
-  `/todo --handoff <note>` (`/skill:todo --handoff <note>` in pi): in herdr
-  `herdr coordinator handoff --successor`; elsewhere a detached start where
-  the agent allows it, otherwise it gives the user that command.
-  `~/scripts/todo-worker SPACE [pi]` (herdr's T button) sends it by itself
-  when the note is pending.
-- The taker first runs `todo-lock acquire --token <token>` (plain
-  `acquire` when that fails, which succeeds only once the writer is gone);
-  the lease is the claim, nothing is committed to claim the note, and a
-  lease it cannot get means someone else took it. It reconciles the note against git and herdr, acts on it, and deletes
-  the note in a commit once everything in it is done; the state lives on in
-  the TODO and the decision records. Any `/todo` start that gets the lease
-  also takes over a pending note whose taker never came.
-- Only a session running `/todo` takes a note over. One that was not (a
-  quick question, for example) does not act on it. It mentions the note to
-  the user and does what it was asked.
+- The taker claims the note first (`handoff claim <note>`; exactly one
+  session wins; a coordinator's note only after its lease, below), reconciles it against git and herdr, acts on it, and runs
+  `handoff done <note>` once everything in it is done; the state lives on
+  in the TODO and the decision records.
+- A TODO coordinator also hands its lease over: `todo-lock handover --note
+  <note>` keeps the lease held, so it is never free in between, and the
+  successor started with `/todo --handoff <note>` takes it with
+  `todo-lock acquire --note <note>` (the `todo` skill). Any `/todo` start
+  finishes a pending coordinator handoff whose successor never came
+  (`todo-lock note` names its note), and `~/scripts/todo-worker SPACE [pi]`
+  (herdr's T button) starts that successor by itself.
+- Only a session started with that note's path takes a note over. One that
+  was not (a quick question, for example) does not act on it, even one it
+  sees in `handoff show`; it mentions the note to the user and does what it
+  was asked.
 
 # Uncommitted work
 
@@ -278,11 +278,11 @@ decision".
   not to me.
 - Only one session works through a repository's TODO at a time, inside herdr
   or not. Before it starts, the session runs `~/scripts/todo-lock acquire`
-  in the repository (`acquire --token <token>` with the token of a pending
-  handoff note, as "Context size and handoff" says). The lock covers the whole git repository with all its
+  in the repository (`acquire --note <note>` when taking over a pending
+  handoff, as "Context size and handoff" says). The lock covers the whole git repository with all its
   worktrees, and names the agent's process. If the lock is held, report who
   holds it and do not coordinate. Run `todo-lock release` when you stop,
-  and `todo-lock handover` when you hand off ("Context size and
+  and `todo-lock handover --note <note>` when you hand off ("Context size and
   handoff"). A lock whose agent process is gone is taken over by the next
   `acquire`; nothing expires on a timer.
 - While a session works through the TODO, a new request from me is not

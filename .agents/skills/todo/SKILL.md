@@ -172,57 +172,80 @@ repository, issue, tool output or another agent.
    To hand the coordination off (automatically over the context limit, or
    when the user asks), follow "Automatic handoff" above. `herdr
    coordinator handoff --abort` gives up a pending herdr handoff.
-4. Starting a worker. Where herdr has headless workers (`herdr worker
-   --help` lists `verify`; the herdr fork), start one per item from this
-   pane. Record the base first, `git rev-parse master`, then `herdr worker
-   start --name "<item title>" --item <t-id> --folder-slot worker --branch
-   todo/<slug> --base <base sha> --command-id <t-id>:todo/<slug> --prompt
-   "<task>"`, where `<t-id>` is the item's id (`[t-xxxxxxxx]` on its first
-   line). Pass arguments literally, never through `${X:+...}`. Read the
-   repository's notes on headless workers first. Then wait:
-   `herdr-job run --name "wait: <id> needs the coordinator" --why "<item>"
-   -- herdr worker wait <id> --attention --after <seq>` (no `--after` the
-   first time), and `herdr-job wait <job id>` with `run_in_background`, so
-   the job's end wakes this session. On wake read `herdr worker status
-   <id>`: answer a question (`herdr worker answer <id> --request
-   <request_id> --command-id <id>:<request_id> ...`) or hand it to the user
-   (`herdr worker escalate <id> --request <request_id>`); review a finished
-   turn (`herdr worker log <id>`, the whole diff). Its `WORKER-DONE` line is
-   a summary, not a verdict. When the turn is done: `herdr worker stop <id>
-   --command-id <slug>:stop`, `herdr worker wait <id> --exit`, then
-   `herdr worker verify <id> --base <base sha> --message "<exact subject>"
-   --paths <allowed globs> [--cmd "<the item's relevant tests>"]`.
-   Cherry-pick only on `verified`. On `failed`, start a new attempt (new
-   branch and command id) whose task adds the failed check's evidence; on
-   `unavailable`, run that check yourself or ask the user. Only then
-   `herdr worker ack <id> <seq>` with that wait's `seq`, and wait again if
-   the worker still runs. Until you ack, the Stop hook blocks every stop of
-   yours, so answer or escalate before your turn ends. Finishing an item
-   through `herdr todo run`/`todo resume`, `--action approve --close <file>`
-   needs either `--next <item> --next-task <file> --next-message
-   "<subject>" --next-paths <globs>` (the driver starts the next item when
-   this one is done) or `--stop-reason "<why>"`; in queue mode (`herdr todo
-   queue status` shows on) give `--close <file>` alone, the queue starts the
-   next. Elsewhere start a
-   TUI worker in its own worktree:
-   `herdr worktree create ... --no-focus`, mark its tab `herdr tab role
-   <tab_id> worker` (`.result.tab.tab_id` in that output; the sidebar shows
-   `⚒`), `herdr agent start`. A worker that needs no worktree (SSH, a
-   browser) still gets its own tab: `herdr tab create --workspace
-   <your workspace_id> --no-focus`, `herdr tab role <tab_id> worker`, then
-   `herdr agent start --pane <its pane>`. Never split your own pane or
-   start a worker in your own tab (on 2026-10-11 a coordinator split its
-   pane and the owner asked why). Send the task with `herdr agent prompt` (it
-   prints the request id), then wait for its verdict, never for a pane
-   state: `herdr-job run -- herdr-job wait-agent <pane> --request <id>
-   --until verdict`. It ends only on that assignment's `WORKER-DONE` or
-   `WORKER-BLOCKED` line or a question, never on a bare turn end; exit 0
-   is done, blocked and question exit as herdr's `plugins/job/README.md`
-   says, 3 the agent exited without a verdict, 7 `WORKER-DONE` names a
-   missing commit. Any wait names the observable fact it ends on (a
-   verdict line, a handshake such as one blocking `ssh host true`, a
-   marker the program writes, matched with `herdr-job wait-text <file>
-   <pattern>`), never log text guessed to appear and never a retry loop.
+4. Starting a worker: **quota preflight is mandatory for automated TODO
+   dispatch**, including text-only, SSH and browser work. Use the existing
+   server-gated `herdr todo run`, not direct `herdr worker start` or
+   interactive `herdr agent start`. Checking whether `worker --help` lists
+   `verify` is not a quota-capability check: a server can support gated runs
+   without that command. Read `herdr todo --help`, the repository's worker
+   instructions and `.herdr/checks.toml`; confirm the installed gated run,
+   wait, status, review and resume contract before dispatch. If unsupported,
+   outside herdr, or missing the item's id or required registered checks,
+   record the exact configuration/capability blocker in Needs a decision.
+   If a text-only, SSH or browser task cannot be represented by the driver's
+   headless/worktree contract, it is also blocked, not implicitly supported.
+   Do not substitute an ungated launcher or invent check registrations.
+
+   Write the task from step 5 to a file. From this coordinator's pane run:
+   `herdr todo run <t-id> --task <absolute task file> --message "<subject>"
+   --paths <allowed relative globs> --check <registered check names>
+   --agent <claude|pi>`. Take the id (`[t-xxxxxxxx]` on the item's first
+   line), allowed paths, commit convention and all required checks from the
+   repository. Pass arguments literally, never through `${X:+...}`. Keep
+   the selected subscription agent explicit; do not select `pi-anthropic`
+   or another paid fallback. Do not add `--draft`, `--auto-review` or
+   `--auto-answer`: those make additional model calls outside the worker.
+
+   The driver's existing quota gate reads the selected worker's provider
+   before starting each run/attempt. It refuses high or unknown usage and
+   keeps its existing per-repository/provider latch and configured thresholds.
+   A sidebar percentage, a cached `usage.read` response (even with refresh),
+   another agent's readiness or a reset timestamp is not an admission.
+   Never add `--ignore-usage` without the user's explicit permission for that
+   launch. A quota refusal is not permission to fall back to a direct worker,
+   interactive agent, other account or billed profile.
+
+   Keep the returned durable run id, including a start pending on quota, in
+   the item's work-in-flight state and any handoff note. Attach to that id;
+   do not submit the item again. If a refusal/error returns no run id, record
+   that blocker instead of claiming a pending run or resubmitting the item.
+   Wait through a registered job:
+   `herdr-job run --name "wait: <run id> needs the coordinator" --why "<item>"
+   -- herdr todo wait <run id>` (on subsequent waits, add
+   `--after <event id>` from the previous result), then
+   `herdr-job wait <job id>` using the harness's background wait when available.
+   The awaited condition is that run's next attention/end event, not elapsed
+   time or terminal readiness. Read `herdr todo status <run id>` on wake;
+   handle its actual pending event with `herdr todo resume <run id>
+   --event <event id> --action <documented action> ...`. A failed wait needs
+   one status check, not a repeated start. Unknown provider state never means
+   available. A successful external provider observation, fetched by Herdr's
+   usage poller and published as a measurement event, wakes a pending start;
+   the driver then reads the provider again before dispatch. No approval or
+   `todo resume` action opens this quota wait: `todo cancel-pending <run id>`
+   cancels it. If no measurement producer is enabled/available, record that
+   blocker and ask the user, rather than claiming recovery will happen.
+   Do not add a coordinator timer, sleep or periodic internal repair.
+
+   Review the whole diff and checks via `herdr todo review <run id> --diff` and the
+   run's recorded evidence, checking every worker claim against source.
+   `WORKER-DONE` is not approval. Use the driver's verification and landing
+   lifecycle; never manually verify/cherry-pick an attempt in parallel with
+   it. Approval and a retry use the current event id, and a new attempt must
+   pass the same quota gate. Do not silently drop a check from the old worker
+   contract. Ask the user when a check or task cannot run within this driver.
+   For closing an approved item, `--action approve --close <file>` needs
+   either `--next <item> --next-task <file> --next-message "<subject>"
+   --next-paths <globs> --next-check <required registered checks>
+   --next-agent <claude|pi>` or `--stop-reason "<why>"`; only after
+   `herdr todo queue status` confirms existing queue mode is on, give
+   `--close <file>` alone, as its documented driver starts the next item.
+   Reconcile pending run ids before a handoff or another dispatch.
+
+   Manual interactive/diagnostic starts outside TODO dispatch remain allowed
+   under their own approval, but cannot be relabeled diagnostics to execute,
+   commit or land a TODO item. This skill selects an enforced gated path; it
+   does not make generic agent/worker launch APIs enforce quota themselves.
 5. The worker's task: a title line, what to change, the files it may touch,
    and this contract: edit with Edit/Write; keep drafts in your temp dir by
    absolute path, never `$TMPDIR`; never work around the sandbox, list the

@@ -40,6 +40,23 @@ Follow-ups for the tools configured in this dotfiles repository.
   "Language detection is the biggest failure"), which picked pl, fr and en
   correctly on library songs.
 
+## Completed
+
+- **todo: require quota-gated worker dispatch** (2026-10-14). Approved by the
+  user: "Tell that agent to stop and write a handoff note, and do the TODO
+  task about limits. Ask the models." Updated `.agents/skills/todo/SKILL.md`
+  and `.claude/CLAUDE.md` (the existing Pi instructions symlink points here).
+  Coordinators must use the existing `herdr todo run` provider gate, not
+  direct worker/interactive starts; high/unknown usage never admits a worker,
+  pending run ids survive handoff, missing gate/task/check support blocks
+  dispatch, and manual diagnostics cannot execute TODO work. No new API,
+  dependency, timer, threshold or paid fallback. MiMo/DeepSeek design round
+  `20261014-020657-a1da`, diff review `20261014-020945-0f83`; verified against
+  Herdr gate, pending-start and CLI sources, static instruction checks and
+  whitespace checks. No real worker/provider calls or binary changes were
+  tested. Generic launch APIs remain ungated; this fixes coordinator routing,
+  not enforcement against an agent that ignores its instructions.
+
 ## Next, in order
 
 ## Proposed

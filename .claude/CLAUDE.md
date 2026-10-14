@@ -358,17 +358,22 @@ decision".
   short task (title line, what to change, files it may touch, the commit
   message, no push, install, rebase or agents of its own, a last line
   `WORKER-DONE <sha> | <summary>` or `WORKER-BLOCKED <reason>`); start it as
-  a headless worker (`herdr worker start`, as the `todo` skill says) where
-  herdr has workers, else in its own worktree (`herdr worktree create ...
-  --no-focus`, then `herdr agent start` with Claude by default, pi with
-  `openai-codex/gpt-6.1-sol` when the Anthropic quota runs low); wait for it
-  through herdr-job; read the whole
-  diff; bring the worker's commit into the shared checkout (cherry-pick, not
-  retyping), run the repository's checks there, update the TODO; close the
-  worker's tab and worktree. Follow the repository's own delegation notes
-  where it has them. It does only this itself: edits to `TODO.md` and
-  `DECISIONS.md` (queuing, triage, answers, decisions), answering me, worker
-  tasks, reviewing and bringing in workers' commits, running checks, consult
+  a headless worker through `herdr todo run`, as the `todo` skill says:
+  its existing server-owned usage gate must admit the selected subscription
+  before each run/attempt. Never bypass high or unknown usage with direct
+  `herdr worker start`, interactive `herdr agent start`, a different account
+  or a paid fallback; `--ignore-usage` needs my explicit permission for that
+  launch. If the gated driver or required item/check configuration is missing,
+  record that blocker instead of dispatching an ungated worker. Preserve a
+  refused start's durable run id, including in handoff notes; attach to it,
+  never launch the item again. Wait through herdr-job, review the whole diff
+  and checks, then use the driver's verification/landing lifecycle and update
+  the TODO; do not manually cherry-pick in parallel with the driver. Generic
+  manual/diagnostic agent starts remain separate from TODO execution. Follow
+  the repository's own delegation notes without weakening this quota gate.
+  It does only this itself: edits to `TODO.md` and `DECISIONS.md` (queuing,
+  triage, answers, decisions), answering me, worker tasks, reviewing workers'
+  diffs and landing via the driver, running checks, consult
   rounds (when I ask to ask the models, it queues the request first, then
   runs the round in the same turn, since a consult is a decision step, not
   implementation, and records the outcome in the item), and the

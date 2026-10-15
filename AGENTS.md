@@ -6,7 +6,3 @@ Commit messages in the dotfiles repository start with the area they touch, then 
 change is about, e.g. `rormpc: max_fps 60`, `hammerspoon: show app icons in the launcher`, `musicdb delete: …`,
 `scripts: …`. Use the same prefix for that area's config and code (`rormpc:`, not `rormpc theme:`); a change spanning
 areas gets the main one, or one commit per area.
-
-`.dotfiles.gitignore` is an allow-list: to track a path, add its `!` line there (a `~/.claude/skills` link only when the
-skill's one copy is in `~/.agents/skills`), never `git add -f`, which leaves a tracked path the allow-list still
-ignores.

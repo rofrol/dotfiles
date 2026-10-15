@@ -1,5 +1,12 @@
 # Architecture and Maintenance Policy
 
+## This repository
+
+`.dotfiles.gitignore` is an allow-list: to track a path, add its `!` line
+there (a `~/.claude/skills` link only when the skill's one copy is in
+`~/.agents/skills`), never `git add -f`, which leaves a tracked path the
+allow-list still ignores.
+
 ## Purpose
 
 This file defines how humans and coding agents must develop and maintain this

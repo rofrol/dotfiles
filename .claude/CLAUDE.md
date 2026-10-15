@@ -202,15 +202,20 @@ Canonical text: Rule 10 in
 Keep every option `label` and `description` (and the `header`) on one line.
 Claude Code 2.1.288 renders a newline inside a description as U+FFFD (`�`),
 because it writes the replacement bytes to the terminal itself. Separate
-parts with ` — ` instead, and put multi-line text (a commit message body, a
-diff) in the option's `preview`, which is rendered as Markdown.
+parts with ` — ` instead.
 
-A preview longer than about 10 lines is clipped ("N lines hidden") and cannot
-be scrolled. The `question-preview.py` PreToolUse hook writes every question
-in full to `~/.local/state/claude-questions/<session id>.md` and, when a
-preview is clipped, opens it in `less` in a herdr pane beside the agent (`q`
-closes it). An approval is informed only if the user could read the whole
-text; outside herdr, show it some other way.
+A text you ask the user to approve (a rule, a commit message body, a diff)
+goes in full in the message body before the question, and the question names
+it; an option's `preview` holds only a short sketch, never the only copy of
+the text being approved. The preview box is narrow and clips without
+scrolling ("N lines hidden"), also when wrapped lines overflow it. The
+`question-preview.py` PreToolUse hook writes every question in full to
+`~/.local/state/claude-questions/<session id>.md` and, for every question
+with a preview, opens it in `less` in a herdr pane beside the agent (`q`
+closes it). An approval counts only once the full text was shown where the
+user can read it whole (the message body, or the opened viewer); when the
+user says a text was cut off, the approval is void: re-show the text and ask
+again before acting on it.
 
 # Asking other models
 

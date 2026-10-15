@@ -4,9 +4,12 @@
 Claude Code clips a long option preview ("N lines hidden") and offers no way
 to scroll it, so a user could approve text they never saw. This hook writes
 every question, with each option's description and full preview, to
-~/.local/state/claude-questions/<session id>.md, and when a preview is longer
-than the box shows, opens that file in `less` in a herdr pane beside the
-agent's pane (without taking focus; `q` closes it).
+~/.local/state/claude-questions/<session id>.md, and for every question with
+a preview opens that file in `less` in a herdr pane beside the agent's pane
+(without taking focus; `q` closes it). Any preview counts: the box is narrow,
+so wrapped lines clip a preview of few source lines too (2026-10-15: a
+9-line preview of 72-column lines was cut off), and the hook cannot see the
+box's width.
 
 It never blocks the question: any failure is logged next to the file and the
 hook exits 0 with no output.
@@ -17,10 +20,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-
-# Preview lines the question box showed before clipping, measured on
-# 2026-10-15 (a 27-line preview showed 10 and hid 17).
-SHOWN_LINES = 10
 
 STATE = os.path.expanduser("~/.local/state/claude-questions")
 
@@ -39,9 +38,9 @@ def render(questions):
     return "\n".join(out)
 
 
-def clipped(questions):
+def has_preview(questions):
     return any(
-        len(opt.get("preview", "").splitlines()) > SHOWN_LINES
+        opt.get("preview", "").strip()
         for q in questions
         for opt in q.get("options", [])
     )
@@ -87,7 +86,7 @@ def main():
     os.makedirs(STATE, exist_ok=True)
     path = os.path.join(STATE, f"{session}.md")
     publish(path, render(questions))
-    if clipped(questions):
+    if has_preview(questions):
         open_viewer(path, session)
 
 

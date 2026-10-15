@@ -163,12 +163,17 @@ non-atomic write) and find the cause: reproduce it with a stress loop, wait for
 an observable condition instead of a duration, retry until the effect is
 observed, publish files atomically. Lengthen time only for a real external
 deadline, rate limit, external polling, designed backoff or measured slow
-hardware, and say which next to the value. This covers your own commands
-and scripts and the tasks you delegate; a label ("debounce", "tooling")
-does not qualify a delay. Every wait names the positive event or condition
-it waits for and what produces it, never a negative one ("idle for N", "no
-marker for N"). A retry needs an acknowledgement and an idempotent action,
-never a blind resend.
+hardware, and say which next to the value. Scaling work, iterations or
+concurrency to make a race likely is a delay in disguise: a labelled diagnostic
+stress loop only, never the regression test for a fix, which forces the
+interleaving with a positive event (a latch, a test hook), shows the racy path
+ran, and is recorded failing on the unfixed code and passing with the fix; a
+test that passes on the unfixed code needs its missing trigger, not more work.
+This covers your own commands and scripts and the tasks you delegate; a label
+("debounce", "tooling") does not qualify a delay. Every wait names the positive
+event or condition it waits for and what produces it, never a negative one
+("idle for N", "no marker for N"). A retry needs an acknowledgement and an
+idempotent action, never a blind resend.
 It also covers fixes and the options any report or question offers: never
 offer a longer timeout, sleep, blind retry or debounce as a fix or option for
 an asynchronous bug. A `delay:` label on a constant inside a fix (not a test

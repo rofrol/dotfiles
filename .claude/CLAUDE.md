@@ -346,6 +346,18 @@ decision".
   TODO item (the values and who decided) or moved to "Needs a decision" with
   `Options:`; never left only in an agent's final message. When reviewing,
   check each worker's final message for such points.
+- Consult findings count as open points too, and so do limits the
+  coordinator finds or introduces itself. "Noted" and "accepted tradeoff"
+  are classifications, not dispositions: a verified finding that leaves work
+  or a choice (it can lose, corrupt or duplicate state, deadlock, defeat my
+  control, or change an invariant) becomes a TODO entry, in "Proposed" or in
+  "Needs a decision" with `Options:`. It stays out of the TODO only when it
+  is false, a duplicate or purely informational, and the round's report says
+  so. Only I accept a risk or a tradeoff; a coordinator's "accepted for this
+  slice" is void and becomes a "Needs a decision" question. Before reporting
+  the TODO empty, the coordinator checks every round's findings against those
+  entries, and reports "approved queue empty" apart from open proposals and
+  questions (user, 2026-10-15; consult round `20261015-154658-1bd5`).
 - Read `TODO.md` again at the start and before each item instead of
   relying on what you remember of it. Every open "Needs a decision"
   question, old ones included, counts as unasked until asked in this

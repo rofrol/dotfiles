@@ -13,6 +13,17 @@ check the entry against that version. Add a pitfall here when it is about
 the language or the compiler, with its version; keep what is about one
 repository (its runtime patch, effects, build) in that repository.
 
+## Copies in the repositories
+
+A repository must stand alone: one cloned without this skill still needs
+the pitfalls. So each Bend repository carries a generated copy of the
+sections below, `docs/bend-pitfalls.md`, and keeps its own notes apart.
+After changing anything below, run `sync <repository>` (next to this file)
+for each repository listed here and commit the copy there; `sync --check
+<repository>` reports a stale one. Never edit a copy.
+
+- `~/personal_projects/agentic-workflow-bend-claude`
+
 ## Code
 
 - A def may call only defs written above it: put helpers (`foo.pick`,

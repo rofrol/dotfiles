@@ -1,0 +1,31 @@
+#!/bin/sh
+# sync [--check] <repository>...: write this skill's general pitfalls into
+# each repository's docs/bend-pitfalls.md, so a clone without the skill
+# still has them; with --check, only report a copy that differs (exit 1).
+set -eu
+here=$(cd "$(dirname "$0")" && pwd -P)
+check=0
+[ "${1:-}" = --check ] && { check=1; shift; }
+[ $# -ge 1 ] || { echo "usage: sync [--check] <repository>..." >&2; exit 2; }
+copy=$(mktemp)
+trap 'rm -f "$copy"' EXIT
+{
+  printf '<!-- Generated from the bend agent skill by its sync script: edit the skill, then sync. -->\n'
+  printf '# Bend 2 pitfalls\n\n'
+  printf 'Read `bend guide` first; these are the details it leaves implicit. Each entry\n'
+  printf 'names the Bend version it was seen with: check it against the version this\n'
+  printf 'repository pins.\n\n'
+  awk 'f || /^## Code$/ { f = 1; print }' "$here/SKILL.md"
+} > "$copy"
+status=0
+for repo in "$@"; do
+  out=$repo/docs/bend-pitfalls.md
+  if [ "$check" = 1 ]; then
+    cmp -s "$copy" "$out" || { echo "stale: $out" >&2; status=1; }
+  else
+    mkdir -p "$repo/docs"
+    cp "$copy" "$out.tmp" && mv "$out.tmp" "$out"
+    echo "wrote $out"
+  fi
+done
+exit $status

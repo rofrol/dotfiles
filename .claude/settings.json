@@ -168,6 +168,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/hooks/question-preview.py\""
+          }
+        ]
       }
     ],
     "SessionEnd": [

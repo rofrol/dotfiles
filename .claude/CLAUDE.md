@@ -200,6 +200,13 @@ because it writes the replacement bytes to the terminal itself. Separate
 parts with ` — ` instead, and put multi-line text (a commit message body, a
 diff) in the option's `preview`, which is rendered as Markdown.
 
+A preview longer than about 10 lines is clipped ("N lines hidden") and cannot
+be scrolled. The `question-preview.py` PreToolUse hook writes every question
+in full to `~/.local/state/claude-questions/<session id>.md` and, when a
+preview is clipped, opens it in `less` in a herdr pane beside the agent (`q`
+closes it). An approval is informed only if the user could read the whole
+text; outside herdr, show it some other way.
+
 # Asking other models
 
 A request to ask the models, in any language and without naming them, means:

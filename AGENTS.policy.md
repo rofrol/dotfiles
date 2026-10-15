@@ -2,10 +2,18 @@
 
 ## This repository
 
+Before testing or reloading Hammerspoon, read `~/.hammerspoon/AGENTS.md`: reloading through `hs` IPC crashes it, and opening its windows steals the user's keyboard focus.
+
+Commit messages in the dotfiles repository start with the area they touch, then a colon: the tool, app or script the
+change is about, e.g. `rormpc: max_fps 60`, `hammerspoon: show app icons in the launcher`, `musicdb delete: …`,
+`scripts: …`. Use the same prefix for that area's config and code (`rormpc:`, not `rormpc theme:`); a change spanning
+areas gets the main one, or one commit per area.
+
 `.dotfiles.gitignore` is an allow-list: to track a path, add its `!` line
 there (a `~/.claude/skills` link only when the skill's one copy is in
 `~/.agents/skills`), never `git add -f`, which leaves a tracked path the
-allow-list still ignores.
+allow-list still ignores; the pre-commit hook (`scripts/dotfiles-setup-filters.sh`)
+refuses a commit while one is.
 
 ## Purpose
 

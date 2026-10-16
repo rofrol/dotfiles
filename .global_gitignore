@@ -18,5 +18,7 @@ debug.log
 
 .playwright-mcp/
 
+**/.claude/settings.local.json
+
 # Zig build caches (Bend 2 native builds write ./target/zig-cache)
 zig-cache/

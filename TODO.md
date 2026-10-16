@@ -70,21 +70,6 @@ Follow-ups for the tools configured in this dotfiles repository.
   never a summary; and `done` archives rather than deletes. Depends on
   t-w3wtzqyw for the CLI's report.
 
-- [ ] A skill for running x86_64 work on the 2010 MacBook. Asked by the user
-  2026-10-16, in the try-roguix coordinator's pane: "maybe save it as a
-  skill in dotfiles, how to connect to this MacBook when we want something
-  x86". The case that prompted it: try-roguix's aarch64 builder cannot build
-  or run x86_64 (no emulation), so codex-bin's x86_64 build went to the
-  MacBook. The skill (one copy in `~/.agents/skills/`, linked from
-  `~/.claude/skills/` and allowed in `.dotfiles.gitignore`) says when to use
-  the MacBook, and points to the canonical rules instead of copying them:
-  `~/personal_projects/guix/guix-x86_64-iso-omguix/docs/macbook.md` (`mb-ssh`,
-  `mb-run`, `MB_HOST`, one `guix time-machine` at a time, no sudo in
-  herdr-job, no reboot without the user) and
-  `~/personal_projects/guix/macbook-guix-config/README.md` (the Roguix pin).
-  It also says to check `pgrep -af guix` first and to tell the
-  guix-x86_64-iso-omguix coordinator before using the machine.
-
 ## Proposed
 
 - **pi: answer while working (plan, awaiting the user's choices).** The user

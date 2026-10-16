@@ -256,6 +256,7 @@ __pycache__/
 /.claude/skills/*
 !/.claude/skills/bend
 !/.claude/skills/handoff
+!/.claude/skills/macbook-2010
 !/.claude/skills/read-link
 !/.claude/skills/todo
 !/.claude/settings.json

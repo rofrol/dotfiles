@@ -59,6 +59,17 @@ Follow-ups for the tools configured in this dotfiles repository.
 
 ## Next, in order
 
+- [ ] Show the previous handoff note to the user after a takeover (skills
+  `todo` and `handoff`). Approved by the user 2026-10-16 (herdr-bend
+  decisions d-f5cs3xm5, d-3t7iup5f, d-hlrc3pjw; consult round
+  `20261016-101519-311d`), to run now. The roagent CLI opens the note in
+  a herdr pane after a claim (roagent TODO t-w3wtzqyw); the skills add the
+  fallback: when the claim reports the note was not shown, the
+  successor's first message quotes the note's open questions, next action
+  and "what not to repeat" verbatim, labeled as the previous agent's text,
+  never a summary; and `done` archives rather than deletes. Depends on
+  t-w3wtzqyw for the CLI's report.
+
 ## Proposed
 
 - **pi: answer while working (plan, awaiting the user's choices).** The user

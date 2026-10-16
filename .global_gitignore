@@ -17,3 +17,6 @@ debug.log
 .vsconfig
 
 .playwright-mcp/
+
+# Zig build caches (Bend 2 native builds write ./target/zig-cache)
+zig-cache/

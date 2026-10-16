@@ -207,11 +207,21 @@
     "type": "command",
     "command": "jq -r '\"\\(.model.display_name) · \\(.workspace.current_dir | sub(env.HOME; \"~\"))\"'"
   },
+  "enabledPlugins": {
+    "shell-path-completion@local-mods": true,
+    "typesafe@typesafe-ai": true
+  },
   "extraKnownMarketplaces": {
     "local-mods": {
       "source": {
         "source": "directory",
         "path": "~/.claude/mods"
+      }
+    },
+    "typesafe-ai": {
+      "source": {
+        "source": "github",
+        "repo": "typesafe-ai/skills"
       }
     }
   },
@@ -224,8 +234,5 @@
   "switchModelsOnFlag": false,
   "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true,
-  "voiceEnabled": true,
-  "enabledPlugins": {
-    "shell-path-completion@local-mods": true
-  }
+  "voiceEnabled": true
 }

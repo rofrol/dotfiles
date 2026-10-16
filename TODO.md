@@ -124,3 +124,6 @@ Follow-ups for the tools configured in this dotfiles repository.
   Cost: moderate extension code; no build. Only worth it if wakes go missing
   in practice.
 
+## Agent rules and skills
+
+- [ ] Remove roagent from the global agent rules (`~/.claude/CLAUDE.md`, "Context size and handoff", "Working through TODO.md") and the `todo` and `handoff` skills, in the same step that removes roagent: the coordinator lease becomes herdr's coordinator tenure, handoff notes and `todo start` move to herdr, `context` to a skill script, and the supervisor in `~/personal_projects/agentic-workflow-bend-claude` runs queues instead of herdr's TODO driver. Decided by the user 2026-10-16 (d-ytigfuq7); plan in that repository's `docs/decisions/0007-one-workflow-engine.md` (its item t-onengine) and roagent's TODO. Waits for those items.

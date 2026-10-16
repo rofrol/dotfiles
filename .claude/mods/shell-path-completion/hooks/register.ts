@@ -1,4 +1,4 @@
-import type { Register } from 'claude-code'
+import type { PromptAutocompleteSuggestion, Register } from 'claude-code'
 
 /** Matches shown at most when no common prefix can be inserted. */
 const MAX_ROWS = 200
@@ -84,7 +84,7 @@ export const register: Register = (on) => {
       return result
     }
 
-    const rows = completions(part, names)
+    const rows: PromptAutocompleteSuggestion[] = completions(part, names)
       .filter((name) => name !== part)
       .map((name) => {
         const path = dir + name
@@ -93,6 +93,12 @@ export const register: Register = (on) => {
         // space inside the quotes.
         return { text: text.slice(e.start - start) }
       })
+    // With several matches and no longer prefix, Tab must not pick one: it
+    // takes the first row, so that row keeps the token as typed. The engine
+    // then closes the menu; arrows choose a match before Tab.
+    if (rows.length > 1) {
+      rows.unshift({ text: e.token, label: `${e.token}  (${rows.length} matches, ↓ to choose)` })
+    }
     return rows.length ? { suggestions: [...result.suggestions, ...rows] } : result
   })
 }

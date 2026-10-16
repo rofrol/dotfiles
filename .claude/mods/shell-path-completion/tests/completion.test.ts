@@ -49,8 +49,9 @@ test('Tab on a partial path offers the common prefix', async ($, on) => {
   expect(await rows($, on, 'ls dir/alp')).toEqual(['dir/alphabet-'])
 })
 
-test('a common prefix already typed lists every match', async ($, on) => {
-  expect(await rows($, on, 'ls dir/alphabet-')).toEqual(['dir/alphabet-one/', 'dir/alphabet-two/'])
+test('a common prefix already typed lists every match below a row that keeps the token', async ($, on) => {
+  // Tab takes the first row, so it must not pick a match.
+  expect(await rows($, on, 'ls dir/alphabet-')).toEqual(['dir/alphabet-', 'dir/alphabet-one/', 'dir/alphabet-two/'])
 })
 
 test('a symbolic link to a directory completes with a slash', async ($, on) => {

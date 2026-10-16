@@ -259,6 +259,7 @@ __pycache__/
 !/.claude/skills/read-link
 !/.claude/skills/todo
 !/.claude/settings.json
+!/.claude/mods/
 
 # Tracked files the allow-list used to ignore (they were added with git add -f).
 !/.claude/CLAUDE.md

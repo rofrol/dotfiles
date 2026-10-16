@@ -1,0 +1,1 @@
+{ "name": "shell-path-completion", "version": "0.1.0", "description": "Tab inserts the common prefix of matching paths, like a shell" }

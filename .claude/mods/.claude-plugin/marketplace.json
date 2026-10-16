@@ -1,0 +1,12 @@
+{
+  "name": "local-mods",
+  "description": "Personal Claude Code mods kept in the dotfiles repository",
+  "owner": { "name": "Roman Frołow" },
+  "plugins": [
+    {
+      "name": "shell-path-completion",
+      "description": "Tab inserts the common prefix of matching paths, like a shell",
+      "source": "./shell-path-completion"
+    }
+  ]
+}

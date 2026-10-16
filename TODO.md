@@ -70,6 +70,19 @@ Follow-ups for the tools configured in this dotfiles repository.
   never a summary; and `done` archives rather than deletes. Depends on
   t-w3wtzqyw for the CLI's report.
 
+- [ ] skills `macbook-2010`: check a file's users before moving it off the
+  disk. Approved by the user 2026-10-16 ("give it to a worker"). Lesson
+  from the herdr coordinator on 2026-10-16: it archived
+  `~/personal_projects/guix/images` to a pendrive and deleted the
+  original after checking only qemu's command line; try-roguix's
+  `builder.qcow2` used one of those images as its qcow2 backing file, so
+  the builder broke until the image was restored. Add to the skill's
+  freeing-disk steps: before moving or deleting, check open files
+  (`lsof +D <dir>`) and, for VM images, every backing chain that may
+  point into the directory (`qemu-img info --backing-chain` on the images
+  of running and known VMs), and keep base images in place. A worker
+  edits `.agents/skills/macbook-2010/SKILL.md`; text only.
+
 ## Proposed
 
 - **pi: answer while working (plan, awaiting the user's choices).** The user

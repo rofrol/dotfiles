@@ -268,6 +268,9 @@ alias e='emacs -nw'
 
 # automatic dotfiles repo via the git shim (no exported GIT_DIR)
 [ -f ~/.zshrc_dotfiles_mode ] && source ~/.zshrc_dotfiles_mode
+# Per-machine config links (yt-dlp, mpv): complain when they do not match this machine
+[ -x ~/scripts/dotfiles-host ] && { ~/scripts/dotfiles-host --check || true; }
+
 
 # Should be last
 [ -f ~/.zprofile_local ] && source ~/.zprofile_local

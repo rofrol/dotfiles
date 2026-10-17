@@ -2,13 +2,57 @@
 # Select this machine's per-host config files: point each app's untracked
 # host.conf at the tracked hosts/<host>.conf. Run once per machine, again after
 # a new app gets a hosts/ directory. Hosts: m1, macbook-2010.
+#
+# `dotfiles-host --check` (run by .bashrc and .zshrc) prints nothing when the
+# links match the host chosen on this machine, and complains when they do not:
+# no host chosen yet, a link missing or changed, or a HOME restored from
+# another machine (the choice is recorded with this machine's hardware id).
 set -euo pipefail
-host=${1:?usage: dotfiles-host HOST (m1, macbook-2010)}
-for dir in "$HOME/.config/yt-dlp" "$HOME/.config/mpv"; do
+apps=("$HOME/.config/yt-dlp" "$HOME/.config/mpv")
+state="$HOME/.local/state/dotfiles-host"
+
+machine_id() {
+	if [ -r /etc/machine-id ]; then
+		cat /etc/machine-id
+	else
+		ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/ { print $4 }'
+	fi
+}
+
+check() {
+	local host id
+	if [ ! -r "$state" ]; then
+		echo "dotfiles-host: no host chosen on this machine; run dotfiles-host m1|macbook-2010" >&2
+		return 1
+	fi
+	{ read -r host; read -r id; } <"$state"
+	if [ "$id" != "$(machine_id)" ]; then
+		echo "dotfiles-host: host '$host' was chosen on another machine (HOME copied?); run dotfiles-host <this host>" >&2
+		return 1
+	fi
+	for dir in "${apps[@]}"; do
+		if [ "$(readlink "$dir/host.conf" 2>/dev/null)" != "hosts/$host.conf" ] || [ ! -f "$dir/host.conf" ]; then
+			echo "dotfiles-host: $dir/host.conf does not point at hosts/$host.conf; run dotfiles-host $host" >&2
+			return 1
+		fi
+	done
+}
+
+if [ "${1:-}" = --check ]; then
+	check
+	exit
+fi
+
+host=${1:?usage: dotfiles-host HOST (m1, macbook-2010) | dotfiles-host --check}
+for dir in "${apps[@]}"; do
 	[ -f "$dir/hosts/$host.conf" ] || { echo "dotfiles-host: no $dir/hosts/$host.conf" >&2; exit 1; }
 done
-for dir in "$HOME/.config/yt-dlp" "$HOME/.config/mpv"; do
+for dir in "${apps[@]}"; do
 	ln -sfn "hosts/$host.conf" "$dir/host.conf.tmp.$$"
 	mv -f "$dir/host.conf.tmp.$$" "$dir/host.conf"
 	echo "$dir/host.conf -> $(readlink "$dir/host.conf")"
 done
+mkdir -p "$(dirname "$state")"
+printf '%s\n%s\n' "$host" "$(machine_id)" >"$state.tmp.$$"
+mv -f "$state.tmp.$$" "$state"
+check

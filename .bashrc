@@ -63,6 +63,9 @@ alias watch='watch '
 
 #source ~/.config/bash/update_history
 
+# Per-machine config links (yt-dlp, mpv): complain when they do not match this machine
+[ -x ~/scripts/dotfiles-host ] && { ~/scripts/dotfiles-host --check || true; }
+
 # Should be last
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local
 

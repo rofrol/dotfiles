@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Select this machine's per-host config files: point each app's untracked
+# host.conf at the tracked hosts/<host>.conf. Run once per machine, again after
+# a new app gets a hosts/ directory. Hosts: m1, macbook-2010.
+set -euo pipefail
+host=${1:?usage: dotfiles-host HOST (m1, macbook-2010)}
+for dir in "$HOME/.config/yt-dlp" "$HOME/.config/mpv"; do
+	[ -f "$dir/hosts/$host.conf" ] || { echo "dotfiles-host: no $dir/hosts/$host.conf" >&2; exit 1; }
+done
+for dir in "$HOME/.config/yt-dlp" "$HOME/.config/mpv"; do
+	ln -sfn "hosts/$host.conf" "$dir/host.conf.tmp.$$"
+	mv -f "$dir/host.conf.tmp.$$" "$dir/host.conf"
+	echo "$dir/host.conf -> $(readlink "$dir/host.conf")"
+done

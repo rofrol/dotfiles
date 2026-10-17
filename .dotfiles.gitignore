@@ -54,6 +54,7 @@ __pycache__/
 !/.config/mpv
 /.config/mpv/*
 !/.config/mpv/mpv.conf
+!/.config/mpv/hosts/
 !/.config/mpv/input.conf
 !/.config/mpv/fonts/
 !/.config/mpv/scripts/
@@ -151,6 +152,7 @@ __pycache__/
 !/.config/yt-dlp/
 /.config/yt-dlp/*
 !/.config/yt-dlp/config
+!/.config/yt-dlp/hosts/
 
 !/.config/kitty/
 /.config/kitty/*

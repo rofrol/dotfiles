@@ -32,3 +32,7 @@
 # %(autonumber)s https://askubuntu.com/questions/694848/how-to-download-a-youtube-playlist-with-numbered-prefix-via-youtube-dl/844773#844773
 # https://www.reddit.com/r/youtubedl/comments/104c1l4/comment/j46gg79/
 -o "%(extractor)s/%(playlist)s/%(playlist_index)03d%(playlist_index&--)s%(uploader)s--%(title).150B--%(id)s--%(upload_date)s.%(ext)s"
+
+# Per-machine options: host.conf is an untracked symlink to hosts/<host>.conf,
+# made by `dotfiles-host <host>`. yt-dlp stops if it is missing.
+--config-locations ~/.config/yt-dlp/host.conf

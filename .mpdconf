@@ -354,6 +354,9 @@ audio_output {
 # between 44.1 and 48 kHz songs then intermittently played ~9% fast (48000/44100).
 # A fixed rate keeps the device at its native 48 kHz; MPD resamples instead.
 	format		"48000:*:*"
+# The built-in speakers by name (MPD matches the CoreAudio device name), so MPD does
+# not follow the system default to another output such as Teams' virtual device.
+	device		"MacBook Pro Speakers"
 #	device		"Built-in Output"	# optional
 #	channel_map      "-1,-1,0,1"	# optional
 }

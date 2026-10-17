@@ -155,6 +155,19 @@ removes only its own entries, so after installing or uninstalling the
 integration check `git diff` here and commit the change (`herdr integration
 status` lists what is installed).
 
+# Bugs in code I do not own
+
+A bug found in an external repository (a compiler, library or tool I do not
+own) is never worked around locally: no adapter, wrapper, special case,
+retry, source contortion or build-time patch in our tree. Fix it in a fork
+under my account with a regression test, open an upstream PR (or comment on
+the existing issue) with the reproducer, and build from a pinned fork commit
+only after I approve that input change; retire the fork when an upstream
+release with the fix is adopted. A documented limitation of the tool is not
+a bug: writing our code in its documented subset is allowed, citing the
+upstream document or issue (user, 2026-10-17). Canonical text: Rule 6 in
+~/personal_projects/agents.md/AGENTS.md (v1.5.0).
+
 # Added delay is a bug signal
 
 Before you raise a timeout or add a sleep, retry or wait, treat the urge as a

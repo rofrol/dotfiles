@@ -32,7 +32,7 @@ export EDITOR=ki
 
 # xargs for trimming https://stackoverflow.com/questions/369758/how-to-trim-whitespace-from-a-bash-variable/12973694#12973694
 # https://unix.stackexchange.com/questions/29981/how-can-i-tell-whether-a-build-is-debian-based/29985#29985
-if [ "$(lsb_release -i | xargs)" = "Distributor ID: Debian" ]; then
+if command -v lsb_release >/dev/null && [ "$(lsb_release -i | xargs)" = "Distributor ID: Debian" ]; then
   [ ! -f ~/.git-completion.bash ] && curl -s https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash
   # https://superuser.com/questions/1310317/why-does-debian-not-autocomplete-all-git-commands/1310326#1310326
   [ -f ~/.git-completion.bash ] && . ~/.git-completion.bash
@@ -67,7 +67,7 @@ alias watch='watch '
 [ -f ~/.bashrc_local ] && source ~/.bashrc_local
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 PATH="/home/roman/perl5/bin${PATH:+:${PATH}}"
 export PATH
@@ -80,7 +80,7 @@ export PERL_MB_OPT
 PERL_MM_OPT="INSTALL_BASE=/home/roman/perl5"
 export PERL_MM_OPT
 
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+[ -x /home/linuxbrew/.linuxbrew/bin/brew ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 alias n=nvim
 
@@ -91,7 +91,7 @@ export PATH=$BUN_INSTALL/bin:$PATH
 export PATH=$PATH:$HOME/.atuin/bin
 # https://github.com/atuinsh/atuin/blob/main/docs/docs/key-binding.md
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
-eval "$(atuin init bash --disable-up-arrow)"
+command -v atuin >/dev/null && eval "$(atuin init bash --disable-up-arrow)"
 
-eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/rofrol.omp.json)"
+command -v oh-my-posh >/dev/null && eval "$(oh-my-posh init bash --config ~/.config/oh-my-posh/themes/rofrol.omp.json)"
 

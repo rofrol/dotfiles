@@ -246,6 +246,10 @@ __pycache__/
 
 !/AGENTS.policy.md
 
+# codex: AGENTS.md is a link to ~/.claude/CLAUDE.md; skills come from ~/.agents/skills
+!/.codex/
+/.codex/*
+!/.codex/AGENTS.md
 !/.claude/
 /.claude/*
 

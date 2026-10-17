@@ -349,6 +349,11 @@ input {
 audio_output {
 	type		"osx"
 	name		"My OS X Device"
+# MPD's osx output sets the device's physical format to the song's rate on every
+# open and initialises the audio unit before CoreAudio has applied it; switching
+# between 44.1 and 48 kHz songs then intermittently played ~9% fast (48000/44100).
+# A fixed rate keeps the device at its native 48 kHz; MPD resamples instead.
+	format		"48000:*:*"
 #	device		"Built-in Output"	# optional
 #	channel_map      "-1,-1,0,1"	# optional
 }
@@ -376,6 +381,12 @@ audio_output {
 #
 ###############################################################################
 
+
+# Resampler for the fixed output rate above.
+resampler {
+	plugin		"soxr"
+	quality		"very high"
+}
 
 # Normalization automatic volume adjustments ##################################
 #

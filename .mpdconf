@@ -349,17 +349,24 @@ input {
 audio_output {
 	type		"osx"
 	name		"My OS X Device"
-# MPD's osx output sets the device's physical format to the song's rate on every
-# open and initialises the audio unit before CoreAudio has applied it; switching
-# between 44.1 and 48 kHz songs then intermittently played ~9% fast (48000/44100).
-# A fixed rate keeps the device at its native 48 kHz; MPD resamples instead.
-	format		"48000:*:*"
 # The built-in speakers by name (MPD matches the CoreAudio device name), so MPD does
 # not follow the system default to another output such as Teams' virtual device.
 	device		"MacBook Pro Speakers"
 #	device		"Built-in Output"	# optional
 #	channel_map      "-1,-1,0,1"	# optional
 }
+
+# Everything is converted to the device's 48 kHz in the decoder, so the osx output
+# never changes the device's sample rate. MPD's osx output sets the device's physical
+# format to the song's rate on every open and initialises the audio unit before
+# CoreAudio has applied it; switching between 44.1 and 48 kHz songs then intermittently
+# played ~9% fast (48000/44100).
+# A per-output `format "48000:*:*"` did the same from 2026-10-17, but on 2026-10-18 it
+# aborted MPD 0.24.15 (`Assertion failed: (nbytes > 0), function PlayChunk, file
+# Thread.cxx, line 269`) when a seek into the last ~12 s was followed by a song change
+# with a different rate; the decoder-side conversion below does not (14 rate changes
+# with the same seeks, and the ratio of MPD's elapsed to the monotonic clock 0.995-1.006).
+audio_output_format	"48000:24:2"
 #
 ## Example "pipe" output:
 #

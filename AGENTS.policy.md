@@ -15,6 +15,11 @@ there (a `~/.claude/skills` link only when the skill's one copy is in
 allow-list still ignores; the pre-commit hook (`scripts/dotfiles-setup-filters.sh`)
 refuses a commit while one is.
 
+That one copy, and the global agent rules that pi and Claude Code read, live in
+the `rofrol/agent-kit` clone at `~/personal_projects/agent-kit`: `.agents/skills/*`,
+`.pi/agent/AGENTS.md` and `.claude/CLAUDE.md` here are links into it. Clone it
+and run `./install` there before trusting those links in a fresh checkout.
+
 ## Purpose
 
 This file defines how humans and coding agents must develop and maintain this

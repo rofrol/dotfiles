@@ -1,1 +1,1 @@
-../../.claude/CLAUDE.md
+../../personal_projects/agent-kit/rules/AGENTS.md

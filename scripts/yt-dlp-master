@@ -1,0 +1,20 @@
+#!/bin/sh
+# yt-dlp from upstream master, in an isolated uvx environment.
+#
+# brew's yt-dlp tracks the last release, and a YouTube countermeasure is often
+# fixed in master days before a release. Run this instead of yt-dlp when a
+# download breaks: it resolves master each time (about a second once cached),
+# loads the same config and the same extractor plugin, and leaves the brew
+# installation untouched. The plugin clone is fast-forwarded first.
+#
+# Note: --version still prints the last released version, because upstream only
+# bumps it when releasing; it does not say which commit is running.
+
+set -e
+
+plugin="$HOME/.config/yt-dlp/plugins/rofrol"
+if [ -d "$plugin/.git" ]; then
+    git -C "$plugin" pull --ff-only --quiet 2>/dev/null || :
+fi
+
+exec uvx --quiet --from "yt-dlp[default] @ git+https://github.com/yt-dlp/yt-dlp@master" yt-dlp "$@"

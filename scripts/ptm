@@ -149,7 +149,7 @@ choice=$(ranked | env -u FZF_DEFAULT_OPTS -u FZF_DEFAULT_OPTS_FILE fzf \
   --prompt='ptm> ' \
   --header='enter: run - ctrl-n: create name from query - ctrl-r: sort by match - esc: cancel' \
   --bind='ctrl-r:toggle-sort' \
-  --preview='case {2} in attach) tmux list-windows -t ={3} ;; new) ls -1 -- {4} 2>/dev/null | head -40 ;; esac' \
+  --preview='case {2} in attach) tmux list-windows -t \={3} ;; new) ls -1 -- {4} 2>/dev/null | head -40 ;; esac' \
   -q "$query")
 rc=$?
 case $rc in

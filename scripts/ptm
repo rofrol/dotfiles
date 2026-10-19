@@ -1,0 +1,246 @@
+#!/bin/bash
+# ptm - pick and run a tmux command for pi, most chosen first.
+#
+# Usage: ptm [initial query]
+#
+# Rows are ready-to-run tmux commands: attach to a running session, or start
+# pi in a new session named after the project directory. Candidate
+# directories come from zoxide's frecency order plus this script's own past
+# picks. fzf filters the rows without re-sorting (--no-sort), so the most
+# chosen command stays on top while you type; ctrl-r toggles sorting by
+# match quality. enter runs the highlighted row; enter with a query that
+# matches nothing, or ctrl-n, creates a session named after the query; esc
+# cancels with status 130. The query's directory is the zoxide directory
+# whose basename is the query, else the current directory.
+#
+# Frecency: a pick earns 8 points when under 4 days old, 4 under 14 days,
+# 2 under 31 days, 1 after that, and picks older than 90 days are ignored.
+# Ties break by the most recent pick, then by zoxide order. These are
+# scoring constants computed from the log when ptm runs; there are no
+# timers. State is one appended line per run in
+# ~/.local/state/ptm/picks.log: "epoch TAB kind TAB name TAB dir".
+#
+# Session names are the directory basename with every character but
+# letters, digits, "-" and "_" mapped to "-": tmux cannot target names
+# containing "." or ":". When that name is already a session of a different
+# directory, "-NNNN" (a checksum of the directory) is appended, so two
+# projects with the same basename never share a session; a picked attach
+# row is exempt, it names the session explicitly. The pick is logged after
+# the session exists. Inside tmux ptm switches clients instead of
+# attaching, so tmux is never nested.
+
+set -u
+
+state_dir="$HOME/.local/state/ptm"
+picks="$state_dir/picks.log"
+mkdir -p "$state_dir" || exit 1
+touch "$picks" || exit 1
+
+pi_bin=$(type -P pi 2>/dev/null) || { echo "ptm: pi is not on PATH" >&2; exit 1; }
+tab=$(printf '\t')
+
+sanitize() {
+  printf '%s' "$1" | sed 's/[^A-Za-z0-9_-]/-/g; s/--*/-/g; s/^-*//; s/-*$//'
+}
+
+cksum4() {
+  printf '%s' "$1" | cksum | cut -d' ' -f1 | cut -c1-4
+}
+
+# Running sessions: name TAB dir (dir may be empty), captured once.
+sessions=$(tmux ls -F $'#{session_name}\t#{session_path}' 2>/dev/null)
+
+# Prints the directory of session $1 from the captured list; empty when the
+# session is not there.
+session_dir() {
+  while IFS= read -r line; do
+    case "$line" in
+      "$1"$tab*) printf '%s' "${line#*"$tab"}"; return 0 ;;
+    esac
+  done <<EOF
+$sessions
+EOF
+  return 1
+}
+
+# Session name for a directory: its sanitized basename, or the basename
+# plus a checksum suffix when the plain name is a session of another
+# directory.
+name_for() {
+  local dir=$1 name sdir
+  name=$(sanitize "${dir##*/}")
+  [ -n "$name" ] || name=s
+  sdir=$(session_dir "$name") || sdir=
+  if [ -n "$sdir" ] && [ "$sdir" != "$dir" ]; then
+    name="$name-$(cksum4 "$dir")"
+  fi
+  printf '%s' "$name"
+}
+
+# Rows to offer: display TAB kind TAB name TAB dir.
+candidates() {
+  local line name dir disp
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    name=${line%%"$tab"*}
+    dir=${line#*"$tab"}
+    case "$name" in ''|*[:.]*) continue ;; esac  # tmux cannot target . or :
+    case "$name$dir" in *"$tab"*|*$'\n'*) continue ;; esac
+    disp="tmux attach-session -t $name"
+    [ -n "$dir" ] && disp="$disp  # $dir"
+    printf '%s\t%s\t%s\t%s\n' "$disp" attach "$name" "$dir"
+  done <<EOF
+$sessions
+EOF
+  { zoxide query -l 2>/dev/null
+    awk -F'\t' 'NF == 4 && $4 != "" && !seen[$4]++ { print $4 }' "$picks"
+  } | while IFS= read -r line; do
+    dir=$line
+    [ -d "$dir" ] || continue
+    case "$dir" in *"$tab"*|*$'\n'*) continue ;; esac
+    name=$(name_for "$dir")
+    disp="tmux new-session -As $name -c $dir pi"
+    printf '%s\t%s\t%s\t%s\n' "$disp" new "$name" "$dir"
+  done
+}
+
+# Rank rows by past picks: display TAB kind TAB name TAB dir, most picked
+# first, most recent first on ties, input order (zoxide frecency) after
+# that. A row is identified by its directory (the session name may gain a
+# checksum suffix later); attach rows for different sessions in one
+# directory all stay, a new row is dropped when any row for its directory
+# is already in.
+ranked() {
+  candidates | awk -F'\t' -v now="$(date +%s)" '
+    FILENAME != "-" {
+      if (NF != 4) next
+      k = ($4 != "") ? $4 : $3
+      age = now - $1
+      if (age > 7776000) next                  # older than 90 days
+      w = (age < 345600) ? 8 : (age < 1209600) ? 4 : (age < 2678400) ? 2 : 1
+      s[k] += w
+      if ($1 > last[k]) last[k] = $1
+      next
+    }
+    {
+      k = ($4 != "") ? $4 : $3
+      if ($2 == "new") {
+        if (dir_seen[$4]++) next
+      } else {
+        if (pair_seen[$3 SUBSEP $4]++) next
+        dir_seen[$4] = 1
+      }
+      printf "%d\t%d\t%s\t%s\t%s\t%s\n", s[k] + 0, last[k] + 0, $1, $2, $3, $4
+    }
+  ' "$picks" - | sort -s -t"$tab" -k1,1nr -k2,2nr | cut -f3-
+}
+
+# fzf prints the query as line 1 (--print-query), then for an --expect key
+# the key name ("ctrl-n"), then the selected row when there is one. Some
+# fzf builds omit the empty key line for the default enter key, so the
+# parser below is shape-agnostic: the row is the only line containing
+# tabs, "ctrl-n" is the only line equal to that key name, everything else
+# is the query.
+query="$*"
+choice=$(ranked | env -u FZF_DEFAULT_OPTS -u FZF_DEFAULT_OPTS_FILE fzf \
+  --print-query --expect=ctrl-n \
+  --delimiter="$tab" --with-nth=1 --nth=1 --no-sort \
+  --layout=reverse --height=~50% --border \
+  --prompt='ptm> ' \
+  --header='enter: run - ctrl-n: create name from query - ctrl-r: sort by match - esc: cancel' \
+  --bind='ctrl-r:toggle-sort' \
+  --preview='case {2} in attach) tmux list-windows -t ={3} ;; new) ls -1 -- {4} 2>/dev/null | head -40 ;; esac' \
+  -q "$query")
+rc=$?
+case $rc in
+  0|1) ;;                    # 1 = completed without a selection
+  *) exit "$rc" ;;           # 130 = esc / ctrl-c, 2 = error
+esac
+
+q_line=$(printf '%s\n' "$choice" | sed -n 1p)
+key_line=$(printf '%s\n' "$choice" | sed -n 2p)
+# The row is scanned from line 2 on, never line 1: the query may contain
+# tabs when ptm was called with one, and must not be mistaken for a row.
+sel_line=$(printf '%s\n' "$choice" | sed -n '2,$p' | awk -F'\t' 'NF >= 4 { print; exit }')
+
+if [ "$key_line" = ctrl-n ]; then
+  sel_line=                                  # force create from the query
+fi
+
+case "$sel_line" in
+  *"$tab"*"$tab"*"$tab"*)          # a row: display TAB kind TAB name TAB dir
+    rest=${sel_line#*"$tab"}
+    kind=${rest%%"$tab"*}
+    rest=${rest#*"$tab"}
+    name=${rest%%"$tab"*}
+    dir=${rest#*"$tab"}
+    case "$name" in ''|*"$tab"*) echo "ptm: bad row" >&2; exit 1 ;; esac
+    ;;
+  *)                                         # no row: the query names a session
+    [ -n "$q_line" ] || exit 0
+    kind=new
+    name=$(sanitize "$q_line")
+    [ -n "$name" ] || { echo "ptm: unusable session name" >&2; exit 1; }
+    dir=$(zoxide query -- "$q_line" 2>/dev/null)
+    case "${dir##*/}" in "$q_line") ;; *) dir=$PWD ;; esac
+    [ -d "$dir" ] || dir=$PWD
+    ;;
+esac
+
+case "$name$dir" in
+  *"$tab"*|*$'\n'*) echo "ptm: bad name or directory" >&2; exit 1 ;;
+esac
+
+# Canonical form for path comparison (symlinks, relative vs absolute);
+# falls back to the raw string when the directory is gone.
+canon() {
+  local c
+  c=$(cd "$1" 2>/dev/null && pwd -P) || c=$1
+  printf '%s' "$c"
+}
+
+# Resolve the session name against the live server: never attach to a
+# session that belongs to a different directory. An attach row names a
+# session the user picked explicitly and skips this; its directory may be
+# empty and must not fall back to the current directory.
+live_dir=
+if [ "$kind" != attach ]; then
+  [ -n "$dir" ] || dir=$PWD
+  live_dir=$(tmux display -t "=$name" -p '#{session_path}' 2>/dev/null) || live_dir=
+  if [ -n "$live_dir" ] && [ "$dir" != "$live_dir" ] &&
+     [ "$(canon "$dir")" != "$(canon "$live_dir")" ]; then
+    name="$name-$(cksum4 "$dir")"
+    live_dir=$(tmux display -t "=$name" -p '#{session_path}' 2>/dev/null) || live_dir=
+    if [ -n "$live_dir" ] && [ "$(canon "$dir")" != "$(canon "$live_dir")" ]; then
+      echo "ptm: session $name belongs to $live_dir, not $dir" >&2
+      exit 1
+    fi
+  fi
+fi
+
+if ! tmux has-session -t "=$name" 2>/dev/null; then
+  [ -n "$dir" ] || dir=$PWD
+  # Create detached first so a lost race with a concurrent ptm fails
+  # loudly here instead of attaching to the wrong session.
+  tmux new-session -d -s "$name" -c "$dir" "$pi_bin" 2>/dev/null || {
+    # display answers rc=0 even for a missing session, so existence is
+    # decided by has-session here.
+    if ! tmux has-session -t "=$name" 2>/dev/null; then
+      echo "ptm: cannot create session $name" >&2
+      exit 1
+    fi
+    live_dir=$(tmux display -t "=$name" -p '#{session_path}' 2>/dev/null) || live_dir=
+    if [ -n "$live_dir" ] && [ "$(canon "$dir")" != "$(canon "$live_dir")" ]; then
+      echo "ptm: cannot create session $name" >&2
+      exit 1
+    fi
+  }
+fi
+
+printf '%s\t%s\t%s\t%s\n' "$(date +%s)" "$kind" "$name" "$dir" >> "$picks"
+
+if [ -n "${TMUX:-}" ]; then
+  tmux switch-client -t "=$name"
+  exit $?
+fi
+exec tmux attach-session -t "=$name"

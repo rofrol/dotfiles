@@ -147,9 +147,9 @@ choice=$(ranked | env -u FZF_DEFAULT_OPTS -u FZF_DEFAULT_OPTS_FILE fzf \
   --delimiter="$tab" --with-nth=1 --nth=1 --no-sort \
   --layout=reverse --height=~50% --border \
   --prompt='ptm> ' \
-  --header='enter: run - ctrl-n: create name from query - ctrl-r: sort by match - esc: cancel' \
+  --header='enter: run - ctrl-n: create - ctrl-r: sort - esc: cancel' \
   --bind='ctrl-r:toggle-sort' \
-  --preview='case {2} in attach) tmux list-windows -t \={3} ;; new) ls -1 -- {4} 2>/dev/null | head -40 ;; esac' \
+  --preview='case {2} in attach) tmux list-windows -t \={3} -F "#{window_index}: #{window_name} (#{window_panes} panes) #{pane_current_command}" ;; new) ls -1 -- {4} 2>/dev/null | head -40 ;; esac' \
   -q "$query")
 rc=$?
 case $rc in

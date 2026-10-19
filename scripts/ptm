@@ -9,7 +9,12 @@
 # picks. ctrl-a swaps the directory source to the places where pi, claude or
 # codex sessions have been run (read from their session histories under
 # ~/.pi/agent/sessions, ~/.claude/projects and ~/.codex/sessions) and swaps
-# back on the next press; -a starts in that view. fzf filters the rows
+# back on the next press, the header always naming the active source; -a
+# starts in that view. ptm --forget QUERY drops the picks of directories
+# matching the query, ptm --refresh rebuilds the agent-history cache. A
+# deleted directory disappears on its own; deleted session files are noticed
+# on the next look at the agent view, the cache rebuilds when the number of
+# session files or any of their timestamps change. fzf filters the rows
 # without re-sorting (--no-sort), so the most chosen command stays on top
 # while you type; ctrl-r toggles sorting by match quality. enter runs the
 # highlighted row; enter with a query that matches nothing, or ctrl-n,
@@ -85,7 +90,13 @@ agent_stamp="$agent_cache/agent-stamp"
 # rebuild; the cache is published by rename, never by appending. All of
 # this happens on an explicit keypress, never on a timer.
 agent_dirs() {
+  # The count catches deleted session files, the timestamp check
+  # catches new or modified ones; both make the cache be rebuilt.
+  count=$(find "$HOME/.pi/agent/sessions" "$HOME/.claude/projects" "$HOME/.codex/sessions" \
+    -name '*.jsonl' 2>/dev/null | wc -l | tr -d ' ')
   if [ -f "$agent_dirs_file" ] && [ -f "$agent_stamp" ] &&
+     [ "$(cat "$agent_stamp" 2>/dev/null)" = "$count" ] &&
+     [ ! "$agent_stamp" -nt "$agent_dirs_file" ] &&
      [ -z "$(find "$HOME/.pi/agent/sessions" "$HOME/.claude/projects" "$HOME/.codex/sessions" \
               -name '*.jsonl' -newer "$agent_stamp" -print -quit 2>/dev/null)" ]; then
     cat "$agent_dirs_file"
@@ -94,7 +105,7 @@ agent_dirs() {
   mkdir -p "$agent_cache" || return 1
   # The stamp is taken before the scan on purpose: a file written during
   # the scan is then newer than the stamp and triggers the next rebuild.
-  touch "$agent_stamp"
+  printf '%s\n' "$count" > "$agent_stamp"
   tmp="$agent_dirs_file.tmp.$$"
   # Newest session first: stat sorts the files by mtime, and grep keeps
   # the order of its arguments, so the first hit per directory is the
@@ -119,7 +130,7 @@ agent_dirs() {
 # The directory source behind the picker rows: zoxide (default) or the
 # agent session history (swapped with ctrl-a).
 dir_list() {
-  if [ -f "$swap_dir/agent" ]; then
+  if [ "${src_mode:-zoxide}" = agent ]; then
     agent_dirs
   else
     zoxide query -l 2>/dev/null
@@ -215,23 +226,63 @@ case "$self" in
   *) self=$(cd "$(dirname "$self")" 2>/dev/null && pwd)/${self##*/} ;;
 esac
 
-if [ "${1:-}" = "--swap-rows" ]; then
-  swap_dir=${2:?ptm: --swap-rows needs a state directory}
+if [ "${1:-}" = "--rows" ]; then
+  case "${2:-}" in agent|zoxide) ;; *) echo "ptm: --rows needs a mode" >&2; exit 1 ;; esac
+  src_mode=$2
+  ranked
+  exit 0
+fi
+
+# Flip the directory source and tell fzf to reload the rows and retitle
+# itself: the header always names the source the user is looking at.
+if [ "${1:-}" = "--swap" ]; then
+  swap_dir=${2:?ptm: --swap needs a state directory}
   mkdir -p "$swap_dir" || exit 1
+  case "$self$swap_dir" in *"'"*|*'{'*|*'}'*)
+    echo "ptm: unsupported character in state path" >&2; exit 1 ;; esac
   if [ -f "$swap_dir/agent" ]; then
     rm -f "$swap_dir/agent"
+    mode=zoxide
+    hdr='[dirs: zoxide] run enter - ^N new - ^A swap - ^R sort - esc'
   else
     touch "$swap_dir/agent"
+    mode=agent
+    hdr='[dirs: agents] run enter - ^N new - ^A swap - ^R sort - esc'
   fi
-  ranked
+  printf "reload('%s' --rows %s)+change-header('%s')\n" "$self" "$mode" "$hdr"
+  exit 0
+fi
+
+# Drop the picks of directories matching the query: the rows they produced
+# stop being promoted, and vanish when no other source lists them.
+if [ "${1:-}" = "--forget" ]; then
+  q=${2-}
+  case "$q" in ''|*"$tab"*|*$'\n'*) echo "ptm: --forget needs a query" >&2; exit 1 ;; esac
+  before=$(wc -l < "$picks" | tr -d ' ')
+  tmp="$picks.tmp.$$"
+  q="$q" awk -F'\t' 'NF == 4 && !($3 == ENVIRON["q"] || index($4, ENVIRON["q"]) > 0)' \
+    "$picks" > "$tmp" && mv "$tmp" "$picks"
+  after=$(wc -l < "$picks" | tr -d ' ')
+  echo "ptm: forgot $((before - after)) picks matching '$q'"
+  exit 0
+fi
+
+# Rebuild the agent-history cache now, e.g. after deleting session files.
+if [ "${1:-}" = "--refresh" ]; then
+  rm -f "$agent_stamp"
+  echo "ptm: $(agent_dirs | awk 'END { print NR }') agent directories"
   exit 0
 fi
 
 swap_dir=$(mktemp -d) || exit 1
 trap 'rm -rf "$swap_dir"' EXIT
 
+hdr='[dirs: zoxide] run enter - ^N new - ^A swap - ^R sort - esc'
+src_mode=zoxide
 if [ "${1:-}" = "-a" ]; then
   touch "$swap_dir/agent"
+  src_mode=agent
+  hdr='[dirs: agents] run enter - ^N new - ^A swap - ^R sort - esc'
   shift
 fi
 
@@ -247,8 +298,8 @@ choice=$(ranked | env -u FZF_DEFAULT_OPTS -u FZF_DEFAULT_OPTS_FILE fzf \
   --delimiter="$tab" --with-nth=1 --nth=1 --no-sort \
   --layout=reverse --height=~50% --border \
   --prompt='ptm> ' \
-  --header='enter: run - ctrl-n: create - ctrl-a: swap dirs - ctrl-r: sort - esc: cancel' \
-  --bind="ctrl-r:toggle-sort,ctrl-a:reload('$self' --swap-rows '$swap_dir')" \
+  --header="$hdr" \
+  --bind="ctrl-r:toggle-sort,ctrl-a:transform('$self' --swap '$swap_dir')" \
   --preview='case {2} in attach) tmux list-windows -t \={3} -F "#{window_index}: #{window_name} (#{window_panes} panes) #{pane_current_command}" ;; new) ls -1 -- {4} 2>/dev/null | head -40 ;; esac' \
   -q "$query")
 rc=$?

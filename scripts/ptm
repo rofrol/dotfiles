@@ -9,7 +9,9 @@
 # picks. fzf filters the rows without re-sorting (--no-sort), so the most
 # chosen command stays on top while you type; ctrl-r toggles sorting by
 # match quality. enter runs the highlighted row; enter with a query that
-# matches nothing, or ctrl-n, creates a session named after the query; esc
+# matches nothing, or ctrl-n, creates a session named after the query;
+# ctrl-n with an empty query falls back to the highlighted row, and with no
+# row at all it names what is missing instead of exiting silently; esc
 # cancels with status 130. The query's directory is the zoxide directory
 # whose basename is the query, else the current directory.
 #
@@ -163,8 +165,12 @@ key_line=$(printf '%s\n' "$choice" | sed -n 2p)
 # tabs when ptm was called with one, and must not be mistaken for a row.
 sel_line=$(printf '%s\n' "$choice" | sed -n '2,$p' | awk -F'\t' 'NF >= 4 { print; exit }')
 
-if [ "$key_line" = ctrl-n ]; then
+if [ "$key_line" = ctrl-n ] && [ -n "$q_line" ]; then
   sel_line=                                  # force create from the query
+fi
+if [ "$key_line" = ctrl-n ] && [ -z "$q_line" ] && [ -z "$sel_line" ]; then
+  echo "ptm: type the name of the session to create" >&2
+  exit 1
 fi
 
 case "$sel_line" in

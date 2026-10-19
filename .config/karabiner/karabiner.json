@@ -30,7 +30,7 @@
                             {
                                 "conditions": [
                                     {
-                                        "bundle_identifiers": ["^org\\.gnu\\.Emacs$", "^dev\\.tryroguix\\.native(\\.development)?\\.vm$"],
+                                        "bundle_identifiers": ["^org\\.gnu\\.Emacs$", "^dev\\.tryomaguix\\.native(\\.development)?\\.vm$"],
                                         "type": "frontmost_application_unless"
                                     }
                                 ],

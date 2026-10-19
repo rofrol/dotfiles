@@ -1,26 +1,32 @@
 #!/bin/bash
 # ptm - pick and run a tmux command for pi, most chosen first.
 #
-# Usage: ptm [initial query]
+# Usage: ptm [-a] [initial query]
 #
 # Rows are ready-to-run tmux commands: attach to a running session, or start
 # pi in a new session named after the project directory. Candidate
 # directories come from zoxide's frecency order plus this script's own past
-# picks. fzf filters the rows without re-sorting (--no-sort), so the most
-# chosen command stays on top while you type; ctrl-r toggles sorting by
-# match quality. enter runs the highlighted row; enter with a query that
-# matches nothing, or ctrl-n, creates a session named after the query;
-# ctrl-n with an empty query falls back to the highlighted row, and with no
-# row at all it names what is missing instead of exiting silently; esc
-# cancels with status 130. The query's directory is the zoxide directory
-# whose basename is the query, else the current directory.
+# picks. ctrl-a swaps the directory source to the places where pi, claude or
+# codex sessions have been run (read from their session histories under
+# ~/.pi/agent/sessions, ~/.claude/projects and ~/.codex/sessions) and swaps
+# back on the next press; -a starts in that view. fzf filters the rows
+# without re-sorting (--no-sort), so the most chosen command stays on top
+# while you type; ctrl-r toggles sorting by match quality. enter runs the
+# highlighted row; enter with a query that matches nothing, or ctrl-n,
+# creates a session named after the query; ctrl-n with an empty query falls
+# back to the highlighted row, and with no row at all it names what is
+# missing instead of exiting silently; esc cancels with status 130. The
+# query's directory is the zoxide directory whose basename is the query,
+# else the current directory.
 #
 # Frecency: a pick earns 8 points when under 4 days old, 4 under 14 days,
 # 2 under 31 days, 1 after that, and picks older than 90 days are ignored.
-# Ties break by the most recent pick, then by zoxide order. These are
-# scoring constants computed from the log when ptm runs; there are no
-# timers. State is one appended line per run in
-# ~/.local/state/ptm/picks.log: "epoch TAB kind TAB name TAB dir".
+# Ties break by the most recent pick, then by the source order (zoxide or
+# session recency). These are scoring constants computed from the log when
+# ptm runs; there are no timers. State is one appended line per run in
+# ~/.local/state/ptm/picks.log: "epoch TAB kind TAB name TAB dir", and a
+# cache of the agent-history directories in ~/.cache/ptm, rebuilt only when
+# a session file is newer than the cache stamp and published atomically.
 #
 # Session names are the directory basename with every character but
 # letters, digits, "-" and "_" mapped to "-": tmux cannot target names
@@ -65,23 +71,68 @@ EOF
   return 1
 }
 
-# Session name for a directory: its sanitized basename, or the basename
-# plus a checksum suffix when the plain name is a session of another
-# directory.
-name_for() {
-  local dir=$1 name sdir
-  name=$(sanitize "${dir##*/}")
-  [ -n "$name" ] || name=s
-  sdir=$(session_dir "$name") || sdir=
-  if [ -n "$sdir" ] && [ "$sdir" != "$dir" ]; then
-    name="$name-$(cksum4 "$dir")"
+# --- agent history -------------------------------------------------------
+
+agent_cache="$HOME/.cache/ptm"
+agent_dirs_file="$agent_cache/agent-dirs"
+agent_stamp="$agent_cache/agent-stamp"
+
+# Prints the directories of past pi, claude and codex sessions, newest
+# session first. The list is cached: it is rebuilt only when some session
+# file is newer than the cache stamp, so the warm path is one directory
+# scan. A rebuild reads every session file once, so the stamp is taken
+# before the scan and a file written during the scan triggers the next
+# rebuild; the cache is published by rename, never by appending. All of
+# this happens on an explicit keypress, never on a timer.
+agent_dirs() {
+  if [ -f "$agent_dirs_file" ] && [ -f "$agent_stamp" ] &&
+     [ -z "$(find "$HOME/.pi/agent/sessions" "$HOME/.claude/projects" "$HOME/.codex/sessions" \
+              -name '*.jsonl' -newer "$agent_stamp" -print -quit 2>/dev/null)" ]; then
+    cat "$agent_dirs_file"
+    return 0
   fi
-  printf '%s' "$name"
+  mkdir -p "$agent_cache" || return 1
+  # The stamp is taken before the scan on purpose: a file written during
+  # the scan is then newer than the stamp and triggers the next rebuild.
+  touch "$agent_stamp"
+  tmp="$agent_dirs_file.tmp.$$"
+  # Newest session first: stat sorts the files by mtime, and grep keeps
+  # the order of its arguments, so the first hit per directory is the
+  # newest one. Names decoded from the directory names are not reliable
+  # (their escapes are lossy), so the working directory is read from the
+  # session payload itself.
+  find "$HOME/.pi/agent/sessions" "$HOME/.claude/projects" "$HOME/.codex/sessions" \
+    -name '*.jsonl' -exec stat -f '%m|%N' {} + 2>/dev/null |
+    sort -rn | cut -d'|' -f2- | tr '\n' '\0' |
+    xargs -0 grep -m1 -H -o '"cwd":"[^"]*"' /dev/null 2>/dev/null |
+    sed 's/:"cwd":[[:space:]]*"/\t/; s/"$//; s/\\\\/\\/g; s/\\"/"/g' |
+    awk -F'\t' '!seen[$2]++ { print $2 }' > "$tmp"
+  if [ -s "$tmp" ]; then
+    mv "$tmp" "$agent_dirs_file"
+  else
+    # An empty or broken scan must not look fresh to the warm path.
+    rm -f "$tmp" "$agent_stamp"
+  fi
+  cat "$agent_dirs_file"
 }
 
-# Rows to offer: display TAB kind TAB name TAB dir.
+# The directory source behind the picker rows: zoxide (default) or the
+# agent session history (swapped with ctrl-a).
+dir_list() {
+  if [ -f "$swap_dir/agent" ]; then
+    agent_dirs
+  else
+    zoxide query -l 2>/dev/null
+  fi
+}
+
+# --- rows ----------------------------------------------------------------
+
+# Rows to offer: display TAB kind TAB name TAB dir. Sanitizing the names of
+# a few hundred directories is done in one awk pass; bash loops would fork
+# per row and stall the picker.
 candidates() {
-  local line name dir disp
+  local line name dir disp sdir
   while IFS= read -r line; do
     [ -n "$line" ] || continue
     name=${line%%"$tab"*}
@@ -94,24 +145,43 @@ candidates() {
   done <<EOF
 $sessions
 EOF
-  { zoxide query -l 2>/dev/null
-    awk -F'\t' 'NF == 4 && $4 != "" && !seen[$4]++ { print $4 }' "$picks"
-  } | while IFS= read -r line; do
-    dir=$line
+  dir_list | awk -F'\t' '
+    NF > 1 { next }
+    /[\t\n]/ { next }
+    {
+      n = $0
+      sub(/^.*\//, "", n)
+      gsub(/[^A-Za-z0-9_-]/, "-", n); gsub(/-+/, "-", n)
+      sub(/^-+/, "", n); sub(/-+$/, "", n)
+      if (n == "") n = "s"
+      dirs[++m] = $0; names[m] = n; count[n]++
+    }
+    END {
+      for (i = 1; i <= m; i++)
+        print names[i] "\t" (count[names[i]] > 1) "\t" dirs[i]
+    }' | while IFS= read -r line; do
+    name=${line%%"$tab"*}
+    rest=${line#*"$tab"}
+    amb=${rest%%"$tab"*}
+    dir=${rest#*"$tab"}
     [ -d "$dir" ] || continue
-    case "$dir" in *"$tab"*|*$'\n'*) continue ;; esac
-    name=$(name_for "$dir")
+    sdir=$(session_dir "$name") || sdir=
+    # The plain name goes to the directory that already holds it; every
+    # other directory sharing the basename gets a stable suffix.
+    if { [ -n "$sdir" ] && [ "$sdir" != "$dir" ]; } || { [ "$amb" = 1 ] && [ "$sdir" != "$dir" ]; }; then
+      name="$name-$(cksum4 "$dir")"
+    fi
     disp="tmux new-session -As $name -c $dir pi"
     printf '%s\t%s\t%s\t%s\n' "$disp" new "$name" "$dir"
   done
 }
 
 # Rank rows by past picks: display TAB kind TAB name TAB dir, most picked
-# first, most recent first on ties, input order (zoxide frecency) after
-# that. A row is identified by its directory (the session name may gain a
-# checksum suffix later); attach rows for different sessions in one
-# directory all stay, a new row is dropped when any row for its directory
-# is already in.
+# first, most recent first on ties, input order (zoxide frecency or session
+# recency) after that. A row is identified by its directory (the session
+# name may gain a checksum suffix later); attach rows for different
+# sessions in one directory all stay, a new row is dropped when any row for
+# its directory is already in.
 ranked() {
   candidates | awk -F'\t' -v now="$(date +%s)" '
     FILENAME != "-" {
@@ -137,6 +207,34 @@ ranked() {
   ' "$picks" - | sort -s -t"$tab" -k1,1nr -k2,2nr | cut -f3-
 }
 
+# --- reload subcommand and mode ------------------------------------------
+
+self=$0
+case "$self" in
+  /*) ;;
+  *) self=$(cd "$(dirname "$self")" 2>/dev/null && pwd)/${self##*/} ;;
+esac
+
+if [ "${1:-}" = "--swap-rows" ]; then
+  swap_dir=${2:?ptm: --swap-rows needs a state directory}
+  mkdir -p "$swap_dir" || exit 1
+  if [ -f "$swap_dir/agent" ]; then
+    rm -f "$swap_dir/agent"
+  else
+    touch "$swap_dir/agent"
+  fi
+  ranked
+  exit 0
+fi
+
+swap_dir=$(mktemp -d) || exit 1
+trap 'rm -rf "$swap_dir"' EXIT
+
+if [ "${1:-}" = "-a" ]; then
+  touch "$swap_dir/agent"
+  shift
+fi
+
 # fzf prints the query as line 1 (--print-query), then for an --expect key
 # the key name ("ctrl-n"), then the selected row when there is one. Some
 # fzf builds omit the empty key line for the default enter key, so the
@@ -149,11 +247,13 @@ choice=$(ranked | env -u FZF_DEFAULT_OPTS -u FZF_DEFAULT_OPTS_FILE fzf \
   --delimiter="$tab" --with-nth=1 --nth=1 --no-sort \
   --layout=reverse --height=~50% --border \
   --prompt='ptm> ' \
-  --header='enter: run - ctrl-n: create - ctrl-r: sort - esc: cancel' \
-  --bind='ctrl-r:toggle-sort' \
+  --header='enter: run - ctrl-n: create - ctrl-a: swap dirs - ctrl-r: sort - esc: cancel' \
+  --bind="ctrl-r:toggle-sort,ctrl-a:reload('$self' --swap-rows '$swap_dir')" \
   --preview='case {2} in attach) tmux list-windows -t \={3} -F "#{window_index}: #{window_name} (#{window_panes} panes) #{pane_current_command}" ;; new) ls -1 -- {4} 2>/dev/null | head -40 ;; esac' \
   -q "$query")
 rc=$?
+rm -rf "$swap_dir"
+trap - EXIT
 case $rc in
   0|1) ;;                    # 1 = completed without a selection
   *) exit "$rc" ;;           # 130 = esc / ctrl-c, 2 = error
@@ -245,6 +345,7 @@ fi
 
 printf '%s\t%s\t%s\t%s\n' "$(date +%s)" "$kind" "$name" "$dir" >> "$picks"
 
+# Run tmux as a child, not by exec, so the cleanup trap above runs.
 if [ -n "${TMUX:-}" ]; then
   tmux switch-client -t "=$name"
   exit $?

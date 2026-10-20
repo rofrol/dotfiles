@@ -3,14 +3,15 @@
 #
 # Usage: ptm [-a] [initial query]
 #
-# Rows are ready-to-run tmux commands: attach to a running session, or start
-# pi in a new session named after the project directory. Candidate
-# directories come from zoxide's frecency order plus this script's own past
-# picks. ctrl-a swaps the directory source to the places where pi, claude or
-# codex sessions have been run (read from their session histories under
-# ~/.pi/agent/sessions, ~/.claude/projects and ~/.codex/sessions) and swaps
-# back on the next press, the header always naming the active source; -a
-# starts in that view. ptm --forget QUERY drops the picks of directories
+# Rows are shown as "att" (attach to a running session) or "new" (start pi
+# in a new session named after the directory). ctrl-a cycles the directory
+# source, the prompt always naming the active one:
+#   visited   - directories from zoxide's frecency order plus past picks
+#   repos     - git repositories on disk, with or without any session
+#   sessions  - directories where pi, claude or codex sessions ran (read
+#               from ~/.pi/agent/sessions, ~/.claude/projects and
+#               ~/.codex/sessions)
+# -r starts in repos, -a in sessions.  ptm --forget QUERY drops the picks of directories
 # matching the query, ptm --refresh rebuilds the agent-history cache. A
 # deleted directory disappears on its own; deleted session files are noticed
 # on the next look at the agent view, the cache rebuilds when the number of
@@ -127,14 +128,30 @@ agent_dirs() {
   cat "$agent_dirs_file"
 }
 
-# The directory source behind the picker rows: zoxide (default) or the
-# agent session history (swapped with ctrl-a).
+# Git repositories under the home directory, found by their .git entries.
+# The walk prunes known noise (tool caches, package trees, build outputs)
+# and stops at depth 5, which covers one level of worktree containers like
+# ~/.herdr/worktrees/<repo>/<branch>; deeper clones inside vendored trees
+# are left out on purpose. Runs on demand, no cache: the scan is the
+# freshness guarantee.
+git_repos() {
+  find "$HOME" -maxdepth 5 \( \
+    -name Library -o -name .cache -o -name .local -o -name .npm -o \
+    -name .cargo -o -name .rustup -o -name node_modules -o -name target -o \
+    -name dist -o -name build -o -name _build -o -name .venv -o \
+    -name .Trash -o -name .gemini -o -name .claude -o -name .config -o \
+    -name .codex \
+  \) -prune -o -name .git -print -prune 2>/dev/null |
+    sed 's:/\.git$::' | sort -u
+}
+
+# The directory source behind the picker rows; see the header comment.
 dir_list() {
-  if [ "${src_mode:-zoxide}" = agent ]; then
-    agent_dirs
-  else
-    zoxide query -l 2>/dev/null
-  fi
+  case "${src_mode:-visited}" in
+    repos) git_repos ;;
+    sessions) agent_dirs ;;
+    *) zoxide query -l 2>/dev/null ;;
+  esac
 }
 
 # --- rows ----------------------------------------------------------------
@@ -150,8 +167,8 @@ candidates() {
     dir=${line#*"$tab"}
     case "$name" in ''|*[:.]*) continue ;; esac  # tmux cannot target . or :
     case "$name$dir" in *"$tab"*|*$'\n'*) continue ;; esac
-    disp="tmux attach-session -t $name"
-    [ -n "$dir" ] && disp="$disp  # $dir"
+    disp="att  $name"
+    [ -n "$dir" ] && disp="$disp  $dir"
     printf '%s\t%s\t%s\t%s\n' "$disp" attach "$name" "$dir"
   done <<EOF
 $sessions
@@ -182,7 +199,7 @@ EOF
     if { [ -n "$sdir" ] && [ "$sdir" != "$dir" ]; } || { [ "$amb" = 1 ] && [ "$sdir" != "$dir" ]; }; then
       name="$name-$(cksum4 "$dir")"
     fi
-    disp="tmux new-session -As $name -c $dir pi"
+    disp="new  $name  $dir"
     printf '%s\t%s\t%s\t%s\n' "$disp" new "$name" "$dir"
   done
 }
@@ -227,29 +244,28 @@ case "$self" in
 esac
 
 if [ "${1:-}" = "--rows" ]; then
-  case "${2:-}" in agent|zoxide) ;; *) echo "ptm: --rows needs a mode" >&2; exit 1 ;; esac
+  case "${2:-}" in visited|repos|sessions) ;; *) echo "ptm: --rows needs a mode" >&2; exit 1 ;; esac
   src_mode=$2
   ranked
   exit 0
 fi
 
-# Flip the directory source and tell fzf to reload the rows and retitle
-# itself: the header always names the source the user is looking at.
+# Advance the directory source and tell fzf to reload the rows and retitle
+# the prompt, so the source is always visible. The chosen mode travels in
+# the action itself: even rapid presses cannot load rows of one source
+# under the name of another.
 if [ "${1:-}" = "--swap" ]; then
   swap_dir=${2:?ptm: --swap needs a state directory}
   mkdir -p "$swap_dir" || exit 1
   case "$self$swap_dir" in *"'"*|*'{'*|*'}'*)
     echo "ptm: unsupported character in state path" >&2; exit 1 ;; esac
-  if [ -f "$swap_dir/agent" ]; then
-    rm -f "$swap_dir/agent"
-    mode=zoxide
-    hdr='[dirs: zoxide] run enter - ^N new - ^A swap - ^R sort - esc'
-  else
-    touch "$swap_dir/agent"
-    mode=agent
-    hdr='[dirs: agents] run enter - ^N new - ^A swap - ^R sort - esc'
-  fi
-  printf "reload('%s' --rows %s)+change-header('%s')\n" "$self" "$mode" "$hdr"
+  case "$(cat "$swap_dir/mode" 2>/dev/null)" in
+    visited) next=repos ;;
+    repos) next=sessions ;;
+    *) next=visited ;;
+  esac
+  printf '%s\n' "$next" > "$swap_dir/mode"
+  printf "reload('%s' --rows %s)+change-prompt(ptm %s> )\n" "$self" "$next" "$next"
   exit 0
 fi
 
@@ -277,14 +293,12 @@ fi
 swap_dir=$(mktemp -d) || exit 1
 trap 'rm -rf "$swap_dir"' EXIT
 
-hdr='[dirs: zoxide] run enter - ^N new - ^A swap - ^R sort - esc'
-src_mode=zoxide
-if [ "${1:-}" = "-a" ]; then
-  touch "$swap_dir/agent"
-  src_mode=agent
-  hdr='[dirs: agents] run enter - ^N new - ^A swap - ^R sort - esc'
-  shift
-fi
+src_mode=visited
+case "${1:-}" in
+  -r) src_mode=repos; shift ;;
+  -a) src_mode=sessions; shift ;;
+esac
+printf '%s\n' "$src_mode" > "$swap_dir/mode"
 
 # fzf prints the query as line 1 (--print-query), then for an --expect key
 # the key name ("ctrl-n"), then the selected row when there is one. Some
@@ -297,8 +311,8 @@ choice=$(ranked | env -u FZF_DEFAULT_OPTS -u FZF_DEFAULT_OPTS_FILE fzf \
   --print-query --expect=ctrl-n \
   --delimiter="$tab" --with-nth=1 --nth=1 --no-sort \
   --layout=reverse --height=~50% --border \
-  --prompt='ptm> ' \
-  --header="$hdr" \
+  --prompt="ptm $src_mode> " \
+  --header='run enter - ^N new - ^A switch - ^R sort - esc' \
   --bind="ctrl-r:toggle-sort,ctrl-a:transform('$self' --swap '$swap_dir')" \
   --preview='case {2} in attach) tmux list-windows -t \={3} -F "#{window_index}: #{window_name} (#{window_panes} panes) #{pane_current_command}" ;; new) ls -1 -- {4} 2>/dev/null | head -40 ;; esac' \
   -q "$query")

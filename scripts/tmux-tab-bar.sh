@@ -25,7 +25,7 @@ EOF
 
 spare=$((W - RIGHT_W))
 tab_w=$((spare / N))
-title_w=$((tab_w - 3)) # space + title field + space + arrow per tab
+title_w=$((tab_w - 3)) # space + title field + space + seam glyph (kitty)
 [ "$title_w" -lt 6 ] && title_w=6
 tab_w=$((title_w + 3))
 extra=$((spare - N * tab_w))
@@ -33,11 +33,8 @@ extra=$((spare - N * tab_w))
 
 title='#{?#{m:π*,#T},#T,#W}'
 field="#{=/$((title_w - 1))/…;p${title_w}:${title}}"
-tmux set -g status-left "#{R: ,${extra}}"
-tmux set -g window-status-format \
-  "#[link=tmux://#{window_id},fg=#bcbcbc,bg=#d0d0d0]#[fg=#080808,bg=#d0d0d0] ${field} #[fg=#d0d0d0,bg=#bcbcbc]#[nolink]"
-tmux set -g window-status-current-format \
-  "#[link=tmux://#{window_id},fg=#bcbcbc,bg=#ffffff]#[fg=#080808,bg=#ffffff]#[bold] ${field} #[fg=#ffffff,bg=#bcbcbc]#[nolink]"
+inactive="#[link=tmux://#{window_id},fg=#444444,bg=#999999] ${field} #{?loop_last_flag,#[fg=#999999]#[bg=#eeeeee]#[nobold],#{?#{next_window_active},#[fg=#999999]#[bg=#eeeeee]#[nobold],#[fg=#eeeeee]#[bg=#999999]#[nobold]}}#[nolink]"
+active="#[link=tmux://#{window_id},fg=#000000,bg=#eeeeee,bold] ${field} #{?loop_last_flag,#[fg=#eeeeee]#[bg=#eeeeee]#[nobold],#[fg=#eeeeee]#[bg=#999999]#[nobold]}#[nolink]"
 
 # The session segment's link carries the full name so a hyperlink-aware
 # terminal shows it on hover. tmux drops a URI containing a raw space and eats
@@ -56,6 +53,25 @@ done < <(tmux list-sessions -F '#{session_id}')
 # field is NAME_W columns whatever the name is (pN pads on the right, p-N on
 # the left, and #S does not expand inside =/N/... - use session_name).
 field="#{p${NAME_W}:#{=/$((NAME_W - 2))/…:session_name}}"
-tmux set -g status-right-length 60
-tmux set -g status-right \
-  "#[link=#{@sess_uri}]#[fg=#bcbcbc,bg=#d0d0d0]#[fg=#080808,bg=#d0d0d0] ${field} #[nolink]"
+right="#[link=#{@sess_uri}]#[fg=#999999,bg=#eeeeee]#[fg=#444444,bg=#eeeeee] ${field} #[nolink]"
+
+# Publish the whole bar in one batch (tmux redraws the status line after
+# every option change, so separate sets flash half-written bars; a capture
+# caught exactly such a mixed frame). tmux-power loads itself the same way.
+tmux source-file - <<EOF
+set -g status-left '#{R: ,${extra}}'
+set -g window-status-format '$inactive'
+set -g window-status-current-format '$active'
+set -g status-style 'bg=#eeeeee,fg=#444444'
+set -g status-bg '#eeeeee'
+set -g status-fg '#444444'
+set -g window-status-style 'bg=#999999,fg=#444444'
+set -g window-status-current-style 'bg=#eeeeee,fg=#000000,bold'
+set -g window-status-last-style 'bg=#999999,fg=#444444'
+set -g window-status-activity-style 'bg=#999999,fg=#444444'
+set -g window-status-bell-style 'bg=#999999,fg=#444444'
+set -g message-style 'bg=#eeeeee,fg=#000000,bold'
+set -g message-command-style 'bg=#eeeeee,fg=#000000,bold'
+set -g status-right-length 60
+set -g status-right '$right'
+EOF

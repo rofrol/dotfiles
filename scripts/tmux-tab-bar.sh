@@ -42,10 +42,14 @@ tmux set -g window-status-current-format \
 # The session segment's link carries the full name so a hyperlink-aware
 # terminal shows it on hover. tmux drops a URI containing a raw space and eats
 # a bare '%' in a format, but a user option is substituted after expansion, so
-# percent-encoding here reaches the terminal untouched.
-uri_name=${NAME//%/%25}
-uri_name=${uri_name// /%20}
-tmux set -g @sess_uri "tmux://session?${uri_name}"
+# percent-encoding here reaches the terminal untouched. The option is per
+# session, like the status bar itself, so every session gets its own.
+while read -r sid; do
+  name=$(tmux display-message -p -t "$sid" '#{session_name}')
+  encoded=${name//%/%25}
+  encoded=${encoded// /%20}
+  tmux set -t "$sid" @sess_uri "tmux://session?${encoded}"
+done < <(tmux list-sessions -F '#{session_id}')
 
 # The session segment: arrow, space, a NAME_W-column name field, space. The
 # name is cut with an ellipsis past NAME_W-2 and padded to the right, so the

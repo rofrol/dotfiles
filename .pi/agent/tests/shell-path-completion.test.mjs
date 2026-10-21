@@ -74,9 +74,13 @@ test("real editor: Tab expands prefix, then opens menu, then accepts selection; 
 		let editor;
 		let rendered;
 		const tui = { requestRender() { rendered?.(); } };
-		sessionStart({}, { mode: "tui", ui: { setEditorComponent(factory) {
-			editor = factory(tui, { borderColor: x => x, selectList: {} }, { matches: () => false });
-		} } });
+		sessionStart({}, { mode: "tui", ui: {
+			getEditorComponent: () => undefined,
+			notify() {},
+			setEditorComponent(factory) {
+				editor = factory(tui, { borderColor: x => x, selectList: {} }, { matches: () => false });
+			},
+		} });
 		editor.setAutocompleteProvider(provider);
 		editor.setText("./pro");
 		async function tab() {

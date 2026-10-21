@@ -218,6 +218,12 @@ Agent tool use follows the same boundaries:
 - Obtain explicit human confirmation before destructive or irreversible
   operations, such as deleting non-disposable data, force-pushing, rewriting
   shared history, deploying, or changing access.
+- Scope a test to its own instance of a shared daemon (tmux, database, queue):
+  give it a dedicated socket or port and clear the environment that points at
+  the caller's instance. `$TMUX` overrides `TMUX_TMPDIR`, so a test that only
+  re-homes the socket directory still talks to the caller's live tmux server
+  and can kill it (a repro test's unscoped `tmux kill-server` did exactly that,
+  2026-10-21). Never end a test with an unscoped kill of a shared daemon.
 
 ### 4. Specify Properties, Not Only Examples
 

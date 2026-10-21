@@ -1,5 +1,6 @@
-import { CustomEditor, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import type { AutocompleteProvider } from "@earendil-works/pi-tui";
+import { wrapEditorFactory } from "./confirm-interrupt.ts";
 
 /** Keep Pi's command and @ search menus; ordinary paths open only on Tab. */
 export function shellPathProvider(provider: AutocompleteProvider): AutocompleteProvider {
@@ -39,15 +40,15 @@ export function shellPathProvider(provider: AutocompleteProvider): AutocompleteP
 	};
 }
 
-class ShellPathEditor extends CustomEditor {
-	override setAutocompleteProvider(provider: AutocompleteProvider): void {
-		super.setAutocompleteProvider(shellPathProvider(provider));
-	}
-}
-
 export default function (pi: ExtensionAPI): void {
 	pi.on("session_start", (_event, ctx) => {
 		if (ctx.mode !== "tui") return;
-		ctx.ui.setEditorComponent((tui, theme, keybindings) => new ShellPathEditor(tui, theme, keybindings));
+		// Compose with whatever editor factory is installed (see confirm-interrupt.ts),
+		// so both extensions survive in either load order.
+		wrapEditorFactory(ctx, "shell-path-completion", (editor) => {
+			const setAutocompleteProvider = editor.setAutocompleteProvider?.bind(editor);
+			if (!setAutocompleteProvider) return;
+			editor.setAutocompleteProvider = (provider) => setAutocompleteProvider(shellPathProvider(provider));
+		});
 	});
 }

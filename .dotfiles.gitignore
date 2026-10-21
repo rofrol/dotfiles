@@ -232,6 +232,7 @@ __pycache__/
 !/.pi/agent/extensions
 /.pi/agent/extensions/*
 !/.pi/agent/extensions/bg-bash.ts
+!/.pi/agent/extensions/confirm-interrupt.ts
 !/.pi/agent/extensions/handoff-notice.ts
 !/.pi/agent/extensions/remember-model.ts
 !/.pi/agent/extensions/shell-path-completion.ts
@@ -239,6 +240,8 @@ __pycache__/
 !/.pi/agent/tests/
 /.pi/agent/tests/*
 !/.pi/agent/tests/shell-path-completion.test.mjs
+!/.pi/agent/tests/confirm-interrupt.test.mjs
+!/.pi/agent/tests/confirm-interrupt.e2e.py
 !/.pi/agent/tests/bg-bash.e2e.py
 !/.pi/README.md
 !/.pi/agent/skills

@@ -233,7 +233,6 @@ __pycache__/
 /.pi/agent/extensions/*
 !/.pi/agent/extensions/bg-bash.ts
 !/.pi/agent/extensions/confirm-interrupt.ts
-!/.pi/agent/extensions/handoff-notice.ts
 !/.pi/agent/extensions/remember-model.ts
 !/.pi/agent/extensions/shell-path-completion.ts
 !/.pi/agent/extensions/README.md
@@ -264,10 +263,8 @@ __pycache__/
 !/.claude/skills/
 /.claude/skills/*
 !/.claude/skills/bend
-!/.claude/skills/handoff
 !/.claude/skills/macbook-2010
 !/.claude/skills/read-link
-!/.claude/skills/todo
 !/.claude/settings.json
 !/.claude/mods/
 

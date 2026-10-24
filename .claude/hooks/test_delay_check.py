@@ -155,6 +155,25 @@ class Justified(unittest.TestCase):
         content = "# delay: rate limit\n" + "x = 1\n" * 5 + "time.sleep(30)\n"
         self.assertTrue(write("/x/a.py", content))
 
+    def test_interval_marker_names_an_external_producer(self):
+        self.assertFalse(write("/x/a.rs", "const SAMPLE: Duration = Duration::from_secs(5); // interval: kernel process table and free disk (read-only observer)\n"))
+        self.assertFalse(write("/x/a.rs", "// interval: the OS process table (read-only observer)\nthread::sleep(SAMPLE);\n"))
+
+    def test_interval_marker_without_external_producer_does_not_count(self):
+        self.assertTrue(write("/x/a.rs", "thread::sleep(Duration::from_secs(5)); // interval: our queue table (read-only observer)\n"))
+        self.assertTrue(write("/x/a.rs", "thread::sleep(Duration::from_secs(5)); // interval: our scheduler, kernel tick (read-only observer)\n"))
+        self.assertTrue(write("/x/a.rs", "thread::sleep(Duration::from_secs(5)); // interval: local service API (read-only observer)\n"))
+
+    def test_interval_marker_must_declare_a_read_only_observer(self):
+        self.assertTrue(write("/x/a.rs", "thread::sleep(Duration::from_secs(5)); // interval: kernel process table\n"))
+
+    def test_interval_marker_that_acts_does_not_count(self):
+        self.assertTrue(write("/x/a.rs", "thread::sleep(Duration::from_secs(5)); // interval: kernel (read-only observer), rescan lost events\n"))
+        self.assertTrue(write("/x/a.rs", "thread::sleep(Duration::from_secs(5)); // interval: kernel (read-only observer), wakes the agent\n"))
+
+    def test_interval_marker_outside_a_comment_does_not_count(self):
+        self.assertTrue(write("/x/a.js", "setTimeout(f, 5000); const o = { interval: kernel (read-only observer) };\n"))
+
 
 class Unrelated(unittest.TestCase):
     def test_read_only_commands(self):

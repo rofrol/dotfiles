@@ -24,6 +24,20 @@ import shlex
 import sys
 
 MARKER = re.compile(r"\bdelay:\s*([^\n;]+)", re.IGNORECASE)
+# A read-only observer's sampling interval over state produced outside its
+# own system (Rule 10's allowed interval) is not a delay: it is marked
+# `interval: <external producer> (read-only observer)` in a comment. The
+# reason starts with a concrete producer outside any agent's pipeline and
+# declares the read-only observer; that it wakes no agent and repairs
+# nothing stays on the author's word, which no keyword can check.
+INTERVAL_MARKER = re.compile(r"(?:#|//)[^\n]*?\binterval:\s*([^\n;]+)", re.IGNORECASE)
+EXTERNAL_PRODUCER = re.compile(
+    r"^(?:the\s+)?(?:OS|kernel|process table|free disk|disk space|wall clock"
+    r"|hardware|device)\b", re.IGNORECASE
+)
+READ_ONLY_OBSERVER = re.compile(r"\bread-only observer\b", re.IGNORECASE)
+ACTS = re.compile(r"\b(?:wake\w*|notif\w*|prompt\w*|restart\w*|kill\w*|retr\w*)\b",
+                  re.IGNORECASE)
 ALLOWED_REASON = re.compile(
     r"^(?:real external deadline|external deadline|rate limit|external polling"
     r"|designed backoff|measured slow hardware)\b", re.IGNORECASE
@@ -236,6 +250,12 @@ class Finding:
 
 
 def allowed_marker(line):
+    for marker in INTERVAL_MARKER.finditer(line):
+        reason = marker.group(1).strip()
+        if INTERNAL_EVENTS.search(reason) or REPAIR.search(reason) or ACTS.search(reason):
+            continue
+        if EXTERNAL_PRODUCER.search(reason) and READ_ONLY_OBSERVER.search(reason):
+            return True
     for marker in MARKER.finditer(line):
         reason = marker.group(1).strip()
         if not ALLOWED_REASON.match(reason) or INTERNAL_EVENTS.search(reason):
@@ -590,7 +610,14 @@ def reason(findings):
         "an acknowledgement, a state change). If it is a real external "
         "deadline, rate limit, external polling, designed backoff or measured "
         "slow hardware, add `delay: <which>` next to it (a code comment, "
-        "`# delay: ...` in a shell command, a line in a task text). In a fix "
+        "`# delay: ...` in a shell command, a line in a task text). A "
+        "read-only observer's sampling interval over state produced outside "
+        "its own system (the OS process table, free disk, the wall clock) is "
+        "not a delay: mark it in a comment as `interval: <producer> "
+        "(read-only observer)`, starting with the producer (the OS, the "
+        "kernel, the process table, free disk, the wall clock, hardware, a "
+        "device); it never reads state its own pipeline wrote, wakes no "
+        "agent and repairs nothing. In a fix "
         "(not a test harness or tooling), get the user's or the coordinating "
         "agent's agreement, with the evidence, before adding the label; never "
         "add one just to get past this check (Rule 10). Periodic repair of "

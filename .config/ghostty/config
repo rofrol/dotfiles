@@ -24,8 +24,11 @@ keybind = command+nine=unbind
 # Cmd+Opt+W still closes the Ghostty tab, Cmd+Shift+W the window.
 keybind = cmd+w=unbind
 
-# Cmd+T goes to herdr (new tab there).
+# Cmd+T and Cmd+W go to the program (AgentDeck: new tab, close tab).
 keybind = cmd+t=unbind
+
+# Cmd+Shift+T goes to the program (AgentDeck: reopen the last closed tab).
+keybind = cmd+shift+t=unbind
 
 # Linux counterparts: Ctrl+Shift+T/W go to herdr (plain Ctrl+T/W stay shell keys).
 # No-ops on macOS.

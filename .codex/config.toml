@@ -140,3 +140,7 @@ trusted_hash = "sha256:f229a89a8f3d511a6959ccde58b25490303a0d5d9d0a447b91077fa2d
 command = "/Users/romanfrolow/.local/share/mise/installs/node/24.21.0/bin/rea"
 args = [ "mcp" ]
 startup_timeout_sec = 30
+
+[mcp_servers.fff]
+command = "/opt/homebrew/bin/fff-mcp"
+args = []

@@ -262,9 +262,6 @@ alias cdi='__zoxide_zi'
 alias e='emacs -nw'
 
 
-# herdr: remember foreground commands per pane (local.relaunch plugin)
-[[ -n $HERDR_PANE_ID ]] && source ~/personal_projects/herdr/plugins/relaunch/relaunch.zsh
-
 
 # automatic dotfiles repo via the git shim (no exported GIT_DIR)
 [ -f ~/.zshrc_dotfiles_mode ] && source ~/.zshrc_dotfiles_mode

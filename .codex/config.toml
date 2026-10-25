@@ -1,0 +1,142 @@
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+model = "gpt-6.1-sol"
+model_reasoning_effort = "low"
+# Some repositories' AGENTS.md exceed the 32 KiB default (lang-for-ai 37 KB,
+# violai 46 KB), which would cut their own sections off.
+project_doc_max_bytes = 131072
+
+notify = ["/Users/romanfrolow/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+
+[projects."/Users/romanfrolow/.config/emacs"]
+trust_level = "trusted"
+
+[projects."/Users/romanfrolow/personal_projects/emacs/ri-mode"]
+trust_level = "trusted"
+
+[projects."/Users/romanfrolow/personal_projects/matchalove"]
+trust_level = "trusted"
+
+[projects."/Users/romanfrolow"]
+trust_level = "trusted"
+
+[projects."/Users/romanfrolow/personal_projects/herdr"]
+trust_level = "trusted"
+
+[projects."/Users/romanfrolow/personal_projects/guix/try-roguix"]
+trust_level = "trusted"
+
+[projects."/Users/romanfrolow/personal_projects/agentic-workflow"]
+trust_level = "trusted"
+
+[projects."/Users/romanfrolow/personal_projects/fast-code-llm/build/agents/gpt-1"]
+trust_level = "trusted"
+
+[projects."/Users/romanfrolow/personal_projects/agent-queue-workflow"]
+trust_level = "trusted"
+
+[tui]
+status_line = ["model-with-reasoning", "current-dir", "model", "reasoning", "run-state", "context-used", "five-hour-limit", "weekly-limit", "context-window-size", "used-tokens", "total-input-tokens", "total-output-tokens", "fast-mode"]
+status_line_use_colors = true
+screen_reader_detection_done = true
+
+[tui.model_availability_nux]
+gpt-6-astra = 4
+"gpt-6.1-sol" = 4
+
+[desktop]
+followUpQueueMode = "steer"
+conversationDetailMode = "STEPS_COMMANDS"
+
+[marketplaces.openai-bundled]
+source_type = "local"
+source = "/Users/romanfrolow/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[marketplaces.openai-primary-runtime]
+source_type = "local"
+source = "/Users/romanfrolow/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[plugins."codex-app-tools@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."unified-computer-use@openai-bundled"]
+enabled = true
+
+[plugins."unified-computer-use@openai-bundled".mcp_servers.cua_repl.tools.js]
+approval_mode = "approve"
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
+
+[mcp_servers.node_repl]
+args = []
+command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = "/Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules"
+NODE_REPL_NODE_PATH = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"
+NODE_REPL_TRUSTED_CODE_PATHS = "/Users/romanfrolow/.codex:/Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules"
+CODEX_HOME = "/Users/romanfrolow/.codex"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+BROWSER_USE_TINYSKY_ENABLED = "1"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
+NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = ""
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.901.51231"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/romanfrolow/.codex/plugins/cache/openai-bundled/browser/26.901.51231/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
+SKY_CUA_SERVICE_PATH = "/Users/romanfrolow/.codex/computer-use/Codex Computer Use.app"
+CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex"
+
+[mcp_servers.computer-use]
+command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
+args = ["mcp"]
+cwd = "."
+enabled = false
+
+[model_providers.openai_http]
+name = "OpenAI HTTP"
+base_url = "https://api.openai.com/v1"
+wire_api = "responses"
+supports_websockets = false
+requires_openai_auth = true
+
+[features]
+hooks = true
+
+[hooks.state]
+
+[hooks.state."/Users/romanfrolow/.codex/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:f229a89a8f3d511a6959ccde58b25490303a0d5d9d0a447b91077fa2da844aec"
+
+[mcp_servers.rea]
+command = "/Users/romanfrolow/.local/share/mise/installs/node/24.21.0/bin/rea"
+args = [ "mcp" ]
+startup_timeout_sec = 30

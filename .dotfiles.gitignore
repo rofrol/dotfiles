@@ -252,6 +252,7 @@ __pycache__/
 !/.codex/
 /.codex/*
 !/.codex/AGENTS.md
+!/.codex/config.toml
 !/.claude/
 /.claude/*
 

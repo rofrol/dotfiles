@@ -1,5 +1,8 @@
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
+# codex reads one global AGENTS.md; the owner's personal preferences live
+# beside the shared rules (Claude Code and pi link them in).
+developer_instructions = "The owner's personal preferences are in ~/.config/agents/personal.md: read it in full before your first reply and follow it."
 
 model = "gpt-6.1-sol"
 model_reasoning_effort = "low"

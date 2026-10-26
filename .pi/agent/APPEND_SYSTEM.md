@@ -1,0 +1,1 @@
+../../.config/agents/personal.md

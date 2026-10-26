@@ -192,6 +192,10 @@ __pycache__/
 !/Library/LaunchAgents/
 /Library/LaunchAgents/*
 
+!/.config/agents/
+/.config/agents/*
+!/.config/agents/personal.md
+
 !/.config/bat/
 /.config/bat/*
 !/.config/bat/config
@@ -228,6 +232,7 @@ __pycache__/
 !/.pi/agent/models.json
 !/.pi/agent/fabric.json
 !/.pi/agent/AGENTS.md
+!/.pi/agent/APPEND_SYSTEM.md
 !/.pi/agent/web-search.json
 !/.pi/agent/extensions
 /.pi/agent/extensions/*
@@ -269,6 +274,9 @@ __pycache__/
 !/.claude/skills/macbook-2010
 !/.claude/skills/read-link
 !/.claude/settings.json
+!/.claude/rules/
+/.claude/rules/*
+!/.claude/rules/personal.md
 !/.claude/mods/
 
 # Tracked files the allow-list used to ignore (they were added with git add -f).

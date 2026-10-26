@@ -237,6 +237,7 @@ __pycache__/
 !/.pi/agent/extensions/shell-path-completion.ts
 !/.pi/agent/extensions/README.md
 !/.pi/agent/extensions/search-reminder.ts
+!/.pi/agent/extensions/policy-context.ts
 !/.pi/agent/tests/
 /.pi/agent/tests/*
 !/.pi/agent/tests/shell-path-completion.test.mjs

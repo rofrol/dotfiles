@@ -69,6 +69,33 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"$HOME/personal_projects/agent-kit/hooks/policy_context.py\" --format claude --part 1 --parts 5"
+          },
+          {
+            "type": "command",
+            "command": "python3 -I \"$HOME/personal_projects/agent-kit/hooks/policy_context.py\" --format claude --part 2 --parts 5"
+          },
+          {
+            "type": "command",
+            "command": "python3 -I \"$HOME/personal_projects/agent-kit/hooks/policy_context.py\" --format claude --part 3 --parts 5"
+          },
+          {
+            "type": "command",
+            "command": "python3 -I \"$HOME/personal_projects/agent-kit/hooks/policy_context.py\" --format claude --part 4 --parts 5"
+          },
+          {
+            "type": "command",
+            "command": "python3 -I \"$HOME/personal_projects/agent-kit/hooks/policy_context.py\" --format claude --part 5 --parts 5"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

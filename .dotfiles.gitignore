@@ -243,6 +243,7 @@ __pycache__/
 !/.pi/agent/extensions/README.md
 !/.pi/agent/extensions/search-reminder.ts
 !/.pi/agent/extensions/policy-context.ts
+!/.pi/agent/extensions/todo-reminder.ts
 !/.pi/agent/tests/
 /.pi/agent/tests/*
 !/.pi/agent/tests/shell-path-completion.test.mjs

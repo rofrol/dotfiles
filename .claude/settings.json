@@ -96,6 +96,16 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"$HOME/personal_projects/agent-kit/hooks/todo_reminder.py\" --format claude || true"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

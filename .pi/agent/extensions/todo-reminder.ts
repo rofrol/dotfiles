@@ -1,1 +1,1 @@
-/Users/romanfrolow/personal_projects/agent-kit/hooks/pi/todo-reminder.ts
+/Users/romanfrolow/.local/share/agent-kit/current/hooks/pi/todo-reminder.ts

@@ -1,1 +1,1 @@
-/Users/romanfrolow/personal_projects/agent-kit/hooks/pi/search-reminder.ts
+/Users/romanfrolow/.local/share/agent-kit/current/hooks/pi/search-reminder.ts

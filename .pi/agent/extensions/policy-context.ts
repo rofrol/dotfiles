@@ -1,1 +1,1 @@
-/Users/romanfrolow/personal_projects/agent-kit/hooks/pi/policy-context.ts
+/Users/romanfrolow/.local/share/agent-kit/current/hooks/pi/policy-context.ts

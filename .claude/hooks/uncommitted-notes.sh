@@ -12,12 +12,22 @@
 #   PostToolUse (Bash)                              -> uncommitted-notes.sh compare
 #   Stop                                            -> uncommitted-notes.sh check
 #
-# record appends the edited path to a per-session ledger. snapshot and compare
-# catch files a shell command changed (sed, echo >>, tee), which the edit tools
-# never see: the snapshot holds `git status --porcelain` from before the command,
-# and the difference afterwards names candidate changes, not proven ownership.
-# Concurrent sessions can change status during the same interval. check looks
-# only at that ledger; it can still include another session's files.
+# record appends the edited path to a per-session ledger, with the file's content
+# hash after the edit and the time ("path<TAB>hash<TAB>epoch"). snapshot and
+# compare catch files a shell command changed (sed, echo >>, tee), which the edit
+# tools never see: the snapshot holds `git status --porcelain` and the hash of
+# each dirty file from before the command; afterwards every path that became
+# dirty or whose content changed is recorded with its new hash. These are
+# candidates, not proven ownership: concurrent sessions can change files during
+# the same command.
+# check reports a dirty path of the ledger only when it may still hold this
+# session's change (the user, 2026-10-27, after a session was told about files
+# another session had dirtied; round 20261027-063006-dde5): its content still is
+# what the session left, or it changed since and no commit since holds exactly
+# the content the session left (its hunk may be in there; the reason says
+# another session changed it too). A path whose session content was committed
+# and which was then dirtied again is someone else's. A line without a hash
+# counts as before.
 # It blocks the stop with a one-line reminder; the model either commits, or says
 # in its final message that it left the files behind. It stays quiet when the
 # final message (the Stop input's last_assistant_message, else the transcript's
@@ -27,9 +37,11 @@
 # again. No commit happens here: committing on the model's behalf would
 # misattribute hunks in shared files.
 #
-# Known limits: a command that changes a file which was already dirty cannot be
-# attributed (the difference does not move), and a session killed without a Stop
-# leaves its ledger on disk, which is deliberate - the next session can inspect it.
+# Known limits: a path with a tab or newline, or one git status quotes, is not
+# followed; a file added inside an already untracked directory does not show;
+# equal bytes are not proof of authorship; a session killed without a
+# Stop leaves its ledger on disk, which is deliberate - the next session can
+# inspect it.
 
 set -euo pipefail
 
@@ -78,6 +90,37 @@ names() {
 	return 1
 }
 
+# The paths of `git status --porcelain` lines on stdin, both sides of a rename.
+status_paths() {
+	awk '{ line = substr($0, 4); sub(/\/$/, "", line); n = split(line, side, / -> /); for (i = 1; i <= n; i++) print side[i] }'
+}
+
+# A path with its directory's symlinks resolved (/tmp is /private/tmp on macOS), so one file has one ledger key;
+# the path itself when its directory is gone.
+physical() {
+	local dir
+	dir=$(cd "$(dirname "$1")" 2>/dev/null && pwd -P) || { printf '%s' "$1"; return 0; }
+	printf '%s/%s' "$dir" "${1##*/}"
+}
+
+# Whether a commit since epoch $3 holds path $1 with exactly blob $2: the session's change to it was committed.
+committed_since() {
+	local commit
+	while IFS= read -r commit; do
+		[ "$(git -C "$(dirname "$1")" rev-parse -q --verify "$commit:./${1##*/}" 2>/dev/null)" = "$2" ] && return 0
+	done < <(git -C "$(dirname "$1")" log --format=%H --since="@$(($3 - 1))" -- "$1" 2>/dev/null)
+	return 1
+}
+
+# A path relative to the repository root when it is inside it (through symlinks too, /tmp on macOS).
+relative() {
+	local path=$1 real
+	[ -n "$root" ] || { printf '%s' "$path"; return; }
+	case $path in "$root"/*) printf '%s' "${path#"$root"/}"; return ;; esac
+	real=$(physical "$path")
+	case $real in "$root"/*) printf '%s' "${real#"$root"/}" ;; *) printf '%s' "$path" ;; esac
+}
+
 session_id=$(json '.session_id // ""')
 [ -n "$session_id" ] || exit 0
 ledger=$state_dir/$session_id
@@ -95,32 +138,47 @@ record)
 	/*) ;;
 	*) path=${cwd:-$PWD}/$path ;;
 	esac
-	printf '%s\n' "$path" >>"$ledger"
+	path=$(physical "$path")
+	printf '%s\t%s\t%s\n' "$path" "$(content_hash "$path")" "$(date +%s)" >>"$ledger"
 	;;
 snapshot)
 	# Remember what is dirty just before a shell command runs.
 	[ "$(json '.tool_name // ""')" = "Bash" ] || exit 0
 	cwd=$(json '.cwd // ""')
 	root=$(git -C "${cwd:-$PWD}" rev-parse --show-toplevel 2>/dev/null) || exit 0
-	git -C "$root" status --porcelain 2>/dev/null >"$ledger.shell" || : >"$ledger.shell"
+	# One snapshot per call (parallel Bash calls of one session), published whole: status lines, then
+	# "hash<TAB>path" of each dirty path after a "--" line, so a change to an already dirty file shows.
+	snap=$ledger.shell.$(json '.tool_use_id // "call"')
+	{
+		git -C "$root" status --porcelain 2>/dev/null || :
+		echo --
+		git -C "$root" status --porcelain 2>/dev/null | status_paths | while IFS= read -r path; do
+			printf '%s\t%s\n' "$(content_hash "$root/$path")" "$path"
+		done
+	} >"$snap.tmp" && mv -f "$snap.tmp" "$snap"
 	;;
 compare)
 	# Whatever this command made dirty that was not dirty before it.
 	[ "$(json '.tool_name // ""')" = "Bash" ] || exit 0
-	[ -f "$ledger.shell" ] || exit 0
+	snap=$ledger.shell.$(json '.tool_use_id // "call"')
+	[ -f "$snap" ] || exit 0
 	cwd=$(json '.cwd // ""')
 	root=$(git -C "${cwd:-$PWD}" rev-parse --show-toplevel 2>/dev/null) || exit 0
+	root=$(physical "$root/.")
+	root=${root%/.}
 	after=$(git -C "$root" status --porcelain 2>/dev/null) || after=""
-	new=$(comm -13 <(sort "$ledger.shell") <(printf '%s\n' "$after" | sort) |
-		sed -e 's/^...//' -e 's/^.* -> //' -e 's:/$::')
-	rm -f "$ledger.shell"
+	new=$(comm -13 <(sed '/^--$/,$d' "$snap" | sort) <(printf '%s\n' "$after" | sort) | status_paths)
+	# Already dirty before the command, and changed by it (or meanwhile).
+	touched=$(sed '1,/^--$/d' "$snap" | while IFS=$'\t' read -r hash path; do
+		[ -n "$path" ] || continue
+		[ "$(content_hash "$root/$path")" = "$hash" ] || printf '%s\n' "$path"
+	done)
+	rm -f "$snap"
+	now=$(date +%s)
 	while IFS= read -r path; do
 		[ -n "$path" ] || continue
-		case $path in
-		/*) printf '%s\n' "$path" >>"$ledger" ;;
-		*) printf '%s\n' "$root/$path" >>"$ledger" ;;
-		esac
-	done <<<"$new"
+		printf '%s\t%s\t%s\n' "$root/$path" "$(content_hash "$root/$path")" "$now" >>"$ledger"
+	done < <(printf '%s\n%s\n' "$new" "$touched" | sort -u)
 	;;
 check)
 	# The reminder already ran for this stop; do not loop.
@@ -129,12 +187,18 @@ check)
 	cwd=$(json '.cwd // ""')
 	root=$(git -C "${cwd:-$PWD}" rev-parse --show-toplevel 2>/dev/null) || root=""
 	dirty=()
-	while IFS= read -r path; do
+	shared=()
+	# The last line per path: the session's latest change to it.
+	while IFS=$'\t' read -r path hash when; do
 		[ -n "$path" ] || continue
-		if [ -n "$(git -C "${cwd:-$PWD}" status --porcelain -- "$path" 2>/dev/null)" ]; then
+		[ -n "$(git -C "${cwd:-$PWD}" status --porcelain -- "$path" 2>/dev/null)" ] || continue
+		if [ -z "$hash" ] || [ "$(content_hash "$path")" = "$hash" ]; then
 			dirty+=("$path")
-		fi
-	done < <(sort -u "$ledger")
+		elif ! committed_since "$path" "$hash" "${when:-0}"; then
+			dirty+=("$path") # changed since, and its content never committed: the session's hunk may be in it
+			shared+=("$path")
+		fi # a commit since holds exactly what the session left, so the change now is someone else's
+	done < <(awk -F'\t' '{last[$1] = $0} END {for (p in last) print last[p]}' "$ledger" | LC_ALL=C sort)
 	if [ ${#dirty[@]} -eq 0 ]; then
 		rm -f "$ledger" "$ledger.acked"
 		exit 0
@@ -167,17 +231,21 @@ check)
 		[ -f "$transcript" ] && message=$(last_assistant_text "$transcript")
 	fi
 	shown=()
+	also=()
 	unnamed=0
 	for path in "${dirty[@]}"; do
-		rel=$path
-		[ -n "$root" ] && case $path in "$root"/*) rel=${path#"$root"/} ;; esac
+		rel=$(relative "$path")
 		shown+=("$rel")
 		names "$message" "$rel" || names "$message" "${path##*/}" || unnamed=1
+	done
+	for path in ${shared[@]+"${shared[@]}"}; do
+		also+=("$(relative "$path")")
 	done
 	[ $unnamed -eq 1 ] || exit 0
 
 	# Shell-observed files are candidates; other sessions may own some hunks.
 	reason="Uncommitted (possibly other sessions' edits too): ${shown[*]} - name them as dirty in your final message; this grants no permission to commit, push or continue stopped work, so commit them by path only if committing is authorized."
+	[ ${#also[@]} -eq 0 ] || reason="$reason Another session also changed ${also[*]} after your last change to it, so part of it may not be yours."
 	jq -n --arg reason "$reason" '{decision: "block", reason: $reason}'
 	;;
 esac

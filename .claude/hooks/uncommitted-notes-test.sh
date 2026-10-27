@@ -101,6 +101,82 @@ cat >"$transcript" <<'EOF'
 EOF
 expect block "transcript's earlier or sidechain text does not count -> block" "$(check s5 '' "$transcript")"
 
+shell() { # shell <session> <snapshot|compare> [tool_use_id]
+	jq -n --arg s "$1" --arg c "$repo" --arg t "${3:-t1}" \
+		'{session_id: $s, cwd: $c, tool_name: "Bash", tool_use_id: $t, tool_input: {command: "x"}}' | run "$2"
+}
+commit_all() { # commit_all <message> [committer date]
+	git -C "$repo" add -A
+	GIT_COMMITTER_DATE=${2:-} git -C "$repo" -c user.name=t -c user.email=t@t commit -q -m "$1"
+}
+commit_all "before the ownership cases"
+
+# Committed after the session's change, then dirtied by someone else: not this session's
+# (the user, 2026-10-27; round 20261027-063006-dde5).
+echo mine >"$repo/e.md"
+record s6 "$repo/e.md"
+commit_all "someone commits e.md" "@$(($(date +%s) + 60))" # dated after the recorded change
+echo theirs >>"$repo/e.md"
+expect pass "committed since, dirtied by another -> no block" "$(check s6 'Answer.')"
+
+# Changed by another session but never committed since: the session's hunk may be in it.
+echo mine >"$repo/f.md"
+record s7 "$repo/f.md"
+echo theirs >>"$repo/f.md"
+out=$(check s7 'Answer.')
+expect block "changed since, not committed -> block" "$out"
+case $(printf '%s' "$out" | jq -r .reason) in
+*"Another session also changed f.md"*) echo "ok   reason names the shared file" ;;
+*) echo "FAIL shared reason: $out"; failures=$((failures + 1)) ;;
+esac
+
+# Another session commits its own hunk of the file the session also changed: the session's hunk stays
+# uncommitted, so it is still reported (round 20261027-063407-6080).
+printf 'base\n' >"$repo/h.md"
+commit_all "h.md"
+printf 'base\nmine\n' >"$repo/h.md"
+record s10 "$repo/h.md"
+printf 'theirs\nbase\n' >"$repo/h.md"
+commit_all "their hunk only" "@$(($(date +%s) + 60))"
+printf 'theirs\nbase\nmine\n' >"$repo/h.md"
+expect block "another session's partial commit -> still block" "$(check s10 'Answer.')"
+
+# A deleted directory does not break the report.
+mkdir -p "$repo/gone"
+echo z >"$repo/gone/z.md"
+record s11 "$repo/gone/z.md"
+commit_all "gone/z.md"
+rm -rf "$repo/gone"
+out=$(check s11 'Answer.')
+case $(printf '%s' "$out" | jq -r .reason) in
+*"gone/z.md"*) echo "ok   deleted directory reported by its relative path" ;;
+*) echo "FAIL deleted directory: $out"; failures=$((failures + 1)) ;;
+esac
+
+# A shell command changes an already dirty file: recorded as the session's change.
+echo dirty >"$repo/g.md"
+shell s8 snapshot
+echo more >>"$repo/g.md"
+shell s8 compare
+out=$(check s8 'Answer.')
+expect block "shell edit of a dirty file -> block" "$out"
+case $(printf '%s' "$out" | jq -r .reason) in
+*"Another session"*) echo "FAIL own shell edit called shared: $out"; failures=$((failures + 1)) ;;
+*) echo "ok   own shell edit not called shared" ;;
+esac
+
+# A rename records both sides.
+echo r >"$repo/old.md"
+commit_all "old.md"
+shell s9 snapshot
+git -C "$repo" mv old.md new.md
+shell s9 compare
+out=$(check s9 'Answer.')
+case $(printf '%s' "$out" | jq -r .reason) in
+*old.md*new.md* | *new.md*old.md*) echo "ok   rename records both paths" ;;
+*) echo "FAIL rename: $out"; failures=$((failures + 1)) ;;
+esac
+
 # Clean files: no block, ledger and acknowledged set removed.
 git -C "$repo" add -A
 git -C "$repo" -c user.name=t -c user.email=t@t commit -q -m all

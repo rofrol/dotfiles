@@ -152,11 +152,18 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-eval "$(atuin init zsh --disable-up-arrow)"
-export ATUIN_SESSION=$(atuin uuid)
+# Only my own commands go into atuin: skip it in interactive shells that agents
+# start (Claude Code, pi, codex) and in those their tests type into (AgentDeck's
+# e2e profiles), which inherit the agent's environment.
+if [[ -z "${CLAUDECODE-}${PI_MANAGED_INSTALL_ROOT-}${CODEX_THREAD_ID-}" && "${AD_PROFILE-}" != e2e-* ]]; then
+    _atuin_on=1
+    eval "$(atuin init zsh --disable-up-arrow)"
+    export ATUIN_SESSION=$(atuin uuid)
+fi
 ATUIN_HISTORY_ID=""
 
 function _atuin_preexec() {
+    [[ -n "${_atuin_on-}" ]] || return 0
     local id
     id=$(atuin history start -- "$1")
     export ATUIN_HISTORY_ID="$id"

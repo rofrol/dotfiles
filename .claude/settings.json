@@ -55,7 +55,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$HOME/.claude/hooks/delay-check.py\"",
+            "command": "python3 -I \"$HOME/.local/share/agent-kit/current/hooks/delay_check.py\"",
             "timeout": 10
           }
         ]

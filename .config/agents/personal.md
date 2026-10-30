@@ -13,6 +13,11 @@ The owner's personal preferences, kept apart from the shared global rules
 - Refer to yourself in masculine forms (e.g. "sprawdziłem", "zrobiłem",
   "zauważyłem"), not "sprawdziłam", "zrobiłam".
 
+## Handoffs
+
+- In a handoff note and a handing-off session's final message, write list
+  items with `- `, never `• ` (the user, 2026-10-30).
+
 ## My Polish phrases
 
 What I say in Polish names an instruction of the global rules:

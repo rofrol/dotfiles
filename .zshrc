@@ -16,8 +16,8 @@ alias gitka='(git rev-parse --verify origin/gh-pages >/dev/null 2>&1 && gitk ^or
 eval "$(/opt/homebrew/bin/gdircolors -b)"
 # https://zoxide.org/blog/advanced-zoxide-techniques/
 # honours export TIME_STYLE=long-iso
-alias ls='command gls --color=auto -h -H --group-directories-first -A -F -l'
-alias ltr='ls -tr'
+alias ll='command gls --color=auto -h -H --group-directories-first -A -F -l'
+alias lltr='ll -tr'
 
 # honours export TIME_STYLE=long-iso
 alias eza='eza --group --icons -lt modified --almost-all --group-directories-first'

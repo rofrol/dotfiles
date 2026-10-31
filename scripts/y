@@ -11,6 +11,8 @@
 # Old names are symlinks to this file and only change the defaults:
 #   ylist = y -p, yp = y -l pl, yplist = y -l pl -p, ynosubs = y -l none
 #
+# yw is y that also runs video_for_whatsapp.sh on each downloaded video.
+#
 # TODO: The problem with this solution: when there is some other problem than no subs in this language,
 # It will still download them.
 # ERROR: Unable to download video subtitles for 'en': HTTP Error 429: Too Many Requests
@@ -20,12 +22,14 @@ set -euo pipefail
 
 lang=en
 playlist=false
+whatsapp=false
 
 case "$(basename "$0")" in
 	ylist) playlist=true ;;
 	yp) lang=pl ;;
 	yplist) lang=pl playlist=true ;;
 	ynosubs) lang=none ;;
+	yw) whatsapp=true ;;
 esac
 
 # Only leading -l/-p are ours; everything from the first other argument on
@@ -46,6 +50,9 @@ else
 fi
 if [[ $playlist == true ]]; then
 	args+=(--yes-playlist)
+fi
+if [[ $whatsapp == true ]]; then
+	args+=(--exec 'after_move:video_for_whatsapp.sh {}')
 fi
 
 exec yt-dlp "${args[@]}" "$@"

@@ -68,6 +68,16 @@
             "command": "python3 \"$HOME/.claude/hooks/question-preview.py\""
           }
         ]
+      },
+      {
+        "matcher": "Read|Edit|Write|MultiEdit|NotebookEdit|Bash|Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"$HOME/.claude/hooks/odin-skill.py\"",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "SessionStart": [

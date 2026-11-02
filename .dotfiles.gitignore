@@ -268,6 +268,8 @@ __pycache__/
 /.claude/hooks/*
 !/.claude/hooks/uncommitted-notes.sh
 !/.claude/hooks/question-preview.py
+!/.claude/hooks/odin-skill.py
+!/.claude/hooks/test_odin_skill.py
 !/.pi/agent/extensions/uncommitted-notes.ts
 !/.claude/skills/
 /.claude/skills/*

@@ -1,0 +1,59 @@
+#!/bin/sh
+# Remux a Blu-ray backup's main playlist into one MKV, without re-encoding:
+# the video, the chapters, and the English and Polish audio and subtitles,
+# whichever the disc has. The main playlist is the first line of
+# bluray-playlists (most tracks, then longest).
+# Usage: bluray-remux [-n] [DISC [OUT.mkv]]
+#   DISC contains BDMV/ (default: .), OUT defaults to ./<DISC name>.mkv,
+#   -n prints what it would do and writes nothing.
+# Needs mkvmerge (brew install mkvtoolnix), jq and bluray-playlists.
+set -eu
+
+dry=
+[ "${1:-}" = -n ] && { dry=1; shift; }
+disc=${1:-.}
+name=$(basename "$(cd "$disc" && pwd)")
+out=${2:-./$name.mkv}
+
+playlist=$(bluray-playlists "$disc" | head -n 1 | cut -f 3)
+[ -n "$playlist" ] || { echo "bluray-remux: no playlist in $disc" >&2; exit 1; }
+json=$(mkvmerge -J "$playlist")
+
+# Track ids of one type in English or Polish (ISO 639-2, or IETF tags).
+ids() {
+	printf '%s' "$json" | jq -r --arg type "$1" '[.tracks[]
+		| select(.type == $type)
+		| select((.properties.language // "") as $l
+			| (.properties.language_ietf // "") as $t
+			| $l == "eng" or $l == "pol" or ($t | test("^(en|pl)(-|$)")))
+		| .id] | join(",")'
+}
+audio=$(ids audio)
+subs=$(ids subtitles)
+if [ -z "$audio" ]; then
+	langs=$(printf '%s' "$json" | jq -r '[.tracks[] | select(.type == "audio") | .properties.language] | unique | join(" ")')
+	echo "bluray-remux: no English or Polish audio in $playlist (audio: $langs)" >&2
+	exit 1
+fi
+
+set -- -o "$out" --audio-tracks "$audio"
+if [ -n "$subs" ]; then set -- "$@" --subtitle-tracks "$subs"; else set -- "$@" --no-subtitles; fi
+set -- "$@" "$playlist"
+
+[ ! -e "$out" ] || { echo "bluray-remux: $out exists; remove it or give another OUT" >&2; exit 1; }
+echo "playlist $playlist: audio $audio, subtitles ${subs:-none} -> $out"
+if [ -n "$dry" ]; then
+	echo "mkvmerge $*"
+	exit 0
+fi
+
+# The playlist's size bounds the output (dropped tracks make it smaller).
+need=$(printf '%s' "$json" | jq '.container.properties.playlist_size // 0')
+free=$(df -k "$(dirname "$out")" | awk 'NR == 2 { print $4 * 1024 }')
+if [ "$free" -lt "$need" ]; then
+	echo "bluray-remux: $(dirname "$out") has $((free >> 30)) GiB free, the playlist is $((need >> 30)) GiB; give OUT on another disk" >&2
+	exit 1
+fi
+
+# mkvmerge exits 1 on warnings (the file is written), 2 on errors.
+mkvmerge "$@" || [ $? -eq 1 ]

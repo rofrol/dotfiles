@@ -1,0 +1,61 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pgsrip"]
+# ///
+"""
+OCR a Matroska file's image subtitles (Blu-ray PGS) into .srt files next
+to it, one per track, with pgsrip and tesseract; --vtt also writes .vtt.
+
+Usage:
+    mkv-subs-to-srt [-l en -l pl] [--vtt] FILE.mkv
+
+Needs tesseract (brew install tesseract; Polish: brew install
+tesseract-lang) and mkvextract (brew install mkvtoolnix). OCR makes
+mistakes (l/I/1, italics): read the result.
+"""
+
+import argparse
+import pathlib
+import subprocess
+import sys
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("file", type=pathlib.Path)
+    parser.add_argument("-l", "--language", action="append",
+                        help="IETF code, repeatable (default: en and pl)")
+    parser.add_argument("--vtt", action="store_true", help="also write .vtt")
+    args = parser.parse_args()
+
+    if not args.file.is_file():
+        print(f"mkv-subs-to-srt: no file {args.file}", file=sys.stderr)
+        return 1
+
+    before = set(args.file.parent.glob("*.srt"))
+    # pgsrip's own CLI, from this script's environment. --all: a disc's two
+    # English tracks (plain and SDH) often carry no flags, and pgsrip would
+    # drop the second as a duplicate. Existing .srt files are kept.
+    command = [sys.executable, "-m", "pgsrip", "rip", "--all"]
+    for code in args.language or ["en", "pl"]:
+        command += ["-l", code]
+    subprocess.run(command + [str(args.file)], check=True)
+
+    written = sorted(set(args.file.parent.glob("*.srt")) - before)
+    if not written:
+        print("mkv-subs-to-srt: no new .srt (no image subtitles in those languages,"
+              " or the files exist already)", file=sys.stderr)
+        return 1
+    for srt in written:
+        print(srt)
+        if args.vtt:
+            vtt = srt.with_suffix(".vtt")
+            subprocess.run(["ffmpeg", "-loglevel", "error", "-n", "-i", str(srt), str(vtt)],
+                           check=True)
+            print(vtt)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

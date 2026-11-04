@@ -1,6 +1,7 @@
 #!/bin/sh
-# List a Blu-ray backup's playlists, longest first: minutes, track count, file.
-# The main feature has the film's running time and all tracks; a long
+# List a Blu-ray backup's playlists: track count, minutes, file. The main
+# feature has all tracks (video, audio, dubs, subtitles) and the film's
+# running time, so it sorts first: most tracks, then longest. A long
 # playlist with one track is a loop of a short clip.
 # Usage: bluray-playlists [DISC]   (DISC contains BDMV/, default: .)
 # Needs mkvmerge (brew install mkvtoolnix) and jq.
@@ -12,5 +13,6 @@ dir="$disc/BDMV/PLAYLIST"
 
 for f in "$dir"/*.mpls; do
 	mkvmerge -J "$f" | jq -r --arg f "$f" \
-		'"\((.container.properties.playlist_duration // 0) / 6e10 | round) min \(.tracks | length) tracks \($f)"'
-done | sort -nr | head
+		'(.tracks | length) as $n
+		 | "\($n) track\(if $n == 1 then "" else "s" end)\t\((.container.properties.playlist_duration // 0) / 6e10 | round) min\t\($f)"'
+done | sort -t "$(printf '\t')" -k1,1nr -k2,2nr | head

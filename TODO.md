@@ -59,6 +59,8 @@ Follow-ups for the tools configured in this dotfiles repository.
 
 ## Next, in order
 
+- [ ] claude: bring `autoMode.environment` in `.claude/settings.json` up to date. Asked by the user 2026-11-05 (rr session; consult round `20261105-101704-97bc`): it names software-factory, with no remotes, as the only trusted repository, so the auto-mode classifier took an approved push to the user's own GitHub repository for an unrequested commit in a connected app. Name the GitHub account rofrol and the user's repositories instead; this is context for the classifier, not authority (rr's ick74t carries the authority).
+
 - [ ] Show the previous handoff note to the user after a takeover (skills
   `todo` and `handoff`). Approved by the user 2026-10-16 (herdr-bend
   decisions d-f5cs3xm5, d-3t7iup5f, d-hlrc3pjw; consult round

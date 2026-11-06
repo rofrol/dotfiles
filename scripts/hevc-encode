@@ -3,8 +3,11 @@
 # the grain, for playback on an Apple Silicon Mac: HEVC decodes in hardware
 # there, AV1 does not (software AV1 in mpv cost about 3x the CPU).
 # Audio becomes Opus 384k (5.1 stays 5.1), subtitles and chapters are copied.
-# Runs at the lowest CPU priority (nice 19) so the Mac stays usable, and keeps
-# it awake (caffeinate -i) until the encode ends.
+# Runs at background QoS (taskpolicy -b: efficiency cores only, throttled I/O)
+# so the Mac stays quiet and usable, and keeps it awake (caffeinate -i) until
+# the encode ends. nice 19 was not enough: with nothing else running, x265
+# still took all 10 cores of an M1 Pro (89 C, loud fan). A running encode can
+# be moved with `taskpolicy -b -p PID` and paused with kill -STOP / -CONT.
 # Usage: hevc-encode [-n] IN.mkv [OUT.mkv] [-- EXTRA FFMPEG OPTIONS]
 #   OUT defaults to IN with _HEVC before the extension; -n prints the command.
 #   Extra options go before OUT, e.g. `-- -t 60` for a one-minute test clip.
@@ -30,7 +33,7 @@ case $(ffprobe -v error -select_streams a:0 -show_entries stream=channel_layout 
   '5.0(side)') af=channelmap=channel_layout=5.0 ;;
 esac
 
-set -- caffeinate -i nice -n 19 ffmpeg -hide_banner -nostdin -i "$in" -map 0 \
+set -- caffeinate -i taskpolicy -b ffmpeg -hide_banner -nostdin -i "$in" -map 0 \
   -c:v libx265 -pix_fmt yuv420p10le -preset slow -crf 18 \
   -x265-params "no-sao=1:aq-mode=3:psy-rd=2.0:psy-rdoq=1.0:log-level=error" \
   -filter:a:0 "$af" -c:a libopus -b:a 384k -mapping_family 1 -c:s copy "$@" "$out"

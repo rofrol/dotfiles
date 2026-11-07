@@ -1,0 +1,63 @@
+#!/bin/sh
+# Add .srt subtitles to a Matroska file in place, without re-encoding:
+# mkvmerge writes a hidden temporary file next to it, the track count is
+# checked, and only then does it replace the original.
+# The language comes from the file name: Film.pl.srt is Polish ("Polski"),
+# Film.en.srt English ("English"); any other code (Film.de.srt) is used as
+# the language and the track name. The first .srt becomes the default track;
+# subtitle tracks already in the file are kept as they are.
+# Subtitles must be UTF-8: convert CP1250 ones first with
+# subtitles_encoding_and_line_ending.sh.
+# Usage: mkv-add-srt [-n] VIDEO.mkv SUB.LANG.srt [SUB.LANG.srt ...]
+#   -n prints the mkvmerge command instead of running it.
+# Needs mkvmerge (brew install mkvtoolnix). Notes: kisswiki
+# src/00other/mkvmerge.md.
+set -eu
+
+dry=
+[ "${1:-}" = -n ] && { dry=1; shift; }
+[ $# -ge 2 ] || { sed -n '2,/^set -eu/s/^# \{0,1\}//p' "$0" >&2; exit 2; }
+
+# A relative path starting with "-" would read as an option: anchor it.
+path() { case $1 in /*) printf '%s\n' "$1" ;; *) printf './%s\n' "$1" ;; esac; }
+
+video=$1; shift
+[ -f "$video" ] || { echo "mkv-add-srt: no file $video" >&2; exit 1; }
+video=$(path "$video")
+tmp=$(dirname "$video")/.$(basename "$video").add-srt.mkv
+[ -e "$tmp" ] && { echo "mkv-add-srt: $tmp exists (left by an earlier run?)" >&2; exit 1; }
+
+tracks() { mkvmerge -J "$1" | python3 -I -c 'import json,sys; print(len(json.load(sys.stdin)["tracks"]))'; }
+
+# Build "mkvmerge -o TMP VIDEO [options SRT]..." in the positional parameters,
+# keeping the .srt paths in a loop over the original ones.
+n=$#
+first=yes
+for srt do
+  [ -f "$srt" ] || { echo "mkv-add-srt: no file $srt" >&2; exit 1; }
+  iconv -f UTF-8 -t UTF-8 "$srt" >/dev/null 2>&1 ||
+    { echo "mkv-add-srt: $srt is not UTF-8 (subtitles_encoding_and_line_ending.sh converts CP1250)" >&2; exit 1; }
+  code=${srt%.*}; code=${code##*.}
+  case $code in
+    pl) name=Polski ;;
+    en) name=English ;;
+    [a-z][a-z]|[a-z][a-z][a-z]) name=$code ;;
+    *) echo "mkv-add-srt: no language in $srt (name it e.g. Film.pl.srt)" >&2; exit 1 ;;
+  esac
+  set -- "$@" --language "0:$code" --track-name "0:$name" --default-track-flag "0:$first" "$(path "$srt")"
+  first=no
+done
+shift "$n"
+set -- mkvmerge -q -o "$tmp" "$video" "$@"
+
+if [ -n "$dry" ]; then printf '%s\n' "$*"; exit 0; fi
+
+before=$(tracks "$video")
+# mkvmerge exits 1 for warnings (the file is written) and 2 for errors.
+rc=0; "$@" || rc=$?
+[ "$rc" -le 1 ] || { rm -f "$tmp"; echo "mkv-add-srt: mkvmerge failed ($rc)" >&2; exit 1; }
+after=$(tracks "$tmp")
+[ "$after" -eq $((before + n)) ] ||
+  { rm -f "$tmp"; echo "mkv-add-srt: expected $((before + n)) tracks, got $after; original kept" >&2; exit 1; }
+mv "$tmp" "$video"
+mkvmerge -i "$video"

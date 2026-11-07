@@ -1,0 +1,4 @@
+#!/bin/sh
+# hevc-encode without the input's subtitles, e.g. when you keep your own .srt.
+# Same arguments as hevc-encode: hevc-encode-no-subs [-n] IN.mkv [OUT.mkv] [-- EXTRA]
+exec "$(dirname "$0")/hevc-encode" -S "$@"

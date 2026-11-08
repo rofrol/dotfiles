@@ -3,8 +3,9 @@
 # the video, the chapters, and the English and Polish audio and subtitles,
 # whichever the disc has. The main playlist is the first line of
 # bluray-playlists (most tracks, then longest).
-# Usage: bluray-remux [-n] [DISC [OUT.mkv]]
-#   DISC contains BDMV/ (default: .), OUT defaults to ./<DISC name>.mkv,
+# Usage: bluray-remux [-n] [DISC [OUT.mkv | DIR]]
+#   DISC contains BDMV/ (default: .), OUT defaults to ./<DISC name>.mkv;
+#   an existing DIR (or a path ending in /) gets DIR/<DISC name>.mkv;
 #   -n prints what it would do and writes nothing.
 # Needs mkvmerge (brew install mkvtoolnix), jq and bluray-playlists.
 set -eu
@@ -13,7 +14,11 @@ dry=
 [ "${1:-}" = -n ] && { dry=1; shift; }
 disc=${1:-.}
 name=$(basename "$(cd "$disc" && pwd)")
-out=${2:-./$name.mkv}
+out=${2:-.}
+case $out in
+	*/) out=$out$name.mkv ;;
+	*) [ -d "$out" ] && out=$out/$name.mkv ;;
+esac
 
 playlist=$(bluray-playlists "$disc" | head -n 1 | cut -f 3)
 [ -n "$playlist" ] || { echo "bluray-remux: no playlist in $disc" >&2; exit 1; }

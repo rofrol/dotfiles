@@ -59,6 +59,17 @@ Follow-ups for the tools configured in this dotfiles repository.
 
 ## Next, in order
 
+- [ ] Turn the subtitle workflow into a script and a skill (user,
+  2026-11-08: "maybe make a skill out of this? or a script in ~/scripts/
+  for the agent?"; chose "script + skill"). `scripts/srt-check`: checks an
+  .srt OCR'd from PGS (numbering, timing, line count and length, OCR
+  suspects, words missing from the system dictionary), splits it into
+  parts for parallel translation, joins them, and compares a translation
+  with its source (same blocks and timestamps). The skill describing the
+  whole flow (`mkv-subs-to-srt` → `srt-check` → proofread and translate
+  to Polish with a glossary → `mkv-add-srt`) belongs in agent-kit
+  `skills/`, added through its rr queue (`rr issue add`).
+
 - [ ] Show the previous handoff note to the user after a takeover (skills
   `todo` and `handoff`). Approved by the user 2026-10-16 (herdr-bend
   decisions d-f5cs3xm5, d-3t7iup5f, d-hlrc3pjw; consult round

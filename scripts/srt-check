@@ -1,0 +1,255 @@
+#!/usr/bin/env python3
+"""
+Check .srt subtitles OCR'd from Blu-ray PGS, and help translate them.
+
+Usage:
+    srt-check check FILE.srt [--max-len 42]
+    srt-check split FILE.srt PARTS OUTDIR    # OUTDIR/<stem>.partN.srt
+    srt-check join OUT.srt PART.srt [PART.srt ...]
+    srt-check compare SOURCE.srt TRANSLATION.srt [--max-len 42]
+    srt-check apply FILE.srt FIXES.json OUT.srt
+
+check prints structural problems (numbering, timestamps, overlaps, empty
+blocks, more than two lines, long lines), OCR suspects (l/I confusions
+such as "lam", digits or symbols inside words) and words missing from
+/usr/share/dict/words (names of the film's world land here too: read
+them, don't fix them blindly). It does not prove the text right: a wrong
+real word ("lam" for "I am") only an attentive read finds.
+
+compare checks that a translation keeps every block of its source: the
+same count, numbers and timestamp lines, at most two lines per block.
+
+apply writes OUT.srt with the fixes of FIXES.json, a list of
+{"block": "N", "old": "...", "new": "..."}; each "old" must occur exactly
+once in its block's text, or nothing is written.
+
+Exit status: 0 when no problem was found, 1 otherwise, 2 on bad usage.
+Standard library only; run as `python3 -I`.
+"""
+
+import argparse
+import pathlib
+import re
+import sys
+
+TIME = re.compile(r"(\d\d):(\d\d):(\d\d),(\d{3}) --> (\d\d):(\d\d):(\d\d),(\d{3})$")
+# Tokens OCR of subtitle bitmaps typically gets wrong.
+SUSPECTS = [
+    (re.compile(r"\bl(am|m|'m|'ll|'d|'ve|f|s|t|n)?\b"), "l for I"),
+    (re.compile(r"(?<![\d,.])\b1('m|'ll|'d|'ve| am\b)|(?<!\w)/ (am|was|have|know|think)\b"), "1 or / for I"),
+    (re.compile(r"\b[a-z]+[A-Z][a-z]*\b"), "case inside word"),
+    (re.compile(r"\b(?!\d+(st|nd|rd|th|s)\b)\w*([a-z]\d|\d[a-z])\w*"), "digit inside word"),
+    (re.compile(r"[|\\{}~_@#$%^*<>]"), "symbol"),
+    (re.compile(r" [,.?!;:](?!\d)|[,;:](?=[A-Za-z])|  |^ | $"), "spacing"),
+    (re.compile(r"''|``|,,|\.{4,}"), "punctuation"),
+    (re.compile(r"\w[!?;:] [a-z]|[a-z]\.[a-z]"), "punctuation inside a sentence"),
+]
+DICT = pathlib.Path("/usr/share/dict/words")
+
+
+def read_blocks(path):
+    text = pathlib.Path(path).read_text(encoding="utf-8-sig").replace("\r", "")
+    return [[line.rstrip() for line in b.split("\n")]
+            for b in re.split(r"\n\s*\n", text.strip())]
+
+
+def plain(line):
+    """A subtitle line without its formatting tags (<i>, {\\an8})."""
+    return re.sub(r"</?[a-zA-Z][^>]*>|\{\\[^}]*\}", "", line)
+
+
+def millis(groups):
+    h, m, s, ms = map(int, groups)
+    return ((h * 60 + m) * 60 + s) * 1000 + ms
+
+
+def structure(blocks, max_len, layout=True):
+    """Numbering and timestamp problems; with layout, also overlaps,
+    empty blocks, more than two lines and lines over max_len."""
+    problems = []
+    expected = 1
+    prev_end = 0
+    for b in blocks:
+        num = b[0]
+        if not num.isdigit():
+            problems.append(f"block after {expected - 1}: number line {num!r}")
+        elif int(num) != expected:
+            problems.append(f"block {num}: expected number {expected}")
+        expected = int(num) + 1 if num.isdigit() else expected + 1
+        m = TIME.match(b[1]) if len(b) > 1 else None
+        if not m:
+            problems.append(f"block {num}: timestamp line {b[1:2]}")
+            continue
+        start, end = millis(m.groups()[:4]), millis(m.groups()[4:])
+        if end <= start:
+            problems.append(f"block {num}: ends before it starts")
+        if not layout:
+            continue
+        if start < prev_end:
+            problems.append(f"block {num}: overlaps the previous block")
+        prev_end = end
+        lines = b[2:]
+        if not any(x.strip() for x in lines):
+            problems.append(f"block {num}: empty")
+        if len(lines) > 2:
+            problems.append(f"block {num}: {len(lines)} lines")
+        for x in lines:
+            if len(x) > max_len:
+                problems.append(f"block {num}: {len(x)} chars: {x}")
+    return problems
+
+
+def check(args):
+    blocks = read_blocks(args.file)
+    problems = structure(blocks, args.max_len)
+    words, names = set(), set()
+    if DICT.is_file():
+        entries = DICT.read_text().split()
+        words = {w.lower() for w in entries}
+        names = {w for w in entries if w[:1].isupper()}
+    unknown = {}
+    for b in blocks:
+        for x in map(plain, b[2:]):
+            for rx, why in SUSPECTS:
+                if rx.search(x):
+                    problems.append(f"block {b[0]}: {why}: {x}")
+            # Contractions (didn't, ain't) are left out: their stems are
+            # not words, and an OCR error inside one shows as a case error.
+            for w in re.findall(r"[A-Za-z]+(?![A-Za-z]*')", x):
+                lw = w.lower()
+                stems = {lw, lw.rstrip("s"), re.sub(r"(ed|ing|es|ly|er|est)$", "", lw),
+                         re.sub(r"(ied|ies)$", "y", lw), re.sub(r"(ed|ing)$", "e", lw)}
+                if words and len(lw) > 1 and not stems & words:
+                    unknown.setdefault(w, []).append(b[0])
+    # A capitalised word inside a sentence, between lower-case neighbours,
+    # that the file mostly writes in lower case ("I Know", "are So
+    # precise"), or that appears once and the dictionary knows only in
+    # lower case ("I Suppose"), is likely an OCR capital; names and titles
+    # ("the Force", "Red Five") are mostly capitalised and stay quiet.
+    inside = re.compile(r"(?<=[a-z,'] |\bI )([A-Z][a-z]+)\b(?! [A-Z0-9])")
+    lower, upper = {}, {}
+    for b in blocks:
+        for x in map(plain, b[2:]):
+            for w in re.findall(r"\b[a-z]+\b", x):
+                lower[w] = lower.get(w, 0) + 1
+            for w in inside.findall(x):
+                upper[w] = upper.get(w, 0) + 1
+    for b in blocks:
+        for x in map(plain, b[2:]):
+            if any(lower.get(w.lower(), 0) >= upper[w]
+                   or (upper[w] == 1 and w.lower() in words and w not in names)
+                   for w in inside.findall(x)):
+                problems.append(f"block {b[0]}: capital inside a sentence: {x}")
+    for p in problems:
+        print(p)
+    if unknown:
+        print("not in the dictionary (block numbers):")
+        for w in sorted(unknown, key=str.lower):
+            print(f"  {w}: {' '.join(unknown[w][:5])}")
+    print(f"{len(blocks)} blocks, {len(problems)} problems, {len(unknown)} unknown words",
+          file=sys.stderr)
+    return 1 if problems else 0
+
+
+def split(args):
+    blocks = read_blocks(args.file)
+    out = pathlib.Path(args.outdir)
+    out.mkdir(parents=True, exist_ok=True)
+    stem = pathlib.Path(args.file).name.removesuffix(".srt")
+    if not 0 < args.parts <= len(blocks):
+        print(f"srt-check: {args.parts} parts of {len(blocks)} blocks", file=sys.stderr)
+        return 2
+    for i in range(args.parts):
+        part = blocks[len(blocks) * i // args.parts:len(blocks) * (i + 1) // args.parts]
+        path = out / f"{stem}.part{i + 1}.srt"
+        path.write_text("\n\n".join("\n".join(b) for b in part) + "\n", encoding="utf-8")
+        print(f"{path}: blocks {part[0][0]}-{part[-1][0]}")
+    return 0
+
+
+def join(args):
+    blocks = [b for p in args.parts for b in read_blocks(p)]
+    problems = structure(blocks, 0, layout=False)
+    if problems:
+        print("\n".join(problems), file=sys.stderr)
+        return 1
+    pathlib.Path(args.out).write_text(
+        "\n\n".join("\n".join(b) for b in blocks) + "\n", encoding="utf-8")
+    print(f"{args.out}: {len(blocks)} blocks")
+    return 0
+
+
+def compare(args):
+    src, dst = read_blocks(args.source), read_blocks(args.translation)
+    problems = []
+    if len(src) != len(dst):
+        problems.append(f"{len(src)} source blocks, {len(dst)} translated")
+    for s, d in zip(src, dst):
+        if s[:2] != d[:2]:
+            problems.append(f"block {s[0]}: number or timestamp differs: {d[:2]}")
+        if not any(x.strip() for x in d[2:]):
+            problems.append(f"block {s[0]}: empty translation")
+        if len(d) > 4:
+            problems.append(f"block {s[0]}: {len(d) - 2} lines")
+        for x in d[2:]:
+            if len(x) > args.max_len:
+                problems.append(f"block {s[0]}: {len(x)} chars: {x}")
+    print("\n".join(problems) if problems else f"{len(dst)} blocks match the source")
+    return 1 if problems else 0
+
+
+def apply(args):
+    import json
+    blocks = read_blocks(args.file)
+    index = {b[0]: b for b in blocks}
+    problems = []
+    for fix in json.loads(pathlib.Path(args.fixes).read_text(encoding="utf-8")):
+        b = index.get(str(fix["block"]))
+        text = "\n".join(b[2:]) if b else ""
+        if text.count(fix["old"]) != 1:
+            problems.append(f"block {fix['block']}: {fix['old']!r} occurs {text.count(fix['old'])} times")
+            continue
+        b[2:] = text.replace(fix["old"], fix["new"]).split("\n")
+        print(f"block {fix['block']}: {fix['old']!r} -> {fix['new']!r}")
+    if problems:
+        print("\n".join(problems), file=sys.stderr)
+        return 1
+    pathlib.Path(args.out).write_text(
+        "\n\n".join("\n".join(b) for b in blocks) + "\n", encoding="utf-8")
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0].strip(),
+                                     formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     epilog=__doc__.split("\n\n", 1)[1])
+    sub = parser.add_subparsers(dest="command", required=True)
+    p = sub.add_parser("check")
+    p.add_argument("file")
+    p.add_argument("--max-len", type=int, default=42)
+    p.set_defaults(run=check)
+    p = sub.add_parser("split")
+    p.add_argument("file")
+    p.add_argument("parts", type=int)
+    p.add_argument("outdir")
+    p.set_defaults(run=split)
+    p = sub.add_parser("join")
+    p.add_argument("out")
+    p.add_argument("parts", nargs="+")
+    p.set_defaults(run=join)
+    p = sub.add_parser("compare")
+    p.add_argument("source")
+    p.add_argument("translation")
+    p.add_argument("--max-len", type=int, default=42)
+    p.set_defaults(run=compare)
+    p = sub.add_parser("apply")
+    p.add_argument("file")
+    p.add_argument("fixes")
+    p.add_argument("out")
+    p.set_defaults(run=apply)
+    args = parser.parse_args()
+    return args.run(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

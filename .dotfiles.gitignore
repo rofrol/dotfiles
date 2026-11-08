@@ -275,6 +275,7 @@ __pycache__/
 /.claude/skills/*
 !/.claude/skills/bend
 !/.claude/skills/macbook-2010
+!/.claude/skills/odin
 !/.claude/skills/read-link
 !/.claude/skills/subtitles-pl
 !/.claude/settings.json
